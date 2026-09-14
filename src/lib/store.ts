@@ -196,6 +196,9 @@ export async function rateLimit(ip: string) {
       d.limits[key] = entry;
       return entry.count <= 12;
     });
+  // Occasional cleanup keeps the table small without a scheduled job.
+  if (Math.random() < 0.05)
+    await sql`DELETE FROM request_limits WHERE resets_at < now() - interval '1 day'`;
   const [r] =
     await sql`INSERT INTO request_limits (key,count,resets_at) VALUES (${key},1,now()+interval '10 minutes') ON CONFLICT(key) DO UPDATE SET count=CASE WHEN request_limits.resets_at<now() THEN 1 ELSE request_limits.count+1 END,resets_at=CASE WHEN request_limits.resets_at<now() THEN now()+interval '10 minutes' ELSE request_limits.resets_at END RETURNING count`;
   return r!.count <= 12;

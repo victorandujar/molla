@@ -2,6 +2,7 @@ import postgres from 'postgres';
 const { bake, products } = await import('../src/lib/config');
 if (!process.env.DATABASE_URL_UNPOOLED)
   throw new Error('Configura DATABASE_URL_UNPOOLED.');
+console.log(`Base de datos: ${new URL(process.env.DATABASE_URL_UNPOOLED).host}`);
 const sql = postgres(process.env.DATABASE_URL_UNPOOLED, { max: 1 });
 try {
   await sql.begin(async (tx) => {

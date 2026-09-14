@@ -32,6 +32,9 @@ async function send(
       reply_to: payload.replyTo,
     }),
   });
+  // Logged without personal data so a delivery problem is visible in Vercel logs.
+  if (!response.ok)
+    console.error(`Email rejected (${response.status}) for ${key}`);
   return response.ok;
 }
 const enabled = () =>
@@ -54,6 +57,7 @@ export async function sendConfirmation(o: Order) {
     );
     await emailStatus(o.id, ok ? 'SENT' : 'FAILED');
   } catch {
+    console.error('Confirmation email failed', o.id);
     await emailStatus(o.id, 'FAILED');
   }
 }
@@ -61,7 +65,7 @@ export async function sendConfirmation(o: Order) {
 export async function notifyOwner(o: Order) {
   if (!enabled() || !brand.contact) return;
   try {
-    await send(
+    const ok = await send(
       {
         to: brand.contact,
         subject: `Nueva reserva: ${o.quantity} × ${o.productName} · ${o.name}`,
@@ -70,6 +74,7 @@ export async function notifyOwner(o: Order) {
       },
       `owner-${o.id}`,
     );
+    if (!ok) console.error('Owner notification failed', o.id);
   } catch {
     console.error('Owner notification failed', o.id);
   }
