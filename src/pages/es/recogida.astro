@@ -1,9 +1,9 @@
 ---
-import Article from '../layouts/Article.astro';
-import Photo from '../components/Photo.astro';
-import { brand, isDemo, launchReady } from '../lib/config';
-import { dayFormat } from '../lib/i18n';
-import { currentBake } from '../lib/store';
+import Article from '../../layouts/Article.astro';
+import Photo from '../../components/Photo.astro';
+import { brand, isDemo, launchReady } from '../../lib/config';
+import { dayFormat } from '../../lib/i18n';
+import { currentBake } from '../../lib/store';
 let pickupDate: string | undefined;
 if (isDemo || launchReady) {
   try {

@@ -4,9 +4,9 @@ export type Lang = 'es' | 'ca';
 
 // Pages that exist in both languages. Keys are shared, paths are localised.
 export const routes = {
-  home: { es: '/', ca: '/ca/' },
-  pickup: { es: '/recogida', ca: '/ca/recollida' },
-  poolish: { es: '/poolish', ca: '/ca/poolish' },
+  home: { ca: '/', es: '/es/' },
+  pickup: { ca: '/recollida', es: '/es/recogida' },
+  poolish: { ca: '/poolish', es: '/es/poolish' },
 } as const;
 export type RouteKey = keyof typeof routes;
 
