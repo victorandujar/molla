@@ -1,0 +1,509 @@
+---
+import Base from '../layouts/Base.astro';
+import Photo from './Photo.astro';
+import {
+  brand,
+  bake,
+  products,
+  money,
+  isDemo,
+  launchReady,
+} from '../lib/config';
+import { ui, routes, dayFormat, type Lang } from '../lib/i18n';
+import { currentBake } from '../lib/store';
+import { bakeState } from '../lib/domain';
+import { randomUUID } from 'node:crypto';
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = ui[lang];
+let current = { ...bake, reserved: 0 };
+let unavailable = false;
+if (isDemo || launchReady) {
+  try {
+    current = await currentBake();
+  } catch {
+    unavailable = true;
+  }
+}
+const state = unavailable
+  ? 'CLOSED'
+  : isDemo || launchReady
+    ? bakeState(current, current.reserved)
+    : 'UPCOMING';
+const open = state === 'OPEN';
+const statusLabel = t.status[state];
+const canSubmit = isDemo || launchReady;
+const loaf = products[0];
+const left = Math.max(0, current.capacity - current.reserved);
+const pickupDay = dayFormat(lang, current.pickupDate);
+const abs = (path: string) =>
+  brand.site ? new URL(path, brand.site).href : undefined;
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: t.loaf.name,
+    description: `${t.loaf.fermentationValue}. ${t.loaf.ingredientsValue}`,
+    image: [abs('/images/loaves-1100.webp'), abs('/images/crumb-1100.webp')],
+    brand: { '@type': 'Brand', name: brand.name },
+    weight: { '@type': 'QuantitativeValue', minValue: 750, maxValue: 850, unitCode: 'GRM' },
+    offers: {
+      '@type': 'Offer',
+      url: abs(`${routes.home[lang]}#reserva`),
+      price: (loaf.price / 100).toFixed(2),
+      priceCurrency: 'EUR',
+      availability: open
+        ? 'https://schema.org/InStock'
+        : 'https://schema.org/OutOfStock',
+      availableDeliveryMethod: 'http://purl.org/goodrelations/v1#DeliveryModePickUp',
+      areaServed: { '@type': 'AdministrativeArea', name: 'Baix Llobregat' },
+      seller: { '@id': abs('/#organization') },
+    },
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    inLanguage: lang,
+    mainEntity: t.faq.items.map(([q, a]) => ({
+      '@type': 'Question',
+      name: q,
+      acceptedAnswer: { '@type': 'Answer', text: a },
+    })),
+  },
+];
+---
+
+<Base lang={lang} route="home" jsonLd={jsonLd}>
+  <main id="contenido">
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="wrap hero-grid">
+        <div class="hero-copy">
+          <p class="kicker">{t.hero.kicker}</p>
+          <h1 id="hero-title">
+            {t.hero.h1a} <em>{t.hero.h1b}</em>
+          </h1>
+          <p class="hero-lede">{t.hero.lede}</p>
+          <div class="hero-actions">
+            <a
+              class="button button-light"
+              href={open ? '#reserva' : '#avisame'}
+            >
+              {open ? t.hero.order : t.hero.notify}
+            </a>
+            <a class="hero-link" href="#proceso">{t.hero.how}</a>
+          </div>
+        </div>
+        <figure class="hero-photo">
+          <Photo
+            name="hero"
+            alt={t.hero.alt}
+            eager
+            sizes="(max-width: 860px) calc(100vw - 40px), 50vw"
+          />
+        </figure>
+        <div
+          id="hornada"
+          class="bake-card"
+          data-state={state}
+          data-event-view="view_current_bake"
+          aria-labelledby="bake-title"
+          role="region"
+        >
+          <div class="bake-head">
+            <span class="status">
+              <span class="status-dot" aria-hidden="true"></span>
+              <span data-bake-label>{statusLabel}</span>
+            </span>
+            <span class="bake-number">
+              {t.bake.number} {bake.number}
+            </span>
+          </div>
+          <h2 id="bake-title" class="bake-day">{pickupDay}</h2>
+          <progress
+            value={current.reserved}
+            max={current.capacity}
+            aria-label={`${current.reserved} ${t.bake.of} ${current.capacity} ${t.bake.reserved}`}
+          ></progress>
+          <p class="bake-count">
+            <strong data-reserved>{current.reserved}</strong>
+            {` ${t.bake.of} ${current.capacity} ${t.bake.reserved}${isDemo ? t.bake.test : ''}`}
+          </p>
+          <p class="bake-deadline">
+            {open
+              ? t.bake.open
+              : state === 'UPCOMING'
+                ? t.bake.upcoming
+                : t.bake.closed}
+          </p>
+          {unavailable && (
+            <p role="status" class="bake-deadline">
+              {t.bake.unavailable}
+            </p>
+          )}
+          <a
+            class="bake-cta"
+            href={open ? '#reserva' : '#avisame'}
+            data-bake-cta
+          >
+            {open ? t.bake.ctaOpen : t.bake.ctaClosed}{' '}
+            <span aria-hidden="true">↓</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <section
+      class="loaf-section wrap"
+      aria-labelledby="loaf-title"
+      data-event-view="view_product"
+    >
+      <div class="loaf-photo">
+        <Photo
+          name="loaves"
+          alt={t.loaf.alt}
+          sizes="(max-width: 860px) calc(100vw - 40px), 58vw"
+        />
+      </div>
+      <div class="loaf-info">
+        <p class="kicker">{t.loaf.kicker}</p>
+        <h2 id="loaf-title">{t.loaf.name}</h2>
+        <p class="loaf-price">
+          {money(loaf.price)} <span>· {loaf.weight}</span>
+        </p>
+        <dl class="spec">
+          <div>
+            <dt>{t.loaf.fermentation}</dt>
+            <dd>{t.loaf.fermentationValue}</dd>
+          </div>
+          <div>
+            <dt>{t.loaf.ingredients}</dt>
+            <dd>{t.loaf.ingredientsValue}</dd>
+          </div>
+          <div>
+            <dt>{t.loaf.allergens}</dt>
+            <dd>{t.loaf.allergensValue}</dd>
+          </div>
+          <div>
+            <dt>{t.loaf.keeps}</dt>
+            <dd>{t.loaf.keepsValue}</dd>
+          </div>
+        </dl>
+        <a class="button" href={open ? '#reserva' : '#avisame'}>
+          {open ? t.loaf.order : t.loaf.notify}
+        </a>
+      </div>
+    </section>
+
+    <section id="proceso" class="process" aria-labelledby="process-title">
+      <div class="wrap">
+        <div class="process-head">
+          <h2 id="process-title">
+            {t.process.h2a} <em>{t.process.h2b}</em>
+          </h2>
+          <div>
+            <p>{t.process.intro}</p>
+            <a class="process-more" href={routes.poolish[lang]}>
+              {t.process.more} →
+            </a>
+          </div>
+        </div>
+        <ol class="timeline">
+          {t.process.steps.map((step) => (
+            <li class:list={{ long: 'time' in step }}>
+              <span class="bar" aria-hidden="true">
+                {'time' in step && <span class="bar-time">{step.time}</span>}
+              </span>
+              <span class="when">{step.when}</span>
+              <h3>{step.title}</h3>
+              <p>{step.text}</p>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </section>
+
+    <section class="maker wrap" aria-labelledby="maker-title">
+      <div class="maker-photos">
+        <div class="maker-main">
+          <Photo
+            name="person"
+            alt={t.maker.altPerson}
+            sizes="(max-width: 860px) 70vw, 32vw"
+          />
+        </div>
+        <div class="maker-side">
+          <Photo
+            name="dough"
+            alt={t.maker.altDough}
+            sizes="(max-width: 860px) 45vw, 20vw"
+          />
+        </div>
+      </div>
+      <div class="maker-copy">
+        <p class="kicker">{t.maker.kicker}</p>
+        <h2 id="maker-title">{t.maker.h2}</h2>
+        <p>{t.maker.p1}</p>
+        <p>{t.maker.p2}</p>
+      </div>
+    </section>
+
+    <section id="reserva" class="reserve" aria-labelledby="reserve-title">
+      <div class="wrap reserve-grid">
+        <div class="reserve-intro">
+          <p class="kicker">{t.reserve.kicker}</p>
+          <h2 id="reserve-title">{t.reserve.h2}</h2>
+          <dl class="summary">
+            <div>
+              <dt>{t.reserve.pickup}</dt>
+              <dd>{pickupDay}</dd>
+            </div>
+            <div>
+              <dt>{t.reserve.where}</dt>
+              <dd id="recogida" data-event-view="pickup_info_view">
+                {brand.pickupAddress}
+                <small>{brand.pickupWindow || t.reserve.windowPending}</small>
+                <span class="map-links">
+                  <a href={brand.pickupMap} target="_blank" rel="noopener noreferrer">
+                    {t.reserve.map}
+                  </a>
+                  <a href={routes.pickup[lang]}>{t.reserve.howToGet}</a>
+                </span>
+              </dd>
+            </div>
+            <div>
+              <dt>{t.reserve.pay}</dt>
+              <dd>{t.reserve.payValue}</dd>
+            </div>
+            {open && (
+              <div>
+                <dt>{t.reserve.left}</dt>
+                <dd>
+                  {left} {t.bake.of} {current.capacity} {t.reserve.loaves}
+                </dd>
+              </div>
+            )}
+          </dl>
+          {brand.whatsapp && (
+            <a
+              class="text-link"
+              data-event="click_whatsapp"
+              href={`https://wa.me/${brand.whatsapp}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {t.reserve.question}
+            </a>
+          )}
+        </div>
+        <div class="reservation-panel">
+          {open ? (
+            <form
+              id="reservation-form"
+              action="/api/reservations"
+              method="post"
+              data-price={loaf.price}
+            >
+              <h3>{t.reserve.yourOrder}</h3>
+              {isDemo && <p class="form-intro">{t.reserve.demoIntro}</p>}
+              <input type="hidden" name="requestId" value={randomUUID()} />
+              <input type="hidden" name="bakeId" value={bake.id} />
+              <input type="hidden" name="product" value="clasica" />
+              <input type="hidden" name="source" value="direct" />
+              <div class="quantity-line">
+                <label for="quantity">
+                  {t.reserve.qty}
+                  <small>{t.reserve.qtyMax}</small>
+                </label>
+                <div class="stepper">
+                  <button type="button" data-step="-1" aria-label={t.reserve.less}>
+                    −
+                  </button>
+                  <input
+                    id="quantity"
+                    name="quantity"
+                    type="number"
+                    min="1"
+                    max={Math.min(4, left)}
+                    value="1"
+                    required
+                  />
+                  <button type="button" data-step="1" aria-label={t.reserve.more}>
+                    +
+                  </button>
+                </div>
+                <output id="total" aria-live="polite">
+                  {money(loaf.price)}
+                </output>
+              </div>
+              <div class="field">
+                <label for="name">{t.reserve.name}</label>
+                <input
+                  id="name"
+                  name="name"
+                  autocomplete="name"
+                  minlength="2"
+                  maxlength="100"
+                  required
+                />
+              </div>
+              <div class="form-columns">
+                <div class="field">
+                  <label for="email">{t.reserve.email}</label>
+                  <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    autocomplete="email"
+                    maxlength="254"
+                    required
+                    placeholder="tu@email.com"
+                  />
+                </div>
+                <div class="field">
+                  <label for="phone">{t.reserve.phone}</label>
+                  <input
+                    id="phone"
+                    name="phone"
+                    type="tel"
+                    autocomplete="tel"
+                    minlength="9"
+                    maxlength="22"
+                    pattern="[+0-9 ()\-]{9,22}"
+                    required
+                    placeholder="612 345 678"
+                  />
+                </div>
+              </div>
+              <div class="honey" aria-hidden="true">
+                <label>
+                  {t.reserve.honey}
+                  <input name="website" tabindex="-1" autocomplete="off" />
+                </label>
+              </div>
+              <label class="check">
+                <input type="checkbox" name="pickup" value="yes" required />
+                <span>
+                  {isDemo ? t.reserve.demoCheck : t.reserve.pickupCheck(pickupDay)}
+                </span>
+              </label>
+              <label class="check">
+                <input type="checkbox" name="privacy" value="yes" required />
+                <span>
+                  {t.reserve.privacyA}{' '}
+                  <a href="/privacidad" target="_blank">
+                    {t.reserve.privacyLink}
+                  </a>
+                  .
+                </span>
+              </label>
+              <p class="form-error" role="alert" tabindex="-1" hidden></p>
+              <button type="submit" class="button full">
+                {isDemo ? t.reserve.submitDemo : t.reserve.submit}
+              </button>
+              <p class="form-footnote">{t.reserve.footnote}</p>
+              <noscript>
+                <p>
+                  {t.reserve.noscript}{' '}
+                  {brand.contact && (
+                    <a href={`mailto:${brand.contact}`}>{t.reserve.noscriptMail}</a>
+                  )}
+                </p>
+              </noscript>
+            </form>
+          ) : (
+            <div class="closed-panel">
+              <p class="kicker">{statusLabel}</p>
+              <h3>{t.reserve.closedH3}</h3>
+              <p>{t.reserve.closedP}</p>
+              <a class="button" href="#avisame">
+                {t.reserve.notify}
+              </a>
+            </div>
+          )}
+          <div id="confirmation" hidden tabindex="-1" role="status"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="preguntas" class="faq wrap" aria-labelledby="faq-title">
+      <h2 id="faq-title">{t.faq.h2}</h2>
+      <div class="faq-list">
+        {t.faq.items.map(([q, a]) => (
+          <details>
+            <summary>
+              {q}
+              <span aria-hidden="true" class="faq-icon"></span>
+            </summary>
+            <p>{a}</p>
+          </details>
+        ))}
+      </div>
+    </section>
+
+    <section id="avisame" class="waitlist" aria-labelledby="waitlist-title">
+      <div class="wrap waitlist-grid">
+        <div>
+          <h2 id="waitlist-title">{t.waitlist.h2}</h2>
+          <p>{t.waitlist.p}</p>
+        </div>
+        <form id="waitlist-form" action="/api/waitlist" method="post">
+          <label for="waitlist-email">{t.waitlist.label}</label>
+          <div class="waitlist-input">
+            <input
+              id="waitlist-email"
+              name="email"
+              type="email"
+              autocomplete="email"
+              maxlength="254"
+              required
+              placeholder="tu@email.com"
+              disabled={!canSubmit}
+            />
+            <button class="button" type="submit" disabled={!canSubmit}>
+              {t.waitlist.button}
+            </button>
+          </div>
+          <input type="hidden" name="source" value="direct" />
+          <div class="honey" aria-hidden="true">
+            <input
+              name="website"
+              aria-label={t.waitlist.honey}
+              tabindex="-1"
+              autocomplete="off"
+            />
+          </div>
+          <label class="check">
+            <input
+              type="checkbox"
+              name="consent"
+              value="yes"
+              required
+              disabled={!canSubmit}
+            />
+            <span>
+              {t.waitlist.consentA}{' '}
+              <a href="/privacidad">{t.waitlist.consentLink}</a>.
+            </span>
+          </label>
+          {!canSubmit && <p class="form-footnote">{t.waitlist.disabled}</p>}
+          {isDemo && <p class="form-footnote">{t.waitlist.demo}</p>}
+          <p class="form-error" role="alert" tabindex="-1" hidden></p>
+          <p class="waitlist-success" role="status" hidden>
+            {t.waitlist.success}
+          </p>
+        </form>
+      </div>
+    </section>
+  </main>
+  <div class="mobile-cta" role="navigation" aria-label={t.mobile.label}>
+    <span>
+      {t.mobile.loaf} · {money(loaf.price)}
+      <small>{pickupDay}</small>
+    </span>
+    <a class="button button-light" href={open ? '#reserva' : '#avisame'}>
+      {open ? t.mobile.order : t.mobile.notify}
+    </a>
+  </div>
+</Base>
