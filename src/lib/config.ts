@@ -14,6 +14,7 @@ export const brand = {
     'https://www.google.com/maps/search/?api=1&query=41.35401410971224,2.026792459636187',
   pickupWindow: process.env.PICKUP_WINDOW || '',
   legalName: process.env.LEGAL_NAME || '',
+  legalId: process.env.LEGAL_ID || '',
   legalAddress: process.env.LEGAL_ADDRESS || '',
   site: process.env.PUBLIC_SITE_URL || '',
   privacyProviders: process.env.PRIVACY_PROVIDERS || '',
