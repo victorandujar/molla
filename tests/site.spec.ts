@@ -20,9 +20,10 @@ test('real photos, keyboard access, responsive layout and accessibility', async 
     await page.goto('/es/');
     await page.evaluate(() => document.fonts.ready);
     await expect(page.getByRole('heading', { level: 1 })).toContainText(
-      'la noche antes',
+      'Pan artesanal por encargo',
     );
-    await expect(page.locator('.hero-photo img')).toBeVisible();
+    await expect(page.locator('.hero-photo img')).toHaveCount(2);
+    await expect(page.locator('.hero-photo img').first()).toBeVisible();
     expect(
       await page.evaluate(
         () => document.documentElement.scrollWidth <= window.innerWidth,
@@ -254,7 +255,7 @@ test('Catalan is the main language, Spanish lives under /es/', async ({
   await page.goto('/');
   await expect(page.locator('html')).toHaveAttribute('lang', 'ca');
   await expect(page.getByRole('heading', { level: 1 })).toContainText(
-    'la nit abans',
+    'Pa artesà per encàrrec',
   );
   for (const path of ['/recollida', '/poolish', '/es/', '/es/recogida', '/es/poolish']) {
     const res = await request.get(path);

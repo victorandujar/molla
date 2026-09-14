@@ -78,31 +78,35 @@ const jsonLd = [
 <Base lang={lang} route="home" jsonLd={jsonLd}>
   <main id="contenido">
     <section class="hero" aria-labelledby="hero-title">
-      <div class="wrap hero-grid">
-        <div class="hero-copy">
-          <p class="kicker">{t.hero.kicker}</p>
-          <h1 id="hero-title">
-            {t.hero.h1a} <em>{t.hero.h1b}</em>
+      <div class="wrap">
+        <div
+          class="hero-head"
+          style={`--lead:${t.hero.h1a.length};--side:${t.hero.h1b.length}`}
+        >
+          <h1 id="hero-title" class="hero-title">
+            <span class="hero-word hero-word-lead">{t.hero.h1a}</span>{' '}
+            <svg class="hero-star" viewBox="0 0 64 64" aria-hidden="true">
+              <path d="M32 0l4.6 20.9L54.6 9.4 43.1 27.4 64 32l-20.9 4.6 11.5 18L36.6 43.1 32 64l-4.6-20.9-18 11.5 11.5-18L0 32l20.9-4.6L9.4 9.4l18 11.5z" />
+            </svg>
+{' '}
+            <span class="hero-word hero-word-side">{t.hero.h1b}</span>
           </h1>
-          <p class="hero-lede">{t.hero.lede}</p>
-          <div class="hero-actions">
-            <a
-              class="button button-light"
-              href={open ? '#reserva' : '#avisame'}
-            >
-              {open ? t.hero.order : t.hero.notify}
-            </a>
-            <a class="hero-link" href="#proceso">{t.hero.how}</a>
+          <div class="hero-aside">
+            <p class="hero-sub">{t.hero.sub}</p>
+            <p class="hero-lede">{t.hero.lede}</p>
           </div>
         </div>
-        <figure class="hero-photo">
-          <Photo
-            name="hero"
-            alt={t.hero.alt}
-            eager
-            sizes="(max-width: 860px) calc(100vw - 40px), 50vw"
-          />
-        </figure>
+        <div class="hero-row">
+          {(['maker', 'hero'] as const).map((name, i) => (
+            <figure class={`hero-photo hero-photo-${name}`}>
+              <Photo
+                name={name}
+                alt={t.hero.photos[i]!}
+                eager
+                sizes={i ? '(max-width: 860px) 50vw, 38vw' : '(max-width: 860px) 50vw, 26vw'}
+              />
+            </figure>
+          ))}
         <div
           id="hornada"
           class="bake-card"
@@ -151,6 +155,15 @@ const jsonLd = [
             <span aria-hidden="true">↓</span>
           </a>
         </div>
+        </div>
+        <p class="hero-keywords">
+          {t.hero.keywords.map((k, i) => (
+            <>
+              {i > 0 && <span aria-hidden="true"> • </span>}
+              <span>{k}</span>
+            </>
+          ))}
+        </p>
       </div>
     </section>
 
