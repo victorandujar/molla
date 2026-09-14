@@ -1,0 +1,86 @@
+---
+import Article from '../../layouts/Article.astro';
+import Photo from '../../components/Photo.astro';
+import { brand } from '../../lib/config';
+import { dayFormat } from '../../lib/i18n';
+export const prerender = true;
+const apple = 'https://maps.apple.com/?ll=41.35401410971224,2.026792459636187&q=Molla';
+const place = {
+  '@context': 'https://schema.org',
+  '@type': 'Place',
+  name: `Punt de recollida ${brand.name}`,
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: 'Ronda de Sant Ramon',
+    addressLocality: 'Sant Boi de Llobregat',
+    postalCode: '08830',
+    addressRegion: 'Barcelona',
+    addressCountry: 'ES',
+  },
+  geo: { '@type': 'GeoCoordinates', latitude: 41.354014, longitude: 2.026792 },
+  hasMap: brand.pickupMap,
+};
+---
+
+<Article
+  lang="ca"
+  route="pickup"
+  crumb="Recollida"
+  title={`Recollida de pa artesà a Sant Boi de Llobregat · ${brand.name}`}
+  description="On i quan recollir el teu pa de fermentació lenta a Sant Boi de Llobregat (Ronda de Sant Ramon). Reserva en línia i paga en recollir. A prop de Santa Coloma de Cervelló, Cornellà i Sant Vicenç dels Horts."
+  kicker="Recollida · Sant Boi de Llobregat"
+  h1="Recull el teu pa a Sant Boi de Llobregat."
+  lede="Un cop per setmana, dissabte, a la Ronda de Sant Ramon. Reserves abans, pagues en recollir i t’emportes el pa del dia."
+  jsonLd={[place]}
+>
+  <div class="article-grid">
+    <div class="prose">
+      <h2>On</h2>
+      <p>
+        <strong>Ronda de Sant Ramon, 08830 Sant Boi de Llobregat.</strong> Al
+        barri de Ciutat Cooperativa – Molí Nou.
+      </p>
+      <p class="article-links">
+        <a class="button" href={brand.pickupMap} target="_blank" rel="noopener noreferrer">
+          Obrir a Google Maps
+        </a>
+        <a class="text-link" href={apple} target="_blank" rel="noopener noreferrer">
+          Apple Maps ↗
+        </a>
+      </p>
+
+      <h2>Quan</h2>
+      <p>
+        Els dissabtes. La propera recollida és <strong>{dayFormat('ca')}</strong>
+        {brand.pickupWindow ? `, ${brand.pickupWindow}` : ''}. Les comandes es
+        tanquen dijous a les 20:00 o quan s’acaba la fornada.
+      </p>
+
+      <h2>Com funciona</h2>
+      <ol>
+        <li>Reserves a la web i reps una confirmació amb la teva referència.</li>
+        <li>Dissabte vens al punt de recollida dins de la franja horària.</li>
+        <li>Dius el teu nom, pagues i t’emportes el pa, cuit aquell mateix dia.</li>
+      </ol>
+      <p>
+        Si al final no pots venir, escriu-me com més aviat millor amb la
+        referència: així allibero el teu pa per a una altra persona.
+      </p>
+
+      <h2>Si vens de fora de Sant Boi</h2>
+      <p>
+        Faig pa per a tot el Baix Llobregat. El punt de recollida et queda a mà
+        si vius a Santa Coloma de Cervelló, Sant Vicenç dels Horts, Cornellà de
+        Llobregat, Sant Joan Despí, Viladecans o Sant Climent de Llobregat. De
+        moment no faig enviaments a domicili.
+      </p>
+    </div>
+    <figure class="article-photo">
+      <Photo
+        name="hands"
+        alt="Mà que subjecta un pa de crosta fosca mentre es talla amb un ganivet de pa"
+        sizes="(max-width: 860px) calc(100vw - 40px), 40vw"
+      />
+    </figure>
+  </div>
+</Article>
