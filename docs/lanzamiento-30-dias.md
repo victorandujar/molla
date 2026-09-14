@@ -1,6 +1,6 @@
 # Los primeros 20 clientes
 
-Objetivo: 20 compradores locales distintos en 30 días. En 60 días: 40, con al menos un 30% que haya vuelto a comprar. Los pedidos de prueba no cuentan. Capacidad: 20 hogazas por hornada como hipótesis inicial, por confirmar antes de abrir.
+Objetivo: 20 compradores locales distintos en 30 días. En 60 días: 40, con al menos un 30% que haya vuelto a comprar. Los pedidos de prueba no cuentan. Capacidad: 6 hogazas por hornada para empezar.
 
 ## Antes de compartir
 
@@ -26,9 +26,9 @@ Domingo: contar qué cambias la próxima semana y revisar números.
 
 ## Textos iniciales listos para adaptar a la fecha confirmada
 
-**Presentación** — Estoy empezando a hacer pan de masa madre por encargo en Santa Coloma de Cervelló. Lo hago yo, en mi cocina, en pequeñas hornadas. La idea es sencilla: reservas durante la semana y lo recoges el sábado. Aquí iré enseñando el pan y cómo lo preparo.
+**Presentación** — Estoy empezando a hacer pan de poolish por encargo para el Baix Llobregat. Lo hago yo, a mano, en hornadas pequeñas. La idea es sencilla: reservas durante la semana y lo recoges el sábado. Aquí iré enseñando el pan y cómo lo preparo.
 
-**Apertura** — Ya puedes reservar la hogaza del sábado. Masa madre, 750–850 g, 6,50 €. Recogida en Santa Coloma de Cervelló. Pedidos hasta el jueves a las 20:00 o hasta completar la hornada. Tienes fecha, recogida y reserva en el enlace de la bio.
+**Apertura** — Ya puedes reservar la hogaza del sábado. Poolish de 8–10 h, 750–850 g, 6,50 €. Recogida en Sant Boi de Llobregat. Pedidos hasta el jueves a las 20:00 o hasta completar la hornada. Tienes fecha, recogida y reserva en el enlace de la bio.
 
 **Proceso** — Hoy toca esperar. La masa ya está en el banneton y la fermentación sigue su ritmo. El sábado veremos la miga.
 
@@ -42,4 +42,4 @@ Repetir el ritmo. Hablar personalmente con un café o comercio cercano que tenga
 
 Cada domingo registrar: pedidos confirmados, recogidos y cancelados; hogazas; ocupación del cupo; importe medio; clientes distintos; compradores que vuelven; lista de espera; canal de origen. Los hooks de visitas están preparados pero no envían datos a un proveedor: no calcular una tasa de conversión web sin medir el denominador. Ver `operacion.md`.
 
-No comprar seguidores ni convertir el perfil en una cuadrícula de carteles. Predominan pan, proceso y persona. No crear páginas casi idénticas de otros municipios. La relevancia local debe venir de información real de Santa Coloma y del Baix Llobregat, compartida por personas de cerca.
+No comprar seguidores ni convertir el perfil en una cuadrícula de carteles. Predominan pan, proceso y persona. No crear páginas casi idénticas de otros municipios. La relevancia local debe venir de información real del Baix Llobregat, compartida por personas de cerca.

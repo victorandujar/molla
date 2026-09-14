@@ -2,13 +2,16 @@ import type { BakeState } from './domain';
 export const brand = {
   name: 'Molla',
   locale: 'es-ES',
-  town: 'Santa Coloma de Cervelló',
+  town: 'Sant Boi de Llobregat',
   region: 'Baix Llobregat',
   tagline: 'Pan de aquí. Para el sábado.',
   contact: process.env.CONTACT_EMAIL || '',
   whatsapp: (process.env.WHATSAPP_NUMBER || '').replace(/\D/g, ''),
   instagram: process.env.INSTAGRAM_URL || '',
-  pickupAddress: process.env.PICKUP_ADDRESS || '',
+  pickupAddress:
+    process.env.PICKUP_ADDRESS || 'Ronda de Sant Ramon, Sant Boi de Llobregat',
+  pickupMap:
+    'https://www.google.com/maps/search/?api=1&query=41.35401410971224,2.026792459636187',
   pickupWindow: process.env.PICKUP_WINDOW || '',
   legalName: process.env.LEGAL_NAME || '',
   legalAddress: process.env.LEGAL_ADDRESS || '',
@@ -21,10 +24,10 @@ export const products = [
   {
     id: 'clasica',
     name: 'La de cada semana',
-    subtitle: 'Hogaza de masa madre',
+    subtitle: 'Hogaza de poolish',
     price: 650,
     weight: '750–850 g',
-    ingredients: 'Harina de trigo, agua, masa madre de trigo y sal.',
+    ingredients: 'Harina de trigo, agua, sal y levadura.',
     allergens: 'Contiene trigo (gluten).',
     image: 'crumb',
     available: true,
@@ -46,10 +49,10 @@ export const products = [
 export const bake = {
   id: 'hornada-001',
   number: '001',
-  pickupDate: '2026-09-19T10:00:00+02:00',
-  deadline: '2026-09-17T20:00:00+02:00',
+  pickupDate: '2026-09-26T10:00:00+02:00',
+  deadline: '2026-09-24T20:00:00+02:00',
   opensAt: '2026-09-14T00:00:00+02:00',
-  capacity: 20,
+  capacity: 6,
   status: 'OPEN' as BakeState,
 };
 export const money = (cents: number) =>

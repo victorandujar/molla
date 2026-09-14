@@ -1,0 +1,63 @@
+---
+import Base from './Base.astro';
+import { brand } from '../lib/config';
+import { ui, routes, type Lang, type RouteKey } from '../lib/i18n';
+interface Props {
+  lang: Lang;
+  route: RouteKey;
+  title: string;
+  description: string;
+  kicker: string;
+  h1: string;
+  lede: string;
+  crumb: string;
+  jsonLd?: Record<string, unknown>[];
+}
+const { lang, route, title, description, kicker, h1, lede, crumb, jsonLd = [] } =
+  Astro.props;
+const t = ui[lang];
+const abs = (path: string) =>
+  brand.site ? new URL(path, brand.site).href : undefined;
+const breadcrumbs = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: t.breadcrumbHome, item: abs(routes.home[lang]) },
+    { '@type': 'ListItem', position: 2, name: crumb, item: abs(routes[route][lang]) },
+  ],
+};
+---
+
+<Base
+  lang={lang}
+  route={route}
+  title={title}
+  description={description}
+  jsonLd={[breadcrumbs, ...jsonLd]}
+>
+  <main id="contenido">
+    <header class="article-hero">
+      <div class="wrap">
+        <nav class="breadcrumbs" aria-label={lang === 'ca' ? 'Ruta' : 'Ruta'}>
+          <a href={routes.home[lang]}>{t.breadcrumbHome}</a>
+          <span aria-hidden="true">/</span>
+          <span aria-current="page">{crumb}</span>
+        </nav>
+        <p class="kicker">{kicker}</p>
+        <h1>{h1}</h1>
+        <p class="article-lede">{lede}</p>
+      </div>
+    </header>
+    <article class="wrap article">
+      <slot />
+    </article>
+    <section class="article-cta">
+      <div class="wrap article-cta-inner">
+        <h2>{t.reserve.h2}</h2>
+        <a class="button" href={`${routes.home[lang]}#reserva`}>
+          {t.hero.order}
+        </a>
+      </div>
+    </section>
+  </main>
+</Base>
