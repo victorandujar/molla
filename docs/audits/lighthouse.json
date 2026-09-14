@@ -1,0 +1,434 @@
+{
+  "categories": {
+    "performance": 100,
+    "accessibility": 100,
+    "best-practices": 100,
+    "seo": 66
+  },
+  "lcp": 1806.2988,
+  "cls": 0,
+  "failed": [
+    {
+      "id": "largest-contentful-paint",
+      "title": "Largest Contentful Paint",
+      "description": "Largest Contentful Paint marks the time at which the largest text or image is painted. [Learn more about the Largest Contentful Paint metric](https://developer.chrome.com/docs/lighthouse/performance/lighthouse-largest-contentful-paint/)"
+    },
+    {
+      "id": "is-crawlable",
+      "title": "Page is blocked from indexing",
+      "description": "Search engines are unable to include your pages in search results if they don't have permission to crawl them. [Learn more about crawler directives](https://developer.chrome.com/docs/lighthouse/seo/is-crawlable/).",
+      "details": {
+        "type": "table",
+        "headings": [
+          {
+            "key": "source",
+            "valueType": "code",
+            "label": "Blocking Directive Source"
+          }
+        ],
+        "items": [
+          {
+            "source": {
+              "type": "node",
+              "lhId": "1-37-META",
+              "path": "1,HTML,0,HEAD,7,META",
+              "selector": "head > meta",
+              "boundingRect": {
+                "top": 0,
+                "bottom": 0,
+                "left": 0,
+                "right": 0,
+                "width": 0,
+                "height": 0
+              },
+              "snippet": "<meta name=\"robots\" content=\"noindex, nofollow\" />",
+              "nodeLabel": "head > meta"
+            }
+          },
+          {
+            "source": {
+              "type": "source-location",
+              "url": "http://127.0.0.1:4382/robots.txt",
+              "urlProvider": "network",
+              "line": 1,
+              "column": 0
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "cache-insight",
+      "title": "Use efficient cache lifetimes",
+      "description": "A long cache lifetime can speed up repeat visits to your page. [Learn more about caching](https://developer.chrome.com/docs/performance/insights/cache).",
+      "details": {
+        "type": "table",
+        "headings": [
+          {
+            "key": "url",
+            "valueType": "url",
+            "label": "Request"
+          },
+          {
+            "key": "cacheLifetimeMs",
+            "valueType": "ms",
+            "label": "Cache TTL",
+            "displayUnit": "duration"
+          },
+          {
+            "key": "totalBytes",
+            "valueType": "bytes",
+            "label": "Transfer Size",
+            "displayUnit": "kb",
+            "granularity": 1
+          }
+        ],
+        "items": [
+          {
+            "url": "http://127.0.0.1:4382/images/loaves-720.avif",
+            "cacheLifetimeMs": 3600000,
+            "totalBytes": 51438,
+            "wastedBytes": 41150.4
+          },
+          {
+            "url": "http://127.0.0.1:4382/images/crumb-720.avif",
+            "cacheLifetimeMs": 3600000,
+            "totalBytes": 38312,
+            "wastedBytes": 30649.600000000002
+          },
+          {
+            "url": "http://127.0.0.1:4382/images/hero-720.avif",
+            "cacheLifetimeMs": 3600000,
+            "totalBytes": 31320,
+            "wastedBytes": 25056
+          },
+          {
+            "url": "http://127.0.0.1:4382/images/maker-720.avif",
+            "cacheLifetimeMs": 3600000,
+            "totalBytes": 28765,
+            "wastedBytes": 23012
+          },
+          {
+            "url": "http://127.0.0.1:4382/_astro/Base.DaXZUxGZ.css",
+            "cacheLifetimeMs": 3600000,
+            "totalBytes": 25766,
+            "wastedBytes": 20612.800000000003
+          },
+          {
+            "url": "http://127.0.0.1:4382/_astro/fraunces-latin-600-normal.BFCDtZfi.woff2",
+            "cacheLifetimeMs": 3600000,
+            "totalBytes": 18303,
+            "wastedBytes": 14642.400000000001
+          },
+          {
+            "url": "http://127.0.0.1:4382/_astro/dm-sans-latin-400-normal.CW0RaeGs.woff2",
+            "cacheLifetimeMs": 3600000,
+            "totalBytes": 14407,
+            "wastedBytes": 11525.6
+          },
+          {
+            "url": "http://127.0.0.1:4382/_astro/Base.astro_astro_type_script_index_0_lang.B9TZWGXy.js",
+            "cacheLifetimeMs": 3600000,
+            "totalBytes": 5568,
+            "wastedBytes": 4454.400000000001
+          }
+        ],
+        "sortedBy": [
+          "wastedBytes"
+        ],
+        "skipSumming": [
+          "cacheLifetimeMs"
+        ],
+        "debugData": {
+          "type": "debugdata",
+          "wastedBytes": 171103.2
+        }
+      }
+    },
+    {
+      "id": "document-latency-insight",
+      "title": "Document request latency",
+      "description": "Your first network request is the most important. [Reduce its latency](https://developer.chrome.com/docs/performance/insights/document-latency) by avoiding redirects, ensuring a fast server response, and enabling text compression.",
+      "details": {
+        "type": "checklist",
+        "items": {
+          "noRedirects": {
+            "label": "Avoids redirects",
+            "value": true
+          },
+          "serverResponseIsFast": {
+            "label": "Server responds quickly (observed 28 ms)",
+            "value": true
+          },
+          "usesCompression": {
+            "label": "No compression applied",
+            "value": false
+          }
+        },
+        "debugData": {
+          "type": "debugdata",
+          "redirectDuration": 0,
+          "serverResponseTime": 28,
+          "uncompressedResponseBytes": 10175,
+          "wastedBytes": 10175
+        }
+      }
+    },
+    {
+      "id": "image-delivery-insight",
+      "title": "Improve image delivery",
+      "description": "Reducing the download time of images can improve the perceived load time of the page and LCP. [Learn more about optimizing image size](https://developer.chrome.com/docs/performance/insights/image-delivery)",
+      "details": {
+        "type": "table",
+        "headings": [
+          {
+            "key": "node",
+            "valueType": "node",
+            "label": ""
+          },
+          {
+            "key": "url",
+            "valueType": "url",
+            "label": "URL",
+            "subItemsHeading": {
+              "key": "reason",
+              "valueType": "text"
+            }
+          },
+          {
+            "key": "totalBytes",
+            "valueType": "bytes",
+            "label": "Resource Size"
+          },
+          {
+            "key": "wastedBytes",
+            "valueType": "bytes",
+            "label": "Est Savings",
+            "subItemsHeading": {
+              "key": "wastedBytes",
+              "valueType": "bytes"
+            }
+          }
+        ],
+        "items": [
+          {
+            "node": {
+              "type": "node",
+              "lhId": "page-1-IMG",
+              "path": "1,HTML,1,BODY,2,MAIN,3,SECTION,1,DIV,1,ARTICLE,0,A,0,DIV,0,PICTURE,1,IMG",
+              "selector": "a > div.product-image > picture > img",
+              "boundingRect": {
+                "top": 2276,
+                "bottom": 2496,
+                "left": 20,
+                "right": 392,
+                "width": 372,
+                "height": 220
+              },
+              "snippet": "<img class=\"\" src=\"http://127.0.0.1:4382/images/loaves-720.avif\" srcset=\"/images/loaves-400.webp 400w, /images/loaves-720.webp 720w, /images/loaves…\" sizes=\"(max-width: 700px) calc(100vw - 40px), (max-width: 1000px) 45vw, 600px\" alt=\"Dos hogazas de corteza tostada sobre una tabla de madera\" width=\"1100\" height=\"786\" loading=\"lazy\" fetchpriority=\"auto\" decoding=\"async\">",
+              "nodeLabel": "Dos hogazas de corteza tostada sobre una tabla de madera"
+            },
+            "url": "http://127.0.0.1:4382/images/loaves-720.avif",
+            "totalBytes": 51217,
+            "wastedBytes": 34752,
+            "subItems": {
+              "type": "subitems",
+              "items": [
+                {
+                  "reason": "This image file is larger than it needs to be (720x425) for its displayed dimensions (372x266). Use responsive images to reduce the image download size.",
+                  "wastedBytes": 34686
+                }
+              ]
+            }
+          },
+          {
+            "node": {
+              "type": "node",
+              "lhId": "page-2-IMG",
+              "path": "1,HTML,1,BODY,2,MAIN,3,SECTION,1,DIV,0,ARTICLE,0,A,0,DIV,0,PICTURE,1,IMG",
+              "selector": "a > div.product-image > picture > img",
+              "boundingRect": {
+                "top": 1699,
+                "bottom": 2039,
+                "left": 20,
+                "right": 392,
+                "width": 372,
+                "height": 340
+              },
+              "snippet": "<img class=\"\" src=\"http://127.0.0.1:4382/images/crumb-720.avif\" srcset=\"/images/crumb-400.webp 400w, /images/crumb-720.webp 720w, /images/crumb-11…\" sizes=\"(max-width: 700px) calc(100vw - 40px), (max-width: 1000px) 45vw, 600px\" alt=\"Interior de una hogaza de masa madre con corteza tostada\" width=\"1100\" height=\"1100\" loading=\"lazy\" fetchpriority=\"auto\" decoding=\"async\">",
+              "nodeLabel": "Interior de una hogaza de masa madre con corteza tostada"
+            },
+            "url": "http://127.0.0.1:4382/images/crumb-720.avif",
+            "totalBytes": 38091,
+            "wastedBytes": 26966,
+            "subItems": {
+              "type": "subitems",
+              "items": [
+                {
+                  "reason": "This image file is larger than it needs to be (720x658) for its displayed dimensions (372x372). Use responsive images to reduce the image download size.",
+                  "wastedBytes": 26966
+                }
+              ]
+            }
+          },
+          {
+            "node": {
+              "type": "node",
+              "lhId": "page-0-IMG",
+              "path": "1,HTML,1,BODY,2,MAIN,0,SECTION,1,FIGURE,0,PICTURE,1,IMG",
+              "selector": "section.hero > figure.hero-photo > picture > img",
+              "boundingRect": {
+                "top": 507,
+                "bottom": 787,
+                "left": 20,
+                "right": 392,
+                "width": 372,
+                "height": 280
+              },
+              "snippet": "<img class=\"\" src=\"http://127.0.0.1:4382/images/hero-720.avif\" srcset=\"/images/hero-400.webp 400w, /images/hero-720.webp 720w, /images/hero-1100.…\" sizes=\"(max-width: 700px) calc(100vw - 40px), (max-width: 1000px) 45vw, 600px\" alt=\"Dos hogazas de masa madre, una cortada mostrando la miga, junto a los azul…\" width=\"1100\" height=\"1100\" loading=\"eager\" fetchpriority=\"high\" decoding=\"async\">",
+              "nodeLabel": "Dos hogazas de masa madre, una cortada mostrando la miga, junto a los azulejos …"
+            },
+            "url": "http://127.0.0.1:4382/images/hero-720.avif",
+            "totalBytes": 31099,
+            "wastedBytes": 20070,
+            "subItems": {
+              "type": "subitems",
+              "items": [
+                {
+                  "reason": "This image file is larger than it needs to be (720x542) for its displayed dimensions (372x372). Use responsive images to reduce the image download size.",
+                  "wastedBytes": 20070
+                }
+              ]
+            }
+          },
+          {
+            "node": {
+              "type": "node",
+              "lhId": "page-3-IMG",
+              "path": "1,HTML,1,BODY,2,MAIN,5,SECTION,0,DIV,0,PICTURE,1,IMG",
+              "selector": "section.maker-section > div.maker-image > picture > img",
+              "boundingRect": {
+                "top": 3435,
+                "bottom": 3875,
+                "left": 20,
+                "right": 392,
+                "width": 372,
+                "height": 440
+              },
+              "snippet": "<img class=\"\" src=\"http://127.0.0.1:4382/images/maker-720.avif\" srcset=\"/images/maker-400.webp 400w, /images/maker-720.webp 720w, /images/maker-11…\" sizes=\"(max-width: 700px) calc(100vw - 40px), (max-width: 1000px) 45vw, 600px\" alt=\"El panadero cortando una hogaza en su cocina doméstica de Santa Coloma de …\" width=\"1100\" height=\"1467\" loading=\"lazy\" fetchpriority=\"auto\" decoding=\"async\">",
+              "nodeLabel": "El panadero cortando una hogaza en su cocina doméstica de Santa Coloma de Cerve…"
+            },
+            "url": "http://127.0.0.1:4382/images/maker-720.avif",
+            "totalBytes": 28544,
+            "wastedBytes": 19955,
+            "subItems": {
+              "type": "subitems",
+              "items": [
+                {
+                  "reason": "This image file is larger than it needs to be (720x852) for its displayed dimensions (372x496). Use responsive images to reduce the image download size.",
+                  "wastedBytes": 19955
+                }
+              ]
+            }
+          }
+        ],
+        "debugData": {
+          "type": "debugdata",
+          "wastedBytes": 101743
+        }
+      }
+    },
+    {
+      "id": "network-dependency-tree-insight",
+      "title": "Network dependency tree",
+      "description": "[Avoid chaining critical requests](https://developer.chrome.com/docs/performance/insights/network-dependency-tree) by reducing the length of chains, reducing the download size of resources, or deferring the download of unnecessary resources to improve page load.",
+      "details": {
+        "type": "list",
+        "items": [
+          {
+            "type": "list-section",
+            "value": {
+              "type": "network-tree",
+              "chains": {
+                "FC787E377A1371D2FA0323AC821C9F43": {
+                  "url": "http://127.0.0.1:4382/",
+                  "navStartToEndTime": 48,
+                  "transferSize": 15548,
+                  "isLongest": true,
+                  "children": {
+                    "6399.6": {
+                      "url": "http://127.0.0.1:4382/_astro/Base.astro_astro_type_script_index_0_lang.B9TZWGXy.js",
+                      "navStartToEndTime": 52,
+                      "transferSize": 5568,
+                      "isLongest": true,
+                      "children": {}
+                    },
+                    "6399.4": {
+                      "url": "http://127.0.0.1:4382/_astro/Base.DaXZUxGZ.css",
+                      "navStartToEndTime": 50,
+                      "transferSize": 25766,
+                      "children": {}
+                    }
+                  }
+                }
+              },
+              "longestChain": {
+                "duration": 52
+              }
+            }
+          },
+          {
+            "type": "list-section",
+            "title": "Preconnected origins",
+            "description": "[preconnect](https://developer.chrome.com/docs/lighthouse/performance/uses-rel-preconnect/) hints help the browser establish a connection earlier in the page load, saving time when the first request for that origin is made. The following are the origins that the page preconnected to.",
+            "value": {
+              "type": "text",
+              "value": "no origins were preconnected"
+            }
+          },
+          {
+            "type": "list-section",
+            "title": "Preconnect candidates",
+            "description": "Add [preconnect](https://developer.chrome.com/docs/lighthouse/performance/uses-rel-preconnect/) hints to your most important origins, but try to use no more than 4.",
+            "value": {
+              "type": "text",
+              "value": "No additional origins are good candidates for preconnecting"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "render-blocking-insight",
+      "title": "Render-blocking requests",
+      "description": "Requests are blocking the page's initial render, which may delay LCP. [Deferring or inlining](https://developer.chrome.com/docs/performance/insights/render-blocking) can move these network requests out of the critical path.",
+      "details": {
+        "type": "table",
+        "headings": [
+          {
+            "key": "url",
+            "valueType": "url",
+            "label": "URL"
+          },
+          {
+            "key": "totalBytes",
+            "valueType": "bytes",
+            "label": "Transfer Size"
+          },
+          {
+            "key": "wastedMs",
+            "valueType": "timespanMs",
+            "label": "Duration"
+          }
+        ],
+        "items": [
+          {
+            "url": "http://127.0.0.1:4382/_astro/Base.DaXZUxGZ.css",
+            "totalBytes": 25766,
+            "wastedMs": 303
+          }
+        ]
+      }
+    }
+  ]
+}
