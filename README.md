@@ -1,6 +1,6 @@
 # Molla · microobrador por encargo
 
-MVP independiente para probar la demanda de pan de masa madre en Santa Coloma de Cervelló. Astro, TypeScript estricto, Tailwind, fotografías reales optimizadas y una pequeña capa PostgreSQL. Pago al recoger. Marca provisional configurable.
+MVP independiente para probar la demanda de pan de poolish (fermentación lenta) en el Baix Llobregat, con recogida en Sant Boi de Llobregat. Astro, TypeScript estricto, Tailwind, fotografías reales optimizadas y una pequeña capa PostgreSQL. Pago al recoger. Marca provisional configurable.
 
 ## Ver el proyecto
 

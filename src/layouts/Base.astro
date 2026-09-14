@@ -1,29 +1,60 @@
 ---
 import '../styles/global.css';
-import '@fontsource/dm-sans/latin-400.css';
-import '@fontsource/fraunces/latin-600.css';
-import displayFont from '@fontsource/fraunces/files/fraunces-latin-600-normal.woff2?url';
-import bodyFont from '@fontsource/dm-sans/files/dm-sans-latin-400-normal.woff2?url';
+import '@fontsource-variable/bricolage-grotesque/standard.css';
+import '@fontsource/instrument-sans/latin-400.css';
+import '@fontsource/instrument-sans/latin-600.css';
+import displayFont from '@fontsource-variable/bricolage-grotesque/files/bricolage-grotesque-latin-standard-normal.woff2?url';
+import bodyFont from '@fontsource/instrument-sans/files/instrument-sans-latin-400-normal.woff2?url';
 import { brand, launchReady, isDemo } from '../lib/config';
+import { ui, routes, type Lang, type RouteKey } from '../lib/i18n';
 interface Props {
+  lang?: Lang;
+  route?: RouteKey;
   title?: string;
   description?: string;
+  image?: string;
   noindex?: boolean;
+  jsonLd?: Record<string, unknown>[];
 }
 const {
-  title = `${brand.name} · Pan de masa madre en ${brand.town}`,
-  description = 'Pan de masa madre por encargo en Santa Coloma de Cervelló. Pocas hogazas, una hornada semanal y recogida local los sábados.',
+  lang = 'es',
+  route,
+  title = ui[lang].meta.title,
+  description = ui[lang].meta.description,
+  image = '/images/social.jpg',
   noindex = false,
+  jsonLd = [],
 } = Astro.props;
-const canonical = brand.site
-  ? new URL(Astro.url.pathname, brand.site).href
-  : null;
+const t = ui[lang];
+const other: Lang = lang === 'es' ? 'ca' : 'es';
+const home = routes.home[lang];
+const abs = (path: string) =>
+  brand.site ? new URL(path, brand.site).href : null;
+const canonical = abs(route ? routes[route][lang] : Astro.url.pathname);
+const indexable = launchReady && !noindex;
+const organization = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  '@id': abs('/#organization'),
+  name: brand.name,
+  url: abs('/'),
+  logo: abs('/favicon.svg'),
+  email: brand.contact || undefined,
+  sameAs: brand.instagram ? [brand.instagram] : undefined,
+  areaServed: [
+    { '@type': 'AdministrativeArea', name: 'Baix Llobregat' },
+    { '@type': 'City', name: 'Sant Boi de Llobregat' },
+    { '@type': 'City', name: 'Santa Coloma de Cervelló' },
+  ],
+};
+const graph = [organization, ...jsonLd];
 ---
 
 <!doctype html>
-<html lang="es">
+<html lang={lang}>
   <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link
       rel="preload"
       href={displayFont}
@@ -38,104 +69,125 @@ const canonical = brand.site
       type="font/woff2"
       crossorigin
     />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#233c48" />
+    <meta name="theme-color" content="#1b3a9f" />
     <title>{title}</title>
     <meta name="description" content={description} />
     <meta
       name="robots"
-      content={noindex || !launchReady ? 'noindex, nofollow' : 'index, follow'}
+      content={indexable ? 'index, follow, max-image-preview:large' : 'noindex, nofollow'}
     />
     {canonical && <link rel="canonical" href={canonical} />}
+    {route && brand.site && (
+      <>
+        <link rel="alternate" hreflang="es" href={abs(routes[route].es)} />
+        <link rel="alternate" hreflang="ca" href={abs(routes[route].ca)} />
+        <link
+          rel="alternate"
+          hreflang="x-default"
+          href={abs(routes[route].es)}
+        />
+      </>
+    )}
+    <meta name="geo.region" content="ES-CT" />
+    <meta name="geo.placename" content="Sant Boi de Llobregat" />
+    <meta name="geo.position" content="41.354014;2.026792" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <meta property="og:type" content="website" />
-    <meta property="og:locale" content="es_ES" />
+    <meta property="og:site_name" content={brand.name} />
+    <meta property="og:locale" content={lang === 'ca' ? 'ca_ES' : 'es_ES'} />
+    <meta
+      property="og:locale:alternate"
+      content={lang === 'ca' ? 'es_ES' : 'ca_ES'}
+    />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     {canonical && (
       <>
         <meta property="og:url" content={canonical} />
-        <meta
-          property="og:image"
-          content={new URL('/images/social.jpg', brand.site).href}
-        />
+        <meta property="og:image" content={abs(image)} />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
       </>
     )}
-    <meta
-      property="og:image:alt"
-      content="Hogazas de masa madre recién cortadas en mi cocina"
-    />
+    <meta property="og:image:alt" content={t.meta.ogAlt} />
     <meta name="twitter:card" content="summary_large_image" />
     {launchReady && (
       <script
         is:inline
         type="application/ld+json"
-        set:html={JSON.stringify({
-          '@context': 'https://schema.org',
-          '@type': 'Organization',
-          name: brand.name,
-          url: brand.site,
-          areaServed: brand.town,
-          email: brand.contact,
-        }).replace(/</g, '\\u003c')}
-      ></script>
+        set:html={JSON.stringify(graph).replace(/</g, '\\u003c')}
+      />
     )}
   </head>
   <body>
-    <a class="skip" href="#contenido">
-      Ir al contenido
-    </a>
+    <a class="skip" href="#contenido">{t.skip}</a>
     {isDemo && (
-      <div class="demo-note" role="region" aria-label="Modo de prueba">
-        Vista de prueba · Los pedidos de esta versión no son reales.
+      <div class="demo-note" role="region" aria-label="Demo">
+        {t.demo}
       </div>
     )}
-    <header class="site-header wrap">
-      <a class="wordmark" href="/" aria-label={`${brand.name}, inicio`}>
-        {brand.name.toLowerCase()}
-        <span class="brand-dot">.</span>
-      </a>
-      <span class="header-place">
-        PAN POR ENCARGO
-        <br />
-        SANTA COLOMA DE CERVELLÓ
-      </span>
-      <nav aria-label="Principal">
-        <a href="/#como">Cómo funciona</a>
-        <a class="nav-order" href="/#hornada">
-          La hornada <span aria-hidden="true">↗</span>
+    <header class="site-header">
+      <div class="wrap header-inner">
+        <a class="wordmark" href={home} aria-label={t.home}>
+          {brand.name.toLowerCase()}
         </a>
-      </nav>
+        <nav aria-label={lang === 'ca' ? 'Principal' : 'Principal'}>
+          <a href={`${home}#proceso`}>{t.nav.process}</a>
+          <a href={routes.pickup[lang]}>{t.nav.pickup}</a>
+          <a href={`${home}#preguntas`}>{t.nav.faq}</a>
+          {route && (
+            <a
+              class="lang-switch"
+              href={routes[route][other]}
+              hreflang={other}
+              lang={other}
+              aria-label={t.switchAria}
+            >
+              {other.toUpperCase()}
+            </a>
+          )}
+          <a class="nav-order" href={`${home}#reserva`}>
+            {t.nav.order}
+          </a>
+        </nav>
+      </div>
     </header>
     <slot />
-    <footer class="wrap site-footer">
-      <a class="wordmark" href="/">
-        {brand.name.toLowerCase()}.
-      </a>
-      <p>
-        Pan de aquí. Para el sábado.
-        <br />
-        <span>Santa Coloma de Cervelló · Baix Llobregat</span>
-      </p>
-      <div>
-        <a href="/privacidad">Privacidad y condiciones</a>
-        {brand.instagram && (
-          <a
-            data-event="click_instagram"
-            href={brand.instagram}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Instagram ↗
-          </a>
-        )}
-        {brand.contact && <a href={`mailto:${brand.contact}`}>Escríbeme ↗</a>}
+    <footer class="site-footer">
+      <div class="wrap footer-inner">
+        <a class="wordmark" href={home}>{brand.name.toLowerCase()}</a>
+        <p>
+          {t.footer.line}
+          <br />
+          <span>{t.footer.area}</span>
+        </p>
+        <div class="footer-links">
+          <a href={routes.poolish[lang]}>Poolish</a>
+          <a href={routes.pickup[lang]}>{t.nav.pickup}</a>
+          {route && (
+            <a href={routes[route][other]} hreflang={other} lang={other}>
+              {t.switchLabel}
+            </a>
+          )}
+          <a href="/privacidad">{t.footer.privacy}</a>
+          {brand.instagram && (
+            <a
+              data-event="click_instagram"
+              href={brand.instagram}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Instagram ↗
+            </a>
+          )}
+          {brand.contact && (
+            <a href={`mailto:${brand.contact}`}>{t.footer.write}</a>
+          )}
+        </div>
+        <small>
+          © {new Date().getFullYear()} {brand.name}
+        </small>
       </div>
-      <small>
-        © {new Date().getFullYear()} {brand.name}
-      </small>
     </footer>
     <script src="../lib/client.ts"></script>
   </body>

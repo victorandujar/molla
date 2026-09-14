@@ -59,6 +59,7 @@ const observer = new IntersectionObserver(
 document
   .querySelectorAll('[data-event-view]')
   .forEach((el) => observer.observe(el));
+const isCa = document.documentElement.lang === 'ca';
 const form = document.querySelector<HTMLFormElement>('#reservation-form');
 const money = (cents: number) =>
   new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(
@@ -103,12 +104,12 @@ async function submit(target: HTMLFormElement) {
     data = await response.json();
   } catch {
     throw new Error(
-      'No se ha podido procesar la solicitud. Vuelve a intentarlo.',
+      (isCa ? 'No s’ha pogut processar la sol·licitud. Torna-ho a provar.' : 'No se ha podido procesar la solicitud. Vuelve a intentarlo.'),
     );
   }
   if (!response.ok)
     throw new Error(
-      data.error || 'No se ha podido guardar. Vuelve a intentarlo.',
+      data.error || (isCa ? 'No s’ha pogut desar. Torna-ho a provar.' : 'No se ha podido guardar. Vuelve a intentarlo.'),
     );
   return data;
 }
@@ -118,7 +119,7 @@ function showError(target: HTMLFormElement, error: unknown) {
   el.textContent =
     error instanceof Error && error.name !== 'TimeoutError'
       ? error.message
-      : 'La conexión está tardando. Vuelve a intentarlo; no duplicaremos tu reserva.';
+      : (isCa ? 'La connexió va lenta. Torna-ho a provar; no duplicarem la reserva.' : 'La conexión está tardando. Vuelve a intentarlo; no duplicaremos tu reserva.');
   el.hidden = false;
   el.focus();
 }
@@ -128,7 +129,7 @@ form?.addEventListener('submit', async (event) => {
   if (button.disabled) return;
   button.disabled = true;
   const label = button.textContent;
-  button.textContent = 'Guardando tu reserva…';
+  button.textContent = (isCa ? 'Desant la teva reserva…' : 'Guardando tu reserva…');
   form.querySelector<HTMLElement>('.form-error')!.hidden = true;
   try {
     const order = await submit(form);
@@ -136,25 +137,25 @@ form?.addEventListener('submit', async (event) => {
     const result = document.querySelector<HTMLElement>('#confirmation')!;
     const heading = document.createElement('h3');
     heading.textContent = order.demo
-      ? 'Así será tu confirmación.'
-      : 'Tu pan tiene tu nombre.';
+      ? (isCa ? 'Així serà la teva confirmació.' : 'Así será tu confirmación.')
+      : (isCa ? 'El teu pa ja té el teu nom.' : 'Tu pan tiene tu nombre.');
     const intro = document.createElement('p');
     intro.textContent = order.demo
-      ? 'Reserva de prueba completada. No has encargado pan ni recibirás un email.'
-      : 'Reserva confirmada. Guarda estos datos para la recogida.';
+      ? (isCa ? 'Reserva de prova completada. No has encarregat pa ni rebràs cap correu.' : 'Reserva de prueba completada. No has encargado pan ni recibirás un email.')
+      : (isCa ? 'Reserva confirmada. Guarda aquestes dades per a la recollida.' : 'Reserva confirmada. Guarda estos datos para la recogida.');
     const details = document.createElement('div');
     details.className = 'confirmation-details';
-    const date = new Intl.DateTimeFormat('es-ES', {
+    const date = new Intl.DateTimeFormat(isCa ? 'ca-ES' : 'es-ES', {
       timeZone: 'Europe/Madrid',
       dateStyle: 'full',
     }).format(new Date(order.pickupDate));
     for (const line of [
-      `${order.quantity} × ${order.productName}`,
-      `Total: ${money(order.total)} · Pago al recoger`,
+      `${order.quantity} × ${isCa && order.productName === 'La de cada semana' ? 'El de cada setmana' : order.productName}`,
+      isCa ? `Total: ${money(order.total)} · Pagament en recollir` : `Total: ${money(order.total)} · Pago al recoger`,
       date,
       order.pickupWindow ||
-        'Franja pendiente de confirmar antes del lanzamiento',
-      order.pickupAddress || 'Punto de recogida pendiente de publicar',
+        (isCa ? 'Franja pendent de confirmar' : 'Franja pendiente de confirmar antes del lanzamiento'),
+      order.pickupAddress || (isCa ? 'Punt de recollida pendent de publicar' : 'Punto de recogida pendiente de publicar'),
     ]) {
       const row = document.createElement('div');
       row.textContent = line;
@@ -162,18 +163,18 @@ form?.addEventListener('submit', async (event) => {
     }
     const ref = document.createElement('p');
     ref.className = 'confirmation-ref';
-    ref.textContent = `Referencia: ${order.id}`;
+    ref.textContent = `${isCa ? 'Referència' : 'Referencia'}: ${order.id}`;
     const save = document.createElement('button');
     save.className = 'button';
     save.type = 'button';
-    save.textContent = 'Guardar o imprimir confirmación';
+    save.textContent = (isCa ? 'Desar o imprimir la confirmació' : 'Guardar o imprimir confirmación');
     save.addEventListener('click', () => window.print());
     result.replaceChildren(heading, intro, details, ref, save);
     if (order.contact) {
       const support = document.createElement('a');
       support.className = 'text-link';
       support.href = `mailto:${order.contact}?subject=${encodeURIComponent('Reserva ' + order.id)}`;
-      support.textContent = 'Consultar o cambiar mi reserva ↗';
+      support.textContent = (isCa ? 'Consultar o canviar la reserva ↗' : 'Consultar o cambiar mi reserva ↗');
       result.append(support);
     }
     result.hidden = false;
@@ -198,12 +199,12 @@ waitlist?.addEventListener('submit', async (event) => {
   if (button.disabled) return;
   button.disabled = true;
   const label = button.textContent;
-  button.textContent = 'Guardando…';
+  button.textContent = (isCa ? 'Desant…' : 'Guardando…');
   waitlist.querySelector<HTMLElement>('.form-error')!.hidden = true;
   try {
     await submit(waitlist);
     waitlist.querySelector<HTMLElement>('.waitlist-success')!.hidden = false;
-    button.textContent = 'Ya estás en la lista';
+    button.textContent = (isCa ? 'Ja ets a la llista' : 'Ya estás en la lista');
     track('waitlist_signup');
   } catch (error) {
     showError(waitlist, error);
@@ -223,7 +224,7 @@ async function refreshBake() {
       progress.value = b.reserved;
       progress.setAttribute(
         'aria-label',
-        `${b.reserved} de ${progress.max} hogazas reservadas`,
+        isCa ? `${b.reserved} de ${progress.max} pans reservats` : `${b.reserved} de ${progress.max} hogazas reservadas`,
       );
     }
     if (b.state !== 'OPEN') {
@@ -231,14 +232,14 @@ async function refreshBake() {
       if (label)
         label.textContent =
           b.state === 'SOLD_OUT'
-            ? 'Hornada agotada'
+            ? (isCa ? 'Fornada exhaurida' : 'Hornada agotada')
             : b.state === 'UPCOMING'
-              ? 'Próxima hornada'
-              : 'Pedidos cerrados';
+              ? (isCa ? 'Propera fornada' : 'Próxima hornada')
+              : (isCa ? 'Comandes tancades' : 'Pedidos cerrados');
       const cta = document.querySelector<HTMLAnchorElement>('[data-bake-cta]');
       if (cta) {
         cta.href = '#avisame';
-        cta.textContent = 'Avísame de la próxima ↗';
+        cta.textContent = (isCa ? 'Avisa’m de la propera ↗' : 'Avísame de la próxima ↗');
       }
       if (form && !form.hidden) {
         form.querySelector<HTMLButtonElement>('button[type=submit]')!.disabled =
@@ -246,7 +247,7 @@ async function refreshBake() {
         showError(
           form,
           new Error(
-            'Esta hornada ya no admite pedidos. Apúntate al aviso de la próxima, más abajo.',
+            (isCa ? 'Aquesta fornada ja no admet comandes. Apunta’t a l’avís de la propera, més avall.' : 'Esta hornada ya no admite pedidos. Apúntate al aviso de la próxima, más abajo.'),
           ),
         );
       }

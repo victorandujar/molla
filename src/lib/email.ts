@@ -2,7 +2,7 @@ import { brand, isDemo, money } from './config';
 import { emailStatus } from './store';
 import type { Order } from './domain';
 export function confirmationText(o: Order) {
-  return `Hola ${o.name},\n\nTu reserva en ${brand.name} está confirmada.\nReferencia: ${o.id}\n${o.quantity} × ${o.productName} — ${money(o.total)}\nRecogida: ${new Intl.DateTimeFormat('es-ES', { timeZone: 'Europe/Madrid', dateStyle: 'full' }).format(new Date(o.pickupDate))}\n${o.pickupWindow}\n${o.pickupAddress}\nPago al recoger.\n\nSi necesitas cambiar o cancelar la reserva, escribe a ${brand.contact} con tu referencia.\nGracias por reservar tu pan.`;
+  return `Hola ${o.name},\n\nTu reserva en ${brand.name} está confirmada.\nReferencia: ${o.id}\n${o.quantity} × ${o.productName} — ${money(o.total)}\nRecogida: ${new Intl.DateTimeFormat('es-ES', { timeZone: 'Europe/Madrid', dateStyle: 'full' }).format(new Date(o.pickupDate))}\n${o.pickupWindow}\n${o.pickupAddress}\n${brand.pickupMap}\nPago al recoger.\n\nSi necesitas cambiar o cancelar la reserva, escribe a ${brand.contact} con tu referencia.\nGracias por reservar tu pan.`;
 }
 export async function sendConfirmation(o: Order) {
   if (o.emailStatus !== 'PENDING') return;

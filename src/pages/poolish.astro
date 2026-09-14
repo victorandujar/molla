@@ -1,0 +1,90 @@
+---
+import Article from '../layouts/Article.astro';
+import Photo from '../components/Photo.astro';
+import { brand } from '../lib/config';
+export const prerender = true;
+const article = {
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline: 'Pan de poolish: qué es y por qué fermento 8–10 horas',
+  inLanguage: 'es',
+  author: { '@type': 'Organization', name: brand.name },
+  image: brand.site ? new URL('/images/crumb-1100.webp', brand.site).href : undefined,
+};
+---
+
+<Article
+  lang="es"
+  route="poolish"
+  crumb="Poolish"
+  title={`Pan de poolish: qué es y en qué se diferencia de la masa madre · ${brand.name}`}
+  description="Qué es el poolish, por qué fermenta 8–10 horas y en qué se diferencia del pan de masa madre. Pan artesanal de fermentación lenta por encargo en el Baix Llobregat."
+  kicker="Fermentación lenta"
+  h1="Pan de poolish: una noche de ventaja."
+  lede="Qué es el poolish, qué le hace a la hogaza y en qué se parece (y en qué no) a la masa madre."
+  jsonLd={[article]}
+>
+  <div class="article-grid">
+    <div class="prose">
+      <h2>Qué es el poolish</h2>
+      <p>
+        Es una masa previa, o prefermento: harina y agua a partes iguales con
+        una cantidad muy pequeña de levadura. Tiene textura de crema espesa y se
+        prepara la víspera. Mientras reposa, entre 8 y 10 horas, la levadura
+        trabaja despacio y la harina desarrolla aromas que un amasado rápido no
+        tiene tiempo de crear.
+      </p>
+      <p>
+        A la mañana siguiente, el poolish se mezcla con el resto de harina, agua
+        y sal. A partir de ahí, el pan se hace como siempre: amasado, formado a
+        mano, reposo en cesta y horno.
+      </p>
+
+      <h2>Qué notas en la hogaza</h2>
+      <ul>
+        <li><strong>Sabor</strong> más profundo, ligeramente dulce y tostado.</li>
+        <li><strong>Miga</strong> más abierta, húmeda y elástica.</li>
+        <li><strong>Corteza</strong> fina, dorada oscura y crujiente.</li>
+        <li><strong>Conservación</strong>: aguanta tierno más días que un pan de fermentación rápida.</li>
+      </ul>
+
+      <h2>¿Poolish o masa madre?</h2>
+      <p>
+        Las dos son fermentaciones lentas, pero no son lo mismo. La masa madre
+        es un cultivo de levaduras salvajes y bacterias lácticas que se
+        alimenta cada día; da panes con un punto ácido marcado. El poolish usa
+        levadura, pero en muy poca cantidad y con mucho tiempo: el resultado es
+        un pan con carácter y miga abierta, de sabor más suave y sin acidez.
+      </p>
+      <p>
+        Mi pan <strong>no es de masa madre</strong>, y prefiero decirlo claro.
+        Si buscas un pan artesanal de fermentación lenta con un gusto amable
+        para el día a día, el poolish es exactamente eso.
+      </p>
+
+      <h2>Cómo es una hornada</h2>
+      <ol>
+        <li><strong>Hasta el jueves a las 20:00</strong>: cierro reservas.</li>
+        <li><strong>La víspera</strong>: preparo el poolish, que reposa 8–10 horas.</li>
+        <li><strong>Por la mañana</strong>: amaso, formo cada hogaza a mano y dejo reposar.</li>
+        <li><strong>Horno</strong> y, después, <a href="/recogida">recogida en Sant Boi</a>.</li>
+      </ol>
+    </div>
+    <div class="article-photos">
+      <figure class="article-photo">
+        <Photo
+          name="crumb"
+          alt="Miga abierta de una hogaza de poolish con corteza tostada"
+          sizes="(max-width: 860px) calc(100vw - 40px), 40vw"
+        />
+      </figure>
+      <figure class="article-photo">
+        <Photo
+          name="dough"
+          alt="Masas de poolish formadas reposando en cestas de fermentación enharinadas"
+          sizes="(max-width: 860px) calc(100vw - 40px), 40vw"
+        />
+      </figure>
+    </div>
+  </div>
+</Article>

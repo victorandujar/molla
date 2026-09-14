@@ -1,0 +1,86 @@
+---
+import Article from '../layouts/Article.astro';
+import Photo from '../components/Photo.astro';
+import { brand } from '../lib/config';
+import { dayFormat } from '../lib/i18n';
+export const prerender = true;
+const apple = 'https://maps.apple.com/?ll=41.35401410971224,2.026792459636187&q=Molla';
+const place = {
+  '@context': 'https://schema.org',
+  '@type': 'Place',
+  name: `Punto de recogida ${brand.name}`,
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: 'Ronda de Sant Ramon',
+    addressLocality: 'Sant Boi de Llobregat',
+    postalCode: '08830',
+    addressRegion: 'Barcelona',
+    addressCountry: 'ES',
+  },
+  geo: { '@type': 'GeoCoordinates', latitude: 41.354014, longitude: 2.026792 },
+  hasMap: brand.pickupMap,
+};
+---
+
+<Article
+  lang="es"
+  route="pickup"
+  crumb="Recogida"
+  title={`Recogida de pan artesanal en Sant Boi de Llobregat · ${brand.name}`}
+  description="Dónde y cuándo recoger tu hogaza de fermentación lenta en Sant Boi de Llobregat (Ronda de Sant Ramon). Reserva online, pagas al recoger. Cerca de Santa Coloma de Cervelló, Cornellà y Sant Vicenç dels Horts."
+  kicker="Recogida · Sant Boi de Llobregat"
+  h1="Recoge tu pan en Sant Boi de Llobregat."
+  lede="Una vez por semana, el sábado, en la Ronda de Sant Ramon. Reservas antes, pagas al recoger y te llevas el pan del día."
+  jsonLd={[place]}
+>
+  <div class="article-grid">
+    <div class="prose">
+      <h2>Dónde</h2>
+      <p>
+        <strong>Ronda de Sant Ramon, 08830 Sant Boi de Llobregat.</strong> En
+        el barrio de Ciutat Cooperativa – Molí Nou.
+      </p>
+      <p class="article-links">
+        <a class="button" href={brand.pickupMap} target="_blank" rel="noopener noreferrer">
+          Abrir en Google Maps
+        </a>
+        <a class="text-link" href={apple} target="_blank" rel="noopener noreferrer">
+          Apple Maps ↗
+        </a>
+      </p>
+
+      <h2>Cuándo</h2>
+      <p>
+        Los sábados. La próxima recogida es el <strong>{dayFormat('es')}</strong>
+        {brand.pickupWindow ? `, ${brand.pickupWindow}` : ''}. Los pedidos se
+        cierran el jueves a las 20:00 o cuando se completa la hornada.
+      </p>
+
+      <h2>Cómo funciona</h2>
+      <ol>
+        <li>Reservas en la web y recibes una confirmación con tu referencia.</li>
+        <li>El sábado vienes al punto de recogida dentro de la franja horaria.</li>
+        <li>Dices tu nombre, pagas y te llevas tu hogaza, horneada ese mismo día.</li>
+      </ol>
+      <p>
+        Si al final no puedes venir, escríbeme cuanto antes con la referencia:
+        así libero tu pan para otra persona.
+      </p>
+
+      <h2>Si vienes de fuera de Sant Boi</h2>
+      <p>
+        Hago pan para todo el Baix Llobregat. El punto de recogida queda a mano
+        si vives en Santa Coloma de Cervelló, Sant Vicenç dels Horts, Cornellà
+        de Llobregat, Sant Joan Despí, Viladecans o Sant Climent de Llobregat.
+        De momento no hago envíos a domicilio.
+      </p>
+    </div>
+    <figure class="article-photo">
+      <Photo
+        name="hands"
+        alt="Mano sujetando una hogaza de corteza oscura mientras se corta con un cuchillo de pan"
+        sizes="(max-width: 860px) calc(100vw - 40px), 40vw"
+      />
+    </figure>
+  </div>
+</Article>
