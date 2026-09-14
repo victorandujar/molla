@@ -1,1 +1,46 @@
-{"name":"molla-microbakery","version":"0.1.0","private":true,"type":"module","scripts":{"dev":"astro dev","build":"astro build","check":"astro check","test":"tsx --test tests/*.test.ts","test:e2e":"playwright test","photos":"node scripts/photos.mjs","db:migrate":"tsx scripts/migrate.ts","orders":"tsx scripts/orders.ts"}}
+{
+  "name": "molla-microbakery",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev --port 4381",
+    "build": "astro build",
+    "check": "astro check",
+    "test": "node --import tsx --test tests/*.test.ts",
+    "test:e2e": "playwright test",
+    "photos": "node scripts/photos.mjs",
+    "db:migrate": "node --env-file-if-exists=.env --import tsx scripts/migrate.ts",
+    "orders": "node --env-file-if-exists=.env --import tsx scripts/orders.ts",
+    "db:seed": "node --env-file-if-exists=.env --import tsx scripts/seed.ts",
+    "audit:local": "node scripts/audit.mjs"
+  },
+  "dependencies": {
+    "@astrojs/vercel": "^11.0.10",
+    "@fontsource/dm-sans": "^5.3.0",
+    "@fontsource/fraunces": "^5.3.0",
+    "@tailwindcss/vite": "^4.3.3",
+    "astro": "^7.3.2",
+    "postgres": "^3.4.9",
+    "tailwindcss": "^4.3.3",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "@axe-core/playwright": "^4.13.0",
+    "@playwright/test": "^1.63.0",
+    "@types/node": "^26.5.1",
+    "lighthouse": "^13.4.1",
+    "prettier": "^3.9.6",
+    "prettier-plugin-astro": "^1.0.0",
+    "sharp": "^0.35.4",
+    "tsx": "^4.23.13",
+    "typescript": "~6.0.3"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "overrides": {
+    "path-to-regexp": "6.3.0"
+  }
+}
