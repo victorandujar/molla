@@ -17,12 +17,13 @@ test('real photos, keyboard access, responsive layout and accessibility', async 
   page.on('pageerror', (e) => errors.push(e.message));
   for (const width of [375, 768, 1440, 1920]) {
     await page.setViewportSize({ width, height: width === 375 ? 812 : 1000 });
-    await page.goto('/');
+    await page.goto('/es/');
     await page.evaluate(() => document.fonts.ready);
     await expect(page.getByRole('heading', { level: 1 })).toContainText(
-      'la noche antes',
+      'Pan artesanal por encargo',
     );
-    await expect(page.locator('.hero-photo img')).toBeVisible();
+    await expect(page.locator('.hero-photo img')).toHaveCount(2);
+    await expect(page.locator('.hero-photo img').first()).toBeVisible();
     expect(
       await page.evaluate(
         () => document.documentElement.scrollWidth <= window.innerWidth,
@@ -44,7 +45,7 @@ test('real photos, keyboard access, responsive layout and accessibility', async 
     });
   }
   await page.setViewportSize({ width: 375, height: 812 });
-  await page.goto('/');
+  await page.goto('/es/');
   await page.keyboard.press('Tab');
   await expect(page.locator('.skip')).toBeFocused();
   await page.keyboard.press('Enter');
@@ -53,7 +54,7 @@ test('real photos, keyboard access, responsive layout and accessibility', async 
   expect(errors).toEqual([]);
 });
 test('reservation, validation and waitlist journey', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('/es/');
   await page.locator('#reservation-form button[type=submit]').click();
   await expect(page.locator('#confirmation')).toBeHidden();
   await page.getByLabel('Tu nombre', { exact: true }).fill('Ana Prueba');
@@ -129,7 +130,7 @@ test('sold out bake becomes waitlist and cannot accept more orders', async ({
       limits: {},
     }),
   );
-  await page.goto('/');
+  await page.goto('/es/');
   await expect(page.locator('[data-bake-label]')).toHaveText('Hornada agotada');
   await expect(page.locator('#reservation-form')).toHaveCount(0);
   await page.locator('[data-bake-cta]').click();
@@ -165,7 +166,7 @@ test('SEO draft safeguards and internal navigation', async ({
   page,
   request,
 }) => {
-  await page.goto('/');
+  await page.goto('/es/');
   await expect(page.locator('html')).toHaveAttribute('lang', 'es');
   await expect(page.locator('meta[name=robots]')).toHaveAttribute(
     'content',
@@ -197,7 +198,7 @@ test('closed bake rejects reservations but accepts next-bake waitlist', async ({
       limits: {},
     }),
   );
-  await page.goto('/');
+  await page.goto('/es/');
   await expect(page.locator('[data-bake-label]')).toHaveText(
     'Pedidos cerrados',
   );
@@ -247,13 +248,16 @@ test('waitlist deduplicates emails and unsubscribe requires explicit POST', asyn
   expect(JSON.parse(await readFile(dataPath, 'utf8')).waitlist).toHaveLength(0);
 });
 
-test('Catalan version, local pages and hreflang', async ({ page, request }) => {
-  await page.goto('/ca/');
+test('Catalan is the main language, Spanish lives under /es/', async ({
+  page,
+  request,
+}) => {
+  await page.goto('/');
   await expect(page.locator('html')).toHaveAttribute('lang', 'ca');
   await expect(page.getByRole('heading', { level: 1 })).toContainText(
-    'la nit abans',
+    'Pa artesà per encàrrec',
   );
-  for (const path of ['/recogida', '/ca/recollida', '/poolish', '/ca/poolish']) {
+  for (const path of ['/recollida', '/poolish', '/es/', '/es/recogida', '/es/poolish']) {
     const res = await request.get(path);
     expect(res.status()).toBe(200);
     await page.goto(path);
@@ -261,8 +265,18 @@ test('Catalan version, local pages and hreflang', async ({ page, request }) => {
     const result = await new AxeBuilder({ page }).analyze();
     expect(result.violations).toEqual([]);
   }
-  await page.goto('/recogida');
+  for (const [from, to] of [
+    ['/ca/', '/'],
+    ['/ca/recollida', '/recollida'],
+    ['/ca/poolish', '/poolish'],
+    ['/recogida', '/es/recogida'],
+  ]) {
+    const res = await request.get(from!, { maxRedirects: 0 });
+    expect(res.status()).toBe(308);
+    expect(new URL(res.headers().location!, 'http://x').pathname).toBe(to);
+  }
+  await page.goto('/es/recogida');
   await expect(page.locator('main')).toContainText('Sant Boi de Llobregat');
   await page.locator('.lang-switch').click();
-  await expect(page).toHaveURL(/\/ca\/recollida$/);
+  await expect(page).toHaveURL(/\/recollida$/);
 });

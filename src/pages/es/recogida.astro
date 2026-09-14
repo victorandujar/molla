@@ -1,9 +1,17 @@
 ---
-import Article from '../layouts/Article.astro';
-import Photo from '../components/Photo.astro';
-import { brand } from '../lib/config';
-import { dayFormat } from '../lib/i18n';
-export const prerender = true;
+import Article from '../../layouts/Article.astro';
+import Photo from '../../components/Photo.astro';
+import { brand, isDemo, launchReady } from '../../lib/config';
+import { dayFormat } from '../../lib/i18n';
+import { currentBake } from '../../lib/store';
+let pickupDate: string | undefined;
+if (isDemo || launchReady) {
+  try {
+    pickupDate = (await currentBake()).pickupDate;
+  } catch {
+    /* Falls back to the configured date. */
+  }
+}
 const apple = 'https://maps.apple.com/?ll=41.35401410971224,2.026792459636187&q=Molla';
 const place = {
   '@context': 'https://schema.org',
@@ -51,7 +59,7 @@ const place = {
 
       <h2>Cuándo</h2>
       <p>
-        Los sábados. La próxima recogida es el <strong>{dayFormat('es')}</strong>
+        Los sábados. La próxima recogida es el <strong>{dayFormat('es', pickupDate)}</strong>
         {brand.pickupWindow ? `, ${brand.pickupWindow}` : ''}. Los pedidos se
         cierran el jueves a las 20:00 o cuando se completa la hornada.
       </p>

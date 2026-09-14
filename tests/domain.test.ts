@@ -1,10 +1,15 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { randomBytes } from 'node:crypto';
+import { confirmationHtml } from '../src/lib/email-templates';
 import {
   bakeState,
   assertCapacity,
   reservationSchema,
   waitlistSchema,
+  madridIso,
+  pickupCode,
+  pickupCodePattern,
 } from '../src/lib/domain';
 const b = {
   status: 'OPEN' as const,
@@ -73,4 +78,46 @@ test('waitlist requires explicit consent', () => {
     waitlistSchema.parse({ email: 'ANA@example.com', consent: 'yes' }).email,
     'ana@example.com',
   );
+});
+
+test('Madrid wall-clock times respect summer and winter offsets', () => {
+  assert.equal(madridIso('2026-09-26', '12:00'), '2026-09-26T10:00:00.000Z');
+  assert.equal(madridIso('2026-12-05', '12:00'), '2026-12-05T11:00:00.000Z');
+  assert.equal(madridIso('2026-10-25', '20:00'), '2026-10-25T19:00:00.000Z');
+  assert.equal(madridIso('2027-03-28', '20:00'), '2027-03-28T18:00:00.000Z');
+  assert.throws(() => madridIso('26/09/2026'));
+});
+
+test('pickup codes are short, readable and carry the bake number', () => {
+  assert.equal(pickupCode('001', new Uint8Array([0, 30, 31, 255])), '001-A9AH');
+  for (let i = 0; i < 500; i++) {
+    const code = pickupCode('012', randomBytes(4));
+    assert.match(code, pickupCodePattern);
+    assert.doesNotMatch(code.slice(4), /[01ILO]/);
+  }
+});
+test('confirmation email escapes customer input and links the map', () => {
+  const html = confirmationHtml({
+    id: 'x',
+    code: '001-K7QM',
+    requestId: 'r',
+    bakeId: 'hornada-001',
+    name: '<script>alert(1)</script> Ana',
+    email: 'a@example.com',
+    phone: '600000000',
+    quantity: 1,
+    product: 'clasica',
+    productName: 'La de cada semana',
+    total: 650,
+    pickupDate: '2026-09-26T10:00:00.000Z',
+    pickupAddress: 'Ronda de Sant Ramon',
+    pickupWindow: 'de 12:00 a 13:00',
+    source: 'direct',
+    status: 'CONFIRMED',
+    createdAt: '',
+    emailStatus: 'PENDING',
+  });
+  assert.doesNotMatch(html, /<script>/);
+  assert.match(html, /001-K7QM/);
+  assert.match(html, /href="https:\/\/www\.google\.com\/maps[^"]+"[^>]*><img[^>]+mapa-recogida\.png/);
 });

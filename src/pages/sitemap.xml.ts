@@ -6,12 +6,12 @@ export function GET() {
   const urls = launchReady
     ? Object.values(routes)
         .flatMap((r) =>
-          (['es', 'ca'] as const).map(
+          (['ca', 'es'] as const).map(
             (lang) =>
               `<url><loc>${site}${r[lang]}</loc><changefreq>weekly</changefreq>` +
               `<xhtml:link rel="alternate" hreflang="es" href="${site}${r.es}"/>` +
               `<xhtml:link rel="alternate" hreflang="ca" href="${site}${r.ca}"/>` +
-              `<xhtml:link rel="alternate" hreflang="x-default" href="${site}${r.es}"/></url>`,
+              `<xhtml:link rel="alternate" hreflang="x-default" href="${site}${r.ca}"/></url>`,
           ),
         )
         .join('')

@@ -365,72 +365,152 @@ img {
 
 /* Portada */
 .hero {
-  background: var(--tile);
-  color: var(--crumb);
-  overflow: hidden;
+  background: var(--linen);
+  color: var(--ink);
+  padding-block: clamp(28px, 5vw, 72px) clamp(8px, 2vw, 24px);
 }
-.hero-grid {
+/* Editorial head: big lead word, star, smaller side word with its notes. */
+.hero-head {
+  container-type: inline-size;
   display: grid;
-  grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
-  grid-template-rows: auto auto;
-  column-gap: clamp(32px, 5vw, 80px);
-  padding-block: clamp(40px, 6vw, 88px);
+  grid-template-columns: auto auto minmax(0, 1fr);
+  grid-template-areas:
+    'lead star side'
+    'lead star aside';
+  column-gap: clamp(14px, 1.6vw, 28px);
 }
-.hero-copy {
-  align-self: center;
-  padding-bottom: 48px;
-}
-.hero .kicker {
-  color: var(--crumb);
-  opacity: 0.9;
-}
-.hero h1 {
-  font-size: clamp(56px, 7.6vw, 118px);
-  font-stretch: 78%;
+.hero-title {
+  grid-area: 1 / 1 / -1 / -1;
+  display: grid;
+  grid-template-columns: subgrid;
+  grid-template-rows: subgrid;
+  grid-template-areas: inherit;
+  font-family: var(--display);
+  font-stretch: 75%;
   font-weight: 800;
-  letter-spacing: -0.035em;
-  line-height: 0.9;
+  text-transform: uppercase;
+  color: var(--tile);
 }
-.hero h1 em {
+.hero-word {
   display: block;
-  color: var(--orange);
+  line-height: 0.82;
+  letter-spacing: -0.02em;
+}
+/* Each word is sized from its length (set inline) so both languages fill
+   the same share of the row: lead ≈ 56%, side ≈ 26%. */
+.hero-word-lead {
+  grid-area: lead;
+  align-self: start;
+  font-size: min(200px, calc(56cqi / (var(--lead) * 0.37)));
+  white-space: nowrap;
+}
+.hero-word-side {
+  grid-area: side;
+  align-self: start;
+  font-size: min(110px, calc(26cqi / (var(--side) * 0.37)));
+  white-space: nowrap;
+}
+.hero-star {
+  grid-area: star;
+  align-self: center;
+  width: clamp(36px, 4.2vw, 64px);
+  fill: var(--orange);
+}
+.hero-aside {
+  grid-area: aside;
+  align-self: end;
+  padding-top: 14px;
+  max-width: 46ch;
+}
+.hero-sub {
+  font-weight: 600;
+  font-size: clamp(16px, 1.3vw, 18px);
 }
 .hero-lede {
-  margin-top: 28px;
-  max-width: 34ch;
-  font-size: clamp(17px, 1.4vw, 19px);
-  color: rgba(247, 241, 232, 0.9);
+  margin-top: 6px;
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--muted);
 }
 .hero-actions {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 16px 28px;
-  margin-top: 36px;
+  gap: 12px 24px;
+  margin-top: 18px;
 }
 .hero-link {
   font-weight: 600;
   font-size: 15px;
 }
+/* Middle row: two real photos and the live bake as a third panel. */
+.hero-row {
+  display: grid;
+  grid-template-columns: 3fr 4.4fr 3.2fr;
+  gap: clamp(10px, 1.2vw, 16px);
+  margin-top: clamp(28px, 3.4vw, 48px);
+  height: clamp(360px, 34vw, 500px);
+}
 .hero-photo {
-  grid-row: 1 / span 2;
-  grid-column: 2;
-  min-height: 560px;
-  position: relative;
-  border-radius: var(--radius);
+  margin: 0;
   overflow: hidden;
+  border-radius: var(--radius);
 }
 .hero-photo picture {
-  position: absolute;
-  inset: 0;
+  display: block;
+  height: 100%;
+}
+.hero-photo-maker img {
+  object-position: 50% 30%;
+}
+.hero-photo-hero img {
+  object-position: 50% 60%;
 }
 .bake-card {
-  grid-column: 1;
-  align-self: end;
-  background: var(--linen-soft);
+  display: flex;
+  flex-direction: column;
+  background: var(--tile);
+  color: var(--crumb);
+  padding: 24px 24px 22px;
+  border-radius: var(--radius);
+  outline: 1.5px dashed rgba(247, 241, 232, 0.55);
+  outline-offset: -10px;
+}
+.bake-card .bake-number,
+.bake-card .bake-deadline {
+  color: rgba(247, 241, 232, 0.78);
+}
+.bake-card .bake-day {
+  margin-top: 18px;
+  font-size: clamp(34px, 3.6vw, 56px);
+  line-height: 0.92;
+}
+.bake-card progress {
+  background: rgba(247, 241, 232, 0.2);
+}
+.bake-card progress::-webkit-progress-bar {
+  background: rgba(247, 241, 232, 0.2);
+}
+.bake-card .bake-cta {
+  align-self: flex-start;
+  margin-top: auto;
+  padding: 10px 18px;
+  border-radius: 999px;
+  background: var(--orange);
   color: var(--ink);
-  padding: 24px 26px 22px;
-  border-radius: 16px;
+  text-decoration: none;
+}
+.hero-keywords {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 4px 12px;
+  margin-top: clamp(18px, 2vw, 26px);
+  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  font-size: clamp(12px, 1.05vw, 15px);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink);
 }
 .bake-head {
   display: flex;
@@ -578,7 +658,7 @@ progress::-moz-progress-bar {
   margin: clamp(48px, 7vw, 88px) 0 0;
   padding: 0;
   display: grid;
-  grid-template-columns: 1.2fr 3fr 1.3fr 1fr 1fr;
+  grid-template-columns: 1.2fr 3.6fr 1.3fr 1fr;
   gap: 0;
 }
 .timeline li {
@@ -1066,37 +1146,43 @@ details p {
 /* Tablet */
 @media (max-width: 1080px) {
   .timeline {
-    grid-template-columns: 1fr 2.4fr 1.2fr;
-    row-gap: 40px;
-  }
-  .timeline li:nth-child(3) .bar::after {
-    right: 0;
+    grid-template-columns: 1fr 2.2fr 1.1fr 1fr;
   }
 }
 @media (max-width: 860px) {
+  .hero-head {
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-areas:
+      'lead lead'
+      'star side'
+      'aside aside';
+    row-gap: 10px;
+  }
+  .hero-word-lead {
+    font-size: calc(90cqi / (var(--lead) * 0.38));
+  }
+  .hero-word-side {
+    align-self: center;
+    font-size: calc(74cqi / (var(--side) * 0.38));
+  }
+  .hero-row {
+    grid-template-columns: 1fr 1fr;
+    height: auto;
+  }
+  .hero-photo {
+    aspect-ratio: 4 / 5;
+  }
+  .bake-card {
+    grid-column: 1 / -1;
+  }
+  .hero-keywords {
+    justify-content: flex-start;
+  }
   .site-header nav a:not(.nav-order, .lang-switch) {
     display: none;
   }
   .site-header nav {
     gap: 16px;
-  }
-  .hero-grid {
-    grid-template-columns: 1fr;
-    padding-top: 40px;
-  }
-  .hero-copy {
-    padding-bottom: 36px;
-  }
-  .hero-photo {
-    grid-row: auto;
-    grid-column: 1;
-    min-height: 0;
-    aspect-ratio: 4 / 3;
-  }
-  .bake-card {
-    grid-column: 1;
-    margin: -48px 12px 0;
-    position: relative;
   }
   .loaf-section,
   .article-grid,
@@ -1145,8 +1231,7 @@ details p {
     background: var(--crumb);
   }
   .bar::after,
-  .timeline li:last-child .bar::after,
-  .timeline li:nth-child(3) .bar::after {
+  .timeline li:last-child .bar::after {
     left: 13px;
     right: auto;
     top: 20px;
@@ -1174,7 +1259,7 @@ details p {
     display: none;
   }
   .long .when::after {
-    content: ' · 8–10 h';
+    content: ' · +20 h';
     color: var(--orange);
     font-weight: 600;
   }

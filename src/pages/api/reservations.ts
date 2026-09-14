@@ -24,6 +24,7 @@ export const POST: APIRoute = async (ctx) => {
     return json(
       {
         id: order.id,
+        code: order.code,
         quantity: order.quantity,
         productName: order.productName,
         total: order.total,

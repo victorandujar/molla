@@ -55,6 +55,24 @@ export function bakeState(
   if (b.status === 'SOLD_OUT' || reserved >= b.capacity) return 'SOLD_OUT';
   return 'OPEN';
 }
+// Converts a Madrid wall-clock date and time to an instant, handling CET/CEST.
+export function madridIso(date: string, time = '00:00') {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !/^\d{2}:\d{2}$/.test(time))
+    throw new Error('Usa fechas AAAA-MM-DD y horas HH:MM.');
+  const guess = Date.parse(`${date}T${time}:00Z`);
+  const offset = (at: number) => {
+    const name = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'Europe/Madrid',
+      timeZoneName: 'longOffset',
+    })
+      .formatToParts(at)
+      .find((p) => p.type === 'timeZoneName')!.value;
+    const [, sign, h, m] = /GMT([+-])(\d{2}):(\d{2})/.exec(name) || [];
+    return sign ? (sign === '-' ? -1 : 1) * (+h! * 60 + +m!) * 60000 : 0;
+  };
+  const instant = guess - offset(guess - offset(guess));
+  return new Date(instant).toISOString();
+}
 export function assertCapacity(
   b: Parameters<typeof bakeState>[0],
   reserved: number,
@@ -69,8 +87,17 @@ export function assertCapacity(
       'Esta hornada ya no admite esa cantidad. Puedes apuntarte a la próxima.',
     );
 }
+// Short pickup code such as 001-K7QM: bake number plus four characters
+// without look-alikes (no 0/O, 1/I/L), easy to say out loud or type.
+const codeAlphabet = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+export function pickupCode(bakeNumber: string, bytes: Uint8Array) {
+  const chars = Array.from(bytes.slice(0, 4), (b) => codeAlphabet[b % 31]);
+  return `${bakeNumber}-${chars.join('')}`;
+}
+export const pickupCodePattern = /^\d{3}-[A-Z2-9]{4}$/;
 export type Order = {
   id: string;
+  code: string;
   requestId: string;
   bakeId: string;
   name: string;

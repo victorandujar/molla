@@ -10,8 +10,10 @@
     "test": "node --import tsx --test tests/*.test.ts",
     "test:e2e": "playwright test",
     "photos": "node scripts/photos.mjs",
+    "brand": "node scripts/brand-assets.mjs",
     "db:migrate": "node --env-file-if-exists=.env --import tsx scripts/migrate.ts",
     "orders": "node --env-file-if-exists=.env --import tsx scripts/orders.ts",
+    "bake": "node --env-file-if-exists=.env --import tsx scripts/bake.ts",
     "db:seed": "node --env-file-if-exists=.env --import tsx scripts/seed.ts",
     "audit:local": "node scripts/audit.mjs"
   },
