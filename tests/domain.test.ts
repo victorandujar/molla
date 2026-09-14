@@ -1,6 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { randomBytes } from 'node:crypto';
+import { confirmationHtml } from '../src/lib/email-templates';
 import {
   bakeState,
   assertCapacity,
@@ -94,4 +95,29 @@ test('pickup codes are short, readable and carry the bake number', () => {
     assert.match(code, pickupCodePattern);
     assert.doesNotMatch(code.slice(4), /[01ILO]/);
   }
+});
+test('confirmation email escapes customer input and links the map', () => {
+  const html = confirmationHtml({
+    id: 'x',
+    code: '001-K7QM',
+    requestId: 'r',
+    bakeId: 'hornada-001',
+    name: '<script>alert(1)</script> Ana',
+    email: 'a@example.com',
+    phone: '600000000',
+    quantity: 1,
+    product: 'clasica',
+    productName: 'La de cada semana',
+    total: 650,
+    pickupDate: '2026-09-26T10:00:00.000Z',
+    pickupAddress: 'Ronda de Sant Ramon',
+    pickupWindow: 'de 12:00 a 13:00',
+    source: 'direct',
+    status: 'CONFIRMED',
+    createdAt: '',
+    emailStatus: 'PENDING',
+  });
+  assert.doesNotMatch(html, /<script>/);
+  assert.match(html, /001-K7QM/);
+  assert.match(html, /href="https:\/\/www\.google\.com\/maps[^"]+"[^>]*><img[^>]+mapa-recogida\.png/);
 });
