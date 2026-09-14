@@ -1359,3 +1359,159 @@ details p {
     padding: 0;
   }
 }
+
+/* Gestión (/gestio): pensada para el móvil en el punto de recogida. */
+.admin {
+  padding-block: 32px 96px;
+  max-width: 760px;
+}
+.admin h1 {
+  font-family: var(--display);
+  font-size: clamp(2rem, 7vw, 3rem);
+  line-height: 1;
+  margin: 0 0 8px;
+}
+.admin h2 {
+  font-family: var(--display);
+  font-size: 1.5rem;
+  margin: 40px 0 16px;
+}
+.admin-login {
+  max-width: 360px;
+  display: grid;
+  gap: 16px;
+}
+.admin-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+.admin-head p {
+  margin: 0;
+  color: var(--muted);
+}
+.admin-head button {
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+.admin-bakes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 20px;
+}
+.admin-bakes a {
+  padding: 6px 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  text-decoration: none;
+}
+.admin-bakes a[aria-current] {
+  background: var(--tile);
+  border-color: var(--tile);
+  color: var(--crumb);
+}
+.admin-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 8px;
+  margin: 24px 0 0;
+}
+.admin-stats div {
+  background: var(--crumb);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+}
+.admin-stats dt {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+.admin-stats dd {
+  margin: 4px 0 0;
+  font-family: var(--display);
+  font-size: 1.6rem;
+  font-weight: 700;
+}
+.admin-notice {
+  margin: 20px 0 0;
+  padding: 12px 14px;
+  border-radius: var(--radius);
+  background: var(--tile);
+  color: var(--crumb);
+}
+.admin-orders {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 12px;
+}
+.admin-orders li {
+  background: var(--crumb);
+  border-radius: var(--radius);
+  padding: 16px;
+  border-left: 6px solid var(--orange);
+}
+.admin-orders li[data-status='COLLECTED'] {
+  border-left-color: var(--tile);
+  opacity: 0.75;
+}
+.admin-orders li[data-status='CANCELLED'] {
+  border-left-color: var(--line);
+  opacity: 0.55;
+}
+.admin-order-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+.admin-code {
+  font-family: var(--display);
+  font-size: 1.6rem;
+  letter-spacing: 0.04em;
+  color: var(--tile);
+}
+.admin-badge {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.admin-orders p {
+  margin: 6px 0 0;
+  overflow-wrap: anywhere;
+}
+.admin-contact {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+}
+.admin-meta {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+.admin-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 12px 20px;
+  margin-top: 14px;
+}
+.admin-actions summary {
+  cursor: pointer;
+  padding: 12px 0;
+  color: var(--crust);
+}
+.admin-actions .text-link {
+  background: none;
+  border: 0;
+  padding: 12px 0;
+  cursor: pointer;
+}
+.button.admin-danger {
+  background: var(--crust);
+  border-color: var(--crust);
+}

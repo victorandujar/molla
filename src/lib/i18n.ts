@@ -1,13 +1,16 @@
 import { bake, brand } from './config';
-
-export type Lang = 'es' | 'ca';
+import type { Lang } from './messages';
+export type { Lang };
 
 // Pages that exist in both languages. Keys are shared, paths are localised.
 export const routes = {
   home: { ca: '/', es: '/es/' },
   pickup: { ca: '/recollida', es: '/es/recogida' },
   poolish: { ca: '/poolish', es: '/es/poolish' },
+  privacy: { ca: '/privacitat', es: '/privacidad' },
 } as const;
+// Pages listed in the sitemap; the privacy page is noindex.
+export const indexedRoutes = ['home', 'pickup', 'poolish'] as const;
 export type RouteKey = keyof typeof routes;
 
 export const dayFormat = (lang: Lang, iso = bake.pickupDate) =>
@@ -17,6 +20,28 @@ export const dayFormat = (lang: Lang, iso = bake.pickupDate) =>
     day: 'numeric',
     month: 'long',
   }).format(new Date(iso));
+
+// Parts of a Madrid date for sentences such as "hasta el jueves 24 a las 20:00".
+export const madridParts = (lang: Lang, iso: string) => {
+  const parts = Object.fromEntries(
+    new Intl.DateTimeFormat(lang === 'ca' ? 'ca-ES' : 'es-ES', {
+      timeZone: 'Europe/Madrid',
+      weekday: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hourCycle: 'h23',
+    })
+      .formatToParts(new Date(iso))
+      .map((p) => [p.type, p.value]),
+  );
+  return {
+    weekday: parts.weekday as string,
+    day: parts.day as string,
+    time: `${parts.hour}:${parts.minute}`,
+  };
+};
+const capital = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
 const areaTowns =
   'Sant Boi, Santa Coloma de Cervelló, Sant Vicenç dels Horts, Cornellà, Sant Joan Despí o Viladecans';
@@ -67,7 +92,11 @@ export const ui = {
       of: 'de',
       reserved: 'hogazas reservadas',
       test: ' (prueba)',
-      open: 'Pedidos hasta el jueves a las 20:00 o hasta completar la hornada.',
+      open: (deadline: string) => {
+        const d = madridParts('es', deadline);
+        return `Pedidos hasta el ${d.weekday} ${d.day} a las ${d.time} o hasta completar la hornada.`;
+      },
+      dateSoon: 'Fecha por confirmar',
       upcoming: 'Anunciaré la fecha al abrir reservas.',
       closed: 'Esta semana ya no acepto pedidos. Te aviso de la próxima.',
       unavailable: 'No puedo consultar el cupo ahora. Recarga la página antes de reservar.',
@@ -95,6 +124,11 @@ export const ui = {
       intro:
         'El poolish es una masa previa, líquida, que fermenta despacio durante la noche. Le da a la hogaza una miga más abierta, una corteza más fina y un sabor que no se consigue con prisa.',
       more: 'Qué es el poolish, en detalle',
+      closeWhen: (deadline: string) => {
+        const d = madridParts('es', deadline);
+        return `Hasta el ${d.weekday}, ${d.time}`;
+      },
+      pickupWhen: (pickup: string) => capital(madridParts('es', pickup).weekday),
       steps: [
         { when: 'Hasta el jueves, 20:00', title: 'Reservas', text: 'Cierro pedidos y sé exactamente cuántas hogazas hacer. Ni una de más.' },
         { when: 'Desde la víspera', title: 'Fermentación lenta', time: '+20 h', text: 'Poolish, amasado con pliegues a mano, formado y una noche en frío. Sin prisa: ahí nacen el sabor, el aroma y la miga.' },
@@ -134,8 +168,8 @@ export const ui = {
       phone: 'Móvil o WhatsApp',
       honey: 'Deja este campo vacío',
       demoCheck: 'Entiendo que estoy probando una reserva ficticia.',
-      pickupCheck: (day: string) =>
-        `Recogeré el pan el ${day}, en ${brand.pickupAddress}, ${brand.pickupWindow}.`,
+      pickupCheck: (day: string, window: string) =>
+        `Recogeré el pan el ${day}, en ${brand.pickupAddress}${window ? `, ${window}` : ''}.`,
       privacyA: 'He leído la',
       privacyLink: 'privacidad y las condiciones',
       submitDemo: 'Probar reserva',
@@ -156,7 +190,7 @@ export const ui = {
         ['¿Dónde se recoge?', `En la Ronda de Sant Ramon, en Sant Boi de Llobregat (barrio de Ciutat Cooperativa – Molí Nou). Te queda cerca si vives en ${areaTowns}.`],
         ['¿Puedo pedir que me lo envíes?', `Hago pan para todo el ${brand.region}, pero de momento no hago envíos: se recoge en Sant Boi de Llobregat.`],
         ['¿Cómo lo conservo?', 'Entero, en un lugar fresco y seco, envuelto en un paño limpio. Si no lo vas a comer pronto, córtalo en rebanadas y congélalo.'],
-        ['¿Y si no puedo venir?', 'Escríbeme cuanto antes con el código de tu reserva. Si aún estamos a tiempo, libero tu hogaza para otra persona.'],
+        ['¿Y si no puedo venir?', 'Responde al email de confirmación o escríbeme cuanto antes con el código de tu reserva. El día antes de la recogida te llega un recordatorio. Si aún estamos a tiempo, libero tu hogaza para otra persona.'],
         ['¿Y si ya no quedan?', 'Apúntate al aviso de la próxima hornada. El aviso no reserva pan: tú decides si encargas.'],
       ],
     },
@@ -170,7 +204,8 @@ export const ui = {
       consentLink: 'política de privacidad',
       disabled: 'Los avisos se activarán al anunciar la primera hornada.',
       demo: 'Modo de prueba: no recibirás emails.',
-      success: 'Ya estás en la lista. Te escribiré cuando abra la próxima hornada.',
+      success: 'Casi está: te he enviado un email para confirmar el aviso. Si no lo ves, mira en spam.',
+      successDirect: 'Ya estás en la lista. Te escribiré cuando abra la próxima hornada.',
     },
     mobile: { label: 'Reserva rápida', loaf: 'Hogaza', order: 'Reservar', notify: 'Avísame' },
     breadcrumbHome: 'Inicio',
@@ -220,7 +255,11 @@ export const ui = {
       of: 'de',
       reserved: 'pans reservats',
       test: ' (prova)',
-      open: 'Comandes fins dijous a les 20:00 o fins que s’acabi la fornada.',
+      open: (deadline: string) => {
+        const d = madridParts('ca', deadline);
+        return `Comandes fins ${d.weekday} ${d.day} a les ${d.time} o fins que s’acabi la fornada.`;
+      },
+      dateSoon: 'Data per confirmar',
       upcoming: 'Anunciaré la data quan obri reserves.',
       closed: 'Aquesta setmana ja no accepto comandes. T’aviso de la propera.',
       unavailable: 'Ara no puc consultar la disponibilitat. Recarrega la pàgina abans de reservar.',
@@ -248,6 +287,11 @@ export const ui = {
       intro:
         'El poolish és una massa prèvia, líquida, que fermenta a poc a poc durant la nit. Dona al pa una molla més oberta, una crosta més fina i un gust que no s’aconsegueix amb pressa.',
       more: 'Què és el poolish, en detall',
+      closeWhen: (deadline: string) => {
+        const d = madridParts('ca', deadline);
+        return `Fins ${d.weekday}, ${d.time}`;
+      },
+      pickupWhen: (pickup: string) => capital(madridParts('ca', pickup).weekday),
       steps: [
         { when: 'Fins dijous, 20:00', title: 'Reserves', text: 'Tanco comandes i sé exactament quants pans he de fer. Ni un de més.' },
         { when: 'Des de la vigília', title: 'Fermentació lenta', time: '+20 h', text: 'Poolish, pastat amb plecs a mà, formació i una nit en fred. Sense pressa: aquí neixen el gust, l’aroma i la molla.' },
@@ -287,8 +331,8 @@ export const ui = {
       phone: 'Mòbil o WhatsApp',
       honey: 'Deixa aquest camp buit',
       demoCheck: 'Entenc que estic provant una reserva fictícia.',
-      pickupCheck: (day: string) =>
-        `Recolliré el pa ${day}, a ${brand.pickupAddress}, ${brand.pickupWindow}.`,
+      pickupCheck: (day: string, window: string) =>
+        `Recolliré el pa ${day}, a ${brand.pickupAddress}${window ? `, ${window}` : ''}.`,
       privacyA: 'He llegit la',
       privacyLink: 'privacitat i les condicions',
       submitDemo: 'Provar la reserva',
@@ -309,7 +353,7 @@ export const ui = {
         ['On es recull?', `A la Ronda de Sant Ramon, a Sant Boi de Llobregat (barri de Ciutat Cooperativa – Molí Nou). Et queda a prop si vius a ${areaTowns}.`],
         ['Me’l pots enviar?', `Faig pa per a tot el ${brand.region}, però de moment no faig enviaments: es recull a Sant Boi de Llobregat.`],
         ['Com el conservo?', 'Sencer, en un lloc fresc i sec, embolicat amb un drap net. Si no te’l menjaràs aviat, talla’l a llesques i congela’l.'],
-        ['I si no puc venir?', 'Escriu-me com més aviat millor amb el codi de la reserva. Si encara som a temps, allibero el teu pa per a una altra persona.'],
+        ['I si no puc venir?', 'Respon el correu de confirmació o escriu-me com més aviat millor amb el codi de la reserva. El dia abans de la recollida t’arriba un recordatori. Si encara som a temps, allibero el teu pa per a una altra persona.'],
         ['I si ja no en queden?', 'Apunta’t a l’avís de la propera fornada. L’avís no reserva pa: tu decideixes si l’encarregues.'],
       ],
     },
@@ -323,7 +367,8 @@ export const ui = {
       consentLink: 'política de privacitat',
       disabled: 'Els avisos s’activaran quan s’anunciï la primera fornada.',
       demo: 'Mode de prova: no rebràs correus.',
-      success: 'Ja ets a la llista. T’escriuré quan obri la propera fornada.',
+      success: 'Gairebé fet: t’he enviat un correu per confirmar l’avís. Si no el veus, mira al correu brossa.',
+      successDirect: 'Ja ets a la llista. T’escriuré quan obri la propera fornada.',
     },
     mobile: { label: 'Reserva ràpida', loaf: 'Pa', order: 'Reservar', notify: 'Avisa’m' },
     breadcrumbHome: 'Inici',

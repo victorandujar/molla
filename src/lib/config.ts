@@ -17,9 +17,16 @@ export const brand = {
   legalId: process.env.LEGAL_ID || '',
   legalAddress: process.env.LEGAL_ADDRESS || '',
   site: process.env.PUBLIC_SITE_URL || '',
-  privacyProviders: process.env.PRIVACY_PROVIDERS || '',
-  privacyRetention: process.env.PRIVACY_RETENTION || '',
-  privacyTransfers: process.env.PRIVACY_TRANSFERS || '',
+};
+// Legal texts come from the environment; the Catalan ones fall back to Spanish.
+const privacyText = (name: string) => ({
+  es: process.env[name] || '',
+  ca: process.env[`${name}_CA`] || process.env[name] || '',
+});
+export const privacy = {
+  providers: privacyText('PRIVACY_PROVIDERS'),
+  retention: privacyText('PRIVACY_RETENTION'),
+  transfers: privacyText('PRIVACY_TRANSFERS'),
 };
 export const products = [
   {
@@ -50,22 +57,17 @@ export const products = [
 export const bake = {
   id: 'hornada-001',
   number: '001',
-  pickupDate: '2026-09-26T10:00:00+02:00',
+  pickupDate: '2026-09-26T12:00:00+02:00',
   deadline: '2026-09-24T20:00:00+02:00',
   opensAt: '2026-09-14T00:00:00+02:00',
   capacity: 6,
   status: 'OPEN' as BakeState,
+  pickupWindow: brand.pickupWindow,
 };
 export const money = (cents: number) =>
   new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(
     cents / 100,
   );
-export const pickupDay = new Intl.DateTimeFormat('es-ES', {
-  timeZone: 'Europe/Madrid',
-  weekday: 'long',
-  day: 'numeric',
-  month: 'long',
-}).format(new Date(bake.pickupDate));
 export const isDemo =
   import.meta.env?.DEV && process.env.LOCAL_DEMO !== 'false';
 export const launchReady =
@@ -79,7 +81,7 @@ export const launchReady =
     brand.contact &&
     brand.legalName &&
     brand.legalAddress &&
-    brand.privacyProviders &&
-    brand.privacyRetention &&
-    brand.privacyTransfers
+    privacy.providers.es &&
+    privacy.retention.es &&
+    privacy.transfers.es
   );

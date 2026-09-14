@@ -1,0 +1,326 @@
+---
+import Base from '../layouts/Base.astro';
+import {
+  adminEnabled,
+  checkPassword,
+  createSession,
+  validSession,
+  sessionCookie,
+  sessionHours,
+} from '../lib/admin';
+import {
+  currentBake,
+  listBakes,
+  ordersForBake,
+  setOrderStatus,
+  waitlistCounts,
+  funnel,
+  rateLimit,
+} from '../lib/store';
+import { bakeState, type Order } from '../lib/domain';
+import { money } from '../lib/config';
+import { pickupDay } from '../lib/email-templates';
+import { ui } from '../lib/i18n';
+import { clientIp } from '../lib/http';
+// Owner's panel for the pickup point: today's orders, mark collected or
+// cancelled from the phone. Spanish only; it is not a public page.
+if (!adminEnabled()) return new Response('Not found', { status: 404 });
+const cookie = {
+  httpOnly: true,
+  secure: import.meta.env.PROD,
+  sameSite: 'strict' as const,
+  path: '/gestio',
+};
+const signedIn = validSession(Astro.cookies.get(sessionCookie)?.value);
+let loginError = '';
+if (Astro.request.method === 'POST') {
+  if (Astro.request.headers.get('origin') !== Astro.url.origin)
+    return new Response('Forbidden', { status: 403 });
+  const form = await Astro.request.formData();
+  const action = String(form.get('action') || '');
+  if (action === 'login') {
+    if (!(await rateLimit(`login|${clientIp(Astro)}`, 5))) {
+      loginError = 'Demasiados intentos. Espera diez minutos.';
+    } else if (checkPassword(String(form.get('password') || ''))) {
+      Astro.cookies.set(sessionCookie, createSession(), {
+        ...cookie,
+        maxAge: sessionHours * 3600,
+      });
+      return Astro.redirect('/gestio', 303);
+    } else {
+      loginError = 'Contraseña incorrecta.';
+    }
+  } else if (action === 'logout') {
+    Astro.cookies.delete(sessionCookie, cookie);
+    return Astro.redirect('/gestio', 303);
+  } else if (signedIn && action === 'status') {
+    const to = String(form.get('to'));
+    const id = String(form.get('id'));
+    const bake = String(form.get('bake') || '');
+    let ok = false;
+    if (to === 'COLLECTED' || to === 'CANCELLED' || to === 'CONFIRMED')
+      ok = await setOrderStatus(id, to);
+    const query = new URLSearchParams({ bake, done: ok ? to : 'none' });
+    return Astro.redirect(`/gestio?${query.toString()}#pedidos`, 303);
+  }
+}
+const labels: Record<Order['status'], string> = {
+  CONFIRMED: 'Pendiente',
+  COLLECTED: 'Recogido',
+  CANCELLED: 'Cancelado',
+};
+const order = { CONFIRMED: 0, COLLECTED: 1, CANCELLED: 2 };
+let data: null | {
+  bakes: Awaited<ReturnType<typeof listBakes>>;
+  bake: Awaited<ReturnType<typeof currentBake>>;
+  orders: Awaited<ReturnType<typeof ordersForBake>>;
+  waitlist: Awaited<ReturnType<typeof waitlistCounts>>;
+  events: Record<string, number>;
+} = null;
+let loadError = '';
+if (signedIn) {
+  try {
+    const [bakes, active, waitlist, events] = await Promise.all([
+      listBakes(),
+      currentBake(),
+      waitlistCounts(),
+      funnel(28),
+    ]);
+    const bake =
+      bakes.find((b) => b.id === Astro.url.searchParams.get('bake')) || active;
+    const orders = (await ordersForBake(bake.id)).sort(
+      (a, b) =>
+        order[a.status] - order[b.status] || a.name.localeCompare(b.name),
+    );
+    data = { bakes, bake, orders, waitlist, events };
+  } catch (e) {
+    console.error('Admin panel failed', e instanceof Error ? e.message : e);
+    loadError = 'No se han podido cargar los datos. Recarga en unos segundos.';
+  }
+}
+const done = Astro.url.searchParams.get('done');
+const notice =
+  done === 'none'
+    ? 'Ese pedido ya había cambiado de estado. Revisa la lista.'
+    : done
+      ? `Pedido marcado como ${labels[done as Order['status']]?.toLowerCase() || 'actualizado'}.`
+      : '';
+const live = data?.orders.filter((o) => o.status !== 'CANCELLED') || [];
+const pending = live.filter((o) => o.status === 'CONFIRMED');
+const whatsapp = (phone: string) => {
+  const digits = phone.replace(/\D/g, '');
+  return `https://wa.me/${digits.length === 9 ? `34${digits}` : digits}`;
+};
+const steps = [
+  ['landing_view', 'Visitas'],
+  ['view_current_bake', 'Ven la hornada'],
+  ['start_reservation', 'Empiezan a reservar'],
+  ['reservation_completed', 'Reservan'],
+  ['waitlist_signup', 'Se apuntan al aviso'],
+] as const;
+---
+
+<Base lang="es" title="Gestión · Molla" noindex>
+  <main id="contenido" class="admin wrap">
+    {!signedIn ? (
+      <form method="post" class="admin-login">
+        <p class="kicker">Gestión</p>
+        <h1>Entrar</h1>
+        <input type="hidden" name="action" value="login" />
+        <div class="field">
+          <label for="password">Contraseña</label>
+          <input
+            id="password"
+            name="password"
+            type="password"
+            autocomplete="current-password"
+            required
+          />
+        </div>
+        {loginError && (
+          <p class="form-error" role="alert">
+            {loginError}
+          </p>
+        )}
+        <button class="button full" type="submit">
+          Entrar
+        </button>
+      </form>
+    ) : !data ? (
+      <p role="alert">{loadError}</p>
+    ) : (
+      <>
+        <header class="admin-head">
+          <div>
+            <p class="kicker">
+              Hornada {data.bake.number} ·{' '}
+              {ui.es.status[bakeState(data.bake, data.bake.reserved)]}
+            </p>
+            <h1>{pickupDay(data.bake.pickupDate)}</h1>
+            <p>{data.bake.pickupWindow || 'Franja sin definir'}</p>
+          </div>
+          <form method="post">
+            <input type="hidden" name="action" value="logout" />
+            <button class="text-link" type="submit">
+              Salir
+            </button>
+          </form>
+        </header>
+        {data.bakes.length > 1 && (
+          <nav class="admin-bakes" aria-label="Hornadas">
+            {data.bakes.map((b) => (
+              <a
+                href={`/gestio?bake=${b.id}`}
+                aria-current={b.id === data!.bake.id ? 'page' : undefined}
+              >
+                {b.number}
+              </a>
+            ))}
+          </nav>
+        )}
+        <dl class="admin-stats">
+          <div>
+            <dt>Reservadas</dt>
+            <dd>
+              {data.bake.reserved} / {data.bake.capacity}
+            </dd>
+          </div>
+          <div>
+            <dt>Por recoger</dt>
+            <dd>{pending.reduce((n, o) => n + o.quantity, 0)}</dd>
+          </div>
+          <div>
+            <dt>Por cobrar</dt>
+            <dd>{money(pending.reduce((n, o) => n + o.total, 0))}</dd>
+          </div>
+          <div>
+            <dt>Recogidas</dt>
+            <dd>{live.length - pending.length}</dd>
+          </div>
+        </dl>
+        {notice && (
+          <p class="admin-notice" role="status">
+            {notice}
+          </p>
+        )}
+        <section id="pedidos" aria-labelledby="orders-title">
+          <h2 id="orders-title">Pedidos</h2>
+          {data.orders.length === 0 && (
+            <p>Todavía no hay pedidos en esta hornada.</p>
+          )}
+          <ul class="admin-orders">
+            {data.orders.map((o) => (
+              <li data-status={o.status}>
+                <div class="admin-order-top">
+                  <strong class="admin-code">{o.code}</strong>
+                  <span class="admin-badge">{labels[o.status]}</span>
+                </div>
+                <p class="admin-name">
+                  {o.name} · {o.quantity} × {money(o.total / o.quantity)} ={' '}
+                  <strong>{money(o.total)}</strong>
+                </p>
+                <p class="admin-contact">
+                  <a href={`tel:${o.phone.replace(/[^\d+]/g, '')}`}>
+                    {o.phone}
+                  </a>
+                  <a
+                    href={whatsapp(o.phone)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    WhatsApp ↗
+                  </a>
+                  <a
+                    href={`mailto:${o.email}?subject=${encodeURIComponent(`Reserva ${o.code}`)}`}
+                  >
+                    {o.email}
+                  </a>
+                </p>
+                <p class="admin-meta">
+                  Email {o.emailStatus.toLowerCase()} · Recordatorio{' '}
+                  {o.reminderSentAt ? 'enviado' : 'no enviado'} · {o.source}
+                </p>
+                <div class="admin-actions">
+                  {o.status === 'CONFIRMED' && (
+                    <form method="post">
+                      <input type="hidden" name="action" value="status" />
+                      <input type="hidden" name="id" value={o.id} />
+                      <input type="hidden" name="bake" value={data!.bake.id} />
+                      <button
+                        class="button"
+                        name="to"
+                        value="COLLECTED"
+                        type="submit"
+                      >
+                        Marcar recogido
+                      </button>
+                    </form>
+                  )}
+                  {o.status === 'COLLECTED' && (
+                    <form method="post">
+                      <input type="hidden" name="action" value="status" />
+                      <input type="hidden" name="id" value={o.id} />
+                      <input type="hidden" name="bake" value={data!.bake.id} />
+                      <button
+                        class="text-link"
+                        name="to"
+                        value="CONFIRMED"
+                        type="submit"
+                      >
+                        Deshacer
+                      </button>
+                    </form>
+                  )}
+                  {o.status === 'CONFIRMED' && (
+                    <details>
+                      <summary>Cancelar…</summary>
+                      <form method="post">
+                        <input type="hidden" name="action" value="status" />
+                        <input type="hidden" name="id" value={o.id} />
+                        <input
+                          type="hidden"
+                          name="bake"
+                          value={data!.bake.id}
+                        />
+                        <p>
+                          Libera {o.quantity} hogaza(s). No se puede deshacer.
+                        </p>
+                        <button
+                          class="button admin-danger"
+                          name="to"
+                          value="CANCELLED"
+                          type="submit"
+                        >
+                          Sí, cancelar {o.code}
+                        </button>
+                      </form>
+                    </details>
+                  )}
+                </div>
+              </li>
+            ))}
+          </ul>
+        </section>
+        <section aria-labelledby="funnel-title">
+          <h2 id="funnel-title">Últimos 28 días</h2>
+          <dl class="admin-stats">
+            {steps.map(([key, label]) => (
+              <div>
+                <dt>{label}</dt>
+                <dd>{data!.events[key] || 0}</dd>
+              </div>
+            ))}
+            <div>
+              <dt>Avisos confirmados</dt>
+              <dd>{data.waitlist.confirmed}</dd>
+            </div>
+            <div>
+              <dt>Avisos sin confirmar</dt>
+              <dd>{data.waitlist.pending}</dd>
+            </div>
+          </dl>
+        </section>
+      </>
+    )}
+  </main>
+</Base>

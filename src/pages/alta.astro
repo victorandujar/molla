@@ -1,0 +1,78 @@
+---
+import Base from '../layouts/Base.astro';
+import { confirmWaitlist } from '../lib/store';
+import { routes } from '../lib/i18n';
+const lang = Astro.url.searchParams.get('lang') === 'ca' ? 'ca' : 'es';
+const t = {
+  es: {
+    title: 'Confirmar el aviso',
+    done: 'Aviso confirmado.',
+    ask: '¿Confirmas que quieres el aviso?',
+    doneText:
+      'Te escribiré cuando abra la próxima hornada. Cada aviso incluye un enlace para darte de baja.',
+    askText: 'Recibirás un email cuando abra una nueva hornada de Molla.',
+    button: 'Sí, avísame',
+    origin: 'Solicitud no válida.',
+    failed: 'No se ha podido confirmar. Inténtalo de nuevo en unos minutos.',
+    invalid:
+      'Este enlace no es válido o ha caducado. Vuelve a apuntarte desde la web.',
+    back: 'Volver al pan',
+  },
+  ca: {
+    title: 'Confirmar l’avís',
+    done: 'Avís confirmat.',
+    ask: 'Confirmes que vols l’avís?',
+    doneText:
+      'T’escriuré quan obri la propera fornada. Cada avís inclou un enllaç per donar-te de baixa.',
+    askText: 'Rebràs un correu quan obri una nova fornada de Molla.',
+    button: 'Sí, avisa’m',
+    origin: 'Sol·licitud no vàlida.',
+    failed: 'No s’ha pogut confirmar. Torna-ho a provar d’aquí a uns minuts.',
+    invalid:
+      'Aquest enllaç no és vàlid o ha caducat. Torna a apuntar-te des del web.',
+    back: 'Tornar al pa',
+  },
+}[lang];
+let done = false;
+let error = '';
+// Confirmation needs a click on the page: link scanners that open the
+// emailed URL must not subscribe anyone.
+if (Astro.request.method === 'POST') {
+  if (Astro.request.headers.get('origin') !== Astro.url.origin) {
+    error = t.origin;
+  } else {
+    const token = String((await Astro.request.formData()).get('token') || '');
+    if (!/^[0-9a-f-]{36}$/i.test(token)) error = t.invalid;
+    else {
+      try {
+        done = await confirmWaitlist(token);
+        if (!done) error = t.invalid;
+      } catch {
+        error = t.failed;
+      }
+    }
+  }
+}
+const token = Astro.url.searchParams.get('token') || '';
+---
+
+<Base lang={lang} title={t.title} noindex>
+  <main id="contenido" class="legal">
+    <h1>{done ? t.done : t.ask}</h1>
+    {done ? (
+      <p>{t.doneText}</p>
+    ) : (
+      <form method="post">
+        <input type="hidden" name="token" value={token} />
+        <p>{t.askText}</p>
+        <button class="button" style="margin-top:24px" type="submit">
+          {t.button}
+        </button>
+      </form>
+    )}
+    {error && <p role="alert">{error}</p>}
+    <p>
+      <a href={routes.home[lang]}>{t.back}</a>
+    </p>
+  </main>
+</Base>

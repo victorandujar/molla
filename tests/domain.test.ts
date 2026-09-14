@@ -1,7 +1,15 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { randomBytes } from 'node:crypto';
-import { confirmationHtml } from '../src/lib/email-templates';
+import {
+  confirmationHtml,
+  confirmationSubject,
+  reminderHtml,
+  reminderSubject,
+  waitlistConfirmation,
+} from '../src/lib/email-templates';
+import { madridParts, ui } from '../src/lib/i18n';
+import { isMessageKey } from '../src/lib/messages';
 import {
   bakeState,
   assertCapacity,
@@ -10,6 +18,9 @@ import {
   madridIso,
   pickupCode,
   pickupCodePattern,
+  reminderDue,
+  csvCell,
+  type Order,
 } from '../src/lib/domain';
 const b = {
   status: 'OPEN' as const,
@@ -96,28 +107,79 @@ test('pickup codes are short, readable and carry the bake number', () => {
     assert.doesNotMatch(code.slice(4), /[01ILO]/);
   }
 });
+const order: Order = {
+  id: 'x',
+  code: '001-K7QM',
+  requestId: 'r',
+  bakeId: 'hornada-001',
+  name: '<script>alert(1)</script> Ana',
+  email: 'a@example.com',
+  phone: '600000000',
+  quantity: 1,
+  product: 'clasica',
+  productName: 'La de cada semana',
+  total: 650,
+  pickupDate: '2026-09-26T10:00:00.000Z',
+  pickupAddress: 'Ronda de Sant Ramon',
+  pickupWindow: 'de 12:00 a 13:00',
+  source: 'direct',
+  status: 'CONFIRMED',
+  createdAt: '',
+  emailStatus: 'PENDING',
+};
 test('confirmation email escapes customer input and links the map', () => {
-  const html = confirmationHtml({
-    id: 'x',
-    code: '001-K7QM',
-    requestId: 'r',
-    bakeId: 'hornada-001',
-    name: '<script>alert(1)</script> Ana',
-    email: 'a@example.com',
-    phone: '600000000',
-    quantity: 1,
-    product: 'clasica',
-    productName: 'La de cada semana',
-    total: 650,
-    pickupDate: '2026-09-26T10:00:00.000Z',
-    pickupAddress: 'Ronda de Sant Ramon',
-    pickupWindow: 'de 12:00 a 13:00',
-    source: 'direct',
-    status: 'CONFIRMED',
-    createdAt: '',
-    emailStatus: 'PENDING',
-  });
+  const html = confirmationHtml(order);
   assert.doesNotMatch(html, /<script>/);
   assert.match(html, /001-K7QM/);
   assert.match(html, /href="https:\/\/www\.google\.com\/maps[^"]+"[^>]*><img[^>]+mapa-recogida\.png/);
+  assert.match(html, /<html lang="es">/);
+});
+test('emails follow the customer language; older orders stay in Spanish', () => {
+  const ca = { ...order, lang: 'ca' as const };
+  assert.match(confirmationSubject(ca), /El teu pa de dissabte/);
+  assert.match(confirmationHtml(ca), /<html lang="ca">[\s\S]*Codi de recollida[\s\S]*\/privacitat/);
+  assert.match(confirmationSubject(order), /Tu pan del sábado/);
+  assert.match(reminderSubject(ca), /^Recordatori/);
+  const reminder = reminderHtml(order);
+  assert.doesNotMatch(reminder, /<script>/);
+  assert.match(reminder, /A pagar al recoger|a pagar al recoger/);
+});
+test('waitlist confirmation links confirm and unsubscribe in the right language', () => {
+  const m = waitlistConfirmation('ca', {
+    confirm: '11111111-1111-4111-8111-111111111111',
+    unsubscribe: '22222222-2222-4222-8222-222222222222',
+  });
+  assert.match(m.html, /\/alta\?token=11111111-1111-4111-8111-111111111111&amp;lang=ca/);
+  assert.match(m.text, /\/baja\?token=22222222-2222-4222-8222-222222222222&lang=ca/);
+});
+test('reminders go out only within 30 hours before pickup', () => {
+  const pickup = '2026-09-26T10:00:00.000Z';
+  const at = (iso: string) => Date.parse(iso);
+  assert.equal(reminderDue(pickup, at('2026-09-25T16:00:00Z')), true);
+  assert.equal(reminderDue(pickup, at('2026-09-24T16:00:00Z')), false);
+  assert.equal(reminderDue(pickup, at('2026-09-26T10:00:01Z')), false);
+});
+test('CSV cells neutralise formulas without losing data', () => {
+  assert.equal(csvCell('+34 612 345 678'), `"'+34 612 345 678"`);
+  assert.equal(csvCell('=HYPERLINK("x")'), `"'=HYPERLINK(""x"")"`);
+  assert.equal(csvCell('Ana'), '"Ana"');
+  assert.equal(csvCell(undefined), '""');
+});
+test('schema issues map to translated messages', () => {
+  const r = reservationSchema.safeParse({ ...input, phone: 'abc' });
+  assert.equal(r.success, false);
+  const key = r.error!.issues[0]!.message;
+  assert.equal(key, 'phone');
+  assert.equal(isMessageKey(key), true);
+  const privacy = reservationSchema.safeParse({ ...input, privacy: '' });
+  assert.equal(privacy.error!.issues[0]!.message, 'privacy');
+});
+test('deadline copy comes from the bake date, in Madrid time', () => {
+  const deadline = '2026-09-24T18:00:00.000Z';
+  assert.deepEqual(madridParts('ca', deadline), { weekday: 'dijous', day: '24', time: '20:00' });
+  assert.equal(
+    ui.es.bake.open(deadline),
+    'Pedidos hasta el jueves 24 a las 20:00 o hasta completar la hornada.',
+  );
+  assert.equal(ui.ca.process.pickupWhen('2026-09-26T10:00:00.000Z'), 'Dissabte');
 });

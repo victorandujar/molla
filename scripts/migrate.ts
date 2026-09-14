@@ -3,7 +3,7 @@ import { readFile, readdir } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 if (!process.env.DATABASE_URL_UNPOOLED)
   throw new Error('Configura DATABASE_URL_UNPOOLED para este proyecto.');
-console.log(`Base de datos: ${new URL(process.env.DATABASE_URL_UNPOOLED).host}`);
+console.log(`Base de datos: ${new URL(process.env.DATABASE_URL_UNPOOLED).host}${new URL(process.env.DATABASE_URL_UNPOOLED).pathname}`);
 const sql = postgres(process.env.DATABASE_URL_UNPOOLED, { max: 1 });
 try {
   await sql`CREATE TABLE IF NOT EXISTS migrations (name text PRIMARY KEY, checksum text NOT NULL, applied_at timestamptz NOT NULL DEFAULT now())`;

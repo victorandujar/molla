@@ -1,11 +1,40 @@
 ---
 import Base from '../layouts/Base.astro';
 import { unsubscribe } from '../lib/store';
+import { routes } from '../lib/i18n';
+const lang = Astro.url.searchParams.get('lang') === 'ca' ? 'ca' : 'es';
+const t = {
+  es: {
+    title: 'Baja de los avisos',
+    done: 'Baja confirmada.',
+    ask: '¿Dejar de recibir avisos?',
+    doneText: 'Tu email se ha eliminado de la lista de hornadas.',
+    again: 'Puedes volver a apuntarte cuando quieras.',
+    button: 'Confirmar baja',
+    origin: 'Solicitud no válida.',
+    failed: 'No se ha podido tramitar la baja. Escribe al contacto de la web.',
+    invalid: 'El enlace de baja no es válido.',
+    back: 'Volver al pan',
+  },
+  ca: {
+    title: 'Baixa dels avisos',
+    done: 'Baixa confirmada.',
+    ask: 'Vols deixar de rebre avisos?',
+    doneText: 'El teu correu s’ha eliminat de la llista de fornades.',
+    again: 'Pots tornar a apuntar-t’hi quan vulguis.',
+    button: 'Confirmar la baixa',
+    origin: 'Sol·licitud no vàlida.',
+    failed: 'No s’ha pogut tramitar la baixa. Escriu al contacte del web.',
+    invalid: 'L’enllaç de baixa no és vàlid.',
+    back: 'Tornar al pa',
+  },
+}[lang];
 let done = false;
 let error = '';
+// A POST, never the GET from the email link, so mail scanners cannot unsubscribe.
 if (Astro.request.method === 'POST') {
   if (Astro.request.headers.get('origin') !== Astro.url.origin) {
-    error = 'Solicitud no válida.';
+    error = t.origin;
   } else {
     const data = await Astro.request.formData();
     const token = String(data.get('token') || '');
@@ -14,34 +43,33 @@ if (Astro.request.method === 'POST') {
         await unsubscribe(token);
         done = true;
       } catch {
-        error =
-          'No se ha podido tramitar la baja. Escribe al contacto de la web.';
+        error = t.failed;
       }
     } else {
-      error = 'El enlace de baja no es válido.';
+      error = t.invalid;
     }
   }
 }
 const token = Astro.url.searchParams.get('token') || '';
 ---
 
-<Base lang="es" title="Baja de los avisos" noindex>
+<Base lang={lang} title={t.title} noindex>
   <main id="contenido" class="legal">
-    <h1>{done ? 'Baja confirmada.' : '¿Dejar de recibir avisos?'}</h1>
+    <h1>{done ? t.done : t.ask}</h1>
     {done ? (
-      <p>Tu email se ha eliminado de la lista de hornadas.</p>
+      <p>{t.doneText}</p>
     ) : (
       <form method="post">
         <input type="hidden" name="token" value={token} />
-        <p>Puedes volver a apuntarte cuando quieras.</p>
+        <p>{t.again}</p>
         <button class="button" style="margin-top:24px" type="submit">
-          Confirmar baja
+          {t.button}
         </button>
       </form>
     )}
     {error && <p role="alert">{error}</p>}
     <p>
-      <a href="/">Volver al pan</a>
+      <a href={routes.home[lang]}>{t.back}</a>
     </p>
   </main>
 </Base>
