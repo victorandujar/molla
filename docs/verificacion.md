@@ -1,6 +1,12 @@
 # Verificación del MVP
 
-Fecha: 14/09/2026. Entorno local, Node 24, Astro 7, Chromium. No se ha desplegado un entorno público ni conectado una base de datos remota.
+Fecha: 14/09/2026. Entorno local, Node 24, Astro 7, Chromium. Actualizado el mismo día tras el despliegue en Vercel (`www.mollapa.com`) con Neon y Resend.
+
+## Prueba en producción (14/09/2026)
+
+- Reserva real en `www.mollapa.com`: HTTP 201, pedido y línea guardados en Neon, `emailStatus` SENT. Resend marcó como entregados la confirmación al cliente y el aviso al obrador. Repetir la misma solicitud devuelve el mismo pedido (idempotencia).
+- Contra la misma base, con la compilación nueva y email desactivado: hornada leída de la base de datos, hornada inexistente rechazada (409), exceso de cupo rechazado (409) y cinco reservas simultáneas por tres hogazas (tres aceptadas, estado SOLD_OUT, sin sobreventa).
+- Todos los datos de prueba (pedidos, líneas, cliente y límites) se borraron después; la hornada quedó OPEN 0/6.
 
 ## Comprobaciones realizadas
 
@@ -30,12 +36,10 @@ El 66 de SEO se debe al bloqueo de indexación explícito del borrador (`noindex
 
 Primera medición: rendimiento 81; tras recortar y comprimir las variantes de fotos, añadir AVIF, precargar las dos fuentes necesarias y ajustar la cabecera móvil, rendimiento 100. No se ha alterado el contenido de las fotografías. Las cifras son de laboratorio local, no datos de usuarios reales ni una garantía de rendimiento en Vercel. Deben repetirse con el dominio y la base de datos reales.
 
-## Pendientes externos explícitos
+## Pendientes fuera del código
 
-- PostgreSQL: el esquema, migraciones, seed y capa transaccional están implementados. No se han ejecutado contra Neon/PostgreSQL remoto por falta de credenciales. Los tests de concurrencia ejercitan la demo local serializada, no prueban el bloqueo distribuido de PostgreSQL. Validar esta capa en el entorno de pruebas antes de activar pedidos reales.
-- Email: integración y plantilla preparadas; no se ha realizado un envío real. Remitente y clave pendientes. Las confirmaciones funcionan en pantalla sin correo.
-- Datos operativos: dirección, franja, contacto, receta/alérgenos, capacidad y precios definitivos por confirmar.
-- Publicación: dominio, Vercel y remoto Git propios pendientes. Ningún recurso de `purpose-cohors` se ha modificado ni reutilizado. Los commits locales se integran en `pre`; no es posible hacer push sin remoto propio.
-- Datos legales: identidad, domicilio, proveedores y conservación por completar; la activación requiere confirmación explícita de estos datos mediante configuración.
-- Avisos de próximas hornadas: se exportan para envío por el propietario. No hay campaña ni envío masivo automático.
-- Analítica: hooks disponibles y canal de origen en pedidos; aún no se recoge un contador de visitas externo.
+- Registro sanitario del obrador (RSIPAC o comunicación previa), alta de la actividad, formación de manipulador y permiso de entrega en el punto de recogida si es vía pública. `LAUNCH_REVIEWED=true` no lo comprueba.
+- Instagram y WhatsApp sin configurar: no aparecen en la web.
+- DMARC de mollapa.com en `p=none`; subir a `quarantine` cuando los envíos lleven unas semanas sin problemas.
+- Avisos de próximas hornadas: se exportan para envío por el propietario; no hay envío masivo automático.
+- Analítica: hooks disponibles y canal de origen en pedidos; sin contador de visitas externo.
