@@ -20,7 +20,7 @@ test('real photos, keyboard access, responsive layout and accessibility', async 
     await page.goto('/');
     await page.evaluate(() => document.fonts.ready);
     await expect(page.getByRole('heading', { level: 1 })).toContainText(
-      'Tu pan.',
+      'la noche antes',
     );
     await expect(page.locator('.hero-photo img')).toBeVisible();
     expect(
@@ -101,19 +101,15 @@ test('duplicate request and simultaneous last loaf never overbook', async ({
   const firstBody = await first.json();
   const retry = await send(input);
   expect((await retry.json()).id).toBe(firstBody.id);
-  for (let i = 0; i < 3; i++)
-    expect(
-      (await send({ ...input, requestId: crypto.randomUUID() })).status(),
-    ).toBe(201);
   const responses = await Promise.all([
-    send({ ...input, requestId: crypto.randomUUID(), quantity: 3 }),
-    send({ ...input, requestId: crypto.randomUUID(), quantity: 3 }),
+    send({ ...input, requestId: crypto.randomUUID(), quantity: 2 }),
+    send({ ...input, requestId: crypto.randomUUID(), quantity: 2 }),
   ]);
   expect(responses.map((r) => r.status()).sort()).toEqual([201, 409]);
   const d = JSON.parse(await readFile(dataPath, 'utf8'));
   expect(
     d.orders.reduce((n: number, o: { quantity: number }) => n + o.quantity, 0),
-  ).toBe(19);
+  ).toBe(6);
 });
 test('sold out bake becomes waitlist and cannot accept more orders', async ({
   page,
@@ -125,7 +121,7 @@ test('sold out bake becomes waitlist and cannot accept more orders', async ({
         {
           id: 'fixture',
           bakeId: 'hornada-001',
-          quantity: 20,
+          quantity: 6,
           status: 'CONFIRMED',
         },
       ],
@@ -249,4 +245,24 @@ test('waitlist deduplicates emails and unsubscribe requires explicit POST', asyn
     'Baja confirmada.',
   );
   expect(JSON.parse(await readFile(dataPath, 'utf8')).waitlist).toHaveLength(0);
+});
+
+test('Catalan version, local pages and hreflang', async ({ page, request }) => {
+  await page.goto('/ca/');
+  await expect(page.locator('html')).toHaveAttribute('lang', 'ca');
+  await expect(page.getByRole('heading', { level: 1 })).toContainText(
+    'la nit abans',
+  );
+  for (const path of ['/recogida', '/ca/recollida', '/poolish', '/ca/poolish']) {
+    const res = await request.get(path);
+    expect(res.status()).toBe(200);
+    await page.goto(path);
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+    const result = await new AxeBuilder({ page }).analyze();
+    expect(result.violations).toEqual([]);
+  }
+  await page.goto('/recogida');
+  await expect(page.locator('main')).toContainText('Sant Boi de Llobregat');
+  await page.locator('.lang-switch').click();
+  await expect(page).toHaveURL(/\/ca\/recollida$/);
 });
