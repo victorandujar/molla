@@ -38,7 +38,7 @@ export const ui = {
     meta: {
       title: `Pan artesanal por encargo en Sant Boi de Llobregat · ${brand.name}`,
       description:
-        'Hogazas de fermentación lenta con poolish de 8–10 horas, hechas a mano. Reserva online y recoge el sábado en Sant Boi de Llobregat. Para todo el Baix Llobregat.',
+        'Hogazas hechas a mano con poolish y más de 20 horas de fermentación lenta. Reserva online y recoge el sábado en Sant Boi de Llobregat. Para todo el Baix Llobregat.',
       ogAlt: 'Hogazas de corteza tostada recién cortadas',
     },
     status: {
@@ -79,7 +79,7 @@ export const ui = {
       name: 'La de cada semana',
       alt: 'Dos hogazas artesanas con greñas abiertas sobre una tabla de madera',
       fermentation: 'Fermentación',
-      fermentationValue: 'Poolish de 8 a 10 horas',
+      fermentationValue: 'Poolish y más de 20 horas de fermentación lenta',
       ingredients: 'Ingredientes',
       ingredientsValue: 'Harina de trigo, agua, sal y levadura.',
       allergens: 'Alérgenos',
@@ -97,8 +97,7 @@ export const ui = {
       more: 'Qué es el poolish, en detalle',
       steps: [
         { when: 'Hasta el jueves, 20:00', title: 'Reservas', text: 'Cierro pedidos y sé exactamente cuántas hogazas hacer. Ni una de más.' },
-        { when: 'La víspera', title: 'Poolish', time: '8–10 h', text: 'Harina, agua y una pizca de levadura reposan toda la noche. Ahí nace el sabor y el aroma.' },
-        { when: 'Por la mañana', title: 'Amasado y formado', text: 'El poolish se une al resto de la masa. Formo cada hogaza a mano y reposa en su cesta.' },
+        { when: 'Desde la víspera', title: 'Fermentación lenta', time: '+20 h', text: 'Poolish, amasado con pliegues a mano, formado y una noche en frío. Sin prisa: ahí nacen el sabor, el aroma y la miga.' },
         { when: 'Antes de recoger', title: 'Horno', text: 'Corteza oscura que cruje, miga abierta y húmeda.' },
         { when: 'Sábado', title: 'Recogida', text: 'Te llevas el pan del día en Sant Boi. Pagas al recogerlo.' },
       ],
@@ -151,7 +150,7 @@ export const ui = {
     faq: {
       h2: 'Preguntas',
       items: [
-        ['¿Es pan de masa madre?', 'No. Uso poolish: una masa previa de harina, agua y muy poca levadura que fermenta entre 8 y 10 horas. Como la masa madre, es una fermentación lenta que da sabor y una miga abierta, pero con un gusto más suave y menos ácido.'],
+        ['¿Es pan de masa madre?', 'No. Uso poolish: una masa previa de harina, agua y muy poca levadura que fermenta durante la noche. En total, cada hogaza lleva más de 20 horas de fermentación. Como la masa madre, es una fermentación lenta que da sabor y una miga abierta, pero con un gusto más suave y menos ácido.'],
         ['¿Qué es un poolish?', 'Una masa previa líquida que se prepara la noche anterior. Aporta aroma, una corteza fina y crujiente y una miga más abierta, sin necesidad de aditivos.'],
         ['¿Qué lleva la hogaza?', 'Harina de trigo, agua, sal y levadura. Contiene gluten. Si tienes otra alergia, pregúntame antes de reservar: en el espacio de elaboración se trabaja con otras harinas.'],
         ['¿Dónde se recoge?', `En la Ronda de Sant Ramon, en Sant Boi de Llobregat (barrio de Ciutat Cooperativa – Molí Nou). Te queda cerca si vives en ${areaTowns}.`],
@@ -192,7 +191,7 @@ export const ui = {
     meta: {
       title: `Pa artesà per encàrrec a Sant Boi de Llobregat · ${brand.name}`,
       description:
-        'Pans de fermentació lenta amb poolish de 8–10 hores, fets a mà. Reserva en línia i recull-lo dissabte a Sant Boi de Llobregat. Per a tot el Baix Llobregat.',
+        'Pans fets a mà amb poolish i més de 20 hores de fermentació lenta. Reserva en línia i recull-lo dissabte a Sant Boi de Llobregat. Per a tot el Baix Llobregat.',
       ogAlt: 'Pans de crosta torrada acabats de tallar',
     },
     status: {
@@ -233,7 +232,7 @@ export const ui = {
       name: 'El de cada setmana',
       alt: 'Dos pans artesans amb els talls oberts sobre una taula de fusta',
       fermentation: 'Fermentació',
-      fermentationValue: 'Poolish de 8 a 10 hores',
+      fermentationValue: 'Poolish i més de 20 hores de fermentació lenta',
       ingredients: 'Ingredients',
       ingredientsValue: 'Farina de blat, aigua, sal i llevat.',
       allergens: 'Al·lèrgens',
@@ -251,8 +250,7 @@ export const ui = {
       more: 'Què és el poolish, en detall',
       steps: [
         { when: 'Fins dijous, 20:00', title: 'Reserves', text: 'Tanco comandes i sé exactament quants pans he de fer. Ni un de més.' },
-        { when: 'La vigília', title: 'Poolish', time: '8–10 h', text: 'Farina, aigua i una mica de llevat reposen tota la nit. Aquí neixen el gust i l’aroma.' },
-        { when: 'Al matí', title: 'Pastat i formació', text: 'El poolish s’uneix a la resta de la massa. Formo cada pa a mà i reposa al seu cistell.' },
+        { when: 'Des de la vigília', title: 'Fermentació lenta', time: '+20 h', text: 'Poolish, pastat amb plecs a mà, formació i una nit en fred. Sense pressa: aquí neixen el gust, l’aroma i la molla.' },
         { when: 'Abans de recollir', title: 'Forn', text: 'Crosta fosca que cruix, molla oberta i humida.' },
         { when: 'Dissabte', title: 'Recollida', text: 'T’emportes el pa del dia a Sant Boi. Pagues en recollir-lo.' },
       ],
@@ -305,7 +303,7 @@ export const ui = {
     faq: {
       h2: 'Preguntes',
       items: [
-        ['És pa de massa mare?', 'No. Faig servir poolish: una massa prèvia de farina, aigua i molt poc llevat que fermenta entre 8 i 10 hores. Com la massa mare, és una fermentació lenta que dona gust i una molla oberta, però amb un sabor més suau i menys àcid.'],
+        ['És pa de massa mare?', 'No. Faig servir poolish: una massa prèvia de farina, aigua i molt poc llevat que fermenta durant la nit. En total, cada pa porta més de 20 hores de fermentació. Com la massa mare, és una fermentació lenta que dona gust i una molla oberta, però amb un sabor més suau i menys àcid.'],
         ['Què és un poolish?', 'Una massa prèvia líquida que es prepara la nit abans. Aporta aroma, una crosta fina i cruixent i una molla més oberta, sense additius.'],
         ['Què porta el pa?', 'Farina de blat, aigua, sal i llevat. Conté gluten. Si tens una altra al·lèrgia, pregunta’m abans de reservar: a l’espai d’elaboració es treballa amb altres farines.'],
         ['On es recull?', `A la Ronda de Sant Ramon, a Sant Boi de Llobregat (barri de Ciutat Cooperativa – Molí Nou). Et queda a prop si vius a ${areaTowns}.`],
