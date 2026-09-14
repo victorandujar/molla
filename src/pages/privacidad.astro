@@ -5,7 +5,7 @@ import { brand, launchReady } from '../lib/config';
 
 <Base title={`Privacidad y condiciones · ${brand.name}`} noindex>
   <main id="contenido" class="legal">
-    <p class="eyebrow">DATOS CLAROS, COMO EL PAN</p>
+    <p class="kicker">Datos claros, como el pan</p>
     <h1>Privacidad y condiciones.</h1>
     {!launchReady && (
       <p>
@@ -19,6 +19,7 @@ import { brand, launchReady } from '../lib/config';
     <p>
       {brand.legalName ||
         'El responsable se identificará antes de abrir pedidos.'}
+      {brand.legalId && ` · NIF ${brand.legalId}`}
       {brand.legalAddress && ` · ${brand.legalAddress}`}
       {brand.contact && (
         <>
@@ -70,11 +71,9 @@ import { brand, launchReady } from '../lib/config';
     </p>
     <h2>Ingredientes y alérgenos</h2>
     <p>
-      Consulta los ingredientes de cada pan antes de reservar. La hogaza clásica
-      contiene trigo y gluten. En el espacio de elaboración se trabaja con otras harinas: consulta antes de
-      comprar si tienes otras alergias. Los ingredientes definitivos y la
-      información sobre contaminación cruzada deben verificarse antes de la
-      primera venta.
+      Consulta los ingredientes de cada pan antes de reservar. La hogaza de poolish
+      lleva harina de trigo, agua, sal y levadura, y contiene gluten. En el espacio de elaboración se trabaja con otras harinas: consulta antes de
+      comprar si tienes otras alergias.
     </p>
     <h2>Medición de visitas</h2>
     <p>

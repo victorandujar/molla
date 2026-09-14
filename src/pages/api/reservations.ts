@@ -2,7 +2,7 @@ import type { APIRoute } from 'astro';
 import { guard, body, json } from '../../lib/http';
 import { reservationSchema } from '../../lib/domain';
 import { reserve } from '../../lib/store';
-import { sendConfirmation } from '../../lib/email';
+import { sendConfirmation, notifyOwner } from '../../lib/email';
 import { isDemo, brand } from '../../lib/config';
 export const POST: APIRoute = async (ctx) => {
   try {
@@ -17,7 +17,7 @@ export const POST: APIRoute = async (ctx) => {
     const order = await reserve(result.data);
     // Email never rolls back a confirmed order. Its outcome is retained for the owner.
     try {
-      await sendConfirmation(order);
+      await Promise.all([sendConfirmation(order), notifyOwner(order)]);
     } catch {
       console.error('Confirmation delivery needs review', order.id);
     }
