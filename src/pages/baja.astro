@@ -1,0 +1,47 @@
+---
+import Base from '../layouts/Base.astro';
+import { unsubscribe } from '../lib/store';
+let done = false;
+let error = '';
+if (Astro.request.method === 'POST') {
+  if (Astro.request.headers.get('origin') !== Astro.url.origin) {
+    error = 'Solicitud no válida.';
+  } else {
+    const data = await Astro.request.formData();
+    const token = String(data.get('token') || '');
+    if (/^[0-9a-f-]{36}$/i.test(token)) {
+      try {
+        await unsubscribe(token);
+        done = true;
+      } catch {
+        error =
+          'No se ha podido tramitar la baja. Escribe al contacto de la web.';
+      }
+    } else {
+      error = 'El enlace de baja no es válido.';
+    }
+  }
+}
+const token = Astro.url.searchParams.get('token') || '';
+---
+
+<Base title="Baja de los avisos" noindex>
+  <main id="contenido" class="legal">
+    <h1>{done ? 'Baja confirmada.' : '¿Dejar de recibir avisos?'}</h1>
+    {done ? (
+      <p>Tu email se ha eliminado de la lista de hornadas.</p>
+    ) : (
+      <form method="post">
+        <input type="hidden" name="token" value={token} />
+        <p>Puedes volver a apuntarte cuando quieras.</p>
+        <button class="button" style="margin-top:24px" type="submit">
+          Confirmar baja
+        </button>
+      </form>
+    )}
+    {error && <p role="alert">{error}</p>}
+    <p>
+      <a href="/">Volver al pan</a>
+    </p>
+  </main>
+</Base>

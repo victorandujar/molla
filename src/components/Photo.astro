@@ -1,0 +1,45 @@
+---
+interface Props {
+  name: string;
+  alt: string;
+  eager?: boolean;
+  class?: string;
+  sizes?: string;
+}
+const {
+  name,
+  alt,
+  eager = false,
+  class: className = '',
+  sizes = '(max-width: 700px) calc(100vw - 40px), (max-width: 1000px) 45vw, 600px',
+} = Astro.props;
+const ratios: Record<string, number> = {
+  hero: 1,
+  crumb: 1,
+  loaves: 1.4,
+  maker: 0.75,
+  hands: 1.333,
+  dough: 0.8,
+  person: 0.75,
+};
+const srcset = (format: string) =>
+  [400, 720, 1100, 1600]
+    .map((w) => `/images/${name}-${w}.${format} ${w}w`)
+    .join(', ');
+---
+
+<picture>
+  <source type="image/avif" srcset={srcset('avif')} sizes={sizes} />
+  <img
+    class={className}
+    src={`/images/${name}-720.webp`}
+    srcset={srcset('webp')}
+    sizes={sizes}
+    alt={alt}
+    width="1100"
+    height={Math.round(1100 / (ratios[name] || 1))}
+    loading={eager ? 'eager' : 'lazy'}
+    fetchpriority={eager ? 'high' : 'auto'}
+    decoding="async"
+  />
+</picture>

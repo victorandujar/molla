@@ -1,0 +1,142 @@
+---
+import '../styles/global.css';
+import '@fontsource/dm-sans/latin-400.css';
+import '@fontsource/fraunces/latin-600.css';
+import displayFont from '@fontsource/fraunces/files/fraunces-latin-600-normal.woff2?url';
+import bodyFont from '@fontsource/dm-sans/files/dm-sans-latin-400-normal.woff2?url';
+import { brand, launchReady, isDemo } from '../lib/config';
+interface Props {
+  title?: string;
+  description?: string;
+  noindex?: boolean;
+}
+const {
+  title = `${brand.name} · Pan de masa madre en ${brand.town}`,
+  description = 'Pan de masa madre por encargo en Santa Coloma de Cervelló. Pocas hogazas, una hornada semanal y recogida local los sábados.',
+  noindex = false,
+} = Astro.props;
+const canonical = brand.site
+  ? new URL(Astro.url.pathname, brand.site).href
+  : null;
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <link
+      rel="preload"
+      href={displayFont}
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href={bodyFont}
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#233c48" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta
+      name="robots"
+      content={noindex || !launchReady ? 'noindex, nofollow' : 'index, follow'}
+    />
+    {canonical && <link rel="canonical" href={canonical} />}
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="es_ES" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    {canonical && (
+      <>
+        <meta property="og:url" content={canonical} />
+        <meta
+          property="og:image"
+          content={new URL('/images/social.jpg', brand.site).href}
+        />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+      </>
+    )}
+    <meta
+      property="og:image:alt"
+      content="Hogazas de masa madre recién cortadas en mi cocina"
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    {launchReady && (
+      <script
+        is:inline
+        type="application/ld+json"
+        set:html={JSON.stringify({
+          '@context': 'https://schema.org',
+          '@type': 'Organization',
+          name: brand.name,
+          url: brand.site,
+          areaServed: brand.town,
+          email: brand.contact,
+        }).replace(/</g, '\\u003c')}
+      ></script>
+    )}
+  </head>
+  <body>
+    <a class="skip" href="#contenido">
+      Ir al contenido
+    </a>
+    {isDemo && (
+      <div class="demo-note" role="region" aria-label="Modo de prueba">
+        Vista de prueba · Los pedidos de esta versión no son reales.
+      </div>
+    )}
+    <header class="site-header wrap">
+      <a class="wordmark" href="/" aria-label={`${brand.name}, inicio`}>
+        {brand.name.toLowerCase()}
+        <span class="brand-dot">.</span>
+      </a>
+      <span class="header-place">
+        PAN POR ENCARGO
+        <br />
+        SANTA COLOMA DE CERVELLÓ
+      </span>
+      <nav aria-label="Principal">
+        <a href="/#como">Cómo funciona</a>
+        <a class="nav-order" href="/#hornada">
+          La hornada <span aria-hidden="true">↗</span>
+        </a>
+      </nav>
+    </header>
+    <slot />
+    <footer class="wrap site-footer">
+      <a class="wordmark" href="/">
+        {brand.name.toLowerCase()}.
+      </a>
+      <p>
+        Pan de aquí. Para el sábado.
+        <br />
+        <span>Santa Coloma de Cervelló · Baix Llobregat</span>
+      </p>
+      <div>
+        <a href="/privacidad">Privacidad y condiciones</a>
+        {brand.instagram && (
+          <a
+            data-event="click_instagram"
+            href={brand.instagram}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Instagram ↗
+          </a>
+        )}
+        {brand.contact && <a href={`mailto:${brand.contact}`}>Escríbeme ↗</a>}
+      </div>
+      <small>
+        © {new Date().getFullYear()} {brand.name}
+      </small>
+    </footer>
+    <script src="../lib/client.ts"></script>
+  </body>
+</html>

@@ -1,0 +1,89 @@
+---
+import Base from '../layouts/Base.astro';
+import { brand, launchReady } from '../lib/config';
+---
+
+<Base title={`Privacidad y condiciones · ${brand.name}`} noindex>
+  <main id="contenido" class="legal">
+    <p class="eyebrow">DATOS CLAROS, COMO EL PAN</p>
+    <h1>Privacidad y condiciones.</h1>
+    {!launchReady && (
+      <p>
+        <strong>Versión de preparación.</strong> Las reservas reales aún no
+        están abiertas. Los datos del responsable y las condiciones finales
+        deben completarse antes del lanzamiento. En las pruebas, utiliza datos
+        ficticios.
+      </p>
+    )}
+    <h2>Quién gestiona tus datos</h2>
+    <p>
+      {brand.legalName ||
+        'El responsable se identificará antes de abrir pedidos.'}
+      {brand.legalAddress && ` · ${brand.legalAddress}`}
+      {brand.contact && (
+        <>
+          . Contacto: <a href={`mailto:${brand.contact}`}>{brand.contact}</a>.
+        </>
+      )}
+    </p>
+    <h2>Tu reserva</h2>
+    <p>
+      Utilizamos tu nombre, email, teléfono y pedido para preparar el pan,
+      confirmar la reserva y coordinar la recogida. No necesitas crear una
+      cuenta. La finalidad es gestionar la relación contractual de tu pedido; no
+      se te añade a la lista de avisos al reservar.
+    </p>
+    <h2>Avisos de hornadas</h2>
+    <p>
+      Solo recibirás avisos si te apuntas expresamente a la lista. Guardamos tu
+      email y la fecha de consentimiento. Puedes retirar ese consentimiento
+      mediante el enlace de baja de cada aviso o escribiendo al contacto
+      publicado en esta página.
+    </p>
+    <h2>Proveedores y conservación</h2>
+    <p>
+      El alojamiento y la base de datos procesan los datos necesarios para
+      prestar el servicio. Si se activa el envío de emails, un proveedor de
+      correo entregará la confirmación.{' '}
+      {brand.privacyProviders ||
+        'Los proveedores contratados se identificarán antes de abrir reservas.'}{' '}
+      {brand.privacyTransfers ||
+        'Las condiciones sobre transferencias internacionales se publicarán antes de abrir reservas.'}{' '}
+      {brand.privacyRetention ||
+        'Los plazos de conservación se publicarán antes de abrir reservas.'}{' '}
+      Los emails de avisos se eliminan al darte de baja.
+    </p>
+    <h2>Tus derechos</h2>
+    <p>
+      Puedes solicitar acceso, rectificación, supresión, oposición, limitación o
+      portabilidad de tus datos a través del contacto del responsable. También
+      puedes presentar una reclamación ante la Agencia Española de Protección de
+      Datos.
+    </p>
+    <h2>Recogida y pago</h2>
+    <p>
+      El precio total se muestra antes de confirmar. El pago se hace al recoger.
+      La confirmación indica la cantidad, la fecha y el punto de recogida. Por
+      ahora no hay envíos. Si necesitas cambiar o cancelar tu reserva, contacta
+      cuanto antes indicando la referencia. Si no puedo preparar tu pedido, te
+      contactaré para comunicarlo.
+    </p>
+    <h2>Ingredientes y alérgenos</h2>
+    <p>
+      Consulta los ingredientes de cada pan antes de reservar. La hogaza clásica
+      contiene trigo y gluten. La cocina es compartida: consulta antes de
+      comprar si tienes otras alergias. Los ingredientes definitivos y la
+      información sobre contaminación cruzada deben verificarse antes de la
+      primera venta.
+    </p>
+    <h2>Medición de visitas</h2>
+    <p>
+      Esta versión no instala cookies de analítica ni carga rastreadores de
+      terceros. Los pedidos pueden incluir su canal de procedencia (por ejemplo,
+      Instagram o recomendación) para entender cómo llegan los clientes.
+    </p>
+    <p>
+      <a href="/">← Volver al pan</a>
+    </p>
+  </main>
+</Base>
