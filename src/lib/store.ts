@@ -1,8 +1,9 @@
-import { randomUUID, createHash } from 'node:crypto';
+import { randomUUID, randomBytes, createHash } from 'node:crypto';
 import postgres from 'postgres';
 import { bake, products, brand, isDemo } from './config';
 import {
   assertCapacity,
+  pickupCode,
   type Order,
   type ReservationInput,
   type BakeState,
@@ -81,6 +82,7 @@ export async function currentBake(): Promise<ActiveBake> {
 export async function reserve(input: ReservationInput): Promise<Order> {
   const order: Order = {
     id: randomUUID(),
+    code: '',
     requestId: input.requestId,
     bakeId: input.bakeId,
     name: input.name,
@@ -115,6 +117,8 @@ export async function reserve(input: ReservationInput): Promise<Order> {
           .reduce((n, o) => n + o.quantity, 0),
         input.quantity,
       );
+      do order.code = pickupCode(bake.number, randomBytes(4));
+      while (d.orders.some((o) => o.code === order.code));
       d.orders.push(order);
       return order;
     });
@@ -143,6 +147,9 @@ export async function reserve(input: ReservationInput): Promise<Order> {
       input.quantity,
     );
     order.pickupDate = new Date(b.pickup_date).toISOString();
+    // The bake row is locked, so no concurrent reservation can take the same code.
+    do order.code = pickupCode(b.number, randomBytes(4));
+    while ((await tx`SELECT 1 FROM orders WHERE code=${order.code}`).length);
     const [p] = await tx`SELECT * FROM products WHERE id=${input.product}`;
     if (!p) throw new Error('Este pan no está disponible.');
     if (p.price !== products[0].price)
@@ -153,7 +160,7 @@ export async function reserve(input: ReservationInput): Promise<Order> {
     order.productName = p.name;
     const [customer] =
       await tx`INSERT INTO customers (id,email,name,phone) VALUES (${randomUUID()},${input.email},${input.name},${input.phone}) ON CONFLICT(email) DO UPDATE SET name=EXCLUDED.name,phone=EXCLUDED.phone RETURNING id`;
-    await tx`INSERT INTO orders (id,request_id,bake_id,customer_id,snapshot,status) VALUES (${order.id},${order.requestId},${bake.id},${customer!.id},${tx.json(order)},'CONFIRMED')`;
+    await tx`INSERT INTO orders (id,code,request_id,bake_id,customer_id,snapshot,status) VALUES (${order.id},${order.code},${order.requestId},${input.bakeId},${customer!.id},${tx.json(order)},'CONFIRMED')`;
     await tx`INSERT INTO order_items (order_id,product_id,quantity,unit_price) VALUES (${order.id},${input.product},${input.quantity},${p.price})`;
     return order;
   });

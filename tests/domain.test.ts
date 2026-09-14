@@ -1,11 +1,14 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { randomBytes } from 'node:crypto';
 import {
   bakeState,
   assertCapacity,
   reservationSchema,
   waitlistSchema,
   madridIso,
+  pickupCode,
+  pickupCodePattern,
 } from '../src/lib/domain';
 const b = {
   status: 'OPEN' as const,
@@ -82,4 +85,13 @@ test('Madrid wall-clock times respect summer and winter offsets', () => {
   assert.equal(madridIso('2026-10-25', '20:00'), '2026-10-25T19:00:00.000Z');
   assert.equal(madridIso('2027-03-28', '20:00'), '2027-03-28T18:00:00.000Z');
   assert.throws(() => madridIso('26/09/2026'));
+});
+
+test('pickup codes are short, readable and carry the bake number', () => {
+  assert.equal(pickupCode('001', new Uint8Array([0, 30, 31, 255])), '001-A9AH');
+  for (let i = 0; i < 500; i++) {
+    const code = pickupCode('012', randomBytes(4));
+    assert.match(code, pickupCodePattern);
+    assert.doesNotMatch(code.slice(4), /[01ILO]/);
+  }
 });

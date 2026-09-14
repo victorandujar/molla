@@ -87,8 +87,17 @@ export function assertCapacity(
       'Esta hornada ya no admite esa cantidad. Puedes apuntarte a la próxima.',
     );
 }
+// Short pickup code such as 001-K7QM: bake number plus four characters
+// without look-alikes (no 0/O, 1/I/L), easy to say out loud or type.
+const codeAlphabet = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+export function pickupCode(bakeNumber: string, bytes: Uint8Array) {
+  const chars = Array.from(bytes.slice(0, 4), (b) => codeAlphabet[b % 31]);
+  return `${bakeNumber}-${chars.join('')}`;
+}
+export const pickupCodePattern = /^\d{3}-[A-Z2-9]{4}$/;
 export type Order = {
   id: string;
+  code: string;
   requestId: string;
   bakeId: string;
   name: string;
