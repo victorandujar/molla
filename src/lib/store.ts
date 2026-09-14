@@ -49,7 +49,10 @@ async function demo<T>(fn: (data: Demo) => T | Promise<T>): Promise<T> {
   queue = run.catch(() => {});
   return run;
 }
-export async function currentBake() {
+export type ActiveBake = typeof bake & { reserved: number };
+// The database decides the active bake: the next pickup not yet completed,
+// or the most recent one so the page shows "closed" until the next is created.
+export async function currentBake(): Promise<ActiveBake> {
   if (!sql || isDemo)
     return demo((d) => ({
       ...bake,
@@ -58,11 +61,15 @@ export async function currentBake() {
         .filter((o) => o.bakeId === bake.id && o.status !== 'CANCELLED')
         .reduce((n, o) => n + o.quantity, 0),
     }));
-  const [b] =
-    await sql`SELECT b.*, COALESCE((SELECT SUM(i.quantity) FROM orders o JOIN order_items i ON i.order_id=o.id WHERE o.bake_id=b.id AND o.status!='CANCELLED'),0)::int AS reserved FROM bakes b WHERE b.id=${bake.id}`;
+  const [b] = await sql`
+    SELECT b.*, COALESCE((SELECT SUM(i.quantity) FROM orders o JOIN order_items i ON i.order_id=o.id WHERE o.bake_id=b.id AND o.status!='CANCELLED'),0)::int AS reserved
+    FROM bakes b, LATERAL (SELECT b.status!='COMPLETED' AND b.pickup_date > now() - interval '12 hours' AS upcoming) u
+    ORDER BY u.upcoming DESC, CASE WHEN u.upcoming THEN b.pickup_date END ASC, b.pickup_date DESC
+    LIMIT 1`;
   if (!b) throw new Error('La próxima hornada todavía se está preparando.');
   return {
-    ...bake,
+    id: b.id as string,
+    number: b.number as string,
     status: b.status as typeof bake.status,
     capacity: b.capacity as number,
     deadline: new Date(b.deadline).toISOString(),
@@ -72,12 +79,10 @@ export async function currentBake() {
   };
 }
 export async function reserve(input: ReservationInput): Promise<Order> {
-  if (input.bakeId !== bake.id)
-    throw new Error('La hornada ha cambiado. Recarga la página.');
   const order: Order = {
     id: randomUUID(),
     requestId: input.requestId,
-    bakeId: bake.id,
+    bakeId: input.bakeId,
     name: input.name,
     email: input.email,
     phone: input.phone,
@@ -95,6 +100,8 @@ export async function reserve(input: ReservationInput): Promise<Order> {
   };
   if (!sql || isDemo)
     return demo((d) => {
+      if (input.bakeId !== bake.id)
+        throw new Error('La hornada ha cambiado. Recarga la página.');
       const prior = d.orders.find((o) => o.requestId === input.requestId);
       if (prior) {
         if (prior.email !== input.email)
@@ -112,8 +119,9 @@ export async function reserve(input: ReservationInput): Promise<Order> {
       return order;
     });
   const result = await sql.begin(async (tx) => {
-    const [b] = await tx`SELECT * FROM bakes WHERE id=${bake.id} FOR UPDATE`;
-    if (!b) throw new Error('Esta hornada no está abierta.');
+    const [b] =
+      await tx`SELECT * FROM bakes WHERE id=${input.bakeId} FOR UPDATE`;
+    if (!b) throw new Error('La hornada ha cambiado. Recarga la página.');
     const [prior] =
       await tx`SELECT snapshot FROM orders WHERE request_id=${input.requestId}`;
     if (prior) {
@@ -123,7 +131,7 @@ export async function reserve(input: ReservationInput): Promise<Order> {
       return previous;
     }
     const [count] =
-      await tx`SELECT COALESCE(SUM(i.quantity),0)::int AS n FROM orders o JOIN order_items i ON i.order_id=o.id WHERE o.bake_id=${bake.id} AND o.status!='CANCELLED'`;
+      await tx`SELECT COALESCE(SUM(i.quantity),0)::int AS n FROM orders o JOIN order_items i ON i.order_id=o.id WHERE o.bake_id=${input.bakeId} AND o.status!='CANCELLED'`;
     assertCapacity(
       {
         status: b.status,

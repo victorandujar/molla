@@ -117,7 +117,7 @@ const jsonLd = [
               <span data-bake-label>{statusLabel}</span>
             </span>
             <span class="bake-number">
-              {t.bake.number} {bake.number}
+              {t.bake.number} {current.number}
             </span>
           </div>
           <h2 id="bake-title" class="bake-day">{pickupDay}</h2>
@@ -308,7 +308,7 @@ const jsonLd = [
               <h3>{t.reserve.yourOrder}</h3>
               {isDemo && <p class="form-intro">{t.reserve.demoIntro}</p>}
               <input type="hidden" name="requestId" value={randomUUID()} />
-              <input type="hidden" name="bakeId" value={bake.id} />
+              <input type="hidden" name="bakeId" value={current.id} />
               <input type="hidden" name="product" value="clasica" />
               <input type="hidden" name="source" value="direct" />
               <div class="quantity-line">

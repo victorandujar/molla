@@ -1,9 +1,17 @@
 ---
 import Article from '../../layouts/Article.astro';
 import Photo from '../../components/Photo.astro';
-import { brand } from '../../lib/config';
+import { brand, isDemo, launchReady } from '../../lib/config';
 import { dayFormat } from '../../lib/i18n';
-export const prerender = true;
+import { currentBake } from '../../lib/store';
+let pickupDate: string | undefined;
+if (isDemo || launchReady) {
+  try {
+    pickupDate = (await currentBake()).pickupDate;
+  } catch {
+    /* Falls back to the configured date. */
+  }
+}
 const apple = 'https://maps.apple.com/?ll=41.35401410971224,2.026792459636187&q=Molla';
 const place = {
   '@context': 'https://schema.org',
@@ -51,7 +59,7 @@ const place = {
 
       <h2>Quan</h2>
       <p>
-        Els dissabtes. La propera recollida és <strong>{dayFormat('ca')}</strong>
+        Els dissabtes. La propera recollida és <strong>{dayFormat('ca', pickupDate)}</strong>
         {brand.pickupWindow ? `, ${brand.pickupWindow}` : ''}. Les comandes es
         tanquen dijous a les 20:00 o quan s’acaba la fornada.
       </p>

@@ -5,6 +5,7 @@ import {
   assertCapacity,
   reservationSchema,
   waitlistSchema,
+  madridIso,
 } from '../src/lib/domain';
 const b = {
   status: 'OPEN' as const,
@@ -73,4 +74,12 @@ test('waitlist requires explicit consent', () => {
     waitlistSchema.parse({ email: 'ANA@example.com', consent: 'yes' }).email,
     'ana@example.com',
   );
+});
+
+test('Madrid wall-clock times respect summer and winter offsets', () => {
+  assert.equal(madridIso('2026-09-26', '12:00'), '2026-09-26T10:00:00.000Z');
+  assert.equal(madridIso('2026-12-05', '12:00'), '2026-12-05T11:00:00.000Z');
+  assert.equal(madridIso('2026-10-25', '20:00'), '2026-10-25T19:00:00.000Z');
+  assert.equal(madridIso('2027-03-28', '20:00'), '2027-03-28T18:00:00.000Z');
+  assert.throws(() => madridIso('26/09/2026'));
 });
