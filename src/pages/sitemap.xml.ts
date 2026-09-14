@@ -1,10 +1,11 @@
 import { brand, launchReady } from '../lib/config';
-import { routes } from '../lib/i18n';
+import { routes, indexedRoutes } from '../lib/i18n';
 const esc = (s: string) => s.replace(/[<>&"']/g, '');
 export function GET() {
   const site = esc(brand.site).replace(/\/$/, '');
   const urls = launchReady
-    ? Object.values(routes)
+    ? indexedRoutes
+        .map((key) => routes[key])
         .flatMap((r) =>
           (['ca', 'es'] as const).map(
             (lang) =>

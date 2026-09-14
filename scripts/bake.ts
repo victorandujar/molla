@@ -10,7 +10,7 @@ const flags = Object.fromEntries(
 );
 const args = rest.filter((a) => !a.startsWith('--'));
 const writes = command !== 'list';
-console.log(`Base de datos: ${new URL(url).host}`);
+console.log(`Base de datos: ${new URL(url).host}${new URL(url).pathname}`);
 if (writes && flags.yes === undefined)
   throw new Error(
     'Este comando modifica la base de datos. Revisa el host y repite con --yes.',
@@ -32,12 +32,13 @@ try {
       await sql`SELECT b.*, COALESCE((SELECT SUM(i.quantity) FROM orders o JOIN order_items i ON i.order_id=o.id WHERE o.bake_id=b.id AND o.status!='CANCELLED'),0)::int AS reserved FROM bakes b ORDER BY pickup_date`;
     for (const b of rows)
       console.log(
-        `${b.id} · nº ${b.number} · ${b.status} · ${b.reserved}/${b.capacity} · abre ${fmt(b.opens_at)} · cierra ${fmt(b.deadline)} · recogida ${fmt(b.pickup_date)}`,
+        `${b.id} · nº ${b.number} · ${b.status} · ${b.reserved}/${b.capacity} · abre ${fmt(b.opens_at)} · cierra ${fmt(b.deadline)} · recogida ${fmt(b.pickup_date)} ${b.pickup_window || '(franja sin definir)'}`,
       );
     if (!rows.length) console.log('No hay hornadas.');
   } else if (command === 'new') {
     // npm run bake -- new 2026-10-03 --capacity=6 [--pickup-time=12:00]
-    // [--deadline=2026-10-01T20:00] [--opens=2026-09-27T00:00] --yes
+    // [--deadline=2026-10-01T20:00] [--opens=2026-09-27T00:00]
+    // [--window="de 12:00 a 13:00"] --yes
     const [date] = args;
     if (!date) throw new Error('Indica la fecha de recogida: AAAA-MM-DD.');
     const capacity = Number(flags.capacity);
@@ -52,6 +53,8 @@ try {
       ? at(flags.deadline)
       : madridIso(addDays(date, -2), '20:00');
     const opensAt = flags.opens ? at(flags.opens) : new Date().toISOString();
+    const window = flags.window || process.env.PICKUP_WINDOW || '';
+    if (!window) throw new Error('Indica --window="de 12:00 a 13:00".');
     if (!(Date.parse(opensAt) < Date.parse(deadline)))
       throw new Error('La apertura debe ser anterior al cierre.');
     if (!(Date.parse(deadline) <= Date.parse(pickupDate)))
@@ -63,9 +66,9 @@ try {
       const [clash] =
         await tx`SELECT id FROM bakes WHERE status!='COMPLETED' AND pickup_date::date=${pickupDate}::timestamptz::date`;
       if (clash) throw new Error(`Ya existe una hornada ese día: ${clash.id}`);
-      await tx`INSERT INTO bakes(id,number,pickup_date,deadline,opens_at,capacity,status) VALUES(${`hornada-${number}`},${number},${pickupDate},${deadline},${opensAt},${capacity},'OPEN')`;
+      await tx`INSERT INTO bakes(id,number,pickup_date,deadline,opens_at,capacity,status,pickup_window) VALUES(${`hornada-${number}`},${number},${pickupDate},${deadline},${opensAt},${capacity},'OPEN',${window})`;
       console.log(
-        `Creada hornada-${number}: recogida ${fmt(new Date(pickupDate))}, cierre ${fmt(new Date(deadline))}, ${capacity} hogazas.`,
+        `Creada hornada-${number}: recogida ${fmt(new Date(pickupDate))} (${window}), cierre ${fmt(new Date(deadline))}, ${capacity} hogazas.`,
       );
     });
   } else if (command === 'status') {
@@ -91,8 +94,20 @@ try {
       await tx`UPDATE bakes SET capacity=${capacity} WHERE id=${id}`;
       console.log('Capacidad actualizada.');
     });
+  } else if (command === 'window') {
+    // npm run bake -- window hornada-002 "de 11:00 a 13:00" --yes
+    const [id, window] = args;
+    if (!id || !window?.trim())
+      throw new Error('Uso: bake -- window ID "de 12:00 a 13:00" --yes');
+    const rows =
+      await sql`UPDATE bakes SET pickup_window=${window.trim()} WHERE id=${id} RETURNING id`;
+    console.log(
+      rows.length
+        ? 'Franja actualizada. Los pedidos ya confirmados conservan la franja de su confirmación.'
+        : 'No existe esa hornada.',
+    );
   } else {
-    throw new Error('Comandos: list | new | status | capacity');
+    throw new Error('Comandos: list | new | status | capacity | window');
   }
 } finally {
   await sql.end();

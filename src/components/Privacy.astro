@@ -1,0 +1,139 @@
+---
+import Base from '../layouts/Base.astro';
+import { brand, launchReady, privacy } from '../lib/config';
+import { routes, type Lang } from '../lib/i18n';
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const text = {
+  es: {
+    title: `Privacidad y condiciones · ${brand.name}`,
+    kicker: 'Datos claros, como el pan',
+    h1: 'Privacidad y condiciones.',
+    draft:
+      'Versión de preparación. Las reservas reales aún no están abiertas. Los datos del responsable y las condiciones finales deben completarse antes del lanzamiento. En las pruebas, utiliza datos ficticios.',
+    whoH: 'Quién gestiona tus datos',
+    whoPending: 'El responsable se identificará antes de abrir pedidos.',
+    contact: 'Contacto',
+    orderH: 'Tu reserva',
+    order:
+      'Utilizamos tu nombre, email, teléfono y pedido para preparar el pan, confirmar la reserva, enviarte un recordatorio el día antes de la recogida y coordinarla. No necesitas crear una cuenta. La finalidad es gestionar la relación contractual de tu pedido; no se te añade a la lista de avisos al reservar.',
+    waitlistH: 'Avisos de hornadas',
+    waitlist:
+      'Solo recibirás avisos si te apuntas expresamente y confirmas tu email con el enlace que te enviamos. Guardamos tu email, el idioma y la fecha de consentimiento. Si no confirmas en siete días, borramos el email. Puedes retirar el consentimiento con el enlace de baja de cada aviso o escribiendo al contacto publicado en esta página.',
+    providersH: 'Proveedores y conservación',
+    providers:
+      'El alojamiento y la base de datos procesan los datos necesarios para prestar el servicio. Un proveedor de correo entrega la confirmación, el recordatorio y los avisos.',
+    providersPending:
+      'Los proveedores contratados se identificarán antes de abrir reservas.',
+    transfersPending:
+      'Las condiciones sobre transferencias internacionales se publicarán antes de abrir reservas.',
+    retentionPending:
+      'Los plazos de conservación se publicarán antes de abrir reservas.',
+    unsubscribed: 'Los emails de avisos se eliminan al darte de baja.',
+    rightsH: 'Tus derechos',
+    rights:
+      'Puedes solicitar acceso, rectificación, supresión, oposición, limitación o portabilidad de tus datos a través del contacto del responsable. También puedes presentar una reclamación ante la Agencia Española de Protección de Datos.',
+    pickupH: 'Recogida y pago',
+    pickup:
+      'El precio total se muestra antes de confirmar. El pago se hace al recoger. La confirmación indica la cantidad, la fecha, el punto de recogida y tu código. Por ahora no hay envíos. Si necesitas cambiar o cancelar tu reserva, contacta cuanto antes indicando el código, y como tarde antes del cierre de pedidos de la hornada: así la hogaza puede pasar a otra persona. Si no puedo preparar tu pedido, te contactaré para comunicarlo. Si no recoges el pan ni avisas, podremos pedirte el pago por adelantado en próximas reservas.',
+    withdrawal:
+      'Al tratarse de un alimento perecedero elaborado para tu pedido, no aplica el derecho de desistimiento (art. 103.d del Texto Refundido de la Ley General para la Defensa de los Consumidores y Usuarios). Esto no afecta a tus derechos si el producto no es conforme.',
+    allergensH: 'Ingredientes y alérgenos',
+    allergens:
+      'Consulta los ingredientes de cada pan antes de reservar. La hogaza de poolish lleva harina de trigo, agua, sal y levadura, y contiene gluten. En el espacio de elaboración se trabaja con otras harinas: consulta antes de comprar si tienes otras alergias.',
+    analyticsH: 'Medición de visitas',
+    analytics:
+      'No usamos cookies ni rastreadores de terceros. La web cuenta de forma agregada, por día, acciones como ver la página o completar una reserva y el canal de llegada (por ejemplo, Instagram). No guarda tu IP ni ningún identificador que permita reconocerte.',
+    back: '← Volver al pan',
+  },
+  ca: {
+    title: `Privacitat i condicions · ${brand.name}`,
+    kicker: 'Dades clares, com el pa',
+    h1: 'Privacitat i condicions.',
+    draft:
+      'Versió de preparació. Les reserves reals encara no estan obertes. Les dades del responsable i les condicions finals s’han de completar abans del llançament. A les proves, fes servir dades fictícies.',
+    whoH: 'Qui gestiona les teves dades',
+    whoPending: 'El responsable s’identificarà abans d’obrir comandes.',
+    contact: 'Contacte',
+    orderH: 'La teva reserva',
+    order:
+      'Fem servir el teu nom, correu, telèfon i comanda per preparar el pa, confirmar la reserva, enviar-te un recordatori el dia abans de la recollida i coordinar-la. No cal crear cap compte. La finalitat és gestionar la relació contractual de la comanda; no t’afegim a la llista d’avisos per reservar.',
+    waitlistH: 'Avisos de fornades',
+    waitlist:
+      'Només rebràs avisos si t’hi apuntes expressament i confirmes el correu amb l’enllaç que t’enviem. Guardem el correu, l’idioma i la data del consentiment. Si no el confirmes en set dies, esborrem el correu. Pots retirar el consentiment amb l’enllaç de baixa de cada avís o escrivint al contacte publicat en aquesta pàgina.',
+    providersH: 'Proveïdors i conservació',
+    providers:
+      'L’allotjament i la base de dades tracten les dades necessàries per prestar el servei. Un proveïdor de correu lliura la confirmació, el recordatori i els avisos.',
+    providersPending:
+      'Els proveïdors contractats s’identificaran abans d’obrir reserves.',
+    transfersPending:
+      'Les condicions sobre transferències internacionals es publicaran abans d’obrir reserves.',
+    retentionPending:
+      'Els terminis de conservació es publicaran abans d’obrir reserves.',
+    unsubscribed: 'Els correus d’avisos s’eliminen quan et dones de baixa.',
+    rightsH: 'Els teus drets',
+    rights:
+      'Pots sol·licitar l’accés, la rectificació, la supressió, l’oposició, la limitació o la portabilitat de les teves dades a través del contacte del responsable. També pots presentar una reclamació davant l’Agència Espanyola de Protecció de Dades o l’Autoritat Catalana de Protecció de Dades.',
+    pickupH: 'Recollida i pagament',
+    pickup:
+      'El preu total es mostra abans de confirmar. El pagament es fa en recollir. La confirmació indica la quantitat, la data, el punt de recollida i el teu codi. De moment no hi ha enviaments. Si has de canviar o cancel·lar la reserva, contacta com més aviat millor indicant el codi, i com a molt tard abans del tancament de comandes de la fornada: així el pa pot passar a una altra persona. Si no puc preparar la teva comanda, et contactaré per comunicar-t’ho. Si no reculls el pa ni avises, et podrem demanar el pagament per avançat en properes reserves.',
+    withdrawal:
+      'Com que es tracta d’un aliment perible elaborat per a la teva comanda, no s’aplica el dret de desistiment (art. 103.d del Text Refós de la Llei General per a la Defensa dels Consumidors i Usuaris). Això no afecta els teus drets si el producte no és conforme.',
+    allergensH: 'Ingredients i al·lèrgens',
+    allergens:
+      'Consulta els ingredients de cada pa abans de reservar. El pa de poolish porta farina de blat, aigua, sal i llevat, i conté gluten. A l’espai d’elaboració es treballa amb altres farines: consulta abans de comprar si tens altres al·lèrgies.',
+    analyticsH: 'Mesura de visites',
+    analytics:
+      'No fem servir galetes ni rastrejadors de tercers. El web compta de manera agregada, per dia, accions com veure la pàgina o completar una reserva i el canal d’arribada (per exemple, Instagram). No guarda la teva IP ni cap identificador que permeti reconèixer-te.',
+    back: '← Tornar al pa',
+  },
+}[lang];
+---
+
+<Base lang={lang} route="privacy" title={text.title} noindex>
+  <main id="contenido" class="legal">
+    <p class="kicker">{text.kicker}</p>
+    <h1>{text.h1}</h1>
+    {!launchReady && (
+      <p>
+        <strong>{text.draft}</strong>
+      </p>
+    )}
+    <h2>{text.whoH}</h2>
+    <p>
+      {brand.legalName || text.whoPending}
+      {brand.legalId && ` · NIF ${brand.legalId}`}
+      {brand.legalAddress && ` · ${brand.legalAddress}`}
+      {brand.contact && (
+        <>
+          . {text.contact}:{' '}
+          <a href={`mailto:${brand.contact}`}>{brand.contact}</a>.
+        </>
+      )}
+    </p>
+    <h2>{text.orderH}</h2>
+    <p>{text.order}</p>
+    <h2>{text.waitlistH}</h2>
+    <p>{text.waitlist}</p>
+    <h2>{text.providersH}</h2>
+    <p>
+      {text.providers} {privacy.providers[lang] || text.providersPending}{' '}
+      {privacy.transfers[lang] || text.transfersPending}{' '}
+      {privacy.retention[lang] || text.retentionPending} {text.unsubscribed}
+    </p>
+    <h2>{text.rightsH}</h2>
+    <p>{text.rights}</p>
+    <h2>{text.pickupH}</h2>
+    <p>{text.pickup}</p>
+    <p>{text.withdrawal}</p>
+    <h2>{text.allergensH}</h2>
+    <p>{text.allergens}</p>
+    <h2>{text.analyticsH}</h2>
+    <p>{text.analytics}</p>
+    <p>
+      <a href={routes.home[lang]}>{text.back}</a>
+    </p>
+  </main>
+</Base>

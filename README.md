@@ -21,11 +21,11 @@ En desarrollo se activa una demo con archivo local `.data/demo.json`. Solo usar 
 npm run check
 npm test
 npm run build
-npm run dev -- --background --host 127.0.0.1
+npm run dev:e2e -- --background --host 127.0.0.1
 npm run test:e2e
 ```
 
-Las pruebas E2E reinician los datos de DEMOSTRACIÓN; ejecutarlas únicamente sobre la demo local. No apuntarlas a producción. La compilación es para Vercel. `node scripts/serve-built.mjs` permite inspeccionar localmente el handler compilado en el puerto 4382, sin simular una base de datos de producción. Resultados y límites en `docs/verificacion.md`.
+`dev:e2e` arranca la demo con una contraseña de prueba para `/gestio` (`astro dev` no carga `.env` en `process.env`). Las pruebas E2E reinician los datos de DEMOSTRACIÓN; ejecutarlas únicamente sobre la demo local. No apuntarlas a producción. La compilación es para Vercel. `node scripts/serve-built.mjs` permite inspeccionar localmente el handler compilado en el puerto 4382, sin simular una base de datos de producción. Resultados y límites en `docs/verificacion.md`.
 
 ## Activar un entorno real
 
@@ -40,7 +40,9 @@ No requiere credenciales de pago para arrancar. El email transaccional es opcion
 
 ## Git y despliegue
 
-Remoto `github.com/victorandujar/molla`. `main` despliega producción en Vercel; las demás ramas generan Preview sin pedidos reales (`LIVE_ORDERS=false`).
+Remoto `github.com/victorandujar/molla`. `main` despliega producción en Vercel; las demás ramas generan Preview contra la base `molla_dev`, sin emails.
+
+Entornos locales: `.env` apunta a `molla_dev` y `.env.production` a producción. Los scripts de producción llevan el sufijo `:prod`. Si un despliegue incluye migraciones nuevas, ejecuta `npm run db:migrate:prod` antes de publicarlo; las migraciones deben ser compatibles con la versión anterior. Gestión diaria: `/gestio` (ver `docs/operacion.md`).
 
 ## Documentos
 

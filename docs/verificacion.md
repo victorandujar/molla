@@ -2,6 +2,16 @@
 
 Fecha: 14/09/2026. Entorno local, Node 24, Astro 7, Chromium. Actualizado el mismo día tras el despliegue en Vercel (`www.mollapa.com`) con Neon y Resend.
 
+## Endurecimiento de lanzamiento (14/09/2026, rama `feature/launch-hardening`)
+
+- Bases separadas: `molla_dev` con su propio usuario; se comprobó que ese usuario recibe «permission denied» al conectarse a `neondb`. Tras el cambio de permisos, producción siguió respondiendo (`/api/bake` OPEN 0/6).
+- `npm run check`: cero errores y avisos. `npm test`: 15 pruebas (estados, capacidad, validación, zona horaria, códigos, emails bilingües y escapados, ventana de recordatorio, CSV, claves de mensajes, fechas de cierre y sesiones de gestión).
+- `npm run test:e2e` (con `dev:e2e`): 14 pruebas. A las anteriores se suman el doble opt-in con confirmación por POST, la clave de reserva generada en el navegador, los errores en catalán, JSON inválido (400), hornada no activa (409), contadores sin datos personales, panel de gestión (contraseña, recogido y deshacer, POST sin sesión rechazado, axe sin infracciones) y privacidad en catalán.
+- Ruta PostgreSQL contra `molla_dev` con los módulos reales: idempotencia, rechazo de otra hornada abierta que no es la activa, cliente existente no sobrescrito, recordatorios reclamados una sola vez y liberados si fallan, transiciones de estado, reintento de confirmaciones, doble opt-in, contadores, límites por ámbito y limpieza. Datos de prueba borrados al terminar.
+- Handler compilado con `.env`: páginas públicas con `s-maxage=60`; API, alta, baja y gestión con `no-store`; CSP presente; cron con 401 sin secreto y 200 con él; login con 303 y cookie `HttpOnly; Secure; SameSite=Strict; Path=/gestio`; 403 con otro origen. Ningún secreto del `.env` aparece en `.vercel/output` ni en `dist`.
+- Chromium sobre el handler compilado: reserva y lista de espera completas y ninguna violación de CSP. Se corrigió además el `pattern` del teléfono, que los navegadores actuales rechazaban como expresión regular inválida (modo `v`), así que la validación del navegador no funcionaba.
+- Pendiente tras desplegar: comprobar la primera ejecución del cron en Vercel y un recordatorio real el viernes anterior a la recogida.
+
 ## Prueba en producción (14/09/2026)
 
 - Reserva real en `www.mollapa.com`: HTTP 201, pedido y línea guardados en Neon, `emailStatus` SENT. Resend marcó como entregados la confirmación al cliente y el aviso al obrador. Repetir la misma solicitud devuelve el mismo pedido (idempotencia).

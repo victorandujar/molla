@@ -8,7 +8,13 @@ import {
   ownerHtml,
   ownerSubject,
   ownerText,
+  reminderHtml,
+  reminderSubject,
+  reminderText,
+  waitlistConfirmation,
 } from './email-templates';
+import type { Lang } from './domain';
+import type { WaitlistTokens } from './store';
 async function send(
   payload: {
     to: string;
@@ -41,11 +47,14 @@ async function send(
     console.error(`Email rejected (${response.status}) for ${key}`);
   return response.ok;
 }
-const enabled = () =>
+export const emailEnabled = () =>
   !isDemo && !!process.env.RESEND_API_KEY && !!process.env.EMAIL_FROM;
-export async function sendConfirmation(o: Order) {
-  if (o.emailStatus !== 'PENDING') return;
-  if (!enabled()) {
+// A retry from the daily job reuses the idempotency key, so an email the
+// provider already accepted is not delivered twice.
+export async function sendConfirmation(o: Order, retry = false) {
+  if (o.emailStatus !== 'PENDING' && !(retry && o.emailStatus === 'FAILED'))
+    return;
+  if (!emailEnabled()) {
     await emailStatus(o.id, 'DISABLED');
     return;
   }
@@ -68,7 +77,7 @@ export async function sendConfirmation(o: Order) {
 }
 // The baker gets every new order in their inbox; failure never affects the order.
 export async function notifyOwner(o: Order) {
-  if (!enabled() || !brand.contact) return;
+  if (!emailEnabled() || !brand.contact) return;
   try {
     const ok = await send(
       {
@@ -83,5 +92,41 @@ export async function notifyOwner(o: Order) {
     if (!ok) console.error('Owner notification failed', o.id);
   } catch {
     console.error('Owner notification failed', o.id);
+  }
+}
+
+export async function sendReminder(o: Order) {
+  if (!emailEnabled()) return false;
+  try {
+    return await send(
+      {
+        to: o.email,
+        subject: reminderSubject(o),
+        text: reminderText(o),
+        html: reminderHtml(o),
+        replyTo: brand.contact || undefined,
+      },
+      `reminder-${o.id}`,
+    );
+  } catch {
+    console.error('Reminder email failed', o.id);
+    return false;
+  }
+}
+export async function sendWaitlistConfirmation(
+  email: string,
+  lang: Lang,
+  tokens: WaitlistTokens,
+) {
+  if (!emailEnabled()) return;
+  const message = waitlistConfirmation(lang, tokens);
+  try {
+    const ok = await send(
+      { to: email, ...message, replyTo: brand.contact || undefined },
+      `waitlist-${tokens.confirm}-${new Date().toISOString().slice(0, 13)}`,
+    );
+    if (!ok) console.error('Waitlist confirmation failed');
+  } catch {
+    console.error('Waitlist confirmation failed');
   }
 }
