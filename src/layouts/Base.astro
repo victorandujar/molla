@@ -129,7 +129,7 @@ const graph = [organization, ...jsonLd];
     <header class="site-header">
       <div class="wrap header-inner">
         <a class="wordmark" href={home} aria-label={t.home}>
-          {brand.name.toLowerCase()}
+          {brand.name.toLowerCase()}.
         </a>
         <nav aria-label={lang === 'ca' ? 'Principal' : 'Principal'}>
           <a href={`${home}#proceso`}>{t.nav.process}</a>
@@ -155,7 +155,7 @@ const graph = [organization, ...jsonLd];
     <slot />
     <footer class="site-footer">
       <div class="wrap footer-inner">
-        <a class="wordmark" href={home}>{brand.name.toLowerCase()}</a>
+        <a class="wordmark" href={home}>{brand.name.toLowerCase()}.</a>
         <p>
           {t.footer.line}
           <br />
