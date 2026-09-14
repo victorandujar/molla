@@ -24,7 +24,9 @@ function source() {
   return 'direct';
 }
 const acquisition = source();
-// Provider-neutral hooks. No personal data, cookies, or third-party scripts.
+// Provider-neutral hooks plus first-party daily counters (event and channel
+// only). No personal data, cookies, or third-party scripts.
+const counted = !location.pathname.startsWith('/gestio');
 function track(
   name: EventName,
   properties: Record<string, string | number> = {},
@@ -34,6 +36,13 @@ function track(
       detail: { event: name, source: acquisition, ...properties },
     }),
   );
+  if (counted)
+    fetch('/api/events', {
+      method: 'POST',
+      keepalive: true,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ event: name, source: acquisition }),
+    }).catch(() => {});
 }
 track('landing_view');
 document
@@ -65,6 +74,9 @@ const money = (cents: number) =>
   new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(
     cents / 100,
   );
+// Generated here, not in the HTML, so a cached page never shares it.
+const requestId = form?.querySelector<HTMLInputElement>('input[name=requestId]');
+if (requestId) requestId.value = crypto.randomUUID();
 const quantity = document.querySelector<HTMLInputElement>('#quantity');
 const total = document.querySelector<HTMLOutputElement>('#total');
 function update() {
@@ -150,7 +162,7 @@ form?.addEventListener('submit', async (event) => {
       dateStyle: 'full',
     }).format(new Date(order.pickupDate));
     for (const line of [
-      `${order.quantity} × ${isCa && order.productName === 'La de cada semana' ? 'El de cada setmana' : order.productName}`,
+      `${order.quantity} × ${order.productName}`,
       isCa ? `Total: ${money(order.total)} · Pagament en recollir` : `Total: ${money(order.total)} · Pago al recoger`,
       date,
       order.pickupWindow ||
@@ -202,8 +214,10 @@ waitlist?.addEventListener('submit', async (event) => {
   button.textContent = (isCa ? 'Desant…' : 'Guardando…');
   waitlist.querySelector<HTMLElement>('.form-error')!.hidden = true;
   try {
-    await submit(waitlist);
-    waitlist.querySelector<HTMLElement>('.waitlist-success')!.hidden = false;
+    const result = await submit(waitlist);
+    const success = waitlist.querySelector<HTMLElement>('.waitlist-success')!;
+    if (!result.confirm) success.textContent = success.dataset.direct || '';
+    success.hidden = false;
     button.textContent = (isCa ? 'Ja ets a la llista' : 'Ya estás en la lista');
     track('waitlist_signup');
   } catch (error) {
@@ -258,7 +272,9 @@ async function refreshBake() {
     /* Server validates availability on every submission. */
   }
 }
-// Refresh only when returning to the page; the transaction is the final authority.
+// The page may come from the CDN cache: refresh on load and when returning to
+// it. The transaction remains the final authority.
+if (form || document.querySelector('[data-reserved]')) void refreshBake();
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible') void refreshBake();
 });

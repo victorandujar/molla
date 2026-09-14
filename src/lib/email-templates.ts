@@ -1,5 +1,5 @@
 import { brand, money } from './config';
-import type { Order } from './domain';
+import type { Lang, Order } from './domain';
 // Email clients ignore stylesheets and web fonts unevenly: inline styles,
 // table layout, hosted PNGs and system-font fallbacks for everything.
 const c = {
@@ -27,8 +27,8 @@ const asset = (path: string) => {
   const base = brand.site || 'https://www.mollapa.com';
   return new URL(path.replace(/^\//, ''), base.endsWith('/') ? base : `${base}/`).href;
 };
-export const pickupDay = (iso: string) => {
-  const text = new Intl.DateTimeFormat('es-ES', {
+export const pickupDay = (iso: string, lang: Lang = 'es') => {
+  const text = new Intl.DateTimeFormat(lang === 'ca' ? 'ca-ES' : 'es-ES', {
     timeZone: 'Europe/Madrid',
     weekday: 'long',
     day: 'numeric',
@@ -37,10 +37,101 @@ export const pickupDay = (iso: string) => {
   return text.charAt(0).toUpperCase() + text.slice(1);
 };
 const firstName = (name: string) => name.trim().split(/\s+/)[0] || name;
+const langOf = (o: Order): Lang => (o.lang === 'ca' ? 'ca' : 'es');
+const privacyPath = { es: '/privacidad', ca: '/privacitat' };
+// Catalan dates read "dissabte, 26 de setembre"; after "el" they stay lowercase.
+const onDay = (o: Order) => pickupDay(o.pickupDate, langOf(o)).toLowerCase();
+const copy = {
+  es: {
+    footer: 'Pan de poolish por encargo',
+    privacy: 'Privacidad y condiciones',
+    subject: (o: Order) => `Reserva ${o.code} · Tu pan del ${onDay(o)}`,
+    hello: 'Hola',
+    confirmed: 'Reserva confirmada',
+    heading: 'Tu pan ya tiene tu nombre',
+    intro: (o: Order) =>
+      `Hecho a mano, con poolish y más de 20 horas de fermentación lenta. Te esperamos el ${onDay(o)}.`,
+    code: 'Código de recogida',
+    codeHint: 'Dilo o enséñalo al recoger.',
+    order: 'Tu pedido',
+    total: 'Total',
+    payLater: 'pago al recoger',
+    when: 'Cuándo',
+    where: 'Dónde',
+    directions: 'Cómo llegar',
+    mapAlt: (address: string) =>
+      `Mapa del punto de recogida: ${address}. Abrir en Google Maps`,
+    mapButton: 'Cómo llegar en Google Maps →',
+    changes:
+      '¿Cambios o no puedes venir? Responde a este email con tu código antes del cierre de pedidos y la hogaza pasará a otra persona.',
+    changesText: (contact: string) =>
+      `¿Cambios o no puedes venir? Responde a este email${contact ? ` o escribe a ${contact}` : ''} con tu código antes del cierre de pedidos.`,
+    thanks: 'Gracias por reservar,',
+    reminderSubject: (o: Order) =>
+      `Recordatorio · Recoge tu pan el ${onDay(o)} (${o.code})`,
+    reminderKicker: 'Recordatorio de recogida',
+    reminderHeading: (o: Order) =>
+      `${firstName(o.name)}, tu pan sale del horno el ${onDay(o)}.`,
+    reminderIntro:
+      'Ven dentro de la franja con tu código. Se paga al recoger.',
+    reminderCancel:
+      '¿Al final no puedes venir? Responde a este email cuanto antes: así la hogaza no se desperdicia.',
+    toPay: 'A pagar al recoger',
+    waitlistSubject: 'Confirma tu aviso de nuevas hornadas',
+    waitlistHeading: 'Un clic y te aviso.',
+    waitlistIntro:
+      'Alguien (esperamos que tú) ha pedido recibir un email cuando abra una nueva hornada de Molla. Confírmalo con el botón. Si no fuiste tú, ignora este mensaje y no te escribiremos más.',
+    waitlistButton: 'Confirmar el aviso →',
+    waitlistUnsubscribe: 'Darme de baja',
+  },
+  ca: {
+    footer: 'Pa de poolish per encàrrec',
+    privacy: 'Privacitat i condicions',
+    subject: (o: Order) => `Reserva ${o.code} · El teu pa de ${onDay(o)}`,
+    hello: 'Hola',
+    confirmed: 'Reserva confirmada',
+    heading: 'El teu pa ja té el teu nom',
+    intro: (o: Order) =>
+      `Fet a mà, amb poolish i més de 20 hores de fermentació lenta. T’esperem ${onDay(o)}.`,
+    code: 'Codi de recollida',
+    codeHint: 'Digues-lo o ensenya’l en recollir.',
+    order: 'La teva comanda',
+    total: 'Total',
+    payLater: 'pagament en recollir',
+    when: 'Quan',
+    where: 'On',
+    directions: 'Com arribar-hi',
+    mapAlt: (address: string) =>
+      `Mapa del punt de recollida: ${address}. Obrir a Google Maps`,
+    mapButton: 'Com arribar-hi amb Google Maps →',
+    changes:
+      'Canvis o no pots venir? Respon aquest correu amb el teu codi abans del tancament de comandes i el pa passarà a una altra persona.',
+    changesText: (contact: string) =>
+      `Canvis o no pots venir? Respon aquest correu${contact ? ` o escriu a ${contact}` : ''} amb el teu codi abans del tancament de comandes.`,
+    thanks: 'Gràcies per reservar,',
+    reminderSubject: (o: Order) =>
+      `Recordatori · Recull el teu pa ${onDay(o)} (${o.code})`,
+    reminderKicker: 'Recordatori de recollida',
+    reminderHeading: (o: Order) =>
+      `${firstName(o.name)}, el teu pa surt del forn ${onDay(o)}.`,
+    reminderIntro:
+      'Vine dins de la franja amb el teu codi. Es paga en recollir.',
+    reminderCancel:
+      'Al final no pots venir? Respon aquest correu com més aviat millor: així el pa no es malbarata.',
+    toPay: 'A pagar en recollir',
+    waitlistSubject: 'Confirma l’avís de noves fornades',
+    waitlistHeading: 'Un clic i t’aviso.',
+    waitlistIntro:
+      'Algú (esperem que tu) ha demanat rebre un correu quan obri una nova fornada de Molla. Confirma-ho amb el botó. Si no has estat tu, ignora aquest missatge i no t’escriurem més.',
+    waitlistButton: 'Confirmar l’avís →',
+    waitlistUnsubscribe: 'Donar-me de baixa',
+  },
+};
 
-function layout(preheader: string, content: string) {
+function layout(lang: Lang, preheader: string, content: string) {
+  const t = copy[lang];
   return `<!doctype html>
-<html lang="es">
+<html lang="${lang}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -70,8 +161,8 @@ function layout(preheader: string, content: string) {
 ${content}
 <tr><td class="pad" style="background:${c.tileDeep};padding:28px 40px;font-family:${body};font-size:13px;line-height:1.6;color:${c.crumb};">
   <strong style="font-family:${display};font-size:18px;">molla.</strong><br>
-  Pan de poolish por encargo · ${esc(brand.town)}<br>
-  ${brand.contact ? `<a href="mailto:${esc(brand.contact)}" style="color:${c.crumb};">${esc(brand.contact)}</a> · ` : ''}<a href="${asset('/privacidad')}" style="color:${c.crumb};">Privacidad y condiciones</a>
+  ${t.footer} · ${esc(brand.town)}<br>
+  ${brand.contact ? `<a href="mailto:${esc(brand.contact)}" style="color:${c.crumb};">${esc(brand.contact)}</a> · ` : ''}<a href="${asset(privacyPath[lang])}" style="color:${c.crumb};">${t.privacy}</a>
 </td></tr>
 </table>
 </td></tr>
@@ -94,65 +185,147 @@ function button(href: string, label: string) {
 }
 
 export function confirmationSubject(o: Order) {
-  return `Reserva ${o.code} · Tu pan del ${pickupDay(o.pickupDate).toLowerCase()}`;
+  return copy[langOf(o)].subject(o);
 }
 
 export function confirmationText(o: Order) {
-  return `Hola ${firstName(o.name)},
+  const t = copy[langOf(o)];
+  return `${t.hello} ${firstName(o.name)},
 
-Tu pan ya tiene tu nombre. Reserva confirmada.
+${t.heading}. ${t.confirmed}.
 
-Código de recogida: ${o.code}
-${o.quantity} × ${o.productName} — ${money(o.total)} (pago al recoger)
+${t.code}: ${o.code}
+${o.quantity} × ${o.productName} — ${money(o.total)} (${t.payLater})
 
-Cuándo: ${pickupDay(o.pickupDate)}, ${o.pickupWindow}
-Dónde: ${o.pickupAddress}
-Cómo llegar: ${brand.pickupMap}
+${t.when}: ${pickupDay(o.pickupDate, langOf(o))}, ${o.pickupWindow}
+${t.where}: ${o.pickupAddress}
+${t.directions}: ${brand.pickupMap}
 
-¿Cambios o no puedes venir? Responde a este email o escribe a ${brand.contact} con tu código antes del cierre de pedidos.
+${t.changesText(brand.contact)}
 
-Gracias por reservar,
+${t.thanks}
 ${brand.name}`;
 }
 
-export function confirmationHtml(o: Order) {
-  const map = brand.pickupMap;
-  const content = `
-<tr><td class="pad" style="padding:44px 40px 8px;">
-  <p style="margin:0 0 10px;font-family:${body};font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:${c.tile};">Reserva confirmada</p>
-  <h1 class="h1" style="margin:0;font-family:${display};font-size:42px;line-height:1;font-weight:800;letter-spacing:-.02em;color:${c.ink};">Tu pan ya tiene tu nombre, ${esc(firstName(o.name))}.</h1>
-  <p style="margin:18px 0 0;font-family:${body};font-size:16px;line-height:1.6;color:${c.muted};">Hecho a mano, con poolish y más de 20 horas de fermentación lenta. Te esperamos el ${esc(pickupDay(o.pickupDate).toLowerCase())}.</p>
-</td></tr>
+// Code, order details and map: shared by the confirmation and the reminder.
+function pickupBlock(o: Order, totalLabel: string) {
+  const lang = langOf(o);
+  const t = copy[lang];
+  const map = esc(brand.pickupMap);
+  return `
 <tr><td class="pad" style="padding:28px 40px 4px;">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#ffffff;border:2px dashed ${c.tile};border-radius:12px;">
     <tr><td align="center" style="padding:20px 16px;">
-      <p style="margin:0 0 6px;font-family:${body};font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:${c.muted};">Código de recogida</p>
+      <p style="margin:0 0 6px;font-family:${body};font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:${c.muted};">${t.code}</p>
       <p class="code" style="margin:0;font-family:${display};font-size:44px;line-height:1.1;font-weight:800;letter-spacing:.06em;color:${c.tile};">${esc(o.code)}</p>
-      <p style="margin:6px 0 0;font-family:${body};font-size:13px;color:${c.muted};">Dilo o enséñalo al recoger.</p>
+      <p style="margin:6px 0 0;font-family:${body};font-size:13px;color:${c.muted};">${t.codeHint}</p>
     </td></tr>
   </table>
 </td></tr>
 <tr><td class="pad" style="padding:20px 40px 8px;">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
     ${details([
-      ['Tu pedido', `${o.quantity} × ${esc(o.productName)}`],
-      ['Total', `<strong>${money(o.total)}</strong> · pago al recoger`],
-      ['Cuándo', `${esc(pickupDay(o.pickupDate))}<br>${esc(o.pickupWindow)}`],
-      ['Dónde', esc(o.pickupAddress)],
+      [t.order, `${o.quantity} × ${esc(o.productName)}`],
+      [t.total, `<strong>${money(o.total)}</strong> · ${totalLabel}`],
+      [t.when, `${esc(pickupDay(o.pickupDate, lang))}<br>${esc(o.pickupWindow)}`],
+      [t.where, esc(o.pickupAddress)],
     ])}
   </table>
 </td></tr>
 <tr><td class="pad" style="padding:16px 40px 0;">
-  <a href="${esc(map)}" style="display:block;text-decoration:none;"><img src="${asset('/email/mapa-recogida.png')}" width="520" alt="Mapa del punto de recogida: ${esc(o.pickupAddress)}. Abrir en Google Maps" style="display:block;width:100%;max-width:520px;height:auto;border:0;border-radius:12px;"></a>
-</td></tr>
-<tr><td class="pad" style="padding:20px 40px 40px;">
-  ${button(esc(map), 'Cómo llegar en Google Maps →')}
-  <p style="margin:28px 0 0;font-family:${body};font-size:14px;line-height:1.6;color:${c.muted};">¿Cambios o no puedes venir? Responde a este email con tu código antes del cierre de pedidos y la hogaza pasará a otra persona.</p>
+  <a href="${map}" style="display:block;text-decoration:none;"><img src="${asset('/email/mapa-recogida.png')}" width="520" alt="${esc(t.mapAlt(o.pickupAddress))}" style="display:block;width:100%;max-width:520px;height:auto;border:0;border-radius:12px;"></a>
 </td></tr>`;
+}
+
+function intro(kicker: string, heading: string, text: string) {
+  return `
+<tr><td class="pad" style="padding:44px 40px 8px;">
+  <p style="margin:0 0 10px;font-family:${body};font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:${c.tile};">${kicker}</p>
+  <h1 class="h1" style="margin:0;font-family:${display};font-size:42px;line-height:1;font-weight:800;letter-spacing:-.02em;color:${c.ink};">${heading}</h1>
+  <p style="margin:18px 0 0;font-family:${body};font-size:16px;line-height:1.6;color:${c.muted};">${text}</p>
+</td></tr>`;
+}
+
+function closing(button: string, note: string) {
+  return `
+<tr><td class="pad" style="padding:20px 40px 40px;">
+  ${button}
+  <p style="margin:28px 0 0;font-family:${body};font-size:14px;line-height:1.6;color:${c.muted};">${note}</p>
+</td></tr>`;
+}
+
+export function confirmationHtml(o: Order) {
+  const lang = langOf(o);
+  const t = copy[lang];
+  const content =
+    intro(
+      t.confirmed,
+      `${t.heading}, ${esc(firstName(o.name))}.`,
+      esc(t.intro(o)),
+    ) +
+    pickupBlock(o, t.payLater) +
+    closing(button(esc(brand.pickupMap), t.mapButton), t.changes);
   return layout(
-    `Código ${o.code} · ${pickupDay(o.pickupDate)}, ${o.pickupWindow} · ${o.pickupAddress}`,
+    lang,
+    `${t.code} ${o.code} · ${pickupDay(o.pickupDate, lang)}, ${o.pickupWindow} · ${o.pickupAddress}`,
     content,
   );
+}
+
+export function reminderSubject(o: Order) {
+  return copy[langOf(o)].reminderSubject(o);
+}
+
+export function reminderText(o: Order) {
+  const lang = langOf(o);
+  const t = copy[lang];
+  return `${t.hello} ${firstName(o.name)},
+
+${t.reminderIntro}
+
+${t.code}: ${o.code}
+${o.quantity} × ${o.productName} — ${money(o.total)} (${t.payLater})
+${t.when}: ${pickupDay(o.pickupDate, lang)}, ${o.pickupWindow}
+${t.where}: ${o.pickupAddress}
+${t.directions}: ${brand.pickupMap}
+
+${t.reminderCancel}
+
+${brand.name}`;
+}
+
+export function reminderHtml(o: Order) {
+  const lang = langOf(o);
+  const t = copy[lang];
+  const content =
+    intro(t.reminderKicker, esc(t.reminderHeading(o)), t.reminderIntro) +
+    pickupBlock(o, t.toPay.toLowerCase()) +
+    closing(button(esc(brand.pickupMap), t.mapButton), t.reminderCancel);
+  return layout(
+    lang,
+    `${o.code} · ${pickupDay(o.pickupDate, lang)}, ${o.pickupWindow}`,
+    content,
+  );
+}
+
+export function waitlistConfirmation(
+  lang: Lang,
+  tokens: { confirm: string; unsubscribe: string },
+) {
+  const t = copy[lang];
+  const confirmUrl = asset(`/alta?token=${tokens.confirm}&lang=${lang}`);
+  const unsubscribeUrl = asset(`/baja?token=${tokens.unsubscribe}&lang=${lang}`);
+  const content =
+    intro(t.waitlistSubject, t.waitlistHeading, t.waitlistIntro) +
+    closing(
+      button(esc(confirmUrl), t.waitlistButton),
+      `<a href="${esc(unsubscribeUrl)}" style="color:${c.muted};">${t.waitlistUnsubscribe}</a>`,
+    );
+  return {
+    subject: t.waitlistSubject,
+    html: layout(lang, t.waitlistHeading, content),
+    text: `${t.waitlistHeading}\n\n${t.waitlistIntro}\n\n${confirmUrl}\n\n${t.waitlistUnsubscribe}: ${unsubscribeUrl}\n\n${brand.name}`,
+  };
 }
 
 export function ownerSubject(o: Order) {
@@ -190,5 +363,5 @@ export function ownerHtml(o: Order) {
     ])}
   </table>
 </td></tr>`;
-  return layout(`${o.name} · ${o.quantity} hogaza(s) · ${o.code}`, content);
+  return layout('es', `${o.name} · ${o.quantity} hogaza(s) · ${o.code}`, content);
 }

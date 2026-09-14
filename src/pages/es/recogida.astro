@@ -2,16 +2,17 @@
 import Article from '../../layouts/Article.astro';
 import Photo from '../../components/Photo.astro';
 import { brand, isDemo, launchReady } from '../../lib/config';
-import { dayFormat } from '../../lib/i18n';
+import { dayFormat, madridParts } from '../../lib/i18n';
 import { currentBake } from '../../lib/store';
-let pickupDate: string | undefined;
+let current: Awaited<ReturnType<typeof currentBake>> | undefined;
 if (isDemo || launchReady) {
   try {
-    pickupDate = (await currentBake()).pickupDate;
+    current = await currentBake();
   } catch {
-    /* Falls back to the configured date. */
+    /* Shows the weekly rhythm without a date. */
   }
 }
+const close = current && madridParts('es', current.deadline);
 const apple = 'https://maps.apple.com/?ll=41.35401410971224,2.026792459636187&q=Molla';
 const place = {
   '@context': 'https://schema.org',
@@ -59,19 +60,26 @@ const place = {
 
       <h2>Cuándo</h2>
       <p>
-        Los sábados. La próxima recogida es el <strong>{dayFormat('es', pickupDate)}</strong>
-        {brand.pickupWindow ? `, ${brand.pickupWindow}` : ''}. Los pedidos se
-        cierran el jueves a las 20:00 o cuando se completa la hornada.
+        {current ? (
+          <>
+            Los sábados. La próxima recogida es el <strong>{dayFormat('es', current.pickupDate)}</strong>
+            {current.pickupWindow ? `, ${current.pickupWindow}` : ''}. Los pedidos
+            se cierran el {close!.weekday} {close!.day} a las {close!.time} o cuando
+            se completa la hornada.
+          </>
+        ) : (
+          <>Los sábados. Los pedidos se cierran dos días antes a las 20:00 o cuando se completa la hornada.</>
+        )}
       </p>
 
       <h2>Cómo funciona</h2>
       <ol>
-        <li>Reservas en la web y recibes una confirmación con tu referencia.</li>
+        <li>Reservas en la web y recibes por email una confirmación con tu código de recogida. El día antes te llega un recordatorio.</li>
         <li>El sábado vienes al punto de recogida dentro de la franja horaria.</li>
-        <li>Dices tu nombre, pagas y te llevas tu hogaza, horneada ese mismo día.</li>
+        <li>Dices tu código, pagas y te llevas tu hogaza, horneada ese mismo día.</li>
       </ol>
       <p>
-        Si al final no puedes venir, escríbeme cuanto antes con la referencia:
+        Si al final no puedes venir, responde al email de confirmación cuanto antes con tu código:
         así libero tu pan para otra persona.
       </p>
 

@@ -12,7 +12,6 @@ import {
 import { ui, routes, dayFormat, type Lang } from '../lib/i18n';
 import { currentBake } from '../lib/store';
 import { bakeState } from '../lib/domain';
-import { randomUUID } from 'node:crypto';
 interface Props {
   lang: Lang;
 }
@@ -37,7 +36,14 @@ const statusLabel = t.status[state];
 const canSubmit = isDemo || launchReady;
 const loaf = products[0];
 const left = Math.max(0, current.capacity - current.reserved);
-const pickupDay = dayFormat(lang, current.pickupDate);
+// Without the database the configured bake is only a placeholder: never show its date.
+const pickupDay = unavailable ? t.bake.dateSoon : dayFormat(lang, current.pickupDate);
+const steps = t.process.steps.map((step, i) =>
+  unavailable ? step
+  : i === 0 ? { ...step, when: t.process.closeWhen(current.deadline) }
+  : i === t.process.steps.length - 1 ? { ...step, when: t.process.pickupWhen(current.pickupDate) }
+  : step,
+);
 const abs = (path: string) =>
   brand.site ? new URL(path, brand.site).href : undefined;
 const jsonLd = [
@@ -136,7 +142,7 @@ const jsonLd = [
           </p>
           <p class="bake-deadline">
             {open
-              ? t.bake.open
+              ? t.bake.open(current.deadline)
               : state === 'UPCOMING'
                 ? t.bake.upcoming
                 : t.bake.closed}
@@ -223,7 +229,7 @@ const jsonLd = [
           </div>
         </div>
         <ol class="timeline">
-          {t.process.steps.map((step) => (
+          {steps.map((step) => (
             <li class:list={{ long: 'time' in step }}>
               <span class="bar" aria-hidden="true">
                 {'time' in step && <span class="bar-time">{step.time}</span>}
@@ -276,7 +282,7 @@ const jsonLd = [
               <dt>{t.reserve.where}</dt>
               <dd id="recogida" data-event-view="pickup_info_view">
                 {brand.pickupAddress}
-                <small>{brand.pickupWindow || t.reserve.windowPending}</small>
+                <small>{current.pickupWindow || t.reserve.windowPending}</small>
                 <span class="map-links">
                   <a href={brand.pickupMap} target="_blank" rel="noopener noreferrer">
                     {t.reserve.map}
@@ -314,13 +320,13 @@ const jsonLd = [
           {open ? (
             <form
               id="reservation-form"
-              action="/api/reservations"
+              action={`/api/reservations?lang=${lang}`}
               method="post"
               data-price={loaf.price}
             >
               <h3>{t.reserve.yourOrder}</h3>
               {isDemo && <p class="form-intro">{t.reserve.demoIntro}</p>}
-              <input type="hidden" name="requestId" value={randomUUID()} />
+              <input type="hidden" name="requestId" value="" />
               <input type="hidden" name="bakeId" value={current.id} />
               <input type="hidden" name="product" value="clasica" />
               <input type="hidden" name="source" value="direct" />
@@ -383,7 +389,7 @@ const jsonLd = [
                     autocomplete="tel"
                     minlength="9"
                     maxlength="22"
-                    pattern="[+0-9 ()\-]{9,22}"
+                    pattern="[0-9 \(\)\+\-]{9,22}"
                     required
                     placeholder="612 345 678"
                   />
@@ -398,14 +404,14 @@ const jsonLd = [
               <label class="check">
                 <input type="checkbox" name="pickup" value="yes" required />
                 <span>
-                  {isDemo ? t.reserve.demoCheck : t.reserve.pickupCheck(pickupDay)}
+                  {isDemo ? t.reserve.demoCheck : t.reserve.pickupCheck(pickupDay, current.pickupWindow)}
                 </span>
               </label>
               <label class="check">
                 <input type="checkbox" name="privacy" value="yes" required />
                 <span>
                   {t.reserve.privacyA}{' '}
-                  <a href="/privacidad" target="_blank">
+                  <a href={routes.privacy[lang]} target="_blank">
                     {t.reserve.privacyLink}
                   </a>
                   .
@@ -461,7 +467,7 @@ const jsonLd = [
           <h2 id="waitlist-title">{t.waitlist.h2}</h2>
           <p>{t.waitlist.p}</p>
         </div>
-        <form id="waitlist-form" action="/api/waitlist" method="post">
+        <form id="waitlist-form" action={`/api/waitlist?lang=${lang}`} method="post">
           <label for="waitlist-email">{t.waitlist.label}</label>
           <div class="waitlist-input">
             <input
@@ -497,13 +503,18 @@ const jsonLd = [
             />
             <span>
               {t.waitlist.consentA}{' '}
-              <a href="/privacidad">{t.waitlist.consentLink}</a>.
+              <a href={routes.privacy[lang]}>{t.waitlist.consentLink}</a>.
             </span>
           </label>
           {!canSubmit && <p class="form-footnote">{t.waitlist.disabled}</p>}
           {isDemo && <p class="form-footnote">{t.waitlist.demo}</p>}
           <p class="form-error" role="alert" tabindex="-1" hidden></p>
-          <p class="waitlist-success" role="status" hidden>
+          <p
+            class="waitlist-success"
+            role="status"
+            data-direct={t.waitlist.successDirect}
+            hidden
+          >
             {t.waitlist.success}
           </p>
         </form>

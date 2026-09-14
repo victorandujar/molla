@@ -2,16 +2,17 @@
 import Article from '../layouts/Article.astro';
 import Photo from '../components/Photo.astro';
 import { brand, isDemo, launchReady } from '../lib/config';
-import { dayFormat } from '../lib/i18n';
+import { dayFormat, madridParts } from '../lib/i18n';
 import { currentBake } from '../lib/store';
-let pickupDate: string | undefined;
+let current: Awaited<ReturnType<typeof currentBake>> | undefined;
 if (isDemo || launchReady) {
   try {
-    pickupDate = (await currentBake()).pickupDate;
+    current = await currentBake();
   } catch {
-    /* Falls back to the configured date. */
+    /* Shows the weekly rhythm without a date. */
   }
 }
+const close = current && madridParts('ca', current.deadline);
 const apple = 'https://maps.apple.com/?ll=41.35401410971224,2.026792459636187&q=Molla';
 const place = {
   '@context': 'https://schema.org',
@@ -59,20 +60,27 @@ const place = {
 
       <h2>Quan</h2>
       <p>
-        Els dissabtes. La propera recollida és <strong>{dayFormat('ca', pickupDate)}</strong>
-        {brand.pickupWindow ? `, ${brand.pickupWindow}` : ''}. Les comandes es
-        tanquen dijous a les 20:00 o quan s’acaba la fornada.
+        {current ? (
+          <>
+            Els dissabtes. La propera recollida és <strong>{dayFormat('ca', current.pickupDate)}</strong>
+            {current.pickupWindow ? `, ${current.pickupWindow}` : ''}. Les comandes
+            es tanquen {close!.weekday} {close!.day} a les {close!.time} o quan
+            s’acaba la fornada.
+          </>
+        ) : (
+          <>Els dissabtes. Les comandes es tanquen dos dies abans a les 20:00 o quan s’acaba la fornada.</>
+        )}
       </p>
 
       <h2>Com funciona</h2>
       <ol>
-        <li>Reserves a la web i reps una confirmació amb la teva referència.</li>
+        <li>Reserves a la web i reps per correu una confirmació amb el teu codi de recollida. El dia abans t’arriba un recordatori.</li>
         <li>Dissabte vens al punt de recollida dins de la franja horària.</li>
-        <li>Dius el teu nom, pagues i t’emportes el pa, cuit aquell mateix dia.</li>
+        <li>Dius el teu codi, pagues i t’emportes el pa, cuit aquell mateix dia.</li>
       </ol>
       <p>
-        Si al final no pots venir, escriu-me com més aviat millor amb la
-        referència: així allibero el teu pa per a una altra persona.
+        Si al final no pots venir, respon el correu de confirmació com més aviat millor amb el
+        teu codi: així allibero el teu pa per a una altra persona.
       </p>
 
       <h2>Si vens de fora de Sant Boi</h2>

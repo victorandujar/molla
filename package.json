@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "astro dev --port 4381",
+    "dev:e2e": "ADMIN_PASSWORD=e2e-password-local astro dev --port 4381",
     "build": "astro build",
     "check": "astro check",
     "test": "node --import tsx --test tests/*.test.ts",
@@ -12,9 +13,13 @@
     "photos": "node scripts/photos.mjs",
     "brand": "node scripts/brand-assets.mjs",
     "db:migrate": "node --env-file-if-exists=.env --import tsx scripts/migrate.ts",
+    "db:migrate:prod": "node --env-file=.env.production --import tsx scripts/migrate.ts",
     "orders": "node --env-file-if-exists=.env --import tsx scripts/orders.ts",
+    "orders:prod": "node --env-file=.env.production --import tsx scripts/orders.ts",
     "bake": "node --env-file-if-exists=.env --import tsx scripts/bake.ts",
+    "bake:prod": "node --env-file=.env.production --import tsx scripts/bake.ts",
     "db:seed": "node --env-file-if-exists=.env --import tsx scripts/seed.ts",
+    "db:seed:prod": "node --env-file=.env.production --import tsx scripts/seed.ts",
     "audit:local": "node scripts/audit.mjs"
   },
   "dependencies": {
@@ -24,6 +29,7 @@
     "@fontsource/fraunces": "^5.3.0",
     "@fontsource/instrument-sans": "^5.3.0",
     "@tailwindcss/vite": "^4.3.3",
+    "@vercel/functions": "^3.9.7",
     "astro": "^7.3.2",
     "postgres": "^3.4.9",
     "tailwindcss": "^4.3.3",
