@@ -1,19 +1,22 @@
-import { brand, isDemo, money } from './config';
+import { brand, isDemo } from './config';
 import { emailStatus } from './store';
 import type { Order } from './domain';
-const day = (iso: string) =>
-  new Intl.DateTimeFormat('es-ES', {
-    timeZone: 'Europe/Madrid',
-    dateStyle: 'full',
-  }).format(new Date(iso));
-export function confirmationText(o: Order) {
-  return `Hola ${o.name},\n\nTu reserva en ${brand.name} está confirmada.\nReferencia: ${o.id}\n${o.quantity} × ${o.productName} — ${money(o.total)}\nRecogida: ${day(o.pickupDate)}\n${o.pickupWindow}\n${o.pickupAddress}\n${brand.pickupMap}\nPago al recoger.\n\nSi necesitas cambiar o cancelar la reserva, escribe a ${brand.contact} con tu referencia.\nGracias por reservar tu pan.`;
-}
-export function ownerText(o: Order) {
-  return `Nueva reserva\n\n${o.quantity} × ${o.productName} — ${money(o.total)}\nNombre: ${o.name}\nEmail: ${o.email}\nTeléfono: ${o.phone}\nRecogida: ${day(o.pickupDate)}, ${o.pickupWindow}\nCanal: ${o.source}\nReferencia: ${o.id}`;
-}
+import {
+  confirmationHtml,
+  confirmationSubject,
+  confirmationText,
+  ownerHtml,
+  ownerSubject,
+  ownerText,
+} from './email-templates';
 async function send(
-  payload: { to: string; subject: string; text: string; replyTo?: string },
+  payload: {
+    to: string;
+    subject: string;
+    text: string;
+    html: string;
+    replyTo?: string;
+  },
   key: string,
 ) {
   const response = await fetch('https://api.resend.com/emails', {
@@ -29,9 +32,13 @@ async function send(
       to: [payload.to],
       subject: payload.subject,
       text: payload.text,
+      html: payload.html,
       reply_to: payload.replyTo,
     }),
   });
+  // Logged without personal data so a delivery problem is visible in Vercel logs.
+  if (!response.ok)
+    console.error(`Email rejected (${response.status}) for ${key}`);
   return response.ok;
 }
 const enabled = () =>
@@ -46,14 +53,16 @@ export async function sendConfirmation(o: Order) {
     const ok = await send(
       {
         to: o.email,
-        subject: `Tu pan del sábado · ${brand.name}`,
+        subject: confirmationSubject(o),
         text: confirmationText(o),
+        html: confirmationHtml(o),
         replyTo: brand.contact || undefined,
       },
       `reservation-${o.id}`,
     );
     await emailStatus(o.id, ok ? 'SENT' : 'FAILED');
   } catch {
+    console.error('Confirmation email failed', o.id);
     await emailStatus(o.id, 'FAILED');
   }
 }
@@ -61,15 +70,17 @@ export async function sendConfirmation(o: Order) {
 export async function notifyOwner(o: Order) {
   if (!enabled() || !brand.contact) return;
   try {
-    await send(
+    const ok = await send(
       {
         to: brand.contact,
-        subject: `Nueva reserva: ${o.quantity} × ${o.productName} · ${o.name}`,
+        subject: ownerSubject(o),
         text: ownerText(o),
+        html: ownerHtml(o),
         replyTo: o.email,
       },
       `owner-${o.id}`,
     );
+    if (!ok) console.error('Owner notification failed', o.id);
   } catch {
     console.error('Owner notification failed', o.id);
   }

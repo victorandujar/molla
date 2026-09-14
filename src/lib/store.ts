@@ -1,8 +1,9 @@
-import { randomUUID, createHash } from 'node:crypto';
+import { randomUUID, randomBytes, createHash } from 'node:crypto';
 import postgres from 'postgres';
 import { bake, products, brand, isDemo } from './config';
 import {
   assertCapacity,
+  pickupCode,
   type Order,
   type ReservationInput,
   type BakeState,
@@ -49,7 +50,10 @@ async function demo<T>(fn: (data: Demo) => T | Promise<T>): Promise<T> {
   queue = run.catch(() => {});
   return run;
 }
-export async function currentBake() {
+export type ActiveBake = typeof bake & { reserved: number };
+// The database decides the active bake: the next pickup not yet completed,
+// or the most recent one so the page shows "closed" until the next is created.
+export async function currentBake(): Promise<ActiveBake> {
   if (!sql || isDemo)
     return demo((d) => ({
       ...bake,
@@ -58,11 +62,15 @@ export async function currentBake() {
         .filter((o) => o.bakeId === bake.id && o.status !== 'CANCELLED')
         .reduce((n, o) => n + o.quantity, 0),
     }));
-  const [b] =
-    await sql`SELECT b.*, COALESCE((SELECT SUM(i.quantity) FROM orders o JOIN order_items i ON i.order_id=o.id WHERE o.bake_id=b.id AND o.status!='CANCELLED'),0)::int AS reserved FROM bakes b WHERE b.id=${bake.id}`;
+  const [b] = await sql`
+    SELECT b.*, COALESCE((SELECT SUM(i.quantity) FROM orders o JOIN order_items i ON i.order_id=o.id WHERE o.bake_id=b.id AND o.status!='CANCELLED'),0)::int AS reserved
+    FROM bakes b, LATERAL (SELECT b.status!='COMPLETED' AND b.pickup_date > now() - interval '12 hours' AS upcoming) u
+    ORDER BY u.upcoming DESC, CASE WHEN u.upcoming THEN b.pickup_date END ASC, b.pickup_date DESC
+    LIMIT 1`;
   if (!b) throw new Error('La próxima hornada todavía se está preparando.');
   return {
-    ...bake,
+    id: b.id as string,
+    number: b.number as string,
     status: b.status as typeof bake.status,
     capacity: b.capacity as number,
     deadline: new Date(b.deadline).toISOString(),
@@ -72,12 +80,11 @@ export async function currentBake() {
   };
 }
 export async function reserve(input: ReservationInput): Promise<Order> {
-  if (input.bakeId !== bake.id)
-    throw new Error('La hornada ha cambiado. Recarga la página.');
   const order: Order = {
     id: randomUUID(),
+    code: '',
     requestId: input.requestId,
-    bakeId: bake.id,
+    bakeId: input.bakeId,
     name: input.name,
     email: input.email,
     phone: input.phone,
@@ -95,6 +102,8 @@ export async function reserve(input: ReservationInput): Promise<Order> {
   };
   if (!sql || isDemo)
     return demo((d) => {
+      if (input.bakeId !== bake.id)
+        throw new Error('La hornada ha cambiado. Recarga la página.');
       const prior = d.orders.find((o) => o.requestId === input.requestId);
       if (prior) {
         if (prior.email !== input.email)
@@ -108,12 +117,15 @@ export async function reserve(input: ReservationInput): Promise<Order> {
           .reduce((n, o) => n + o.quantity, 0),
         input.quantity,
       );
+      do order.code = pickupCode(bake.number, randomBytes(4));
+      while (d.orders.some((o) => o.code === order.code));
       d.orders.push(order);
       return order;
     });
   const result = await sql.begin(async (tx) => {
-    const [b] = await tx`SELECT * FROM bakes WHERE id=${bake.id} FOR UPDATE`;
-    if (!b) throw new Error('Esta hornada no está abierta.');
+    const [b] =
+      await tx`SELECT * FROM bakes WHERE id=${input.bakeId} FOR UPDATE`;
+    if (!b) throw new Error('La hornada ha cambiado. Recarga la página.');
     const [prior] =
       await tx`SELECT snapshot FROM orders WHERE request_id=${input.requestId}`;
     if (prior) {
@@ -123,7 +135,7 @@ export async function reserve(input: ReservationInput): Promise<Order> {
       return previous;
     }
     const [count] =
-      await tx`SELECT COALESCE(SUM(i.quantity),0)::int AS n FROM orders o JOIN order_items i ON i.order_id=o.id WHERE o.bake_id=${bake.id} AND o.status!='CANCELLED'`;
+      await tx`SELECT COALESCE(SUM(i.quantity),0)::int AS n FROM orders o JOIN order_items i ON i.order_id=o.id WHERE o.bake_id=${input.bakeId} AND o.status!='CANCELLED'`;
     assertCapacity(
       {
         status: b.status,
@@ -135,6 +147,9 @@ export async function reserve(input: ReservationInput): Promise<Order> {
       input.quantity,
     );
     order.pickupDate = new Date(b.pickup_date).toISOString();
+    // The bake row is locked, so no concurrent reservation can take the same code.
+    do order.code = pickupCode(b.number, randomBytes(4));
+    while ((await tx`SELECT 1 FROM orders WHERE code=${order.code}`).length);
     const [p] = await tx`SELECT * FROM products WHERE id=${input.product}`;
     if (!p) throw new Error('Este pan no está disponible.');
     if (p.price !== products[0].price)
@@ -145,7 +160,7 @@ export async function reserve(input: ReservationInput): Promise<Order> {
     order.productName = p.name;
     const [customer] =
       await tx`INSERT INTO customers (id,email,name,phone) VALUES (${randomUUID()},${input.email},${input.name},${input.phone}) ON CONFLICT(email) DO UPDATE SET name=EXCLUDED.name,phone=EXCLUDED.phone RETURNING id`;
-    await tx`INSERT INTO orders (id,request_id,bake_id,customer_id,snapshot,status) VALUES (${order.id},${order.requestId},${bake.id},${customer!.id},${tx.json(order)},'CONFIRMED')`;
+    await tx`INSERT INTO orders (id,code,request_id,bake_id,customer_id,snapshot,status) VALUES (${order.id},${order.code},${order.requestId},${input.bakeId},${customer!.id},${tx.json(order)},'CONFIRMED')`;
     await tx`INSERT INTO order_items (order_id,product_id,quantity,unit_price) VALUES (${order.id},${input.product},${input.quantity},${p.price})`;
     return order;
   });
@@ -196,6 +211,9 @@ export async function rateLimit(ip: string) {
       d.limits[key] = entry;
       return entry.count <= 12;
     });
+  // Occasional cleanup keeps the table small without a scheduled job.
+  if (Math.random() < 0.05)
+    await sql`DELETE FROM request_limits WHERE resets_at < now() - interval '1 day'`;
   const [r] =
     await sql`INSERT INTO request_limits (key,count,resets_at) VALUES (${key},1,now()+interval '10 minutes') ON CONFLICT(key) DO UPDATE SET count=CASE WHEN request_limits.resets_at<now() THEN 1 ELSE request_limits.count+1 END,resets_at=CASE WHEN request_limits.resets_at<now() THEN now()+interval '10 minutes' ELSE request_limits.resets_at END RETURNING count`;
   return r!.count <= 12;

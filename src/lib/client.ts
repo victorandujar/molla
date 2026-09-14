@@ -163,7 +163,7 @@ form?.addEventListener('submit', async (event) => {
     }
     const ref = document.createElement('p');
     ref.className = 'confirmation-ref';
-    ref.textContent = `${isCa ? 'Referència' : 'Referencia'}: ${order.id}`;
+    ref.textContent = `${isCa ? 'Codi de recollida' : 'Código de recogida'}: ${order.code}`;
     const save = document.createElement('button');
     save.className = 'button';
     save.type = 'button';
@@ -173,7 +173,7 @@ form?.addEventListener('submit', async (event) => {
     if (order.contact) {
       const support = document.createElement('a');
       support.className = 'text-link';
-      support.href = `mailto:${order.contact}?subject=${encodeURIComponent('Reserva ' + order.id)}`;
+      support.href = `mailto:${order.contact}?subject=${encodeURIComponent('Reserva ' + order.code)}`;
       support.textContent = (isCa ? 'Consultar o canviar la reserva ↗' : 'Consultar o cambiar mi reserva ↗');
       result.append(support);
     }

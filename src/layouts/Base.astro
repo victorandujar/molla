@@ -17,7 +17,7 @@ interface Props {
   jsonLd?: Record<string, unknown>[];
 }
 const {
-  lang = 'es',
+  lang = 'ca',
   route,
   title = ui[lang].meta.title,
   description = ui[lang].meta.description,
@@ -38,7 +38,7 @@ const organization = {
   '@id': abs('/#organization'),
   name: brand.name,
   url: abs('/'),
-  logo: abs('/favicon.svg'),
+  logo: abs('/icon-512.png'),
   email: brand.contact || undefined,
   sameAs: brand.instagram ? [brand.instagram] : undefined,
   areaServed: [
@@ -79,19 +79,20 @@ const graph = [organization, ...jsonLd];
     {canonical && <link rel="canonical" href={canonical} />}
     {route && brand.site && (
       <>
-        <link rel="alternate" hreflang="es" href={abs(routes[route].es)} />
         <link rel="alternate" hreflang="ca" href={abs(routes[route].ca)} />
+        <link rel="alternate" hreflang="es" href={abs(routes[route].es)} />
         <link
           rel="alternate"
           hreflang="x-default"
-          href={abs(routes[route].es)}
+          href={abs(routes[route].ca)}
         />
       </>
     )}
     <meta name="geo.region" content="ES-CT" />
     <meta name="geo.placename" content="Sant Boi de Llobregat" />
     <meta name="geo.position" content="41.354014;2.026792" />
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon-48.png" type="image/png" sizes="48x48" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content={brand.name} />
     <meta property="og:locale" content={lang === 'ca' ? 'ca_ES' : 'es_ES'} />
@@ -129,7 +130,7 @@ const graph = [organization, ...jsonLd];
     <header class="site-header">
       <div class="wrap header-inner">
         <a class="wordmark" href={home} aria-label={t.home}>
-          {brand.name.toLowerCase()}
+          {brand.name.toLowerCase()}.
         </a>
         <nav aria-label={lang === 'ca' ? 'Principal' : 'Principal'}>
           <a href={`${home}#proceso`}>{t.nav.process}</a>
@@ -155,7 +156,7 @@ const graph = [organization, ...jsonLd];
     <slot />
     <footer class="site-footer">
       <div class="wrap footer-inner">
-        <a class="wordmark" href={home}>{brand.name.toLowerCase()}</a>
+        <a class="wordmark" href={home}>{brand.name.toLowerCase()}.</a>
         <p>
           {t.footer.line}
           <br />

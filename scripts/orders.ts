@@ -1,6 +1,6 @@
 import postgres from 'postgres';
 import { readFile, writeFile } from 'node:fs/promises';
-import type { Order } from '../src/lib/domain';
+import { pickupCodePattern, type Order } from '../src/lib/domain';
 const [command = 'summary', arg] = process.argv.slice(2);
 const sql = process.env.DATABASE_URL
   ? postgres(process.env.DATABASE_URL, { max: 1 })
@@ -11,11 +11,13 @@ try {
       throw new Error(
         'Los cambios de estado requieren la base de datos configurada.',
       );
-    if (!arg || !/^[0-9a-f-]{36}$/i.test(arg))
-      throw new Error('Indica una referencia de pedido válida.');
+    const ref = arg?.trim().toUpperCase() || '';
+    const uuid = /^[0-9A-F-]{36}$/.test(ref);
+    if (!uuid && !pickupCodePattern.test(ref))
+      throw new Error('Indica el código (001-K7QM) o la referencia del pedido.');
     const status = command === 'cancel' ? 'CANCELLED' : 'COLLECTED';
     const rows =
-      await sql`UPDATE orders SET status=${status},snapshot=jsonb_set(snapshot,'{status}',${sql.json(status)}) WHERE id=${arg} AND status='CONFIRMED' RETURNING id`;
+      await sql`UPDATE orders SET status=${status},snapshot=jsonb_set(snapshot,'{status}',${sql.json(status)}) WHERE ${uuid ? sql`id=${ref.toLowerCase()}` : sql`code=${ref}`} AND status='CONFIRMED' RETURNING id`;
     console.log(
       rows.length ? 'Estado actualizado.' : 'No se encontró el pedido.',
     );
@@ -44,6 +46,7 @@ try {
           .replaceAll('"', '""') +
         '"';
       const fields = [
+        'code',
         'id',
         'bakeId',
         'name',
