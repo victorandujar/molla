@@ -25,7 +25,10 @@ const esc = (s: string) =>
 // Resolved against the site URL, which may include a base path.
 const asset = (path: string) => {
   const base = brand.site || 'https://www.mollapa.com';
-  return new URL(path.replace(/^\//, ''), base.endsWith('/') ? base : `${base}/`).href;
+  return new URL(
+    path.replace(/^\//, ''),
+    base.endsWith('/') ? base : `${base}/`,
+  ).href;
 };
 export const pickupDay = (iso: string, lang: Lang = 'es') => {
   const text = new Intl.DateTimeFormat(lang === 'ca' ? 'ca-ES' : 'es-ES', {
@@ -58,10 +61,7 @@ const copy = {
     payLater: 'pago al recoger',
     when: 'Cuándo',
     where: 'Dónde',
-    directions: 'Cómo llegar',
-    mapAlt: (address: string) =>
-      `Mapa del punto de recogida: ${address}. Abrir en Google Maps`,
-    mapButton: 'Cómo llegar en Google Maps →',
+    pickupNote: 'Te confirmaremos el punto exacto de recogida con tu pedido.',
     changes:
       '¿Cambios o no puedes venir? Responde a este email con tu código antes del cierre de pedidos y la hogaza pasará a otra persona.',
     changesText: (contact: string) =>
@@ -72,8 +72,7 @@ const copy = {
     reminderKicker: 'Recordatorio de recogida',
     reminderHeading: (o: Order) =>
       `${firstName(o.name)}, tu pan sale del horno el ${onDay(o)}.`,
-    reminderIntro:
-      'Ven dentro de la franja con tu código. Se paga al recoger.',
+    reminderIntro: 'Ven dentro de la franja con tu código. Se paga al recoger.',
     reminderCancel:
       '¿Al final no puedes venir? Responde a este email cuanto antes: así la hogaza no se desperdicia.',
     toPay: 'A pagar al recoger',
@@ -100,10 +99,8 @@ const copy = {
     payLater: 'pagament en recollir',
     when: 'Quan',
     where: 'On',
-    directions: 'Com arribar-hi',
-    mapAlt: (address: string) =>
-      `Mapa del punt de recollida: ${address}. Obrir a Google Maps`,
-    mapButton: 'Com arribar-hi amb Google Maps →',
+    pickupNote:
+      'Et confirmarem el punt exacte de recollida amb la teva comanda.',
     changes:
       'Canvis o no pots venir? Respon aquest correu amb el teu codi abans del tancament de comandes i el pa passarà a una altra persona.',
     changesText: (contact: string) =>
@@ -199,7 +196,7 @@ ${o.quantity} × ${o.productName} — ${money(o.total)} (${t.payLater})
 
 ${t.when}: ${pickupDay(o.pickupDate, langOf(o))}, ${o.pickupWindow}
 ${t.where}: ${o.pickupAddress}
-${t.directions}: ${brand.pickupMap}
+${t.pickupNote}
 
 ${t.changesText(brand.contact)}
 
@@ -211,7 +208,6 @@ ${brand.name}`;
 function pickupBlock(o: Order, totalLabel: string) {
   const lang = langOf(o);
   const t = copy[lang];
-  const map = esc(brand.pickupMap);
   return `
 <tr><td class="pad" style="padding:28px 40px 4px;">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#ffffff;border:2px dashed ${c.tile};border-radius:12px;">
@@ -227,13 +223,16 @@ function pickupBlock(o: Order, totalLabel: string) {
     ${details([
       [t.order, `${o.quantity} × ${esc(o.productName)}`],
       [t.total, `<strong>${money(o.total)}</strong> · ${totalLabel}`],
-      [t.when, `${esc(pickupDay(o.pickupDate, lang))}<br>${esc(o.pickupWindow)}`],
-      [t.where, esc(o.pickupAddress)],
+      [
+        t.when,
+        `${esc(pickupDay(o.pickupDate, lang))}<br>${esc(o.pickupWindow)}`,
+      ],
+      [
+        t.where,
+        `${esc(o.pickupAddress)}<br><span style="font-size:13px;color:${c.muted};">${esc(t.pickupNote)}</span>`,
+      ],
     ])}
   </table>
-</td></tr>
-<tr><td class="pad" style="padding:16px 40px 0;">
-  <a href="${map}" style="display:block;text-decoration:none;"><img src="${asset('/email/mapa-recogida.png')}" width="520" alt="${esc(t.mapAlt(o.pickupAddress))}" style="display:block;width:100%;max-width:520px;height:auto;border:0;border-radius:12px;"></a>
 </td></tr>`;
 }
 
@@ -264,7 +263,7 @@ export function confirmationHtml(o: Order) {
       esc(t.intro(o)),
     ) +
     pickupBlock(o, t.payLater) +
-    closing(button(esc(brand.pickupMap), t.mapButton), t.changes);
+    closing('', t.changes);
   return layout(
     lang,
     `${t.code} ${o.code} · ${pickupDay(o.pickupDate, lang)}, ${o.pickupWindow} · ${o.pickupAddress}`,
@@ -287,7 +286,7 @@ ${t.code}: ${o.code}
 ${o.quantity} × ${o.productName} — ${money(o.total)} (${t.payLater})
 ${t.when}: ${pickupDay(o.pickupDate, lang)}, ${o.pickupWindow}
 ${t.where}: ${o.pickupAddress}
-${t.directions}: ${brand.pickupMap}
+${t.pickupNote}
 
 ${t.reminderCancel}
 
@@ -300,7 +299,7 @@ export function reminderHtml(o: Order) {
   const content =
     intro(t.reminderKicker, esc(t.reminderHeading(o)), t.reminderIntro) +
     pickupBlock(o, t.toPay.toLowerCase()) +
-    closing(button(esc(brand.pickupMap), t.mapButton), t.reminderCancel);
+    closing('', t.reminderCancel);
   return layout(
     lang,
     `${o.code} · ${pickupDay(o.pickupDate, lang)}, ${o.pickupWindow}`,
@@ -314,7 +313,9 @@ export function waitlistConfirmation(
 ) {
   const t = copy[lang];
   const confirmUrl = asset(`/alta?token=${tokens.confirm}&lang=${lang}`);
-  const unsubscribeUrl = asset(`/baja?token=${tokens.unsubscribe}&lang=${lang}`);
+  const unsubscribeUrl = asset(
+    `/baja?token=${tokens.unsubscribe}&lang=${lang}`,
+  );
   const content =
     intro(t.waitlistSubject, t.waitlistHeading, t.waitlistIntro) +
     closing(
@@ -363,5 +364,9 @@ export function ownerHtml(o: Order) {
     ])}
   </table>
 </td></tr>`;
-  return layout('es', `${o.name} · ${o.quantity} hogaza(s) · ${o.code}`, content);
+  return layout(
+    'es',
+    `${o.name} · ${o.quantity} hogaza(s) · ${o.code}`,
+    content,
+  );
 }

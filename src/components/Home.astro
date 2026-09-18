@@ -37,12 +37,17 @@ const canSubmit = isDemo || launchReady;
 const loaf = products[0];
 const left = Math.max(0, current.capacity - current.reserved);
 // Without the database the configured bake is only a placeholder: never show its date.
-const pickupDay = unavailable ? t.bake.dateSoon : dayFormat(lang, current.pickupDate);
+const pickupDay = unavailable
+  ? t.bake.dateSoon
+  : dayFormat(lang, current.pickupDate);
 const steps = t.process.steps.map((step, i) =>
-  unavailable ? step
-  : i === 0 ? { ...step, when: t.process.closeWhen(current.deadline) }
-  : i === t.process.steps.length - 1 ? { ...step, when: t.process.pickupWhen(current.pickupDate) }
-  : step,
+  unavailable
+    ? step
+    : i === 0
+      ? { ...step, when: t.process.closeWhen(current.deadline) }
+      : i === t.process.steps.length - 1
+        ? { ...step, when: t.process.pickupWhen(current.pickupDate) }
+        : step,
 );
 const abs = (path: string) =>
   brand.site ? new URL(path, brand.site).href : undefined;
@@ -54,7 +59,12 @@ const jsonLd = [
     description: `${t.loaf.fermentationValue}. ${t.loaf.ingredientsValue}`,
     image: [abs('/images/loaves-1100.webp'), abs('/images/crumb-1100.webp')],
     brand: { '@type': 'Brand', name: brand.name },
-    weight: { '@type': 'QuantitativeValue', minValue: 750, maxValue: 850, unitCode: 'GRM' },
+    weight: {
+      '@type': 'QuantitativeValue',
+      minValue: 750,
+      maxValue: 850,
+      unitCode: 'GRM',
+    },
     offers: {
       '@type': 'Offer',
       url: abs(`${routes.home[lang]}#reserva`),
@@ -63,7 +73,8 @@ const jsonLd = [
       availability: open
         ? 'https://schema.org/InStock'
         : 'https://schema.org/OutOfStock',
-      availableDeliveryMethod: 'http://purl.org/goodrelations/v1#DeliveryModePickUp',
+      availableDeliveryMethod:
+        'http://purl.org/goodrelations/v1#DeliveryModePickUp',
       areaServed: { '@type': 'AdministrativeArea', name: 'Baix Llobregat' },
       seller: { '@id': abs('/#organization') },
     },
@@ -93,8 +104,7 @@ const jsonLd = [
             <span class="hero-word hero-word-lead">{t.hero.h1a}</span>{' '}
             <svg class="hero-star" viewBox="0 0 64 64" aria-hidden="true">
               <path d="M32 0l4.6 20.9L54.6 9.4 43.1 27.4 64 32l-20.9 4.6 11.5 18L36.6 43.1 32 64l-4.6-20.9-18 11.5 11.5-18L0 32l20.9-4.6L9.4 9.4l18 11.5z" />
-            </svg>
-{' '}
+            </svg>{' '}
             <span class="hero-word hero-word-side">{t.hero.h1b}</span>
           </h1>
           <div class="hero-aside">
@@ -109,58 +119,64 @@ const jsonLd = [
                 name={name}
                 alt={t.hero.photos[i]!}
                 eager
-                sizes={i ? '(max-width: 860px) 50vw, 38vw' : '(max-width: 860px) 50vw, 26vw'}
+                sizes={
+                  i
+                    ? '(max-width: 860px) 50vw, 38vw'
+                    : '(max-width: 860px) 50vw, 26vw'
+                }
               />
             </figure>
           ))}
-        <div
-          id="hornada"
-          class="bake-card"
-          data-state={state}
-          data-event-view="view_current_bake"
-          aria-labelledby="bake-title"
-          role="region"
-        >
-          <div class="bake-head">
-            <span class="status">
-              <span class="status-dot" aria-hidden="true"></span>
-              <span data-bake-label>{statusLabel}</span>
-            </span>
-            <span class="bake-number">
-              {t.bake.number} {current.number}
-            </span>
-          </div>
-          <h2 id="bake-title" class="bake-day">{pickupDay}</h2>
-          <progress
-            value={current.reserved}
-            max={current.capacity}
-            aria-label={`${current.reserved} ${t.bake.of} ${current.capacity} ${t.bake.reserved}`}
-          ></progress>
-          <p class="bake-count">
-            <strong data-reserved>{current.reserved}</strong>
-            {` ${t.bake.of} ${current.capacity} ${t.bake.reserved}${isDemo ? t.bake.test : ''}`}
-          </p>
-          <p class="bake-deadline">
-            {open
-              ? t.bake.open(current.deadline)
-              : state === 'UPCOMING'
-                ? t.bake.upcoming
-                : t.bake.closed}
-          </p>
-          {unavailable && (
-            <p role="status" class="bake-deadline">
-              {t.bake.unavailable}
-            </p>
-          )}
-          <a
-            class="bake-cta"
-            href={open ? '#reserva' : '#avisame'}
-            data-bake-cta
+          <div
+            id="hornada"
+            class="bake-card"
+            data-state={state}
+            data-event-view="view_current_bake"
+            aria-labelledby="bake-title"
+            role="region"
           >
-            {open ? t.bake.ctaOpen : t.bake.ctaClosed}{' '}
-            <span aria-hidden="true">↓</span>
-          </a>
-        </div>
+            <div class="bake-head">
+              <span class="status">
+                <span class="status-dot" aria-hidden="true"></span>
+                <span data-bake-label>{statusLabel}</span>
+              </span>
+              <span class="bake-number">
+                {t.bake.number} {current.number}
+              </span>
+            </div>
+            <h2 id="bake-title" class="bake-day">
+              {pickupDay}
+            </h2>
+            <progress
+              value={current.reserved}
+              max={current.capacity}
+              aria-label={`${current.reserved} ${t.bake.of} ${current.capacity} ${t.bake.reserved}`}
+            ></progress>
+            <p class="bake-count">
+              <strong data-reserved>{current.reserved}</strong>
+              {` ${t.bake.of} ${current.capacity} ${t.bake.reserved}${isDemo ? t.bake.test : ''}`}
+            </p>
+            <p class="bake-deadline">
+              {open
+                ? t.bake.open(current.deadline)
+                : state === 'UPCOMING'
+                  ? t.bake.upcoming
+                  : t.bake.closed}
+            </p>
+            {unavailable && (
+              <p role="status" class="bake-deadline">
+                {t.bake.unavailable}
+              </p>
+            )}
+            <a
+              class="bake-cta"
+              href={open ? '#reserva' : '#avisame'}
+              data-bake-cta
+            >
+              {open ? t.bake.ctaOpen : t.bake.ctaClosed}{' '}
+              <span aria-hidden="true">↓</span>
+            </a>
+          </div>
         </div>
         <p class="hero-keywords">
           {t.hero.keywords.map((k, i) => (
@@ -281,13 +297,11 @@ const jsonLd = [
             <div>
               <dt>{t.reserve.where}</dt>
               <dd id="recogida" data-event-view="pickup_info_view">
-                {brand.pickupAddress}
+                {t.reserve.pickupLocation}
+                <small>{t.reserve.pickupDetails}</small>
                 <small>{current.pickupWindow || t.reserve.windowPending}</small>
                 <span class="map-links">
-                  <a href={brand.pickupMap} target="_blank" rel="noopener noreferrer">
-                    {t.reserve.map}
-                  </a>
-                  <a href={routes.pickup[lang]}>{t.reserve.howToGet}</a>
+                  <a href={routes.pickup[lang]}>{t.reserve.pickupInfo}</a>
                 </span>
               </dd>
             </div>
@@ -336,7 +350,11 @@ const jsonLd = [
                   <small>{t.reserve.qtyMax}</small>
                 </label>
                 <div class="stepper">
-                  <button type="button" data-step="-1" aria-label={t.reserve.less}>
+                  <button
+                    type="button"
+                    data-step="-1"
+                    aria-label={t.reserve.less}
+                  >
                     −
                   </button>
                   <input
@@ -348,7 +366,11 @@ const jsonLd = [
                     value="1"
                     required
                   />
-                  <button type="button" data-step="1" aria-label={t.reserve.more}>
+                  <button
+                    type="button"
+                    data-step="1"
+                    aria-label={t.reserve.more}
+                  >
                     +
                   </button>
                 </div>
@@ -404,7 +426,9 @@ const jsonLd = [
               <label class="check">
                 <input type="checkbox" name="pickup" value="yes" required />
                 <span>
-                  {isDemo ? t.reserve.demoCheck : t.reserve.pickupCheck(pickupDay, current.pickupWindow)}
+                  {isDemo
+                    ? t.reserve.demoCheck
+                    : t.reserve.pickupCheck(pickupDay, current.pickupWindow)}
                 </span>
               </label>
               <label class="check">
@@ -426,7 +450,9 @@ const jsonLd = [
                 <p>
                   {t.reserve.noscript}{' '}
                   {brand.contact && (
-                    <a href={`mailto:${brand.contact}`}>{t.reserve.noscriptMail}</a>
+                    <a href={`mailto:${brand.contact}`}>
+                      {t.reserve.noscriptMail}
+                    </a>
                   )}
                 </p>
               </noscript>
@@ -467,7 +493,11 @@ const jsonLd = [
           <h2 id="waitlist-title">{t.waitlist.h2}</h2>
           <p>{t.waitlist.p}</p>
         </div>
-        <form id="waitlist-form" action={`/api/waitlist?lang=${lang}`} method="post">
+        <form
+          id="waitlist-form"
+          action={`/api/waitlist?lang=${lang}`}
+          method="post"
+        >
           <label for="waitlist-email">{t.waitlist.label}</label>
           <div class="waitlist-input">
             <input

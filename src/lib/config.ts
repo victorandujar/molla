@@ -1,4 +1,5 @@
 import type { BakeState } from './domain';
+export const WEEKLY_LOAF_PRICE_CENTS = 500;
 export const brand = {
   name: 'Molla',
   locale: 'es-ES',
@@ -8,10 +9,10 @@ export const brand = {
   contact: process.env.CONTACT_EMAIL || '',
   whatsapp: (process.env.WHATSAPP_NUMBER || '').replace(/\D/g, ''),
   instagram: process.env.INSTAGRAM_URL || '',
-  pickupAddress:
-    process.env.PICKUP_ADDRESS || 'Ronda de Sant Ramon, Sant Boi de Llobregat',
-  pickupMap:
-    'https://www.google.com/maps/search/?api=1&query=41.35401410971224,2.026792459636187',
+  pickupLabel: {
+    es: 'Punto de recogida en Sant Boi de Llobregat',
+    ca: 'Punt de recollida a Sant Boi de Llobregat',
+  },
   pickupWindow: process.env.PICKUP_WINDOW || '',
   legalName: process.env.LEGAL_NAME || '',
   legalId: process.env.LEGAL_ID || '',
@@ -33,7 +34,7 @@ export const products = [
     id: 'clasica',
     name: 'La de cada semana',
     subtitle: 'Hogaza de poolish',
-    price: 650,
+    price: WEEKLY_LOAF_PRICE_CENTS,
     weight: '750–850 g',
     ingredients: 'Harina de trigo, agua, sal y levadura.',
     allergens: 'Contiene trigo (gluten).',
@@ -76,7 +77,6 @@ export const launchReady =
   !!(
     process.env.DATABASE_URL &&
     brand.site.startsWith('https://') &&
-    brand.pickupAddress &&
     brand.pickupWindow &&
     brand.contact &&
     brand.legalName &&
