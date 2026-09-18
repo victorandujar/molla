@@ -28,7 +28,7 @@ Domingo: contar qué cambias la próxima semana y revisar números.
 
 **Presentación** — Estoy empezando a hacer pan de poolish por encargo para el Baix Llobregat. Lo hago yo, a mano, en hornadas pequeñas. La idea es sencilla: reservas durante la semana y lo recoges el sábado. Aquí iré enseñando el pan y cómo lo preparo.
 
-**Apertura** — Ya puedes reservar la hogaza del sábado. Poolish y más de 20 h de fermentación, 750–850 g, 6,50 €. Recogida en Sant Boi de Llobregat. Pedidos hasta el jueves a las 20:00 o hasta completar la hornada. Tienes fecha, recogida y reserva en el enlace de la bio.
+**Apertura** — Ya puedes reservar la hogaza del sábado. Poolish y más de 20 h de fermentación, 750–850 g, 5,00 €. Recogida en Sant Boi de Llobregat; el punto exacto se confirma con el pedido. Pedidos hasta el jueves a las 20:00 o hasta completar la hornada. Tienes fecha, recogida y reserva en el enlace de la bio.
 
 **Proceso** — Hoy toca esperar. La masa ya está en el banneton y la fermentación sigue su ritmo. El sábado veremos la miga.
 

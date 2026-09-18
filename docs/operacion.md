@@ -90,4 +90,4 @@ Producción (`www.mollapa.com`) tiene `LIVE_ORDERS=true`. Preview también, pero
 
 ## Marca
 
-`npm run brand` regenera con la tipografía de la web el wordmark del email (`public/email/molla-crema.png`), los iconos (`favicon-48.png`, `apple-touch-icon.png`, `icon-512.png`) y el mapa del punto de recogida (`public/email/mapa-recogida.png`, teselas de OpenStreetMap con su atribución). Ejecutarlo solo si cambia la marca o el punto de recogida.
+`npm run brand` regenera con la tipografía de la web el wordmark del email (`public/email/molla-crema.png`) y los iconos (`favicon-48.png`, `apple-touch-icon.png`, `icon-512.png`). Ejecutarlo solo si cambia la marca.

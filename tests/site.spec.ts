@@ -65,7 +65,7 @@ test('reservation, validation and waitlist journey', async ({ page }) => {
   await page.locator('input[name=pickup]').check();
   await page.locator('input[name=privacy]').check();
   await page.getByRole('button', { name: 'Añadir una hogaza' }).click();
-  await expect(page.locator('#total')).toContainText('13,00');
+  await expect(page.locator('#total')).toContainText('10,00');
   await page.locator('#reservation-form button[type=submit]').click();
   await expect(page.locator('#confirmation')).toBeVisible();
   await expect(page.locator('#confirmation')).toContainText(
@@ -80,7 +80,7 @@ test('reservation, validation and waitlist journey', async ({ page }) => {
   );
   const d = await readData();
   expect(d.orders).toHaveLength(1);
-  expect(d.orders[0].total).toBe(1300);
+  expect(d.orders[0].total).toBe(1000);
   expect(d.orders[0].lang).toBe('es');
   expect(d.waitlist).toHaveLength(1);
   expect(d.waitlist[0].confirmedAt).toBeNull();
@@ -108,7 +108,17 @@ test('every request id is generated in the browser, never in shared HTML', async
 test('server errors follow the page language', async ({ request }) => {
   const ca = await request.post('/api/reservations?lang=ca', {
     headers: origin,
-    data: { requestId: crypto.randomUUID(), bakeId: 'hornada-001', name: 'Ana', email: 'ana@example.com', phone: 'abc', product: 'clasica', quantity: 1, pickup: 'yes', privacy: 'yes' },
+    data: {
+      requestId: crypto.randomUUID(),
+      bakeId: 'hornada-001',
+      name: 'Ana',
+      email: 'ana@example.com',
+      phone: 'abc',
+      product: 'clasica',
+      quantity: 1,
+      pickup: 'yes',
+      privacy: 'yes',
+    },
   });
   expect(ca.status()).toBe(400);
   expect((await ca.json()).error).toBe('Revisa el telèfon.');
@@ -119,10 +129,22 @@ test('server errors follow the page language', async ({ request }) => {
   expect(broken.status()).toBe(400);
   const stale = await request.post('/api/reservations', {
     headers: origin,
-    data: { requestId: crypto.randomUUID(), bakeId: 'hornada-000', name: 'Ana', email: 'ana@example.com', phone: '612345678', product: 'clasica', quantity: 1, pickup: 'yes', privacy: 'yes' },
+    data: {
+      requestId: crypto.randomUUID(),
+      bakeId: 'hornada-000',
+      name: 'Ana',
+      email: 'ana@example.com',
+      phone: '612345678',
+      product: 'clasica',
+      quantity: 1,
+      pickup: 'yes',
+      privacy: 'yes',
+    },
   });
   expect(stale.status()).toBe(409);
-  expect((await stale.json()).error).toBe('La hornada ha cambiado. Recarga la página.');
+  expect((await stale.json()).error).toBe(
+    'La hornada ha cambiado. Recarga la página.',
+  );
 });
 test('cookie-free counters store only event, channel and day', async ({
   page,
@@ -133,13 +155,25 @@ test('cookie-free counters store only event, channel and day', async ({
     .poll(async () => Object.keys((await readData()).events || {}))
     .toContainEqual(expect.stringMatching(/\|landing_view\|instagram$/));
   expect(
-    (await request.post('/api/events', { headers: origin, data: { event: 'nope', source: 'x' } })).status(),
+    (
+      await request.post('/api/events', {
+        headers: origin,
+        data: { event: 'nope', source: 'x' },
+      })
+    ).status(),
   ).toBe(204);
   expect(
-    (await request.post('/api/events', { headers: { origin: 'https://elsewhere.example' }, data: { event: 'landing_view', source: 'direct' } })).status(),
+    (
+      await request.post('/api/events', {
+        headers: { origin: 'https://elsewhere.example' },
+        data: { event: 'landing_view', source: 'direct' },
+      })
+    ).status(),
   ).toBe(204);
   const keys = Object.keys((await readData()).events);
-  expect(keys.some((k) => k.includes('|nope|') || k.endsWith('|direct'))).toBe(false);
+  expect(keys.some((k) => k.includes('|nope|') || k.endsWith('|direct'))).toBe(
+    false,
+  );
 });
 test('owner panel needs the password and marks orders at pickup', async ({
   page,
@@ -149,7 +183,17 @@ test('owner panel needs the password and marks orders at pickup', async ({
   const password = 'e2e-password-local';
   const created = await request.post('/api/reservations', {
     headers: origin,
-    data: { requestId: crypto.randomUUID(), bakeId: 'hornada-001', name: 'Marta', email: 'marta@example.com', phone: '612345678', product: 'clasica', quantity: 2, pickup: 'yes', privacy: 'yes' },
+    data: {
+      requestId: crypto.randomUUID(),
+      bakeId: 'hornada-001',
+      name: 'Marta',
+      email: 'marta@example.com',
+      phone: '612345678',
+      product: 'clasica',
+      quantity: 2,
+      pickup: 'yes',
+      privacy: 'yes',
+    },
   });
   const { code } = await created.json();
   await page.goto('/gestio');
@@ -162,13 +206,22 @@ test('owner panel needs the password and marks orders at pickup', async ({
   const card = page.locator('.admin-orders li', { hasText: code });
   await expect(card).toContainText('Marta');
   await card.getByRole('button', { name: 'Marcar recogido' }).click();
-  await expect(page.locator('.admin-notice')).toHaveText('Pedido marcado como recogido.');
+  await expect(page.locator('.admin-notice')).toHaveText(
+    'Pedido marcado como recogido.',
+  );
   expect((await readData()).orders[0].status).toBe('COLLECTED');
-  await page.locator('.admin-orders li', { hasText: code }).getByRole('button', { name: 'Deshacer' }).click();
+  await page
+    .locator('.admin-orders li', { hasText: code })
+    .getByRole('button', { name: 'Deshacer' })
+    .click();
   expect((await readData()).orders[0].status).toBe('CONFIRMED');
   const forged = await request.post('/gestio', {
     headers: origin,
-    form: { action: 'status', id: (await readData()).orders[0].id, to: 'CANCELLED' },
+    form: {
+      action: 'status',
+      id: (await readData()).orders[0].id,
+      to: 'CANCELLED',
+    },
   });
   expect(forged.status()).toBe(200);
   expect((await readData()).orders[0].status).toBe('CONFIRMED');
@@ -323,7 +376,9 @@ test('closed bake rejects reservations but accepts next-bake waitlist', async ({
 test('Catalan privacy page mirrors the Spanish one', async ({ page }) => {
   await page.goto('/privacitat');
   await expect(page.locator('html')).toHaveAttribute('lang', 'ca');
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Privacitat i condicions.');
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText(
+    'Privacitat i condicions.',
+  );
   await page.locator('.lang-switch').click();
   await expect(page).toHaveURL(/\/privacidad$/);
 });
@@ -361,7 +416,13 @@ test('Catalan is the main language, Spanish lives under /es/', async ({
   await expect(page.getByRole('heading', { level: 1 })).toContainText(
     'Pa artesà per encàrrec',
   );
-  for (const path of ['/recollida', '/poolish', '/es/', '/es/recogida', '/es/poolish']) {
+  for (const path of [
+    '/recollida',
+    '/poolish',
+    '/es/',
+    '/es/recogida',
+    '/es/poolish',
+  ]) {
     const res = await request.get(path);
     expect(res.status()).toBe(200);
     await page.goto(path);
@@ -381,6 +442,10 @@ test('Catalan is the main language, Spanish lives under /es/', async ({
   }
   await page.goto('/es/recogida');
   await expect(page.locator('main')).toContainText('Sant Boi de Llobregat');
+  await expect(page.locator('main')).toContainText(
+    'Te confirmaremos el punto exacto de recogida con tu pedido',
+  );
+  await expect(page.locator('body')).not.toContainText('Ronda de Sant Ramon');
   await page.locator('.lang-switch').click();
   await expect(page).toHaveURL(/\/recollida$/);
 });
