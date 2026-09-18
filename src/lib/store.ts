@@ -122,7 +122,7 @@ export async function reserve(
     productName: products[0].name,
     total: products[0].price * input.quantity,
     pickupDate: bake.pickupDate,
-    pickupAddress: brand.pickupAddress,
+    pickupAddress: brand.pickupLabel[input.lang],
     pickupWindow: bake.pickupWindow,
     source: input.source,
     status: 'CONFIRMED',

@@ -9,6 +9,7 @@ import {
   waitlistConfirmation,
 } from '../src/lib/email-templates';
 import { madridParts, ui } from '../src/lib/i18n';
+import { WEEKLY_LOAF_PRICE_CENTS } from '../src/lib/config';
 import { isMessageKey } from '../src/lib/messages';
 import {
   bakeState,
@@ -118,26 +119,33 @@ const order: Order = {
   quantity: 1,
   product: 'clasica',
   productName: 'La de cada semana',
-  total: 650,
+  total: WEEKLY_LOAF_PRICE_CENTS,
   pickupDate: '2026-09-26T10:00:00.000Z',
-  pickupAddress: 'Ronda de Sant Ramon',
+  pickupAddress: 'Punto de recogida en Sant Boi de Llobregat',
   pickupWindow: 'de 12:00 a 13:00',
   source: 'direct',
   status: 'CONFIRMED',
   createdAt: '',
   emailStatus: 'PENDING',
 };
-test('confirmation email escapes customer input and links the map', () => {
+test('confirmation email escapes customer input without exposing the old pickup point', () => {
   const html = confirmationHtml(order);
   assert.doesNotMatch(html, /<script>/);
   assert.match(html, /001-K7QM/);
-  assert.match(html, /href="https:\/\/www\.google\.com\/maps[^"]+"[^>]*><img[^>]+mapa-recogida\.png/);
+  assert.match(
+    html,
+    /Te confirmaremos el punto exacto de recogida con tu pedido/,
+  );
+  assert.doesNotMatch(html, /Ronda de Sant Ramon|Google Maps|mapa-recogida/);
   assert.match(html, /<html lang="es">/);
 });
 test('emails follow the customer language; older orders stay in Spanish', () => {
   const ca = { ...order, lang: 'ca' as const };
   assert.match(confirmationSubject(ca), /El teu pa de dissabte/);
-  assert.match(confirmationHtml(ca), /<html lang="ca">[\s\S]*Codi de recollida[\s\S]*\/privacitat/);
+  assert.match(
+    confirmationHtml(ca),
+    /<html lang="ca">[\s\S]*Codi de recollida[\s\S]*\/privacitat/,
+  );
   assert.match(confirmationSubject(order), /Tu pan del sábado/);
   assert.match(reminderSubject(ca), /^Recordatori/);
   const reminder = reminderHtml(order);
@@ -149,8 +157,14 @@ test('waitlist confirmation links confirm and unsubscribe in the right language'
     confirm: '11111111-1111-4111-8111-111111111111',
     unsubscribe: '22222222-2222-4222-8222-222222222222',
   });
-  assert.match(m.html, /\/alta\?token=11111111-1111-4111-8111-111111111111&amp;lang=ca/);
-  assert.match(m.text, /\/baja\?token=22222222-2222-4222-8222-222222222222&lang=ca/);
+  assert.match(
+    m.html,
+    /\/alta\?token=11111111-1111-4111-8111-111111111111&amp;lang=ca/,
+  );
+  assert.match(
+    m.text,
+    /\/baja\?token=22222222-2222-4222-8222-222222222222&lang=ca/,
+  );
 });
 test('reminders go out only within 30 hours before pickup', () => {
   const pickup = '2026-09-26T10:00:00.000Z';
@@ -176,10 +190,17 @@ test('schema issues map to translated messages', () => {
 });
 test('deadline copy comes from the bake date, in Madrid time', () => {
   const deadline = '2026-09-24T18:00:00.000Z';
-  assert.deepEqual(madridParts('ca', deadline), { weekday: 'dijous', day: '24', time: '20:00' });
+  assert.deepEqual(madridParts('ca', deadline), {
+    weekday: 'dijous',
+    day: '24',
+    time: '20:00',
+  });
   assert.equal(
     ui.es.bake.open(deadline),
     'Pedidos hasta el jueves 24 a las 20:00 o hasta completar la hornada.',
   );
-  assert.equal(ui.ca.process.pickupWhen('2026-09-26T10:00:00.000Z'), 'Dissabte');
+  assert.equal(
+    ui.ca.process.pickupWhen('2026-09-26T10:00:00.000Z'),
+    'Dissabte',
+  );
 });
