@@ -96,7 +96,7 @@ export const ui = {
       how: 'Cómo lo hago',
       photos: [
         'El panadero cortando hogazas recién hechas junto al azulejo azul',
-        'Dos hogazas de corteza tostada delante del azulejo azul de la cocina',
+        'Rebanadas de hogaza con la miga abierta sobre una tabla de madera',
       ],
     },
     bake: {
@@ -120,6 +120,7 @@ export const ui = {
       kicker: 'La hogaza',
       name: 'La de cada semana',
       alt: 'Dos hogazas artesanas con greñas abiertas sobre una tabla de madera',
+      altSlice: 'Media hogaza sostenida en la mano, con la miga alveolada a la vista',
       fermentation: 'Fermentación',
       fermentationValue: 'Poolish y más de 20 horas de fermentación lenta',
       ingredients: 'Ingredientes',
@@ -327,7 +328,7 @@ export const ui = {
       how: 'Com el faig',
       photos: [
         'El forner tallant pans acabats de fer al costat de la rajola blava',
-        'Dos pans de crosta torrada davant la rajola blava de la cuina',
+        'Llesques de pa amb la molla oberta sobre una taula de fusta',
       ],
     },
     bake: {
@@ -351,6 +352,7 @@ export const ui = {
       kicker: 'El pa',
       name: 'El de cada setmana',
       alt: 'Dos pans artesans amb els talls oberts sobre una taula de fusta',
+      altSlice: 'Mig pa sostingut a la mà, amb la molla alveolada a la vista',
       fermentation: 'Fermentació',
       fermentationValue: 'Poolish i més de 20 hores de fermentació lenta',
       ingredients: 'Ingredients',
