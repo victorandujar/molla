@@ -194,12 +194,21 @@ const jsonLd = [
       aria-labelledby="loaf-title"
       data-event-view="view_product"
     >
-      <div class="loaf-photo">
-        <Photo
-          name="loaves"
-          alt={t.loaf.alt}
-          sizes="(max-width: 860px) calc(100vw - 40px), 58vw"
-        />
+      <div class="loaf-photos">
+        <div class="loaf-photo">
+          <Photo
+            name="loaves"
+            alt={t.loaf.alt}
+            sizes="(max-width: 860px) calc(100vw - 40px), 50vw"
+          />
+        </div>
+        <div class="loaf-inset">
+          <Photo
+            name="slice"
+            alt={t.loaf.altSlice}
+            sizes="(max-width: 860px) 50vw, 27vw"
+          />
+        </div>
       </div>
       <div class="loaf-info">
         <p class="kicker">{t.loaf.kicker}</p>

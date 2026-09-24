@@ -464,7 +464,7 @@ img {
   object-position: 50% 30%;
 }
 .hero-photo-hero img {
-  object-position: 50% 60%;
+  object-position: 50% 50%;
 }
 .bake-card {
   display: flex;
@@ -599,9 +599,25 @@ progress::-moz-progress-bar {
   align-items: center;
   padding-block: clamp(64px, 9vw, 128px);
 }
+/* Outside and inside of the loaf: the crumb shot overlaps the main photo. */
+.loaf-photos {
+  position: relative;
+  padding-bottom: 14%;
+}
 .loaf-photo {
+  width: 88%;
   aspect-ratio: 7 / 5;
   border-radius: var(--radius);
+  overflow: hidden;
+}
+.loaf-inset {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 48%;
+  aspect-ratio: 8 / 5;
+  border: 8px solid var(--linen);
+  border-radius: 14px;
   overflow: hidden;
 }
 .loaf-price {

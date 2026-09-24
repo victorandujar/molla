@@ -1,15 +1,19 @@
 import sharp from 'sharp';
 import { mkdir, writeFile } from 'node:fs/promises';
-const dir =
-  process.argv[2] || 'assets/originals';
+const dir = process.argv[2] || 'assets/originals';
 const roles = {
-  hero: '1000041564',
+  hero: 'rebanadas-tabla',
   crumb: '1000041563',
   loaves: '1000041558',
   maker: '1000041594',
   hands: '1000041588',
   dough: '1000045169',
   person: '1000041581',
+  slice: 'miga-mano',
+};
+// Optional region (original pixels) cut before resizing, for shots with busy surroundings.
+const regions = {
+  slice: { left: 290, top: 2645, width: 4300, height: 2690 },
 };
 await mkdir('public/images', { recursive: true });
 const ratios = {
@@ -20,15 +24,16 @@ const ratios = {
   hands: 1.333,
   dough: 0.8,
   person: 0.75,
+  slice: 1.6,
 };
 for (const [name, id] of Object.entries(roles))
   for (const width of [400, 720, 1100, 1600]) {
-    const source = sharp(`${dir}/${id}.jpg`)
-      .rotate()
-      .resize(width, Math.round(width / ratios[name]), {
-        fit: 'cover',
-        position: 'centre',
-      });
+    const image = sharp(`${dir}/${id}.jpg`).rotate();
+    if (regions[name]) image.extract(regions[name]);
+    const source = image.resize(width, Math.round(width / ratios[name]), {
+      fit: 'cover',
+      position: 'centre',
+    });
     await source
       .clone()
       .webp({ quality: 78 })
@@ -47,7 +52,7 @@ const notes = {
   1000041556: 'Hogazas desde arriba; alternativa para Stories.',
   1000041558: 'Producto: corteza y dos hogazas.',
   1000041563: 'Ficha de producto: miga visible a contraluz.',
-  1000041564: 'Hero: hogazas, luz y azul de la cocina.',
+  1000041564: 'Hogazas, luz y azul de la cocina; antiguo hero, alternativa.',
   1000041570: 'Retrato cercano oliendo el pan; Stories.',
   1000041571: 'Retrato medio; Instagram persona.',
   1000041578: 'Retrato abierto con cocina; alternativa.',
@@ -59,10 +64,14 @@ const notes = {
   1000041608: 'Rebanadas y miga; detalle editorial.',
   1000045161: 'Masa en fermentación; contenido de proceso.',
   1000045169: 'Bannetons; proceso en la web.',
+  'rebanadas-tabla':
+    'Hero: rebanadas sobre la tabla, miga abierta desde arriba.',
+  'miga-mano':
+    'Rebanada en la mano; recorte de la miga junto a la ficha de producto.',
 };
 await writeFile(
   'docs/fotografia.md',
-  '# Selección de las 15 fotografías\n\n' +
+  '# Selección de fotografías\n\n' +
     Object.entries(notes)
       .map(([id, n]) => `- ${id}.jpg: ${n}`)
       .join('\n') +
