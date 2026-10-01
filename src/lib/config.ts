@@ -54,7 +54,7 @@ export const products = [
     available: false,
   },
 ] as const;
-// A new bake is created explicitly; dates never roll forward automatically.
+// Seed/fallback bake. Production rolls subsequent dates forward automatically.
 export const bake = {
   id: 'hornada-001',
   number: '001',

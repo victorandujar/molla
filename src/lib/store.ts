@@ -4,9 +4,11 @@ import { bake, products, brand, isDemo } from './config';
 import { AppError } from './messages';
 import {
   assertCapacity,
+  madridIso,
   pickupCode,
   reminderDue,
   reminderWindowHours,
+  weeklyCyclePlan,
   type Lang,
   type Order,
   type ReservationInput,
@@ -398,4 +400,88 @@ export async function cleanup() {
   await sql!`DELETE FROM request_limits WHERE resets_at < now() - interval '1 day'`;
   // Unconfirmed sign-ups hold an email without consent: drop them after a week.
   await sql!`DELETE FROM waitlist_subscribers WHERE confirmed_at IS NULL AND subscribed_at < now() - interval '7 days'`;
+}
+
+const madridClock = (at: Date) =>
+  new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Europe/Madrid',
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23',
+  }).format(at);
+
+export type WeeklyCycleResult = {
+  closed: number;
+  completed: number;
+  created: string | null;
+  active: string | null;
+};
+
+// Reconciles the weekly lifecycle. An advisory transaction lock and the
+// pickup-date lookup make repeated/overlapping cron calls harmless.
+export async function runWeeklyBakeCycle(
+  now = new Date(),
+): Promise<WeeklyCycleResult> {
+  if (useDemo())
+    return { closed: 0, completed: 0, created: null, active: null };
+
+  return sql!.begin(async (tx) => {
+    await tx`SELECT pg_advisory_xact_lock(hashtext('molla-weekly-bake-cycle'))`;
+    const closed = await tx`
+      UPDATE bakes SET status='CLOSED'
+      WHERE deadline <= ${now} AND status IN ('UPCOMING','OPEN','SOLD_OUT')
+      RETURNING id`;
+
+    const initialPlan = weeklyCyclePlan(now);
+    const startOfToday = madridIso(initialPlan.today, '00:00');
+    const completed = await tx`
+      UPDATE bakes SET status='COMPLETED'
+      WHERE pickup_date < ${startOfToday} AND status!='COMPLETED'
+      RETURNING id`;
+
+    if (!initialPlan.shouldEnsureBake)
+      return {
+        closed: closed.length,
+        completed: completed.length,
+        created: null,
+        active: null,
+      };
+
+    const [existing] = await tx`
+      SELECT id,status FROM bakes
+      WHERE (pickup_date AT TIME ZONE 'Europe/Madrid')::date=${initialPlan.pickupDate}::date
+      ORDER BY pickup_date LIMIT 1`;
+    if (existing) {
+      if (existing.status === 'UPCOMING')
+        await tx`UPDATE bakes SET status='OPEN',opens_at=LEAST(opens_at,${now}) WHERE id=${existing.id}`;
+      return {
+        closed: closed.length,
+        completed: completed.length,
+        created: null,
+        active: existing.id as string,
+      };
+    }
+
+    const [latest] =
+      await tx`SELECT number,capacity,pickup_date,pickup_window FROM bakes ORDER BY pickup_date DESC LIMIT 1`;
+    const pickupTime = latest?.pickup_date
+      ? madridClock(new Date(latest.pickup_date))
+      : madridClock(new Date(bake.pickupDate));
+    const plan = weeklyCyclePlan(now, pickupTime);
+    const number = String(Number(latest?.number || 0) + 1).padStart(3, '0');
+    const id = `hornada-${number}`;
+    await tx`
+      INSERT INTO bakes(id,number,pickup_date,deadline,opens_at,capacity,status,pickup_window)
+      VALUES(
+        ${id},${number},${plan.pickupAt},${plan.deadline},${now},
+        ${Number(latest?.capacity || bake.capacity)},'OPEN',
+        ${(latest?.pickup_window as string | null) || brand.pickupWindow || null}
+      )`;
+    return {
+      closed: closed.length,
+      completed: completed.length,
+      created: id,
+      active: id,
+    };
+  }) as Promise<WeeklyCycleResult>;
 }

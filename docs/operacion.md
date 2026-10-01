@@ -20,14 +20,16 @@ Las Preview tienen `LIVE_ORDERS=true` contra `molla_dev` y sin `RESEND_API_KEY`:
 
 Debajo, el embudo de los últimos 28 días y los avisos confirmados o pendientes. La sesión dura 12 horas, la cookie solo viaja a `/gestio` y hay 5 intentos de contraseña cada 10 minutos por IP. Cambiar `ADMIN_PASSWORD` (y redesplegar) cierra todas las sesiones.
 
-## Hornadas: la base de datos manda
+## Hornadas: ciclo semanal automático
 
-`src/lib/config.ts` contiene marca, producto, receta y precio en céntimos. La hornada que se muestra y admite pedidos se lee de la base de datos: la próxima recogida no completada o, si no hay ninguna, la última (que aparecerá como cerrada con la lista de avisos). Abrir una semana nueva no requiere desplegar.
+`src/lib/config.ts` contiene marca, producto, receta y precio en céntimos. La hornada que se muestra y admite pedidos se lee de la base de datos: la próxima recogida no completada o, si no hay ninguna, la última (que aparecerá como cerrada con la lista de avisos).
+
+El ciclo semanal no requiere intervención: el jueves a las 20:00 (hora de Madrid) se cierran las solicitudes y el domingo de madrugada se crea la hornada del sábado siguiente. La hornada nueva conserva el cupo, la hora y la franja de recogida de la anterior, pero empieza con 0 reservas. Los pedidos anteriores no se borran: quedan en su hornada para el histórico y la gestión. La tarea diaria vuelve a reconciliar el ciclo, así que recupera automáticamente una ejecución de cron perdida entre domingo y jueves.
 
 Todos los comandos muestran el host de la base de datos. Los que escriben exigen `--yes`: revisa antes el host, porque `.env` apunta a producción.
 
 - `npm run bake`: lista hornadas con estado, reservas/capacidad, apertura, cierre y recogida.
-- `npm run bake:prod -- new 2026-10-03 --capacity=6 --yes`: crea la siguiente hornada (`hornada-002`, …). Por defecto la recogida es a las 12:00, cierra dos días antes a las 20:00, abre en el momento de crearla y usa la franja de `PICKUP_WINDOW`. Ajustable con `--pickup-time=HH:MM`, `--deadline=AAAA-MM-DDTHH:MM`, `--opens=AAAA-MM-DDTHH:MM` y `--window="de 11:00 a 13:00"`, siempre en hora de Madrid (el cambio de horario se calcula solo). La web muestra el cierre, el día y la franja de cada hornada; no hay fechas escritas a mano en los textos.
+- `npm run bake:prod -- new 2026-10-03 --capacity=6 --yes`: crea manualmente una hornada excepcional (`hornada-002`, …). Por defecto la recogida es a las 12:00, cierra dos días antes a las 20:00, abre en el momento de crearla y usa la franja de `PICKUP_WINDOW`. Ajustable con `--pickup-time=HH:MM`, `--deadline=AAAA-MM-DDTHH:MM`, `--opens=AAAA-MM-DDTHH:MM` y `--window="de 11:00 a 13:00"`, siempre en hora de Madrid (el cambio de horario se calcula solo). La web muestra el cierre, el día y la franja de cada hornada; no hay fechas escritas a mano en los textos.
 - `npm run bake:prod -- window hornada-002 "de 11:00 a 13:00" --yes`: cambia la franja. Los pedidos ya confirmados conservan la franja con la que se confirmaron.
 - `npm run bake -- capacity hornada-002 8 --yes`: cambia el cupo; nunca por debajo de lo ya reservado.
 - `npm run bake -- status hornada-001 COMPLETED --yes`: marca la hornada como entregada tras la recogida. Estados: UPCOMING, OPEN, SOLD_OUT, CLOSED y COMPLETED.
@@ -50,9 +52,9 @@ Los comandos siguientes aparecen sin sufijo; para producción usa `orders:prod`.
 
 Las exportaciones se crean con permisos privados. No subirlas a Git. En local sin DATABASE_URL, los comandos de lectura usan `.data/demo.json`. No trasladar datos ficticios a producción. La lista y el resumen son herramientas de operación; no hay un panel público con pedidos.
 
-## Tarea diaria: recordatorios y reintentos
+## Tareas automáticas: ciclo, recordatorios y reintentos
 
-Vercel Cron llama cada día a `/api/cron/daily` a las 16:00 UTC (18:00 en verano y 17:00 en invierno en Madrid; en el plan Hobby puede ejecutarse en cualquier momento de esa hora), autenticado con `CRON_SECRET`. La tarea:
+Vercel Cron llama cada día a `/api/cron/cycle` a las 00:00 UTC (01:00 en invierno y 02:00 en verano en Madrid). El cierre público se aplica exactamente a las 20:00 del jueves mediante la fecha límite de la hornada; el cron persiste después el estado `CLOSED`. Las invocaciones redundantes son seguras: una transacción bloqueada evita crear dos hornadas. Además llama cada día a `/api/cron/daily` a las 16:00 UTC (18:00 en verano y 17:00 en invierno), autenticado con `CRON_SECRET`. La tarea diaria reconcilia también el ciclo como respaldo y después:
 
 1. Envía un **recordatorio** en el idioma del cliente a los pedidos confirmados cuya recogida cae en las próximas 30 horas: con recogida el sábado a mediodía, llega el viernes por la tarde. Cada pedido se marca antes de enviar, para que dos ejecuciones no dupliquen el email. Si el envío falla, se desmarca.
 2. **Reintenta** las confirmaciones en FAILED o PENDING de más de 10 minutos, para recogidas futuras. Usa la misma clave idempotente, así que Resend no duplica un email que ya había aceptado.

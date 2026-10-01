@@ -20,6 +20,7 @@ import {
   pickupCode,
   pickupCodePattern,
   reminderDue,
+  weeklyCyclePlan,
   csvCell,
   type Order,
 } from '../src/lib/domain';
@@ -100,6 +101,25 @@ test('Madrid wall-clock times respect summer and winter offsets', () => {
   assert.throws(() => madridIso('26/09/2026'));
 });
 
+test('weekly cycle opens Sunday for the next Saturday and closes Thursday at 20:00 Madrid time', () => {
+  assert.deepEqual(weeklyCyclePlan(new Date('2026-09-26T22:05:00Z')), {
+    today: '2026-09-27',
+    weekday: 0,
+    shouldEnsureBake: true,
+    pickupDate: '2026-10-03',
+    pickupAt: '2026-10-03T10:00:00.000Z',
+    deadline: '2026-10-01T18:00:00.000Z',
+  });
+  const thursday = weeklyCyclePlan(new Date('2026-12-03T12:00:00Z'));
+  assert.equal(thursday.pickupDate, '2026-12-05');
+  assert.equal(thursday.deadline, '2026-12-03T19:00:00.000Z');
+  assert.equal(thursday.shouldEnsureBake, true);
+  assert.equal(
+    weeklyCyclePlan(new Date('2026-12-04T12:00:00Z')).shouldEnsureBake,
+    false,
+  );
+});
+
 test('pickup codes are short, readable and carry the bake number', () => {
   assert.equal(pickupCode('001', new Uint8Array([0, 30, 31, 255])), '001-A9AH');
   for (let i = 0; i < 500; i++) {
@@ -136,6 +156,7 @@ test('confirmation email escapes customer input without exposing the old pickup 
     html,
     /Te confirmaremos el punto exacto de recogida con tu pedido/,
   );
+  assert.match(html, /hasta 35 horas de fermentación lenta/);
   assert.doesNotMatch(html, /Ronda de Sant Ramon|Google Maps|mapa-recogida/);
   assert.match(html, /<html lang="es">/);
 });
@@ -146,6 +167,7 @@ test('emails follow the customer language; older orders stay in Spanish', () => 
     confirmationHtml(ca),
     /<html lang="ca">[\s\S]*Codi de recollida[\s\S]*\/privacitat/,
   );
+  assert.match(confirmationHtml(ca), /fins a 35 hores de fermentació lenta/);
   assert.match(confirmationSubject(order), /Tu pan del sábado/);
   assert.match(reminderSubject(ca), /^Recordatori/);
   const reminder = reminderHtml(order);
@@ -203,4 +225,6 @@ test('deadline copy comes from the bake date, in Madrid time', () => {
     ui.ca.process.pickupWhen('2026-09-26T10:00:00.000Z'),
     'Dissabte',
   );
+  assert.equal(ui.ca.process.steps[1]!.time, 'Fins a 35 h');
+  assert.equal(ui.es.process.steps[1]!.time, 'Hasta 35 h');
 });
