@@ -68,7 +68,7 @@ export const ui = {
     meta: {
       title: `Pan artesanal por encargo en Sant Boi de Llobregat · ${brand.name}`,
       description:
-        'Hogazas hechas a mano con poolish y más de 20 horas de fermentación lenta. Reserva online y recoge el sábado en Sant Boi de Llobregat. Para todo el Baix Llobregat.',
+        'Hogazas hechas a mano con poolish y hasta 35 horas de fermentación lenta. Reserva online y recoge el sábado en Sant Boi de Llobregat. Para todo el Baix Llobregat.',
       ogAlt: 'Hogazas de corteza tostada recién cortadas',
     },
     status: {
@@ -82,10 +82,10 @@ export const ui = {
       h1a: 'Pan artesanal',
       h1b: 'por encargo',
       sub: 'Cada sábado en Sant Boi de Llobregat.',
-      lede: 'Amaso a mano una hornada pequeña cada semana, con poolish y más de 20 horas de fermentación lenta. Tú lo reservas aquí y el sábado lo pasas a recoger.',
+      lede: 'Amaso a mano una hornada pequeña cada semana, con poolish y hasta 35 horas de fermentación lenta. Tú lo reservas aquí y el sábado lo pasas a recoger.',
       keywords: [
         'Poolish',
-        '+20 h de fermentación',
+        'Hasta 35 h de fermentación',
         'Hecho a mano',
         'Recogida el sábado',
         'Sant Boi de Llobregat',
@@ -121,7 +121,7 @@ export const ui = {
       name: 'La de cada semana',
       alt: 'Dos hogazas artesanas con greñas abiertas sobre una tabla de madera',
       fermentation: 'Fermentación',
-      fermentationValue: 'Poolish y más de 20 horas de fermentación lenta',
+      fermentationValue: 'Poolish y hasta 35 horas de fermentación lenta',
       ingredients: 'Ingredientes',
       ingredientsValue: 'Harina de trigo, agua, sal y levadura.',
       allergens: 'Alérgenos',
@@ -152,10 +152,10 @@ export const ui = {
           text: 'Cierro pedidos y sé exactamente cuántas hogazas hacer. Ni una de más.',
         },
         {
-          when: 'Desde la víspera',
+          when: 'Desde el jueves',
           title: 'Fermentación lenta',
-          time: '+20 h',
-          text: 'Poolish, amasado con pliegues a mano, formado y una noche en frío. Sin prisa: ahí nacen el sabor, el aroma y la miga.',
+          time: 'Hasta 35 h',
+          text: 'Poolish, amasado con pliegues a mano, formado y una larga fermentación en frío. Sin prisa: ahí nacen el sabor, el aroma y la miga.',
         },
         {
           when: 'Antes de recoger',
@@ -223,7 +223,7 @@ export const ui = {
       items: [
         [
           '¿Es pan de masa madre?',
-          'No. Uso poolish: una masa previa de harina, agua y muy poca levadura que fermenta durante la noche. En total, cada hogaza lleva más de 20 horas de fermentación. Como la masa madre, es una fermentación lenta que da sabor y una miga abierta, pero con un gusto más suave y menos ácido.',
+          'No. Uso poolish: una masa previa de harina, agua y muy poca levadura que fermenta durante la noche. En total, cada hogaza lleva hasta 35 horas de fermentación. Como la masa madre, es una fermentación lenta que da sabor y una miga abierta, pero con un gusto más suave y menos ácido.',
         ],
         [
           '¿Qué es un poolish?',
@@ -299,7 +299,7 @@ export const ui = {
     meta: {
       title: `Pa artesà per encàrrec a Sant Boi de Llobregat · ${brand.name}`,
       description:
-        'Pans fets a mà amb poolish i més de 20 hores de fermentació lenta. Reserva en línia i recull-lo dissabte a Sant Boi de Llobregat. Per a tot el Baix Llobregat.',
+        'Pans fets a mà amb poolish i fins a 35 hores de fermentació lenta. Reserva en línia i recull-lo dissabte a Sant Boi de Llobregat. Per a tot el Baix Llobregat.',
       ogAlt: 'Pans de crosta torrada acabats de tallar',
     },
     status: {
@@ -313,10 +313,10 @@ export const ui = {
       h1a: 'Pa artesà',
       h1b: 'per encàrrec',
       sub: 'Cada dissabte a Sant Boi de Llobregat.',
-      lede: 'Pasto a mà una fornada petita cada setmana, amb poolish i més de 20 hores de fermentació lenta. Tu el reserves aquí i dissabte el passes a buscar.',
+      lede: 'Pasto a mà una fornada petita cada setmana, amb poolish i fins a 35 hores de fermentació lenta. Tu el reserves aquí i dissabte el passes a buscar.',
       keywords: [
         'Poolish',
-        '+20 h de fermentació',
+        'Fins a 35 h de fermentació',
         'Fet a mà',
         'Recollida dissabte',
         'Sant Boi de Llobregat',
@@ -352,7 +352,7 @@ export const ui = {
       name: 'El de cada setmana',
       alt: 'Dos pans artesans amb els talls oberts sobre una taula de fusta',
       fermentation: 'Fermentació',
-      fermentationValue: 'Poolish i més de 20 hores de fermentació lenta',
+      fermentationValue: 'Poolish i fins a 35 hores de fermentació lenta',
       ingredients: 'Ingredients',
       ingredientsValue: 'Farina de blat, aigua, sal i llevat.',
       allergens: 'Al·lèrgens',
@@ -383,10 +383,10 @@ export const ui = {
           text: 'Tanco comandes i sé exactament quants pans he de fer. Ni un de més.',
         },
         {
-          when: 'Des de la vigília',
+          when: 'Des de dijous',
           title: 'Fermentació lenta',
-          time: '+20 h',
-          text: 'Poolish, pastat amb plecs a mà, formació i una nit en fred. Sense pressa: aquí neixen el gust, l’aroma i la molla.',
+          time: 'Fins a 35 h',
+          text: 'Poolish, pastat amb plecs a mà, formació i una llarga fermentació en fred. Sense presses: aquí neixen el gust, l’aroma i la molla.',
         },
         {
           when: 'Abans de recollir',
@@ -454,7 +454,7 @@ export const ui = {
       items: [
         [
           'És pa de massa mare?',
-          'No. Faig servir poolish: una massa prèvia de farina, aigua i molt poc llevat que fermenta durant la nit. En total, cada pa porta més de 20 hores de fermentació. Com la massa mare, és una fermentació lenta que dona gust i una molla oberta, però amb un sabor més suau i menys àcid.',
+          'No. Faig servir poolish: una massa prèvia de farina, aigua i molt poc llevat que fermenta durant la nit. En total, cada pa porta fins a 35 hores de fermentació. Com la massa mare, és una fermentació lenta que dona gust i una molla oberta, però amb un sabor més suau i menys àcid.',
         ],
         [
           'Què és un poolish?',

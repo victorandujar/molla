@@ -76,6 +76,39 @@ export function madridIso(date: string, time = '00:00') {
   const instant = guess - offset(guess - offset(guess));
   return new Date(instant).toISOString();
 }
+
+const madridDate = (at: Date) => {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'Europe/Madrid',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(at);
+  const value = (type: Intl.DateTimeFormatPartTypes) =>
+    parts.find((part) => part.type === type)!.value;
+  return `${value('year')}-${value('month')}-${value('day')}`;
+};
+const addCalendarDays = (date: string, days: number) =>
+  new Date(Date.parse(`${date}T12:00:00Z`) + days * 86400000)
+    .toISOString()
+    .slice(0, 10);
+
+// The weekly cycle follows Madrid's calendar, not the cron server's UTC day.
+// Sunday through Thursday ensure the coming Saturday exists; Friday and
+// Saturday never create a last-minute bake.
+export function weeklyCyclePlan(now = new Date(), pickupTime = '12:00') {
+  const today = madridDate(now);
+  const weekday = new Date(`${today}T12:00:00Z`).getUTCDay();
+  const pickupDate = addCalendarDays(today, (6 - weekday + 7) % 7);
+  return {
+    today,
+    weekday,
+    shouldEnsureBake: weekday <= 4,
+    pickupDate,
+    pickupAt: madridIso(pickupDate, pickupTime),
+    deadline: madridIso(addCalendarDays(pickupDate, -2), '20:00'),
+  };
+}
 export function assertCapacity(
   b: Parameters<typeof bakeState>[0],
   reserved: number,
@@ -127,5 +160,9 @@ export const reminderDue = (pickupIso: string, now = Date.now()) => {
 // Spreadsheet apps run cells starting with these characters as formulas.
 export const csvCell = (v: unknown) => {
   const text = String(v ?? '');
-  return '"' + (/^[=+\-@\t\r]/.test(text) ? `'${text}` : text).replaceAll('"', '""') + '"';
+  return (
+    '"' +
+    (/^[=+\-@\t\r]/.test(text) ? `'${text}` : text).replaceAll('"', '""') +
+    '"'
+  );
 };
