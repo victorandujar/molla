@@ -1274,8 +1274,13 @@ details p {
   .bar-time {
     display: none;
   }
-  .long .when::after {
-    content: ' · +20 h';
+  html[lang='es'] .long .when::after {
+    content: ' · hasta 35 h';
+    color: var(--orange);
+    font-weight: 600;
+  }
+  html[lang='ca'] .long .when::after {
+    content: ' · fins a 35 h';
     color: var(--orange);
     font-weight: 600;
   }

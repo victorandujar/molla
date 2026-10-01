@@ -53,7 +53,7 @@ const copy = {
     confirmed: 'Reserva confirmada',
     heading: 'Tu pan ya tiene tu nombre',
     intro: (o: Order) =>
-      `Hecho a mano, con poolish y más de 20 horas de fermentación lenta. Te esperamos el ${onDay(o)}.`,
+      `Hecho a mano, con poolish y hasta 35 horas de fermentación lenta. Te esperamos el ${onDay(o)}.`,
     code: 'Código de recogida',
     codeHint: 'Dilo o enséñalo al recoger.',
     order: 'Tu pedido',
@@ -91,7 +91,7 @@ const copy = {
     confirmed: 'Reserva confirmada',
     heading: 'El teu pa ja té el teu nom',
     intro: (o: Order) =>
-      `Fet a mà, amb poolish i més de 20 hores de fermentació lenta. T’esperem ${onDay(o)}.`,
+      `Fet a mà, amb poolish i fins a 35 hores de fermentació lenta. T’esperem ${onDay(o)}.`,
     code: 'Codi de recollida',
     codeHint: 'Digues-lo o ensenya’l en recollir.',
     order: 'La teva comanda',

@@ -2,6 +2,7 @@ import {
   claimReminders,
   cleanup,
   releaseReminder,
+  runWeeklyBakeCycle,
   unsentConfirmations,
 } from './store';
 import { emailEnabled, sendConfirmation, sendReminder } from './email';
@@ -9,7 +10,12 @@ const pause = (ms: number) => new Promise((r) => setTimeout(r, ms));
 // Runs once a day (vercel.json): pickup reminders, confirmation retries and
 // housekeeping. Sends one email at a time to stay within provider limits.
 export async function runDailyJobs() {
-  const result = { reminders: 0, reminderFailures: 0, retried: 0 };
+  const result = {
+    reminders: 0,
+    reminderFailures: 0,
+    retried: 0,
+    cycle: await runWeeklyBakeCycle(),
+  };
   if (emailEnabled()) {
     for (const order of await claimReminders()) {
       if (await sendReminder(order)) result.reminders++;
