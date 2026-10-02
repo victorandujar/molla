@@ -7,9 +7,22 @@ const article = {
   '@context': 'https://schema.org',
   '@type': 'Article',
   headline: 'Pa de poolish: què és i per què fermenta fins a 35 hores',
+  description:
+    'Què és el poolish, com transforma el pa i en què es diferencia de la massa mare.',
   inLanguage: 'ca',
-  author: { '@type': 'Organization', name: brand.name },
-  image: brand.site ? new URL('/images/crumb-1100.webp', brand.site).href : undefined,
+  mainEntityOfPage: brand.site
+    ? new URL('/poolish', brand.site).href
+    : undefined,
+  author: {
+    '@id': brand.site ? new URL('/#organization', brand.site).href : undefined,
+  },
+  publisher: {
+    '@id': brand.site ? new URL('/#organization', brand.site).href : undefined,
+  },
+  dateModified: '2026-10-02',
+  image: brand.site
+    ? new URL('/images/crumb-1100.webp', brand.site).href
+    : undefined,
 };
 ---
 
@@ -30,9 +43,9 @@ const article = {
       <p>
         És una massa prèvia, o prefermentació: farina i aigua a parts iguals amb
         una quantitat molt petita de llevat. Té textura de crema espessa i es
-        prepara la vigília. Mentre reposa durant la nit, el llevat treballa
-        a poc a poc i la farina desenvolupa aromes que un pastat ràpid no té
-        temps de crear.
+        prepara la vigília. Mentre reposa durant la nit, el llevat treballa a
+        poc a poc i la farina desenvolupa aromes que un pastat ràpid no té temps
+        de crear.
       </p>
       <p>
         Després, el poolish es barreja amb la resta de farina, aigua i sal. La
@@ -42,32 +55,53 @@ const article = {
 
       <h2>Què hi notes</h2>
       <ul>
-        <li><strong>Gust</strong> més profund, lleugerament dolç i torrat.</li>
-        <li><strong>Molla</strong> més oberta, humida i elàstica.</li>
-        <li><strong>Crosta</strong> fina, daurada fosca i cruixent.</li>
-        <li><strong>Conservació</strong>: es manté tendre més dies que un pa de fermentació ràpida.</li>
+        <li>
+          <strong>Gust</strong> més profund, lleugerament dolç i torrat.
+        </li>
+        <li>
+          <strong>Molla</strong> més oberta, humida i elàstica.
+        </li>
+        <li>
+          <strong>Crosta</strong> fina, daurada fosca i cruixent.
+        </li>
+        <li>
+          <strong>Conservació</strong>: es manté tendre més dies que un pa de
+          fermentació ràpida.
+        </li>
       </ul>
 
       <h2>Poolish o massa mare?</h2>
       <p>
-        Totes dues són fermentacions lentes, però no són el mateix. La massa mare
-        és un cultiu de llevats salvatges i bacteris làctics que s’alimenta cada
-        dia; dona pans amb un punt àcid marcat. El poolish fa servir llevat, però
-        en molt poca quantitat i amb molt de temps: el resultat és un pa amb
-        caràcter i molla oberta, de gust més suau i sense acidesa.
+        Totes dues són fermentacions lentes, però no són el mateix. La massa
+        mare és un cultiu de llevats salvatges i bacteris làctics que s’alimenta
+        cada dia; dona pans amb un punt àcid marcat. El poolish fa servir
+        llevat, però en molt poca quantitat i amb molt de temps: el resultat és
+        un pa amb caràcter i molla oberta, de gust més suau i sense acidesa.
       </p>
       <p>
-        El meu pa <strong>no és de massa mare</strong>, i prefereixo dir-ho clar.
-        Si busques un pa artesà de fermentació lenta amb un gust amable per al
-        dia a dia, el poolish és exactament això.
+        El meu pa <strong>no és de massa mare</strong>, i prefereixo dir-ho
+        clar. Si busques un pa artesà de fermentació lenta amb un gust amable
+        per al dia a dia, el poolish és exactament això.
       </p>
 
       <h2>Com és una fornada</h2>
       <ol>
-        <li><strong>Fins al tancament</strong> (normalment dos dies abans, a les 20:00): tanco reserves.</li>
-        <li><strong>Després del tancament</strong>: preparo el poolish, que reposa tota la nit.</li>
-        <li><strong>Després</strong>: pasto amb plecs, formo cada pa a mà i el deixo fermentar una altra nit en fred.</li>
-        <li><strong>Forn</strong> i, després, <a href="/recollida">recollida a Sant Boi</a>.</li>
+        <li>
+          <strong>Fins al tancament</strong> (normalment dos dies abans, a les
+          20:00): tanco reserves.
+        </li>
+        <li>
+          <strong>Després del tancament</strong>: preparo el poolish, que reposa
+          tota la nit.
+        </li>
+        <li>
+          <strong>Després</strong>: pasto amb plecs, formo cada pa a mà i el
+          deixo fermentar una altra nit en fred.
+        </li>
+        <li>
+          <strong>Forn</strong> i, després,{' '}
+          <a href="/recollida">recollida a Sant Boi</a>.
+        </li>
       </ol>
     </div>
     <div class="article-photos">

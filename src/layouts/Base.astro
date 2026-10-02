@@ -5,7 +5,7 @@ import '@fontsource/instrument-sans/latin-400.css';
 import '@fontsource/instrument-sans/latin-600.css';
 import displayFont from '@fontsource-variable/bricolage-grotesque/files/bricolage-grotesque-latin-standard-normal.woff2?url';
 import bodyFont from '@fontsource/instrument-sans/files/instrument-sans-latin-400-normal.woff2?url';
-import { brand, launchReady, isDemo } from '../lib/config';
+import { brand, searchIndexable, isDemo } from '../lib/config';
 import { ui, routes, type Lang, type RouteKey } from '../lib/i18n';
 interface Props {
   lang?: Lang;
@@ -14,6 +14,7 @@ interface Props {
   description?: string;
   image?: string;
   noindex?: boolean;
+  ogType?: 'website' | 'article';
   jsonLd?: Record<string, unknown>[];
 }
 const {
@@ -23,6 +24,7 @@ const {
   description = ui[lang].meta.description,
   image = '/images/social.jpg',
   noindex = false,
+  ogType = 'website',
   jsonLd = [],
 } = Astro.props;
 const t = ui[lang];
@@ -31,15 +33,19 @@ const home = routes.home[lang];
 const abs = (path: string) =>
   brand.site ? new URL(path, brand.site).href : null;
 const canonical = abs(route ? routes[route][lang] : Astro.url.pathname);
-const indexable = launchReady && !noindex;
+const indexable = searchIndexable && !noindex;
 const organization = {
   '@context': 'https://schema.org',
   '@type': 'Organization',
   '@id': abs('/#organization'),
   name: brand.name,
+  legalName: brand.legalName || undefined,
   url: abs('/'),
   logo: abs('/icon-512.png'),
+  image: abs('/images/social.jpg'),
+  description: ui[lang].meta.description,
   email: brand.contact || undefined,
+  telephone: brand.whatsapp ? `+${brand.whatsapp}` : undefined,
   sameAs: brand.instagram ? [brand.instagram] : undefined,
   areaServed: [
     { '@type': 'AdministrativeArea', name: 'Baix Llobregat' },
@@ -47,7 +53,27 @@ const organization = {
     { '@type': 'City', name: 'Santa Coloma de Cervelló' },
   ],
 };
-const graph = [organization, ...jsonLd];
+const website = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  '@id': abs('/#website'),
+  url: abs('/'),
+  name: brand.name,
+  inLanguage: ['ca', 'es'],
+  publisher: { '@id': abs('/#organization') },
+};
+const webpage = {
+  '@context': 'https://schema.org',
+  '@type': 'WebPage',
+  '@id': canonical ? `${canonical}#webpage` : undefined,
+  url: canonical || undefined,
+  name: title,
+  description,
+  inLanguage: lang,
+  isPartOf: { '@id': abs('/#website') },
+  about: { '@id': abs('/#organization') },
+};
+const graph = [organization, website, webpage, ...jsonLd];
 ---
 
 <!doctype html>
@@ -70,8 +96,10 @@ const graph = [organization, ...jsonLd];
       crossorigin
     />
     <meta name="theme-color" content="#1b3a9f" />
+    <meta name="color-scheme" content="light" />
     <title>{title}</title>
     <meta name="description" content={description} />
+    <meta name="author" content={brand.name} />
     <meta
       name="robots"
       content={
@@ -81,6 +109,15 @@ const graph = [organization, ...jsonLd];
       }
     />
     {canonical && <link rel="canonical" href={canonical} />}
+    {brand.googleSiteVerification && (
+      <meta
+        name="google-site-verification"
+        content={brand.googleSiteVerification}
+      />
+    )}
+    {brand.bingSiteVerification && (
+      <meta name="msvalidate.01" content={brand.bingSiteVerification} />
+    )}
     {route && brand.site && (
       <>
         <link rel="alternate" hreflang="ca" href={abs(routes[route].ca)} />
@@ -96,7 +133,7 @@ const graph = [organization, ...jsonLd];
     <meta name="geo.placename" content="Sant Boi de Llobregat" />
     <link rel="icon" href="/favicon-48.png" type="image/png" sizes="48x48" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content={ogType} />
     <meta property="og:site_name" content={brand.name} />
     <meta property="og:locale" content={lang === 'ca' ? 'ca_ES' : 'es_ES'} />
     <meta
@@ -109,13 +146,19 @@ const graph = [organization, ...jsonLd];
       <>
         <meta property="og:url" content={canonical} />
         <meta property="og:image" content={abs(image)} />
+        <meta property="og:image:secure_url" content={abs(image)} />
+        <meta property="og:image:type" content="image/jpeg" />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
       </>
     )}
     <meta property="og:image:alt" content={t.meta.ogAlt} />
     <meta name="twitter:card" content="summary_large_image" />
-    {launchReady && (
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    {abs(image) && <meta name="twitter:image" content={abs(image)} />}
+    <meta name="twitter:image:alt" content={t.meta.ogAlt} />
+    {searchIndexable && (
       <script
         is:inline
         type="application/ld+json"

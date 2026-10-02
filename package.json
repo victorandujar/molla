@@ -20,7 +20,8 @@
     "bake:prod": "node --env-file=.env.production --import tsx scripts/bake.ts",
     "db:seed": "node --env-file-if-exists=.env --import tsx scripts/seed.ts",
     "db:seed:prod": "node --env-file=.env.production --import tsx scripts/seed.ts",
-    "audit:local": "node scripts/audit.mjs"
+    "audit:local": "node scripts/audit.mjs",
+    "seo:indexnow": "node scripts/indexnow.mjs"
   },
   "dependencies": {
     "@astrojs/vercel": "^11.0.10",

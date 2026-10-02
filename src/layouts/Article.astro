@@ -13,8 +13,17 @@ interface Props {
   crumb: string;
   jsonLd?: Record<string, unknown>[];
 }
-const { lang, route, title, description, kicker, h1, lede, crumb, jsonLd = [] } =
-  Astro.props;
+const {
+  lang,
+  route,
+  title,
+  description,
+  kicker,
+  h1,
+  lede,
+  crumb,
+  jsonLd = [],
+} = Astro.props;
 const t = ui[lang];
 const abs = (path: string) =>
   brand.site ? new URL(path, brand.site).href : undefined;
@@ -22,8 +31,18 @@ const breadcrumbs = {
   '@context': 'https://schema.org',
   '@type': 'BreadcrumbList',
   itemListElement: [
-    { '@type': 'ListItem', position: 1, name: t.breadcrumbHome, item: abs(routes.home[lang]) },
-    { '@type': 'ListItem', position: 2, name: crumb, item: abs(routes[route][lang]) },
+    {
+      '@type': 'ListItem',
+      position: 1,
+      name: t.breadcrumbHome,
+      item: abs(routes.home[lang]),
+    },
+    {
+      '@type': 'ListItem',
+      position: 2,
+      name: crumb,
+      item: abs(routes[route][lang]),
+    },
   ],
 };
 ---
@@ -33,6 +52,7 @@ const breadcrumbs = {
   route={route}
   title={title}
   description={description}
+  ogType="article"
   jsonLd={[breadcrumbs, ...jsonLd]}
 >
   <main id="contenido">
