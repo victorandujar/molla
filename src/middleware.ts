@@ -8,6 +8,8 @@ const cacheable = new Set([
   '/es/',
   '/recollida',
   '/es/recogida',
+  '/poolish',
+  '/es/poolish',
   '/privacidad',
   '/privacitat',
   '/robots.txt',
@@ -43,6 +45,12 @@ export const onRequest = defineMiddleware(async (ctx, next) => {
   response.headers.set('X-Content-Type-Options', 'nosniff');
   response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
   response.headers.set('X-Frame-Options', 'DENY');
+  if (
+    process.env.VERCEL_ENV === 'preview' ||
+    ['/alta', '/baja', '/gestio'].includes(ctx.url.pathname) ||
+    ctx.url.pathname.startsWith('/api/')
+  )
+    response.headers.set('X-Robots-Tag', 'noindex, nofollow, noarchive');
   response.headers.set(
     'Permissions-Policy',
     'camera=(), microphone=(), geolocation=()',
