@@ -1,9 +1,9 @@
-import { brand, launchReady } from '../lib/config';
+import { brand, searchIndexable } from '../lib/config';
 export function GET() {
   return new Response(
-    launchReady
+    searchIndexable
       ? `User-agent: *\nAllow: /\nDisallow: /api/\nDisallow: /baja\nDisallow: /alta\nDisallow: /gestio\nSitemap: ${brand.site.replace(/\/$/, '')}/sitemap.xml\n`
       : 'User-agent: *\nDisallow: /\n',
-    { headers: { 'Content-Type': 'text/plain' } },
+    { headers: { 'Content-Type': 'text/plain; charset=utf-8' } },
   );
 }

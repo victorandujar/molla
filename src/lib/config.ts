@@ -18,6 +18,8 @@ export const brand = {
   legalId: process.env.LEGAL_ID || '',
   legalAddress: process.env.LEGAL_ADDRESS || '',
   site: process.env.PUBLIC_SITE_URL || '',
+  googleSiteVerification: process.env.GOOGLE_SITE_VERIFICATION || '',
+  bingSiteVerification: process.env.BING_SITE_VERIFICATION || '',
 };
 // Legal texts come from the environment; the Catalan ones fall back to Spanish.
 const privacyText = (name: string) => ({
@@ -71,6 +73,15 @@ export const money = (cents: number) =>
   );
 export const isDemo =
   import.meta.env?.DEV && process.env.LOCAL_DEMO !== 'false';
+
+// Search visibility must never depend on whether orders, the database or the
+// legal checkout flow are ready. A public production site remains useful (and
+// indexable) while a bake is closed. Vercel previews stay out of search.
+export const searchIndexable =
+  brand.site.startsWith('https://') &&
+  process.env.VERCEL_ENV !== 'preview' &&
+  process.env.VERCEL_ENV !== 'development';
+
 export const launchReady =
   process.env.LIVE_ORDERS === 'true' &&
   process.env.LAUNCH_REVIEWED === 'true' &&
