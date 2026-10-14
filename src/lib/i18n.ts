@@ -68,7 +68,7 @@ export const ui = {
     meta: {
       title: `Pan artesanal por encargo en Sant Boi de Llobregat · ${brand.name}`,
       description:
-        'Hogazas hechas a mano con poolish y hasta 35 horas de fermentación lenta. Reserva online y recoge el sábado en Sant Boi de Llobregat. Para todo el Baix Llobregat.',
+        'Pan y banana bread hechos a mano con harinas ecológicas, poolish y hasta 35 horas de fermentación lenta. Reserva online y recoge el sábado en Sant Boi de Llobregat. Para todo el Baix Llobregat.',
       ogAlt: 'Hogazas de corteza tostada recién cortadas',
     },
     status: {
@@ -82,13 +82,15 @@ export const ui = {
       h1a: 'Pan artesanal',
       h1b: 'por encargo',
       sub: 'Cada sábado en Sant Boi de Llobregat.',
-      lede: 'Amaso a mano una hornada pequeña cada semana, con poolish y hasta 35 horas de fermentación lenta. Tú lo reservas aquí y el sábado lo pasas a recoger.',
+      lede: 'Amaso a mano una hornada pequeña cada semana, con harinas ecológicas, poolish y hasta 35 horas de fermentación lenta. Tú lo reservas aquí y el sábado lo pasas a recoger.',
+      kicker: 'Panadería de barrio · Sant Boi de Llobregat',
+      seal: 'FERMENTACIÓN LENTA · HECHO A MANO · ',
       keywords: [
+        'Harinas ecológicas',
         'Poolish',
         'Hasta 35 h de fermentación',
         'Hecho a mano',
         'Recogida el sábado',
-        'Sant Boi de Llobregat',
         'Baix Llobregat',
       ],
       order: 'Reservar hogaza',
@@ -103,6 +105,8 @@ export const ui = {
       number: 'Hornada',
       of: 'de',
       reserved: 'hogazas reservadas',
+      small: (n: number) => `Hornada pequeña · ${n} hogazas`,
+      leftOf: (n: number) => `hogazas libres de ${n}`,
       test: ' (prueba)',
       open: (deadline: string) => {
         const d = madridParts('es', deadline);
@@ -120,11 +124,13 @@ export const ui = {
       kicker: 'La hogaza',
       name: 'La de cada semana',
       alt: 'Dos hogazas artesanas con greñas abiertas sobre una tabla de madera',
-      altSlice: 'Media hogaza sostenida en la mano, con la miga alveolada a la vista',
+      altSlice:
+        'Media hogaza sostenida en la mano, con la miga alveolada a la vista',
       fermentation: 'Fermentación',
       fermentationValue: 'Poolish y hasta 35 horas de fermentación lenta',
       ingredients: 'Ingredientes',
-      ingredientsValue: 'Harina de trigo, agua, sal y levadura.',
+      ingredientsValue:
+        'Harina de trigo ecológica, agua, sal y levadura. Nada más.',
       allergens: 'Alérgenos',
       allergensValue:
         'Contiene trigo (gluten). Si tienes otra alergia, pregúntame antes de reservar.',
@@ -133,6 +139,32 @@ export const ui = {
         'Varios días envuelta en un paño. Se congela bien en rebanadas.',
       order: 'Reservar esta hogaza',
       notify: 'Quiero enterarme',
+    },
+    banana: {
+      kicker: 'También horneo',
+      h2a: 'Banana bread',
+      h2b: 'de chocolate.',
+      p: 'Plátanos muy maduros, harina ecológica y pepitas de chocolate por dentro y por fuera. Corteza dorada, miga húmeda y tierna. Se hornea en pequeñas tandas junto al pan.',
+      point1: 'Harina ecológica',
+      point2: 'Plátano bien maduro',
+      point3: 'Tandas pequeñas',
+      note: 'Aún no se reserva en la web: pídemelo y lo añado a tu hogaza de la semana.',
+      alt: 'Banana bread con pepitas de chocolate sobre una tabla de madera',
+      altDetail:
+        'Detalle de la corteza del banana bread con pepitas de chocolate',
+      ask: 'Pedir banana bread',
+      notify: 'Avísame cuando haya',
+    },
+    organic: {
+      kicker: 'Harina',
+      h2a: 'Harinas ecológicas,',
+      h2b: 'de molino.',
+      p: 'Todo el pan y el banana bread se hacen con harinas de cultivo ecológico. Una buena harina no necesita mejorantes: con agua, sal, poco levadura y mucho tiempo es suficiente.',
+      items: [
+        ['100 %', 'harinas ecológicas'],
+        ['0', 'mejorantes ni aditivos'],
+        ['35 h', 'de fermentación'],
+      ],
     },
     process: {
       h2a: 'La mayor parte del trabajo',
@@ -174,7 +206,7 @@ export const ui = {
       kicker: 'Quién hace el pan',
       h2: 'Pocas hogazas, hechas de una en una.',
       p1: 'Hago pan artesanal por encargo para gente de todo el Baix Llobregat. Cada semana horneo solo lo que se ha reservado: así cada hogaza tiene su tiempo y no se tira nada.',
-      p2: 'Sin mejorantes ni atajos. Harina, agua, sal, un poco de levadura y una noche entera de paciencia.',
+      p2: 'Sin mejorantes ni atajos. Harina ecológica, agua, sal, un poco de levadura y una noche entera de paciencia.',
       altPerson: 'El panadero sostiene una hogaza recién horneada y sonríe',
       altDough: 'Dos masas formadas reposando en sus cestas de fermentación',
     },
@@ -232,11 +264,19 @@ export const ui = {
         ],
         [
           '¿Qué lleva la hogaza?',
-          'Harina de trigo, agua, sal y levadura. Contiene gluten. Si tienes otra alergia, pregúntame antes de reservar: en el espacio de elaboración se trabaja con otras harinas.',
+          'Harina de trigo ecológica, agua, sal y levadura. Contiene gluten. Si tienes otra alergia, pregúntame antes de reservar: en el espacio de elaboración se trabaja con otras harinas.',
         ],
         [
           '¿Dónde se recoge?',
           `En un punto de recogida en Sant Boi de Llobregat. Te confirmaremos el punto exacto con tu pedido. La recogida te queda cerca si vives en ${areaTowns}.`,
+        ],
+        [
+          '¿Haces banana bread?',
+          'Sí, de chocolate y con harina ecológica, en tandas pequeñas. Todavía no se reserva en la web: escríbeme y lo añadimos a tu pedido de pan.',
+        ],
+        [
+          '¿Las harinas son ecológicas?',
+          'Sí. Trabajo con harinas de cultivo ecológico, tanto para el pan como para el banana bread.',
         ],
         [
           '¿Puedo pedir que me lo envíes?',
@@ -300,7 +340,7 @@ export const ui = {
     meta: {
       title: `Pa artesà per encàrrec a Sant Boi de Llobregat · ${brand.name}`,
       description:
-        'Pans fets a mà amb poolish i fins a 35 hores de fermentació lenta. Reserva en línia i recull-lo dissabte a Sant Boi de Llobregat. Per a tot el Baix Llobregat.',
+        'Pa i banana bread fets a mà amb farines ecològiques, poolish i fins a 35 hores de fermentació lenta. Reserva en línia i recull-lo dissabte a Sant Boi de Llobregat. Per a tot el Baix Llobregat.',
       ogAlt: 'Pans de crosta torrada acabats de tallar',
     },
     status: {
@@ -314,13 +354,15 @@ export const ui = {
       h1a: 'Pa artesà',
       h1b: 'per encàrrec',
       sub: 'Cada dissabte a Sant Boi de Llobregat.',
-      lede: 'Pasto a mà una fornada petita cada setmana, amb poolish i fins a 35 hores de fermentació lenta. Tu el reserves aquí i dissabte el passes a buscar.',
+      lede: 'Pasto a mà una fornada petita cada setmana, amb farines ecològiques, poolish i fins a 35 hores de fermentació lenta. Tu el reserves aquí i dissabte el passes a buscar.',
+      kicker: 'Fleca de barri · Sant Boi de Llobregat',
+      seal: 'FERMENTACIÓ LENTA · FET A MÀ · ',
       keywords: [
+        'Farines ecològiques',
         'Poolish',
         'Fins a 35 h de fermentació',
         'Fet a mà',
         'Recollida dissabte',
-        'Sant Boi de Llobregat',
         'Baix Llobregat',
       ],
       order: 'Reservar pa',
@@ -335,6 +377,8 @@ export const ui = {
       number: 'Fornada',
       of: 'de',
       reserved: 'pans reservats',
+      small: (n: number) => `Fornada petita · ${n} pans`,
+      leftOf: (n: number) => `pans lliures de ${n}`,
       test: ' (prova)',
       open: (deadline: string) => {
         const d = madridParts('ca', deadline);
@@ -356,7 +400,8 @@ export const ui = {
       fermentation: 'Fermentació',
       fermentationValue: 'Poolish i fins a 35 hores de fermentació lenta',
       ingredients: 'Ingredients',
-      ingredientsValue: 'Farina de blat, aigua, sal i llevat.',
+      ingredientsValue:
+        'Farina de blat ecològica, aigua, sal i llevat. Res més.',
       allergens: 'Al·lèrgens',
       allergensValue:
         'Conté blat (gluten). Si tens una altra al·lèrgia, pregunta’m abans de reservar.',
@@ -365,6 +410,31 @@ export const ui = {
         'Uns quants dies embolicat amb un drap. Es congela bé a llesques.',
       order: 'Reservar aquest pa',
       notify: 'Vull assabentar-me’n',
+    },
+    banana: {
+      kicker: 'També cuino',
+      h2a: 'Banana bread',
+      h2b: 'de xocolata.',
+      p: 'Plàtans ben madurs, farina ecològica i xips de xocolata per dins i per fora. Crosta daurada, molla humida i tendra. Es couen en tandes petites al costat del pa.',
+      point1: 'Farina ecològica',
+      point2: 'Plàtan ben madur',
+      point3: 'Tandes petites',
+      note: 'Encara no es reserva a la web: demana-me’l i l’afegeixo al teu pa de la setmana.',
+      alt: 'Banana bread amb xips de xocolata sobre una taula de fusta',
+      altDetail: 'Detall de la crosta del banana bread amb xips de xocolata',
+      ask: 'Demanar banana bread',
+      notify: 'Avisa’m quan n’hi hagi',
+    },
+    organic: {
+      kicker: 'Farina',
+      h2a: 'Farines ecològiques,',
+      h2b: 'de molí.',
+      p: 'Tot el pa i el banana bread es fan amb farines de cultiu ecològic. Una bona farina no necessita milloradors: amb aigua, sal, poc llevat i molt de temps n’hi ha prou.',
+      items: [
+        ['100 %', 'farines ecològiques'],
+        ['0', 'milloradors ni additius'],
+        ['35 h', 'de fermentació'],
+      ],
     },
     process: {
       h2a: 'La major part de la feina',
@@ -406,7 +476,7 @@ export const ui = {
       kicker: 'Qui fa el pa',
       h2: 'Pocs pans, fets d’un en un.',
       p1: 'Faig pa artesà per encàrrec per a gent de tot el Baix Llobregat. Cada setmana només cou el que s’ha reservat: així cada pa té el seu temps i no es llença res.',
-      p2: 'Sense milloradors ni dreceres. Farina, aigua, sal, una mica de llevat i una nit sencera de paciència.',
+      p2: 'Sense milloradors ni dreceres. Farina ecològica, aigua, sal, una mica de llevat i una nit sencera de paciència.',
       altPerson: 'El forner sosté un pa acabat de coure i somriu',
       altDough:
         'Dues masses formades reposant als seus cistells de fermentació',
@@ -464,11 +534,19 @@ export const ui = {
         ],
         [
           'Què porta el pa?',
-          'Farina de blat, aigua, sal i llevat. Conté gluten. Si tens una altra al·lèrgia, pregunta’m abans de reservar: a l’espai d’elaboració es treballa amb altres farines.',
+          'Farina de blat ecològica, aigua, sal i llevat. Conté gluten. Si tens una altra al·lèrgia, pregunta’m abans de reservar: a l’espai d’elaboració es treballa amb altres farines.',
         ],
         [
           'On es recull?',
           `En un punt de recollida a Sant Boi de Llobregat. Et confirmarem el punt exacte amb la teva comanda. La recollida et queda a prop si vius a ${areaTowns}.`,
+        ],
+        [
+          'Fas banana bread?',
+          'Sí, de xocolata i amb farina ecològica, en tandes petites. Encara no es reserva a la web: escriu-me i l’afegim a la teva comanda de pa.',
+        ],
+        [
+          'Les farines són ecològiques?',
+          'Sí. Treballo amb farines de cultiu ecològic, tant per al pa com per al banana bread.',
         ],
         [
           'Me’l pots enviar?',

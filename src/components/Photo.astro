@@ -22,11 +22,17 @@ const ratios: Record<string, number> = {
   dough: 0.8,
   person: 0.75,
   slice: 1.6,
+  boule: 1088 / 1445,
+  crumb2: 1088 / 1445,
+  banana: 1506 / 2000,
+  bananaDetail: 1500 / 1129,
 };
+// The newer photos are smaller originals: they have no 1600 w variant.
+const widths = ['boule', 'crumb2'].includes(name)
+  ? [400, 720, 1100]
+  : [400, 720, 1100, 1600];
 const srcset = (format: string) =>
-  [400, 720, 1100, 1600]
-    .map((w) => `/images/${name}-${w}.${format} ${w}w`)
-    .join(', ');
+  widths.map((w) => `/images/${name}-${w}.${format} ${w}w`).join(', ');
 ---
 
 <picture>

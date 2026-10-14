@@ -94,39 +94,16 @@ const jsonLd = [
 
 <Base lang={lang} route="home" jsonLd={jsonLd}>
   <main id="contenido">
-    <section class="hero" aria-labelledby="hero-title">
-      <div class="wrap">
-        <div
-          class="hero-head"
-          style={`--lead:${t.hero.h1a.length};--side:${t.hero.h1b.length}`}
-        >
+    <section class="hero tex" aria-labelledby="hero-title">
+      <div class="wrap hero-grid">
+        <div class="hero-copy">
+          <p class="hero-kicker">{t.hero.kicker}</p>
           <h1 id="hero-title" class="hero-title">
-            <span class="hero-word hero-word-lead">{t.hero.h1a}</span>{' '}
-            <svg class="hero-star" viewBox="0 0 64 64" aria-hidden="true">
-              <path d="M32 0l4.6 20.9L54.6 9.4 43.1 27.4 64 32l-20.9 4.6 11.5 18L36.6 43.1 32 64l-4.6-20.9-18 11.5 11.5-18L0 32l20.9-4.6L9.4 9.4l18 11.5z" />
-            </svg>{' '}
-            <span class="hero-word hero-word-side">{t.hero.h1b}</span>
+            <span class="hero-word-lead">{t.hero.h1a}</span>{' '}
+            <em class="hero-word-side">{t.hero.h1b}</em>
           </h1>
-          <div class="hero-aside">
-            <p class="hero-sub">{t.hero.sub}</p>
-            <p class="hero-lede">{t.hero.lede}</p>
-          </div>
-        </div>
-        <div class="hero-row">
-          {(['maker', 'hero'] as const).map((name, i) => (
-            <figure class={`hero-photo hero-photo-${name}`}>
-              <Photo
-                name={name}
-                alt={t.hero.photos[i]!}
-                eager
-                sizes={
-                  i
-                    ? '(max-width: 860px) 50vw, 38vw'
-                    : '(max-width: 860px) 50vw, 26vw'
-                }
-              />
-            </figure>
-          ))}
+          <p class="hero-sub">{t.hero.sub}</p>
+          <p class="hero-lede">{t.hero.lede}</p>
           <div
             id="hornada"
             class="bake-card"
@@ -150,11 +127,18 @@ const jsonLd = [
             <progress
               value={current.reserved}
               max={current.capacity}
+              hidden={current.reserved === 0}
               aria-label={`${current.reserved} ${t.bake.of} ${current.capacity} ${t.bake.reserved}`}
             ></progress>
-            <p class="bake-count">
-              <strong data-reserved>{current.reserved}</strong>
-              {` ${t.bake.of} ${current.capacity} ${t.bake.reserved}${isDemo ? t.bake.test : ''}`}
+            <p class="bake-count" data-bake-count>
+              <span data-count-small hidden={current.reserved > 0}>
+                {t.bake.small(current.capacity)}
+                {isDemo ? t.bake.test : ''}
+              </span>
+              <span data-count-left hidden={current.reserved === 0}>
+                <strong data-left>{left}</strong>
+                {` ${t.bake.leftOf(current.capacity)}${isDemo ? t.bake.test : ''}`}
+              </span>
             </p>
             <p class="bake-deadline">
               {open
@@ -178,14 +162,52 @@ const jsonLd = [
             </a>
           </div>
         </div>
-        <p class="hero-keywords">
-          {t.hero.keywords.map((k, i) => (
-            <>
-              {i > 0 && <span aria-hidden="true"> • </span>}
-              <span>{k}</span>
-            </>
-          ))}
-        </p>
+        <div class="hero-photos">
+          <figure class="hero-photo hero-photo-main">
+            <Photo
+              name="boule"
+              alt={t.hero.photos[0]!}
+              eager
+              sizes="(max-width: 860px) 80vw, 34vw"
+            />
+          </figure>
+          <figure class="hero-photo hero-photo-crumb">
+            <Photo
+              name="crumb2"
+              alt={t.hero.photos[1]!}
+              eager
+              sizes="(max-width: 860px) 46vw, 20vw"
+            />
+          </figure>
+          <svg class="hero-seal" viewBox="0 0 120 120" aria-hidden="true">
+            <defs>
+              <path
+                id="seal-circle"
+                d="M60 60m-46 0a46 46 0 1 1 92 0a46 46 0 1 1-92 0"
+              />
+            </defs>
+            <text>
+              <textPath href="#seal-circle" startOffset="0">
+                {t.hero.seal}
+              </textPath>
+            </text>
+            <text class="seal-num" x="60" y="68" text-anchor="middle">
+              35h
+            </text>
+          </svg>
+        </div>
+      </div>
+      <div class="ticker" aria-hidden="true">
+        <span class="ticker-track">
+          {[0, 1].map(() =>
+            t.hero.keywords.map((k) => (
+              <>
+                <span>{k}</span>
+                <i>●</i>
+              </>
+            )),
+          )}
+        </span>
       </div>
     </section>
 
@@ -240,6 +262,27 @@ const jsonLd = [
       </div>
     </section>
 
+    <section class="organic" aria-labelledby="organic-title">
+      <div class="organic-pattern" aria-hidden="true"></div>
+      <div class="wrap">
+        <div class="organic-card">
+          <p class="kicker">{t.organic.kicker}</p>
+          <h2 id="organic-title">
+            {t.organic.h2a} <em>{t.organic.h2b}</em>
+          </h2>
+          <p>{t.organic.p}</p>
+          <ul class="organic-stats">
+            {t.organic.items.map(([n, label]) => (
+              <li>
+                <strong>{n}</strong>
+                <span>{label}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </section>
+
     <section id="proceso" class="process" aria-labelledby="process-title">
       <div class="wrap">
         <div class="process-head">
@@ -265,6 +308,55 @@ const jsonLd = [
             </li>
           ))}
         </ol>
+      </div>
+    </section>
+
+    <section class="banana" aria-labelledby="banana-title">
+      <div class="wrap banana-grid">
+        <div class="banana-photos">
+          <div class="banana-main">
+            <Photo
+              name="banana"
+              alt={t.banana.alt}
+              sizes="(max-width: 860px) 70vw, 30vw"
+            />
+          </div>
+          <div class="banana-detail">
+            <Photo
+              name="bananaDetail"
+              alt={t.banana.altDetail}
+              sizes="(max-width: 860px) 46vw, 20vw"
+            />
+          </div>
+        </div>
+        <div class="banana-copy">
+          <p class="kicker">{t.banana.kicker}</p>
+          <h2 id="banana-title">
+            {t.banana.h2a} <em>{t.banana.h2b}</em>
+          </h2>
+          <p>{t.banana.p}</p>
+          <ul class="chips">
+            <li>{t.banana.point1}</li>
+            <li>{t.banana.point2}</li>
+            <li>{t.banana.point3}</li>
+          </ul>
+          <p class="banana-note">{t.banana.note}</p>
+          {brand.whatsapp ? (
+            <a
+              class="button button-choc"
+              data-event="click_whatsapp"
+              href={`https://wa.me/${brand.whatsapp}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {t.banana.ask} <span aria-hidden="true">↗</span>
+            </a>
+          ) : (
+            <a class="button button-choc" href="#avisame">
+              {t.banana.notify}
+            </a>
+          )}
+        </div>
       </div>
     </section>
 
