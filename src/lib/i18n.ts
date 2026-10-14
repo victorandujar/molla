@@ -61,14 +61,14 @@ export const ui = {
     switchAria: 'Llegeix aquesta pàgina en català',
     footer: {
       line: 'Pan artesanal de fermentación lenta, por encargo.',
-      area: `Recogida en Sant Boi de Llobregat · Para todo el ${brand.region}`,
+      area: `Entrega a domicilio en Sant Boi y Santa Coloma · Recogida en Sant Boi de Llobregat`,
       privacy: 'Privacidad y condiciones',
       write: 'Escríbeme ↗',
     },
     meta: {
       title: `Pan artesanal por encargo en Sant Boi de Llobregat · ${brand.name}`,
       description:
-        'Pan y banana bread hechos a mano con harinas ecológicas, poolish y hasta 35 horas de fermentación lenta. Reserva online y recoge el sábado en Sant Boi de Llobregat. Para todo el Baix Llobregat.',
+        'Pan y banana bread hechos a mano con harinas ecológicas, poolish y hasta 35 horas de fermentación lenta. Reserva online y recíbelo el sábado en casa (Sant Boi y Santa Coloma de Cervelló) o recógelo en Sant Boi de Llobregat.',
       ogAlt: 'Hogazas de corteza tostada recién cortadas',
     },
     status: {
@@ -81,7 +81,7 @@ export const ui = {
     hero: {
       h1a: 'Pan artesanal',
       h1b: 'por encargo',
-      sub: 'Cada sábado en Sant Boi de Llobregat.',
+      sub: 'Cada sábado. A domicilio en Sant Boi y Santa Coloma.',
       lede: 'Amaso a mano una hornada pequeña cada semana, con harinas ecológicas, poolish y hasta 35 horas de fermentación lenta. Tú lo reservas aquí y el sábado lo pasas a recoger.',
       kicker: 'Panadería de barrio · Sant Boi de Llobregat',
       seal: 'FERMENTACIÓN LENTA · HECHO A MANO · ',
@@ -217,11 +217,11 @@ export const ui = {
       where: 'Dónde',
       pickupLocation: 'Punto de recogida en Sant Boi de Llobregat',
       pickupDetails:
-        'Te confirmaremos el punto exacto de recogida con tu pedido.',
+        'Entrega a domicilio en Sant Boi y Santa Coloma de Cervelló; en el resto, recogida en Sant Boi. Te confirmo la hora o el punto exacto con tu pedido.',
       windowPending: 'Sábado · horario de recogida confirmado con el pedido',
       pickupInfo: 'Más información sobre la recogida',
       pay: 'Pago',
-      payValue: 'Al recoger. Sin tarjeta ni cuenta.',
+      payValue: 'Al recibirlo o recogerlo. Sin tarjeta ni cuenta.',
       left: 'Quedan',
       loaves: 'hogazas',
       question: 'Tengo una pregunta ↗',
@@ -238,7 +238,7 @@ export const ui = {
       honey: 'Deja este campo vacío',
       demoCheck: 'Entiendo que estoy probando una reserva ficticia.',
       pickupCheck: (day: string, window: string) =>
-        `Recogeré el pan el ${day} en Sant Boi de Llobregat${window ? `, ${window}` : ''}. El punto exacto se confirma con el pedido.`,
+        `Recibiré el pan el ${day}: en casa si vivo en Sant Boi o Santa Coloma de Cervelló, o lo recogeré en Sant Boi de Llobregat${window ? ` (${window})` : ''}. La hora y el punto exacto se confirman con el pedido.`,
       privacyA: 'He leído la',
       privacyLink: 'privacidad y las condiciones',
       submitDemo: 'Probar reserva',
@@ -279,8 +279,8 @@ export const ui = {
           'Sí. Trabajo con harinas de cultivo ecológico, tanto para el pan como para el banana bread.',
         ],
         [
-          '¿Puedo pedir que me lo envíes?',
-          `Hago pan para todo el ${brand.region}, pero de momento no hago envíos: se recoge en Sant Boi de Llobregat.`,
+          '¿Hacéis entrega a domicilio?',
+          'Sí: entrego a domicilio en Sant Boi de Llobregat y en Santa Coloma de Cervelló. Si vives en otro municipio del Baix Llobregat, se recoge en Sant Boi de Llobregat.',
         ],
         [
           '¿Cómo lo conservo?',
@@ -333,14 +333,14 @@ export const ui = {
     switchAria: 'Lee esta página en castellano',
     footer: {
       line: 'Pa artesà de fermentació lenta, per encàrrec.',
-      area: `Recollida a Sant Boi de Llobregat · Per a tot el ${brand.region}`,
+      area: `Entrega a domicili a Sant Boi i Santa Coloma · Recollida a Sant Boi de Llobregat`,
       privacy: 'Privacitat i condicions',
       write: 'Escriu-me ↗',
     },
     meta: {
       title: `Pa artesà per encàrrec a Sant Boi de Llobregat · ${brand.name}`,
       description:
-        'Pa i banana bread fets a mà amb farines ecològiques, poolish i fins a 35 hores de fermentació lenta. Reserva en línia i recull-lo dissabte a Sant Boi de Llobregat. Per a tot el Baix Llobregat.',
+        'Pa i banana bread fets a mà amb farines ecològiques, poolish i fins a 35 hores de fermentació lenta. Reserva en línia i rep-lo dissabte a casa (Sant Boi i Santa Coloma de Cervelló) o recull-lo a Sant Boi de Llobregat.',
       ogAlt: 'Pans de crosta torrada acabats de tallar',
     },
     status: {
@@ -353,7 +353,7 @@ export const ui = {
     hero: {
       h1a: 'Pa artesà',
       h1b: 'per encàrrec',
-      sub: 'Cada dissabte a Sant Boi de Llobregat.',
+      sub: 'Cada dissabte. A domicili a Sant Boi i Santa Coloma.',
       lede: 'Pasto a mà una fornada petita cada setmana, amb farines ecològiques, poolish i fins a 35 hores de fermentació lenta. Tu el reserves aquí i dissabte el passes a buscar.',
       kicker: 'Fleca de barri · Sant Boi de Llobregat',
       seal: 'FERMENTACIÓ LENTA · FET A MÀ · ',
@@ -488,11 +488,11 @@ export const ui = {
       where: 'On',
       pickupLocation: 'Punt de recollida a Sant Boi de Llobregat',
       pickupDetails:
-        'Et confirmarem el punt exacte de recollida amb la teva comanda.',
+        'Entrega a domicili a Sant Boi i Santa Coloma de Cervelló; a la resta, recollida a Sant Boi. Et confirmo l’hora o el punt exacte amb la comanda.',
       windowPending: 'Dissabte · horari de recollida confirmat amb la comanda',
       pickupInfo: 'Més informació sobre la recollida',
       pay: 'Pagament',
-      payValue: 'En recollir. Sense targeta ni compte.',
+      payValue: 'En rebre’l o recollir-lo. Sense targeta ni compte.',
       left: 'En queden',
       loaves: 'pans',
       question: 'Tinc una pregunta ↗',
@@ -509,7 +509,7 @@ export const ui = {
       honey: 'Deixa aquest camp buit',
       demoCheck: 'Entenc que estic provant una reserva fictícia.',
       pickupCheck: (day: string, window: string) =>
-        `Recolliré el pa ${day} a Sant Boi de Llobregat${window ? `, ${window}` : ''}. El punt exacte es confirma amb la comanda.`,
+        `Rebré el pa ${day}: a casa si visc a Sant Boi o Santa Coloma de Cervelló, o el recolliré a Sant Boi de Llobregat${window ? ` (${window})` : ''}. L’hora i el punt exacte es confirmen amb la comanda.`,
       privacyA: 'He llegit la',
       privacyLink: 'privacitat i les condicions',
       submitDemo: 'Provar la reserva',
@@ -549,8 +549,8 @@ export const ui = {
           'Sí. Treballo amb farines de cultiu ecològic, tant per al pa com per al banana bread.',
         ],
         [
-          'Me’l pots enviar?',
-          `Faig pa per a tot el ${brand.region}, però de moment no faig enviaments: es recull a Sant Boi de Llobregat.`,
+          'Feu entrega a domicili?',
+          'Sí: entrego a domicili a Sant Boi de Llobregat i a Santa Coloma de Cervelló. Si vius en un altre municipi del Baix Llobregat, es recull a Sant Boi de Llobregat.',
         ],
         [
           'Com el conservo?',

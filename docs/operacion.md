@@ -29,14 +29,14 @@ El ciclo semanal no requiere intervención: el jueves a las 20:00 (hora de Madri
 Todos los comandos muestran el host de la base de datos. Los que escriben exigen `--yes`: revisa antes el host, porque `.env` apunta a producción.
 
 - `npm run bake`: lista hornadas con estado, reservas/capacidad, apertura, cierre y recogida.
-- `npm run bake:prod -- new 2026-10-03 --capacity=6 --yes`: crea manualmente una hornada excepcional (`hornada-002`, …). Por defecto la recogida es a las 12:00, cierra dos días antes a las 20:00, abre en el momento de crearla y usa la franja de `PICKUP_WINDOW`. Ajustable con `--pickup-time=HH:MM`, `--deadline=AAAA-MM-DDTHH:MM`, `--opens=AAAA-MM-DDTHH:MM` y `--window="de 11:00 a 13:00"`, siempre en hora de Madrid (el cambio de horario se calcula solo). La web muestra el cierre, el día y la franja de cada hornada; no hay fechas escritas a mano en los textos.
+- `npm run bake:prod -- new 2026-10-03 --capacity=10 --yes`: crea manualmente una hornada excepcional (`hornada-002`, …). Por defecto la recogida es a las 12:00, cierra dos días antes a las 20:00, abre en el momento de crearla y usa la franja de `PICKUP_WINDOW`. Ajustable con `--pickup-time=HH:MM`, `--deadline=AAAA-MM-DDTHH:MM`, `--opens=AAAA-MM-DDTHH:MM` y `--window="de 11:00 a 13:00"`, siempre en hora de Madrid (el cambio de horario se calcula solo). La web muestra el cierre, el día y la franja de cada hornada; no hay fechas escritas a mano en los textos.
 - `npm run bake:prod -- window hornada-002 "de 11:00 a 13:00" --yes`: cambia la franja. Los pedidos ya confirmados conservan la franja con la que se confirmaron.
 - `npm run bake -- capacity hornada-002 8 --yes`: cambia el cupo; nunca por debajo de lo ya reservado.
 - `npm run bake -- status hornada-001 COMPLETED --yes`: marca la hornada como entregada tras la recogida. Estados: UPCOMING, OPEN, SOLD_OUT, CLOSED y COMPLETED.
 
 El cierre se aplica en el servidor a la hora exacta. Las reservas bloquean la fila de la hornada (`FOR UPDATE`): probado el 14/09/2026 contra Neon con cinco reservas simultáneas por las tres últimas hogazas (entraron tres, sin sobreventa). Los pedidos cancelados liberan unidades. El precio del producto debe coincidir entre configuración y base de datos; si no, se rechaza la reserva.
 
-Hornada actual: `hornada-001`, recogida el sábado 26/09/2026, cierre el jueves 24/09 a las 20:00, 6 hogazas, máximo 4 por pedido.
+Hornada actual: `hornada-001`, recogida el sábado 26/09/2026, cierre el jueves 24/09 a las 20:00, 10 hogazas, máximo 4 por pedido.
 
 ## Consultar y preparar
 
