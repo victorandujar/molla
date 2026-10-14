@@ -94,107 +94,89 @@ const jsonLd = [
 
 <Base lang={lang} route="home" jsonLd={jsonLd}>
   <main id="contenido">
-    <section class="hero tex" aria-labelledby="hero-title">
-      <div class="wrap hero-grid">
-        <div class="hero-copy">
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="wrap hero-board">
+        <div class="hero-box hero-title-box">
           <p class="hero-kicker">{t.hero.kicker}</p>
           <h1 id="hero-title" class="hero-title">
             <span class="hero-word-lead">{t.hero.h1a}</span>{' '}
-            <em class="hero-word-side">{t.hero.h1b}</em>
+            <span class="hero-word-side">{t.hero.h1b}</span>
           </h1>
           <p class="hero-sub">{t.hero.sub}</p>
           <p class="hero-lede">{t.hero.lede}</p>
-          <div
-            id="hornada"
-            class="bake-card"
-            data-state={state}
-            data-event-view="view_current_bake"
-            aria-labelledby="bake-title"
-            role="region"
-          >
-            <div class="bake-head">
-              <span class="status">
-                <span class="status-dot" aria-hidden="true"></span>
-                <span data-bake-label>{statusLabel}</span>
-              </span>
-              <span class="bake-number">
-                {t.bake.number} {current.number}
-              </span>
-            </div>
-            <h2 id="bake-title" class="bake-day">
-              {pickupDay}
-            </h2>
-            <progress
-              value={current.reserved}
-              max={current.capacity}
-              hidden={current.reserved === 0}
-              aria-label={`${current.reserved} ${t.bake.of} ${current.capacity} ${t.bake.reserved}`}
-            ></progress>
-            <p class="bake-count" data-bake-count>
-              <span data-count-small hidden={current.reserved > 0}>
-                {t.bake.small(current.capacity)}
-                {isDemo ? t.bake.test : ''}
-              </span>
-              <span data-count-left hidden={current.reserved === 0}>
-                <strong data-left>{left}</strong>
-                {` ${t.bake.leftOf(current.capacity)}${isDemo ? t.bake.test : ''}`}
-              </span>
-            </p>
-            <p class="bake-deadline">
-              {open
-                ? t.bake.open(current.deadline)
-                : state === 'UPCOMING'
-                  ? t.bake.upcoming
-                  : t.bake.closed}
-            </p>
-            {unavailable && (
-              <p role="status" class="bake-deadline">
-                {t.bake.unavailable}
-              </p>
-            )}
-            <a
-              class="bake-cta"
-              href={open ? '#reserva' : '#avisame'}
-              data-bake-cta
-            >
-              {open ? t.bake.ctaOpen : t.bake.ctaClosed}{' '}
-              <span aria-hidden="true">↓</span>
-            </a>
-          </div>
         </div>
-        <div class="hero-photos">
-          <figure class="hero-photo hero-photo-main">
-            <Photo
-              name="boule"
-              alt={t.hero.photos[0]!}
-              eager
-              sizes="(max-width: 860px) 80vw, 34vw"
-            />
-          </figure>
-          <figure class="hero-photo hero-photo-crumb">
-            <Photo
-              name="crumb2"
-              alt={t.hero.photos[1]!}
-              eager
-              sizes="(max-width: 860px) 46vw, 20vw"
-            />
-          </figure>
-          <svg class="hero-seal" viewBox="0 0 120 120" aria-hidden="true">
-            <defs>
-              <path
-                id="seal-circle"
-                d="M60 60m-46 0a46 46 0 1 1 92 0a46 46 0 1 1-92 0"
-              />
-            </defs>
-            <text>
-              <textPath href="#seal-circle" startOffset="0">
-                {t.hero.seal}
-              </textPath>
-            </text>
-            <text class="seal-num" x="60" y="68" text-anchor="middle">
-              35h
-            </text>
-          </svg>
+        <figure class="hero-photo hero-photo-main">
+          <Photo
+            name="boule"
+            alt={t.hero.photos[0]!}
+            eager
+            sizes="(max-width: 860px) 90vw, 34vw"
+          />
+        </figure>
+        <figure class="hero-photo hero-photo-crumb">
+          <Photo
+            name="crumb2"
+            alt={t.hero.photos[1]!}
+            eager
+            sizes="(max-width: 860px) 90vw, 30vw"
+          />
+        </figure>
+        <div
+          id="hornada"
+          class="bake-card"
+          data-state={state}
+          data-event-view="view_current_bake"
+          aria-labelledby="bake-title"
+          role="region"
+        >
+          <div class="bake-head">
+            <span class="status">
+              <span class="status-dot" aria-hidden="true"></span>
+              <span data-bake-label>{statusLabel}</span>
+            </span>
+            <span class="bake-number">
+              {t.bake.number} {current.number}
+            </span>
+          </div>
+          <h2 id="bake-title" class="bake-day">
+            {pickupDay}
+          </h2>
+          <progress
+            value={current.reserved}
+            max={current.capacity}
+            hidden={current.reserved === 0}
+            aria-label={`${current.reserved} ${t.bake.of} ${current.capacity} ${t.bake.reserved}`}
+          ></progress>
+          <p class="bake-count" data-bake-count>
+            <span data-count-small hidden={current.reserved > 0}>
+              {t.bake.small(current.capacity)}
+              {isDemo ? t.bake.test : ''}
+            </span>
+            <span data-count-left hidden={current.reserved === 0}>
+              <strong data-left>{left}</strong>
+              {` ${t.bake.leftOf(current.capacity)}${isDemo ? t.bake.test : ''}`}
+            </span>
+          </p>
+          <p class="bake-deadline">
+            {open
+              ? t.bake.open(current.deadline)
+              : state === 'UPCOMING'
+                ? t.bake.upcoming
+                : t.bake.closed}
+          </p>
+          {unavailable && (
+            <p role="status" class="bake-deadline">
+              {t.bake.unavailable}
+            </p>
+          )}
+          <a
+            class="bake-cta"
+            href={open ? '#reserva' : '#avisame'}
+            data-bake-cta
+          >
+            {open ? t.bake.ctaOpen : t.bake.ctaClosed}{' '}
+            <span aria-hidden="true">↓</span>
+          </a>
         </div>
       </div>
       <div class="ticker" aria-hidden="true">

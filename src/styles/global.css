@@ -94,11 +94,8 @@ h3,
   line-height: 0.98;
 }
 h2 em {
-  font-family: 'Fraunces', Georgia, serif;
-  font-style: italic;
-  font-weight: 400;
-  font-stretch: 100%;
-  letter-spacing: -0.02em;
+  font-style: normal;
+  font-weight: 300;
 }
 h2 {
   font-size: clamp(38px, 5vw, 72px);
@@ -369,136 +366,102 @@ img {
   text-decoration: none;
 }
 
-/* Portada: azul de azulejo con la miga dibujada como textura */
-.tex {
+/* Portada: el cartel de la miga, azul sobre blanco, con las cajas encima */
+.hero {
   position: relative;
   isolation: isolate;
+  background: #fbf8f1;
+  color: var(--tile);
+  padding-block: clamp(20px, 3vw, 44px) clamp(28px, 4vw, 56px);
+  overflow: hidden;
 }
-.tex::before {
+.hero::before {
   content: '';
   position: absolute;
   inset: 0;
   z-index: -1;
-  background: var(--tex-color, rgba(247, 241, 232, 0.13));
+  background: var(--tile);
   -webkit-mask: url('/images/texture-1412.webp') center / cover no-repeat;
   mask: url('/images/texture-1412.webp') center / cover no-repeat;
-  pointer-events: none;
 }
-.hero {
-  --tex-color: rgba(120, 150, 255, 0.28);
-  background: var(--tile);
-  color: var(--crumb);
-  padding-top: clamp(32px, 5vw, 72px);
-  overflow: hidden;
-}
-.hero-grid {
+.hero-board {
   display: grid;
-  grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
-  gap: clamp(32px, 5vw, 80px);
-  align-items: center;
-  padding-bottom: clamp(48px, 6vw, 88px);
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  grid-template-rows: auto auto;
+  gap: clamp(10px, 1.2vw, 16px);
+  min-height: clamp(520px, 52vw, 760px);
+}
+.hero-box,
+.hero-photo,
+.bake-card {
+  border-radius: 6px;
+}
+.hero-title-box {
+  grid-column: 1 / span 7;
+  grid-row: 1;
+  align-self: start;
+  padding: clamp(22px, 3.2vw, 48px);
+  background: #fbf8f1;
+  border: 1.5px solid var(--tile);
 }
 .hero-kicker {
   font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
   font-size: 12px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: rgba(247, 241, 232, 0.8);
-  margin-bottom: 20px;
+  margin-bottom: clamp(16px, 2vw, 28px);
 }
 .hero-title {
-  font-size: clamp(52px, 8.4vw, 132px);
-  font-stretch: 78%;
+  font-size: clamp(48px, 7.6vw, 124px);
+  font-stretch: 75%;
   font-weight: 800;
-  line-height: 0.88;
-  letter-spacing: -0.025em;
+  line-height: 0.86;
+  letter-spacing: -0.02em;
   text-transform: uppercase;
+  color: var(--tile);
 }
-.hero-word-lead {
-  display: block;
-}
+.hero-word-lead,
 .hero-word-side {
   display: block;
-  font-family: 'Fraunces', Georgia, serif;
-  font-style: italic;
-  font-weight: 400;
-  font-stretch: 100%;
-  text-transform: none;
-  letter-spacing: -0.02em;
-  font-size: 0.86em;
-  line-height: 1;
-  color: var(--orange);
 }
 .hero-sub {
-  margin-top: clamp(20px, 2.4vw, 32px);
-  font-size: clamp(18px, 1.6vw, 22px);
+  margin-top: clamp(18px, 2.2vw, 30px);
+  font-size: clamp(17px, 1.5vw, 21px);
   font-weight: 600;
+  color: var(--ink);
 }
 .hero-lede {
   margin-top: 8px;
-  max-width: 48ch;
-  color: rgba(247, 241, 232, 0.86);
-}
-.hero-photos {
-  position: relative;
-  padding: 0 0 12% 10%;
+  max-width: 52ch;
+  color: var(--muted);
 }
 .hero-photo {
   margin: 0;
   overflow: hidden;
+  background: var(--linen);
 }
 .hero-photo picture {
   display: block;
   height: 100%;
 }
 .hero-photo-main {
-  aspect-ratio: 3 / 4;
-  border-radius: 999px 999px 18px 18px;
-  box-shadow: 0 40px 70px -40px rgba(5, 14, 60, 0.8);
+  grid-column: 8 / -1;
+  grid-row: 1 / span 2;
 }
 .hero-photo-crumb {
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  width: 44%;
-  aspect-ratio: 3 / 4;
-  border-radius: 18px;
-  border: 6px solid var(--tile);
-  box-shadow: 0 24px 50px -30px rgba(5, 14, 60, 0.9);
+  grid-column: 5 / span 3;
+  grid-row: 2;
+  min-height: 260px;
 }
-.hero-seal {
-  position: absolute;
-  top: 6%;
-  right: -4%;
-  width: clamp(92px, 11vw, 150px);
-  padding: 6px;
-  border-radius: 50%;
-  background: var(--orange);
-  color: var(--ink);
-  animation: spin 40s linear infinite;
-}
-.hero-seal text {
-  fill: var(--ink);
-  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
-  font-size: 11.4px;
-  letter-spacing: 0.1em;
-}
-.hero-seal .seal-num {
-  font-family: var(--display);
-  font-weight: 800;
-  font-size: 30px;
-  letter-spacing: -0.02em;
-}
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
+.hero-photo-crumb img {
+  object-position: 50% 42%;
 }
 /* La cinta del cartel: texto corrido que rodea la portada. */
 .ticker {
   overflow: hidden;
-  border-block: 1px solid var(--tile-line);
-  background: var(--tile-deep);
+  border-block: 1.5px solid var(--tile);
+  background: #fbf8f1;
+  color: var(--tile);
   padding-block: 14px;
   font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
   font-size: 13px;
@@ -516,7 +479,7 @@ img {
   font-style: normal;
   font-size: 8px;
   align-self: center;
-  color: var(--orange);
+  color: var(--crust);
 }
 @keyframes ticker {
   to {
@@ -524,36 +487,41 @@ img {
   }
 }
 .bake-card {
+  grid-column: 1 / span 4;
+  grid-row: 2;
+  align-self: end;
   display: flex;
   flex-direction: column;
-  max-width: 460px;
-  margin-top: clamp(28px, 3vw, 40px);
   padding: 22px 24px 20px;
-  border-radius: var(--radius);
-  background: var(--crumb);
-  color: var(--ink);
-  outline: 1.5px dashed rgba(19, 27, 49, 0.35);
-  outline-offset: -9px;
-  box-shadow: 0 30px 50px -36px rgba(5, 14, 60, 0.8);
+  background: var(--tile);
+  color: var(--crumb);
+  border: 1.5px solid var(--tile);
+}
+.bake-card .bake-number,
+.bake-card .bake-deadline {
+  color: rgba(247, 241, 232, 0.8);
 }
 .bake-card .bake-day {
   margin-top: 12px;
   font-size: clamp(30px, 3vw, 44px);
   line-height: 0.95;
-  color: var(--tile);
+}
+.bake-card progress,
+.bake-card progress::-webkit-progress-bar {
+  background: rgba(247, 241, 232, 0.2);
 }
 .bake-card .bake-cta {
   align-self: flex-start;
   margin-top: 16px;
   padding: 11px 20px;
   border-radius: 999px;
-  background: var(--tile);
-  color: var(--crumb);
+  background: var(--orange);
+  color: var(--ink);
   text-decoration: none;
   transition: background 0.2s;
 }
 .bake-card .bake-cta:hover {
-  background: var(--tile-deep);
+  background: #ff9552;
 }
 .bake-head {
   display: flex;
@@ -1384,7 +1352,6 @@ details p {
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .hero-seal,
   .ticker-track {
     animation: none !important;
   }
@@ -1401,16 +1368,21 @@ details p {
   }
 }
 @media (max-width: 860px) {
-  .hero-grid {
-    grid-template-columns: 1fr;
+  .hero-board {
+    grid-template-columns: 1fr 1fr;
+    min-height: 0;
   }
-  .hero-photos {
-    max-width: 520px;
-    margin-inline: auto;
-    width: 100%;
-  }
+  .hero-title-box,
   .bake-card {
-    max-width: none;
+    grid-column: 1 / -1;
+    grid-row: auto;
+  }
+  .hero-photo-main,
+  .hero-photo-crumb {
+    grid-column: auto;
+    grid-row: auto;
+    min-height: 0;
+    aspect-ratio: 3 / 4;
   }
   .site-header nav a:not(.nav-order, .lang-switch) {
     display: none;
