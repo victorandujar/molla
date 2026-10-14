@@ -16,7 +16,12 @@ export const POST: APIRoute = async (ctx) => {
     // emailed link. Without an email provider there is no way to confirm,
     // so a deployment without one keeps the previous direct sign-up.
     const confirmed = !isDemo && !emailEnabled();
-    const tokens = await joinWaitlist(r.data.email, r.data.source, lang, confirmed);
+    const tokens = await joinWaitlist(
+      r.data.email,
+      r.data.source,
+      lang,
+      confirmed,
+    );
     if (tokens) after(sendWaitlistConfirmation(r.data.email, lang, tokens));
     // Same answer whether the address was new, pending or already confirmed.
     return json({ ok: true, confirm: !confirmed });
