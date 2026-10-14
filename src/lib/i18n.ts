@@ -84,7 +84,6 @@ export const ui = {
       sub: 'Cada sábado. A domicilio en Sant Boi y Santa Coloma.',
       lede: 'Amaso a mano una hornada pequeña cada semana, con harinas ecológicas, poolish y hasta 35 horas de fermentación lenta. Tú lo reservas aquí y el sábado lo pasas a recoger.',
       kicker: 'Panadería de barrio · Sant Boi de Llobregat',
-      seal: 'FERMENTACIÓN LENTA · HECHO A MANO · ',
       keywords: [
         'Harinas ecológicas',
         'Poolish',
@@ -97,9 +96,16 @@ export const ui = {
       notify: 'Avísame cuando abra',
       how: 'Cómo lo hago',
       photos: [
-        'El panadero cortando hogazas recién hechas junto al azulejo azul',
-        'Rebanadas de hogaza con la miga abierta sobre una tabla de madera',
+        'Hogaza redonda recién horneada, con el corte abierto, sobre papel de horno',
+        'Una hogaza partida por la mitad entre las manos, con la miga abierta',
       ],
+      values: [
+        ['Harinas ecológicas', 'De cultivo ecológico, sin mejorantes.'],
+        ['Hasta 35 horas', 'De fermentación lenta con poolish.'],
+        ['Hornada pequeña', 'Pocas hogazas, hechas de una en una.'],
+        ['A domicilio', 'En Sant Boi y Santa Coloma de Cervelló.'],
+      ],
+      nextBake: 'Próxima hornada',
     },
     bake: {
       number: 'Hornada',
@@ -158,7 +164,7 @@ export const ui = {
     organic: {
       kicker: 'Harina',
       h2a: 'Harinas ecológicas,',
-      h2b: 'de molino.',
+      h2b: 'y tiempo.',
       p: 'Todo el pan y el banana bread se hacen con harinas de cultivo ecológico. Una buena harina no necesita mejorantes: con agua, sal, poco levadura y mucho tiempo es suficiente.',
       items: [
         ['100 %', 'harinas ecológicas'],
@@ -310,6 +316,8 @@ export const ui = {
         'Casi está: te he enviado un email para confirmar el aviso. Si no lo ves, mira en spam.',
       successDirect:
         'Ya estás en la lista. Te escribiré cuando abra la próxima hornada.',
+      poster:
+        'Ilustración en azul de la miga del pan, rodeada por el lema de Molla',
     },
     mobile: {
       label: 'Reserva rápida',
@@ -356,7 +364,6 @@ export const ui = {
       sub: 'Cada dissabte. A domicili a Sant Boi i Santa Coloma.',
       lede: 'Pasto a mà una fornada petita cada setmana, amb farines ecològiques, poolish i fins a 35 hores de fermentació lenta. Tu el reserves aquí i dissabte el passes a buscar.',
       kicker: 'Fleca de barri · Sant Boi de Llobregat',
-      seal: 'FERMENTACIÓ LENTA · FET A MÀ · ',
       keywords: [
         'Farines ecològiques',
         'Poolish',
@@ -369,9 +376,16 @@ export const ui = {
       notify: 'Avisa’m quan obri',
       how: 'Com el faig',
       photos: [
-        'El forner tallant pans acabats de fer al costat de la rajola blava',
-        'Llesques de pa amb la molla oberta sobre una taula de fusta',
+        'Pa rodó acabat de coure, amb el tall obert, sobre paper de forn',
+        'Un pa partit per la meitat entre les mans, amb la molla oberta',
       ],
+      values: [
+        ['Farines ecològiques', 'De cultiu ecològic, sense milloradors.'],
+        ['Fins a 35 hores', 'De fermentació lenta amb poolish.'],
+        ['Fornada petita', 'Pocs pans, fets d’un en un.'],
+        ['A domicili', 'A Sant Boi i Santa Coloma de Cervelló.'],
+      ],
+      nextBake: 'Propera fornada',
     },
     bake: {
       number: 'Fornada',
@@ -428,7 +442,7 @@ export const ui = {
     organic: {
       kicker: 'Farina',
       h2a: 'Farines ecològiques,',
-      h2b: 'de molí.',
+      h2b: 'i temps.',
       p: 'Tot el pa i el banana bread es fan amb farines de cultiu ecològic. Una bona farina no necessita milloradors: amb aigua, sal, poc llevat i molt de temps n’hi ha prou.',
       items: [
         ['100 %', 'farines ecològiques'],
@@ -580,6 +594,8 @@ export const ui = {
         'Gairebé fet: t’he enviat un correu per confirmar l’avís. Si no el veus, mira al correu brossa.',
       successDirect:
         'Ja ets a la llista. T’escriuré quan obri la propera fornada.',
+      poster:
+        'Il·lustració en blau de la molla del pa, envoltada pel lema de Molla',
     },
     mobile: {
       label: 'Reserva ràpida',

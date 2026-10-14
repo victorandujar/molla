@@ -44,3 +44,15 @@ for (const width of [768, 1412]) {
     .webp({ quality: 80, alphaQuality: 90 })
     .toFile(`public/images/texture-${width}.webp`);
 }
+// El cartel completo, con su marco de texto, para mostrarlo como lámina.
+for (const width of [720, 1100, 1536]) {
+  const poster = sharp(`${dir}/5.webp`).resize({ width });
+  await poster
+    .clone()
+    .webp({ quality: 82 })
+    .toFile(`public/images/poster-${width}.webp`);
+  await poster
+    .clone()
+    .avif({ quality: 58 })
+    .toFile(`public/images/poster-${width}.avif`);
+}
