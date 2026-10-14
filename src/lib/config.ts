@@ -38,7 +38,7 @@ export const products = [
     subtitle: 'Hogaza de poolish',
     price: WEEKLY_LOAF_PRICE_CENTS,
     weight: '750–850 g',
-    ingredients: 'Harina de trigo, agua, sal y levadura.',
+    ingredients: 'Harina de trigo ecológica, agua, sal y levadura.',
     allergens: 'Contiene trigo (gluten).',
     image: 'crumb',
     available: true,
@@ -63,7 +63,7 @@ export const bake = {
   pickupDate: '2026-09-26T12:00:00+02:00',
   deadline: '2026-09-24T20:00:00+02:00',
   opensAt: '2026-09-14T00:00:00+02:00',
-  capacity: 6,
+  capacity: 10,
   status: 'OPEN' as BakeState,
   pickupWindow: brand.pickupWindow,
 };

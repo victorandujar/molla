@@ -264,10 +264,18 @@ async function refreshBake() {
     const response = await fetch('/api/bake', { cache: 'no-store' });
     if (!response.ok) return;
     const b = await response.json();
-    const n = document.querySelector('[data-reserved]');
-    if (n) n.textContent = String(b.reserved);
+    const n = document.querySelector('[data-left]');
+    if (n && b.capacity) n.textContent = String(b.capacity - b.reserved);
+    // At zero reservations the card shows the small batch, never an empty counter.
+    document
+      .querySelector<HTMLElement>('[data-count-small]')
+      ?.toggleAttribute('hidden', b.reserved > 0);
+    document
+      .querySelector<HTMLElement>('[data-count-left]')
+      ?.toggleAttribute('hidden', b.reserved === 0);
     const progress = document.querySelector('progress');
     if (progress) {
+      progress.hidden = b.reserved === 0;
       progress.value = b.reserved;
       progress.setAttribute(
         'aria-label',
@@ -319,7 +327,7 @@ async function refreshBake() {
 }
 // The page may come from the CDN cache: refresh on load and when returning to
 // it. The transaction remains the final authority.
-if (form || document.querySelector('[data-reserved]')) void refreshBake();
+if (form || document.querySelector('[data-left]')) void refreshBake();
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible') void refreshBake();
 });

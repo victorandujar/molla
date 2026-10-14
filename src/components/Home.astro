@@ -95,67 +95,65 @@ const jsonLd = [
 <Base lang={lang} route="home" jsonLd={jsonLd}>
   <main id="contenido">
     <section class="hero" aria-labelledby="hero-title">
-      <div class="wrap">
-        <div
-          class="hero-head"
-          style={`--lead:${t.hero.h1a.length};--side:${t.hero.h1b.length}`}
-        >
+      <div class="wrap hero-grid">
+        <div class="hero-copy">
+          <p class="eyebrow">{t.hero.kicker}</p>
           <h1 id="hero-title" class="hero-title">
-            <span class="hero-word hero-word-lead">{t.hero.h1a}</span>{' '}
-            <svg class="hero-star" viewBox="0 0 64 64" aria-hidden="true">
-              <path d="M32 0l4.6 20.9L54.6 9.4 43.1 27.4 64 32l-20.9 4.6 11.5 18L36.6 43.1 32 64l-4.6-20.9-18 11.5 11.5-18L0 32l20.9-4.6L9.4 9.4l18 11.5z" />
-            </svg>{' '}
-            <span class="hero-word hero-word-side">{t.hero.h1b}</span>
+            <span>{t.hero.h1a}</span> <span class="soft">{t.hero.h1b}</span>
           </h1>
-          <div class="hero-aside">
-            <p class="hero-sub">{t.hero.sub}</p>
-            <p class="hero-lede">{t.hero.lede}</p>
+          <p class="hero-lede">{t.hero.lede}</p>
+          <div class="hero-actions">
+            <a class="button" href={open ? '#reserva' : '#avisame'}>
+              {open ? t.hero.order : t.hero.notify}
+            </a>
+            <a class="link-arrow" href="#proceso">
+              {t.hero.how} <span aria-hidden="true">→</span>
+            </a>
           </div>
         </div>
-        <div class="hero-row">
-          {(['maker', 'hero'] as const).map((name, i) => (
-            <figure class={`hero-photo hero-photo-${name}`}>
-              <Photo
-                name={name}
-                alt={t.hero.photos[i]!}
-                eager
-                sizes={
-                  i
-                    ? '(max-width: 860px) 50vw, 38vw'
-                    : '(max-width: 860px) 50vw, 26vw'
-                }
-              />
-            </figure>
-          ))}
-          <div
-            id="hornada"
-            class="bake-card"
-            data-state={state}
-            data-event-view="view_current_bake"
-            aria-labelledby="bake-title"
-            role="region"
-          >
-            <div class="bake-head">
-              <span class="status">
-                <span class="status-dot" aria-hidden="true"></span>
-                <span data-bake-label>{statusLabel}</span>
-              </span>
-              <span class="bake-number">
-                {t.bake.number} {current.number}
-              </span>
-            </div>
+        <div class="hero-visual">
+          <div class="print" aria-hidden="true"></div>
+          <figure class="hero-photo hero-photo-main">
+            <Photo
+              name="crumb2"
+              alt={t.hero.photos[1]!}
+              eager
+              sizes="(max-width: 860px) 86vw, 40vw"
+            />
+          </figure>
+          <figure class="hero-photo hero-photo-small">
+            <Photo
+              name="boule"
+              alt={t.hero.photos[0]!}
+              eager
+              sizes="(max-width: 860px) 36vw, 16vw"
+            />
+          </figure>
+        </div>
+      </div>
+
+      <div class="wrap">
+        <div
+          id="hornada"
+          class="bake-card"
+          data-state={state}
+          data-event-view="view_current_bake"
+          aria-labelledby="bake-title"
+          role="region"
+        >
+          <div class="bake-cell bake-head">
+            <span class="status">
+              <span class="status-dot" aria-hidden="true"></span>
+              <span data-bake-label>{statusLabel}</span>
+            </span>
+            <span class="bake-number">
+              {t.bake.number} {current.number}
+            </span>
+          </div>
+          <div class="bake-cell bake-main">
             <h2 id="bake-title" class="bake-day">
               {pickupDay}
             </h2>
-            <progress
-              value={current.reserved}
-              max={current.capacity}
-              aria-label={`${current.reserved} ${t.bake.of} ${current.capacity} ${t.bake.reserved}`}
-            ></progress>
-            <p class="bake-count">
-              <strong data-reserved>{current.reserved}</strong>
-              {` ${t.bake.of} ${current.capacity} ${t.bake.reserved}${isDemo ? t.bake.test : ''}`}
-            </p>
             <p class="bake-deadline">
               {open
                 ? t.bake.open(current.deadline)
@@ -168,53 +166,78 @@ const jsonLd = [
                 {t.bake.unavailable}
               </p>
             )}
-            <a
-              class="bake-cta"
-              href={open ? '#reserva' : '#avisame'}
-              data-bake-cta
-            >
-              {open ? t.bake.ctaOpen : t.bake.ctaClosed}{' '}
-              <span aria-hidden="true">↓</span>
-            </a>
           </div>
+          <div class="bake-cell bake-stock">
+            <p class="bake-count" data-bake-count>
+              <span data-count-small hidden={current.reserved > 0}>
+                {t.bake.small(current.capacity)}
+                {isDemo ? t.bake.test : ''}
+              </span>
+              <span data-count-left hidden={current.reserved === 0}>
+                <strong data-left>{left}</strong>
+                {` ${t.bake.leftOf(current.capacity)}${isDemo ? t.bake.test : ''}`}
+              </span>
+            </p>
+            <progress
+              value={current.reserved}
+              max={current.capacity}
+              hidden={current.reserved === 0}
+              aria-label={`${current.reserved} ${t.bake.of} ${current.capacity} ${t.bake.reserved}`}
+            ></progress>
+          </div>
+          <a
+            class="bake-cta"
+            href={open ? '#reserva' : '#avisame'}
+            data-bake-cta
+          >
+            {open ? t.bake.ctaOpen : t.bake.ctaClosed}{' '}
+            <span aria-hidden="true">↓</span>
+          </a>
         </div>
-        <p class="hero-keywords">
-          {t.hero.keywords.map((k, i) => (
-            <>
-              {i > 0 && <span aria-hidden="true"> • </span>}
-              <span>{k}</span>
-            </>
-          ))}
-        </p>
       </div>
     </section>
 
+    <section class="values" aria-label={t.organic.kicker}>
+      <ul class="wrap values-list">
+        {t.hero.values.map(([title, text], i) => (
+          <li>
+            <span class="num">0{i + 1}</span>
+            <strong>{title}</strong>
+            <span>{text}</span>
+          </li>
+        ))}
+      </ul>
+    </section>
+
     <section
-      class="loaf-section wrap"
+      class="product wrap"
       aria-labelledby="loaf-title"
       data-event-view="view_product"
     >
-      <div class="loaf-photos">
-        <div class="loaf-photo">
+      <div class="product-media">
+        <figure class="product-photo">
           <Photo
             name="loaves"
             alt={t.loaf.alt}
-            sizes="(max-width: 860px) calc(100vw - 40px), 50vw"
+            sizes="(max-width: 860px) calc(100vw - 40px), 54vw"
           />
-        </div>
-        <div class="loaf-inset">
+        </figure>
+        <figure class="product-inset">
           <Photo
             name="slice"
             alt={t.loaf.altSlice}
-            sizes="(max-width: 860px) 50vw, 27vw"
+            sizes="(max-width: 860px) 50vw, 22vw"
           />
-        </div>
+        </figure>
       </div>
-      <div class="loaf-info">
-        <p class="kicker">{t.loaf.kicker}</p>
+      <div class="product-info">
+        <p class="eyebrow">
+          <span class="num">01</span>
+          {t.loaf.kicker}
+        </p>
         <h2 id="loaf-title">{t.loaf.name}</h2>
-        <p class="loaf-price">
-          {money(loaf.price)} <span>· {loaf.weight}</span>
+        <p class="price">
+          {money(loaf.price)} <span>{loaf.weight}</span>
         </p>
         <dl class="spec">
           <div>
@@ -240,27 +263,53 @@ const jsonLd = [
       </div>
     </section>
 
+    <section class="manifesto" aria-labelledby="organic-title">
+      <div class="wrap manifesto-inner">
+        <p class="eyebrow">
+          <span class="num">02</span>
+          {t.organic.kicker}
+        </p>
+        <h2 id="organic-title">
+          {t.organic.h2a} <span class="soft">{t.organic.h2b}</span>
+        </h2>
+        <p class="manifesto-text">{t.organic.p}</p>
+        <ul class="manifesto-stats">
+          {t.organic.items.map(([n, label]) => (
+            <li>
+              <strong>{n}</strong>
+              <span>{label}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+
     <section id="proceso" class="process" aria-labelledby="process-title">
       <div class="wrap">
-        <div class="process-head">
-          <h2 id="process-title">
-            {t.process.h2a} <em>{t.process.h2b}</em>
-          </h2>
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">
+              <span class="num">03</span>
+              {t.nav.process}
+            </p>
+            <h2 id="process-title">
+              {t.process.h2a} <span class="soft">{t.process.h2b}</span>
+            </h2>
+          </div>
           <div>
             <p>{t.process.intro}</p>
-            <a class="process-more" href={routes.poolish[lang]}>
-              {t.process.more} →
+            <a class="link-arrow" href={routes.poolish[lang]}>
+              {t.process.more} <span aria-hidden="true">→</span>
             </a>
           </div>
         </div>
-        <ol class="timeline">
-          {steps.map((step) => (
+        <ol class="steps">
+          {steps.map((step, i) => (
             <li class:list={{ long: 'time' in step }}>
-              <span class="bar" aria-hidden="true">
-                {'time' in step && <span class="bar-time">{step.time}</span>}
-              </span>
+              <span class="step-num">0{i + 1}</span>
               <span class="when">{step.when}</span>
               <h3>{step.title}</h3>
+              {'time' in step && <span class="step-time">{step.time}</span>}
               <p>{step.text}</p>
             </li>
           ))}
@@ -268,25 +317,80 @@ const jsonLd = [
       </div>
     </section>
 
+    <section class="banana" aria-labelledby="banana-title">
+      <div class="wrap banana-grid">
+        <div class="banana-copy">
+          <p class="eyebrow">
+            <span class="num">04</span>
+            {t.banana.kicker}
+          </p>
+          <h2 id="banana-title">
+            {t.banana.h2a} <span class="soft">{t.banana.h2b}</span>
+          </h2>
+          <p class="banana-text">{t.banana.p}</p>
+          <ul class="tags">
+            <li>{t.banana.point1}</li>
+            <li>{t.banana.point2}</li>
+            <li>{t.banana.point3}</li>
+          </ul>
+          <p class="note">{t.banana.note}</p>
+          {brand.whatsapp ? (
+            <a
+              class="button"
+              data-event="click_whatsapp"
+              href={`https://wa.me/${brand.whatsapp}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {t.banana.ask} <span aria-hidden="true">↗</span>
+            </a>
+          ) : (
+            <a class="button" href="#avisame">
+              {t.banana.notify}
+            </a>
+          )}
+        </div>
+        <div class="banana-media">
+          <figure class="banana-main">
+            <Photo
+              name="banana"
+              alt={t.banana.alt}
+              sizes="(max-width: 860px) 70vw, 32vw"
+            />
+          </figure>
+          <figure class="banana-detail">
+            <Photo
+              name="bananaDetail"
+              alt={t.banana.altDetail}
+              sizes="(max-width: 860px) 50vw, 22vw"
+            />
+          </figure>
+        </div>
+      </div>
+    </section>
+
     <section class="maker wrap" aria-labelledby="maker-title">
-      <div class="maker-photos">
-        <div class="maker-main">
+      <div class="maker-media">
+        <figure class="maker-main">
           <Photo
             name="person"
             alt={t.maker.altPerson}
-            sizes="(max-width: 860px) 70vw, 32vw"
+            sizes="(max-width: 860px) 70vw, 34vw"
           />
-        </div>
-        <div class="maker-side">
+        </figure>
+        <figure class="maker-side">
           <Photo
             name="dough"
             alt={t.maker.altDough}
-            sizes="(max-width: 860px) 45vw, 20vw"
+            sizes="(max-width: 860px) 40vw, 16vw"
           />
-        </div>
+        </figure>
       </div>
       <div class="maker-copy">
-        <p class="kicker">{t.maker.kicker}</p>
+        <p class="eyebrow">
+          <span class="num">05</span>
+          {t.maker.kicker}
+        </p>
         <h2 id="maker-title">{t.maker.h2}</h2>
         <p>{t.maker.p1}</p>
         <p>{t.maker.p2}</p>
@@ -296,7 +400,10 @@ const jsonLd = [
     <section id="reserva" class="reserve" aria-labelledby="reserve-title">
       <div class="wrap reserve-grid">
         <div class="reserve-intro">
-          <p class="kicker">{t.reserve.kicker}</p>
+          <p class="eyebrow">
+            <span class="num">06</span>
+            {t.reserve.kicker}
+          </p>
           <h2 id="reserve-title">{t.reserve.h2}</h2>
           <dl class="summary">
             <div>
@@ -482,7 +589,13 @@ const jsonLd = [
     </section>
 
     <section id="preguntas" class="faq wrap" aria-labelledby="faq-title">
-      <h2 id="faq-title">{t.faq.h2}</h2>
+      <div>
+        <p class="eyebrow">
+          <span class="num">07</span>
+          {t.nav.faq}
+        </p>
+        <h2 id="faq-title">{t.faq.h2}</h2>
+      </div>
       <div class="faq-list">
         {t.faq.items.map(([q, a]) => (
           <details>
@@ -498,65 +611,84 @@ const jsonLd = [
 
     <section id="avisame" class="waitlist" aria-labelledby="waitlist-title">
       <div class="wrap waitlist-grid">
-        <div>
+        <figure class="poster">
+          <picture>
+            <source
+              type="image/avif"
+              srcset="/images/poster-720.avif 720w, /images/poster-1100.avif 1100w, /images/poster-1536.avif 1536w"
+              sizes="(max-width: 860px) calc(100vw - 40px), 46vw"
+            />
+            <img
+              src="/images/poster-1100.webp"
+              srcset="/images/poster-720.webp 720w, /images/poster-1100.webp 1100w, /images/poster-1536.webp 1536w"
+              sizes="(max-width: 860px) calc(100vw - 40px), 46vw"
+              alt={t.waitlist.poster}
+              width="1536"
+              height="1024"
+              loading="lazy"
+              decoding="async"
+            />
+          </picture>
+        </figure>
+        <div class="waitlist-body">
           <h2 id="waitlist-title">{t.waitlist.h2}</h2>
           <p>{t.waitlist.p}</p>
-        </div>
-        <form
-          id="waitlist-form"
-          action={`/api/waitlist?lang=${lang}`}
-          method="post"
-        >
-          <label for="waitlist-email">{t.waitlist.label}</label>
-          <div class="waitlist-input">
-            <input
-              id="waitlist-email"
-              name="email"
-              type="email"
-              autocomplete="email"
-              maxlength="254"
-              required
-              placeholder="tu@email.com"
-              disabled={!canSubmit}
-            />
-            <button class="button" type="submit" disabled={!canSubmit}>
-              {t.waitlist.button}
-            </button>
-          </div>
-          <input type="hidden" name="source" value="direct" />
-          <div class="honey" aria-hidden="true">
-            <input
-              name="website"
-              aria-label={t.waitlist.honey}
-              tabindex="-1"
-              autocomplete="off"
-            />
-          </div>
-          <label class="check">
-            <input
-              type="checkbox"
-              name="consent"
-              value="yes"
-              required
-              disabled={!canSubmit}
-            />
-            <span>
-              {t.waitlist.consentA}{' '}
-              <a href={routes.privacy[lang]}>{t.waitlist.consentLink}</a>.
-            </span>
-          </label>
-          {!canSubmit && <p class="form-footnote">{t.waitlist.disabled}</p>}
-          {isDemo && <p class="form-footnote">{t.waitlist.demo}</p>}
-          <p class="form-error" role="alert" tabindex="-1" hidden></p>
-          <p
-            class="waitlist-success"
-            role="status"
-            data-direct={t.waitlist.successDirect}
-            hidden
+          <form
+            id="waitlist-form"
+            action={`/api/waitlist?lang=${lang}`}
+            method="post"
           >
-            {t.waitlist.success}
-          </p>
-        </form>
+            <label for="waitlist-email">{t.waitlist.label}</label>
+            <div class="waitlist-input">
+              <input
+                id="waitlist-email"
+                name="email"
+                type="email"
+                autocomplete="email"
+                maxlength="254"
+                required
+                placeholder="tu@email.com"
+                disabled={!canSubmit}
+              />
+              <button class="button" type="submit" disabled={!canSubmit}>
+                {t.waitlist.button}
+              </button>
+            </div>
+            <input type="hidden" name="source" value="direct" />
+            <div class="honey" aria-hidden="true">
+              <input
+                name="website"
+                aria-label={t.waitlist.honey}
+                tabindex="-1"
+                autocomplete="off"
+              />
+            </div>
+            <label class="check">
+              <input
+                type="checkbox"
+                name="consent"
+                value="yes"
+                required
+                disabled={!canSubmit}
+              />
+              <span>
+                {t.waitlist.consentA}{' '}
+                <a href={routes.privacy[lang]}>{t.waitlist.consentLink}</a>.
+              </span>
+            </label>
+            {!canSubmit && <p class="form-footnote">{t.waitlist.disabled}</p>}
+            {isDemo && <p class="form-footnote">{t.waitlist.demo}</p>}
+            <p class="form-error" role="alert" tabindex="-1" hidden></p>
+            <p
+              class="waitlist-success"
+              role="status"
+              data-direct={t.waitlist.successDirect}
+              hidden
+            >
+              {t.waitlist.success}
+            </p>
+          </form>
+        </div>
       </div>
     </section>
   </main>

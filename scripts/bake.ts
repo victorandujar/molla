@@ -36,7 +36,7 @@ try {
       );
     if (!rows.length) console.log('No hay hornadas.');
   } else if (command === 'new') {
-    // npm run bake -- new 2026-10-03 --capacity=6 [--pickup-time=12:00]
+    // npm run bake -- new 2026-10-03 --capacity=10 [--pickup-time=12:00]
     // [--deadline=2026-10-01T20:00] [--opens=2026-09-27T00:00]
     // [--window="de 12:00 a 13:00"] --yes
     const [date] = args;

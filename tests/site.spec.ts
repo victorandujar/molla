@@ -253,14 +253,14 @@ test('duplicate request and simultaneous last loaf never overbook', async ({
   const retry = await send(input);
   expect((await retry.json()).id).toBe(firstBody.id);
   const responses = await Promise.all([
-    send({ ...input, requestId: crypto.randomUUID(), quantity: 2 }),
-    send({ ...input, requestId: crypto.randomUUID(), quantity: 2 }),
+    send({ ...input, requestId: crypto.randomUUID(), quantity: 4 }),
+    send({ ...input, requestId: crypto.randomUUID(), quantity: 4 }),
   ]);
   expect(responses.map((r) => r.status()).sort()).toEqual([201, 409]);
   const d = JSON.parse(await readFile(dataPath, 'utf8'));
   expect(
     d.orders.reduce((n: number, o: { quantity: number }) => n + o.quantity, 0),
-  ).toBe(6);
+  ).toBe(8);
 });
 test('sold out bake becomes waitlist and cannot accept more orders', async ({
   page,
