@@ -99,7 +99,12 @@ const jsonLd = [
         <div class="hero-copy">
           <p class="eyebrow">{t.hero.kicker}</p>
           <h1 id="hero-title" class="hero-title">
-            <span>{t.hero.h1a}</span> <span class="soft">{t.hero.h1b}</span>
+            <span class="line">
+              <span>{t.hero.h1a}</span>
+            </span>{' '}
+            <span class="line soft">
+              <span>{t.hero.h1b}</span>
+            </span>
           </h1>
           <p class="hero-lede">{t.hero.lede}</p>
           <div class="hero-actions">
@@ -112,7 +117,7 @@ const jsonLd = [
           </div>
         </div>
         <div class="hero-visual">
-          <div class="print" aria-hidden="true"></div>
+          <div class="print" aria-hidden="true" data-depth="-0.08"></div>
           <figure class="hero-photo hero-photo-main">
             <Photo
               name="crumb2"
@@ -121,7 +126,7 @@ const jsonLd = [
               sizes="(max-width: 860px) 86vw, 40vw"
             />
           </figure>
-          <figure class="hero-photo hero-photo-small">
+          <figure class="hero-photo hero-photo-small" data-depth="0.06">
             <Photo
               name="boule"
               alt={t.hero.photos[0]!}
