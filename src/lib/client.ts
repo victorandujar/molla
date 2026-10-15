@@ -331,3 +331,103 @@ if (form || document.querySelector('[data-left]')) void refreshBake();
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible') void refreshBake();
 });
+
+// Movimiento: la portada entra al cargar, el resto aparece al hacer scroll.
+// Sin JS o con movimiento reducido, todo se ve desde el principio.
+const calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
+if (!calm && 'IntersectionObserver' in window) {
+  const root = document.documentElement;
+  root.classList.add('motion');
+  requestAnimationFrame(() => root.classList.add('loaded'));
+  const groups = [
+    '.values-list li',
+    '.product-media figure',
+    '.product-info > *',
+    '.spec > div',
+    '.manifesto-inner > *',
+    '.manifesto-stats li',
+    '.section-head > *',
+    '.steps li',
+    '.banana-copy > *',
+    '.banana-media figure',
+    '.maker-media figure',
+    '.maker-copy > *',
+    '.reserve-intro > *',
+    '.reservation-panel',
+    '.faq > div:first-child',
+    '.faq-list details',
+    '.poster',
+    '.waitlist-body',
+    '.article-hero .wrap > *',
+    '.prose > *',
+    '.article-photo',
+  ];
+  const reveal = new IntersectionObserver(
+    (entries) => {
+      for (const entry of entries)
+        if (entry.isIntersecting) {
+          entry.target.classList.add('in');
+          reveal.unobserve(entry.target);
+        }
+    },
+    { threshold: 0.12, rootMargin: '0px 0px -6% 0px' },
+  );
+  for (const selector of groups)
+    document.querySelectorAll<HTMLElement>(selector).forEach((el, i) => {
+      if (el.closest('.hero')) return;
+      el.classList.add('reveal');
+      el.style.setProperty('--d', `${Math.min(i % 6, 5) * 70}ms`);
+      reveal.observe(el);
+    });
+  // Las cifras del manifiesto cuentan hasta su valor.
+  const counter = new IntersectionObserver(
+    (entries) => {
+      for (const entry of entries) {
+        if (!entry.isIntersecting) continue;
+        counter.unobserve(entry.target);
+        const el = entry.target as HTMLElement;
+        const text = el.textContent || '';
+        const match = text.match(/\d+/);
+        if (!match) continue;
+        const target = Number(match[0]);
+        const start = performance.now();
+        const tick = (now: number) => {
+          const t = Math.min(1, (now - start) / 1400);
+          const eased = 1 - Math.pow(1 - t, 3);
+          el.textContent = text.replace(
+            match[0],
+            String(Math.round(target * eased)),
+          );
+          if (t < 1) requestAnimationFrame(tick);
+        };
+        requestAnimationFrame(tick);
+      }
+    },
+    { threshold: 0.6 },
+  );
+  document
+    .querySelectorAll('.manifesto-stats strong')
+    .forEach((el) => counter.observe(el));
+  // Parallax suave en la portada y cabecera que se marca al bajar.
+  const header = document.querySelector('.site-header');
+  const layers = document.querySelectorAll<HTMLElement>('[data-depth]');
+  let ticking = false;
+  const onScroll = () => {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(() => {
+      const y = scrollY;
+      header?.classList.toggle('scrolled', y > 8);
+      if (y < innerHeight * 1.2)
+        layers.forEach((el) =>
+          el.style.setProperty(
+            '--py',
+            `${(y * Number(el.dataset.depth)).toFixed(1)}px`,
+          ),
+        );
+      ticking = false;
+    });
+  };
+  addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+}
