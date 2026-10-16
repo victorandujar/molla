@@ -106,6 +106,84 @@ export const ui = {
         ['A domicilio', 'En Sant Boi y Santa Coloma de Cervelló.'],
       ],
       nextBake: 'Próxima hornada',
+      ribbon: [
+        'Molla',
+        'Pa artesà',
+        'Fins a 35 h de fermentació',
+        'Baix Llobregat',
+      ],
+      scroll: 'Desliza',
+      hands: 'Las manos de mi madre',
+      sealTop: 'hasta',
+      sealBottom: 'de fermentación',
+    },
+    film: {
+      label: 'La cocina, en fotos',
+      items: [
+        [
+          'proof',
+          'La masa',
+          'Fermenta despacio, sin prisa.',
+          'Dos masas de pan reposando sobre la encimera',
+        ],
+        [
+          'hands',
+          'A mano',
+          'Pliegues, formado y corte, uno a uno.',
+          'Mano que corta una hogaza de corteza oscura con un cuchillo de pan',
+        ],
+        [
+          'smell',
+          'Huele',
+          'El primer gesto al sacarlo del horno.',
+          'El panadero huele una hogaza recién horneada',
+        ],
+        [
+          'cut',
+          'Corteza',
+          'Oscura y crujiente; la miga, húmeda.',
+          'Hogaza recién cortada, con la corteza tostada y la miga a la vista',
+        ],
+        [
+          'slices',
+          'Hasta 35 h',
+          'De fermentación: ahí está el sabor.',
+          'Rebanadas de pan con miga alveolada sobre una tabla',
+        ],
+      ] as [string, string, string, string][],
+    },
+    catalog: {
+      kicker: 'La carta',
+      h2a: 'Dos piezas,',
+      h2b: 'hechas sin prisa.',
+      intro:
+        'Cada semana horneo solo lo que se reserva. Añade lo que te apetezca a tu pedido y el sábado es tuyo.',
+      loaf: 'La de cada semana',
+      bananaWhole: 'Banana bread entero',
+      bananaHalf: 'Medio banana bread',
+      add: 'Añadir al pedido',
+      inOrder: (n: string) => `${n} en tu pedido`,
+      remove: 'Quitar uno',
+      whole: 'Entero',
+      half: 'Mitad',
+      size: 'Tamaño',
+      each: 'cada una',
+      bananaLeft: (halves: number) =>
+        halves <= 0
+          ? 'Agotado esta semana'
+          : halves === 1
+            ? 'Queda medio molde esta semana'
+            : halves === 2
+              ? 'Queda un molde esta semana'
+              : halves === 3
+                ? 'Queda un molde y medio esta semana'
+                : `Quedan ${halves % 2 ? `${Math.floor(halves / 2)} moldes y medio` : `${halves / 2} moldes`} esta semana`,
+      closed: 'Se reserva cuando abra la hornada',
+      pill: 'Tu pedido',
+      pillCta: 'Reservar',
+      loaves: (n: number) => `${n} ${n === 1 ? 'hogaza' : 'hogazas'}`,
+      banana: (halves: number) =>
+        halves === 1 ? '½ banana bread' : `${halves / 2} banana bread`,
     },
     bake: {
       number: 'Hornada',
@@ -150,11 +228,14 @@ export const ui = {
       kicker: 'También horneo',
       h2a: 'Banana bread',
       h2b: 'de chocolate.',
-      p: 'Plátanos muy maduros, harina ecológica y pepitas de chocolate por dentro y por fuera. Corteza dorada, miga húmeda y tierna. Se hornea en pequeñas tandas junto al pan.',
+      p: 'Tres plátanos muy maduros por molde, harina ecológica, yogur y una bolsa entera de pepitas de chocolate. Corteza dorada, miga húmeda y tierna.',
       point1: 'Harina ecológica',
-      point2: 'Plátano bien maduro',
-      point3: 'Tandas pequeñas',
-      note: 'Aún no se reserva en la web: pídemelo y lo añado a tu hogaza de la semana.',
+      point2: '3 plátanos por molde',
+      point3: '100 g de chocolate',
+      ingredientsValue:
+        'Plátano maduro, harina de trigo ecológica, yogur y pepitas de chocolate.',
+      allergensValue: 'Contiene trigo (gluten) y leche. Pregúntame por trazas.',
+      note: 'Entero o la mitad. Con tu hogaza o solo.',
       alt: 'Banana bread con pepitas de chocolate sobre una tabla de madera',
       altDetail:
         'Detalle de la corteza del banana bread con pepitas de chocolate',
@@ -175,6 +256,7 @@ export const ui = {
     process: {
       h2a: 'La mayor parte del trabajo',
       h2b: 'es esperar.',
+      hours: 'horas de fermentación',
       intro:
         'El poolish es una masa previa, líquida, que fermenta despacio durante la noche. Le da a la hogaza una miga más abierta, una corteza más fina y un sabor que no se consigue con prisa.',
       more: 'Qué es el poolish, en detalle',
@@ -217,8 +299,15 @@ export const ui = {
       altDough: 'Dos masas formadas reposando en sus cestas de fermentación',
     },
     reserve: {
-      kicker: 'Pedido para recoger',
-      h2: 'Reserva tu hogaza.',
+      kicker: 'Pedido para el sábado',
+      h2: 'Reserva tu pedido.',
+      bananaQty: 'Banana bread',
+      bananaHint: 'Por mitades: ½, 1, 1½ o 2',
+      bananaLess: 'Quitar media pieza de banana bread',
+      bananaMore: 'Añadir media pieza de banana bread',
+      bananaNone: 'Sin banana bread',
+      emptyOrder: 'Añade una hogaza o un banana bread para reservar.',
+      totalLabel: 'Total a pagar al recoger',
       pickup: 'Recogida',
       where: 'Dónde',
       pickupLocation: 'Punto de recogida en Sant Boi de Llobregat',
@@ -235,7 +324,7 @@ export const ui = {
       demoIntro:
         'Modo de prueba: usa datos ficticios. No se envían emails ni se encarga pan.',
       qty: 'Hogazas',
-      qtyMax: 'Máximo 4 por reserva',
+      qtyMax: 'Hasta 4 por pedido',
       less: 'Quitar una hogaza',
       more: 'Añadir una hogaza',
       name: 'Tu nombre',
@@ -278,7 +367,7 @@ export const ui = {
         ],
         [
           '¿Haces banana bread?',
-          'Sí, de chocolate y con harina ecológica, en tandas pequeñas. Todavía no se reserva en la web: escríbeme y lo añadimos a tu pedido de pan.',
+          'Sí, de chocolate y con harina ecológica, en tandas pequeñas. Se reserva aquí mismo, entero o la mitad, junto a tu hogaza o solo.',
         ],
         [
           '¿Las harinas son ecológicas?',
@@ -316,8 +405,7 @@ export const ui = {
         'Casi está: te he enviado un email para confirmar el aviso. Si no lo ves, mira en spam.',
       successDirect:
         'Ya estás en la lista. Te escribiré cuando abra la próxima hornada.',
-      poster:
-        'Ilustración en azul de la miga del pan, rodeada por el lema de Molla',
+      poster: 'Hogaza partida por la mitad, con la miga abierta a contraluz',
     },
     mobile: {
       label: 'Reserva rápida',
@@ -386,6 +474,84 @@ export const ui = {
         ['A domicili', 'A Sant Boi i Santa Coloma de Cervelló.'],
       ],
       nextBake: 'Propera fornada',
+      ribbon: [
+        'Molla',
+        'Pa artesà',
+        'Fins a 35 h de fermentació',
+        'Baix Llobregat',
+      ],
+      scroll: 'Llisca',
+      hands: 'Les mans de la meva mare',
+      sealTop: 'fins a',
+      sealBottom: 'de fermentació',
+    },
+    film: {
+      label: 'La cuina, en fotos',
+      items: [
+        [
+          'proof',
+          'La massa',
+          'Fermenta a poc a poc, sense pressa.',
+          'Dues masses de pa reposant sobre el taulell',
+        ],
+        [
+          'hands',
+          'A mà',
+          'Plecs, formació i tall, un a un.',
+          'Mà que talla un pa de crosta fosca amb un ganivet de pa',
+        ],
+        [
+          'smell',
+          'Fa olor',
+          'El primer gest en treure’l del forn.',
+          'El forner ensuma un pa acabat de coure',
+        ],
+        [
+          'cut',
+          'Crosta',
+          'Fosca i cruixent; la molla, humida.',
+          'Pa acabat de tallar, amb la crosta torrada i la molla a la vista',
+        ],
+        [
+          'slices',
+          'Fins a 35 h',
+          'De fermentació: aquí hi ha el gust.',
+          'Llesques de pa amb molla alveolada sobre una taula',
+        ],
+      ] as [string, string, string, string][],
+    },
+    catalog: {
+      kicker: 'La carta',
+      h2a: 'Dues peces,',
+      h2b: 'fetes sense pressa.',
+      intro:
+        'Cada setmana només cou el que es reserva. Afegeix el que et vingui de gust a la comanda i el dissabte és teu.',
+      loaf: 'El de cada setmana',
+      bananaWhole: 'Banana bread sencer',
+      bananaHalf: 'Mig banana bread',
+      add: 'Afegir a la comanda',
+      inOrder: (n: string) => `${n} a la comanda`,
+      remove: 'Treure’n un',
+      whole: 'Sencer',
+      half: 'Meitat',
+      size: 'Mida',
+      each: 'cadascun',
+      bananaLeft: (halves: number) =>
+        halves <= 0
+          ? 'Exhaurit aquesta setmana'
+          : halves === 1
+            ? 'Queda mig motlle aquesta setmana'
+            : halves === 2
+              ? 'Queda un motlle aquesta setmana'
+              : halves === 3
+                ? 'Queda un motlle i mig aquesta setmana'
+                : `Queden ${halves % 2 ? `${Math.floor(halves / 2)} motlles i mig` : `${halves / 2} motlles`} aquesta setmana`,
+      closed: 'Es reserva quan obri la fornada',
+      pill: 'La teva comanda',
+      pillCta: 'Reservar',
+      loaves: (n: number) => `${n} ${n === 1 ? 'pa' : 'pans'}`,
+      banana: (halves: number) =>
+        halves === 1 ? '½ banana bread' : `${halves / 2} banana bread`,
     },
     bake: {
       number: 'Fornada',
@@ -429,11 +595,14 @@ export const ui = {
       kicker: 'També cuino',
       h2a: 'Banana bread',
       h2b: 'de xocolata.',
-      p: 'Plàtans ben madurs, farina ecològica i xips de xocolata per dins i per fora. Crosta daurada, molla humida i tendra. Es couen en tandes petites al costat del pa.',
+      p: 'Tres plàtans ben madurs per motlle, farina ecològica, iogurt i una bossa sencera de xips de xocolata. Crosta daurada, molla humida i tendra.',
       point1: 'Farina ecològica',
-      point2: 'Plàtan ben madur',
-      point3: 'Tandes petites',
-      note: 'Encara no es reserva a la web: demana-me’l i l’afegeixo al teu pa de la setmana.',
+      point2: '3 plàtans per motlle',
+      point3: '100 g de xocolata',
+      ingredientsValue:
+        'Plàtan madur, farina de blat ecològica, iogurt i xips de xocolata.',
+      allergensValue: 'Conté blat (gluten) i llet. Pregunta’m per traces.',
+      note: 'Sencer o la meitat. Amb el teu pa o sol.',
       alt: 'Banana bread amb xips de xocolata sobre una taula de fusta',
       altDetail: 'Detall de la crosta del banana bread amb xips de xocolata',
       ask: 'Demanar banana bread',
@@ -453,6 +622,7 @@ export const ui = {
     process: {
       h2a: 'La major part de la feina',
       h2b: 'és esperar.',
+      hours: 'hores de fermentació',
       intro:
         'El poolish és una massa prèvia, líquida, que fermenta a poc a poc durant la nit. Dona al pa una molla més oberta, una crosta més fina i un gust que no s’aconsegueix amb pressa.',
       more: 'Què és el poolish, en detall',
@@ -496,8 +666,15 @@ export const ui = {
         'Dues masses formades reposant als seus cistells de fermentació',
     },
     reserve: {
-      kicker: 'Comanda per recollir',
-      h2: 'Reserva el teu pa.',
+      kicker: 'Comanda per a dissabte',
+      h2: 'Reserva la teva comanda.',
+      bananaQty: 'Banana bread',
+      bananaHint: 'Per meitats: ½, 1, 1½ o 2',
+      bananaLess: 'Treure mitja peça de banana bread',
+      bananaMore: 'Afegir mitja peça de banana bread',
+      bananaNone: 'Sense banana bread',
+      emptyOrder: 'Afegeix un pa o un banana bread per reservar.',
+      totalLabel: 'Total a pagar en recollir',
       pickup: 'Recollida',
       where: 'On',
       pickupLocation: 'Punt de recollida a Sant Boi de Llobregat',
@@ -514,7 +691,7 @@ export const ui = {
       demoIntro:
         'Mode de prova: fes servir dades fictícies. No s’envien correus ni s’encarrega pa.',
       qty: 'Pans',
-      qtyMax: 'Màxim 4 per reserva',
+      qtyMax: 'Fins a 4 per comanda',
       less: 'Treure un pa',
       more: 'Afegir un pa',
       name: 'El teu nom',
@@ -556,7 +733,7 @@ export const ui = {
         ],
         [
           'Fas banana bread?',
-          'Sí, de xocolata i amb farina ecològica, en tandes petites. Encara no es reserva a la web: escriu-me i l’afegim a la teva comanda de pa.',
+          'Sí, de xocolata i amb farina ecològica, en tandes petites. Es reserva aquí mateix, sencer o la meitat, amb el teu pa o sol.',
         ],
         [
           'Les farines són ecològiques?',
@@ -594,8 +771,7 @@ export const ui = {
         'Gairebé fet: t’he enviat un correu per confirmar l’avís. Si no el veus, mira al correu brossa.',
       successDirect:
         'Ja ets a la llista. T’escriuré quan obri la propera fornada.',
-      poster:
-        'Il·lustració en blau de la molla del pa, envoltada pel lema de Molla',
+      poster: 'Pa partit per la meitat, amb la molla oberta a contrallum',
     },
     mobile: {
       label: 'Reserva ràpida',

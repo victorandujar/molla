@@ -1,0 +1,24 @@
+---
+// The lettered border of the packaging: words split by dots, scrolling.
+interface Props {
+  words: readonly string[];
+  class?: string;
+  reverse?: boolean;
+}
+const { words, class: className = '', reverse = false } = Astro.props;
+// Enough copies to cover a wide screen twice, so the loop never shows a gap.
+const run = Array.from({ length: 4 }, () => words).flat();
+---
+
+<div class:list={['ribbon', className, { reverse }]} aria-hidden="true">
+  {[0, 1].map(() => (
+    <span class="ribbon-track">
+      {run.map((w) => (
+        <span class="ribbon-word">
+          <span class="ribbon-dot" />
+          {w}
+        </span>
+      ))}
+    </span>
+  ))}
+</div>
