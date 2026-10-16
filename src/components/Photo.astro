@@ -26,9 +26,15 @@ const ratios: Record<string, number> = {
   crumb2: 1088 / 1445,
   banana: 1506 / 2000,
   bananaDetail: 1500 / 1129,
+  kitchen: 1.4,
+  smell: 0.8,
+  proof: 0.8,
+  slices: 0.8,
+  cut: 0.8,
+  tiles: 0.75,
 };
 // The newer photos are smaller originals: they have no 1600 w variant.
-const widths = ['boule', 'crumb2'].includes(name)
+const widths = ['boule', 'crumb2', 'tiles'].includes(name)
   ? [400, 720, 1100]
   : [400, 720, 1100, 1600];
 const srcset = (format: string) =>

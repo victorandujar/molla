@@ -1,9 +1,17 @@
 import { randomUUID, randomBytes, createHash } from 'node:crypto';
 import postgres from 'postgres';
-import { bake, products, brand, isDemo } from './config';
+import {
+  bake,
+  brand,
+  isDemo,
+  productById,
+  BANANA_HALVES_PER_BAKE,
+} from './config';
+import { ui } from './i18n';
 import { AppError } from './messages';
 import {
   assertCapacity,
+  bananaSplit,
   madridIso,
   pickupCode,
   reminderDue,
@@ -11,6 +19,7 @@ import {
   weeklyCyclePlan,
   type Lang,
   type Order,
+  type OrderItem,
   type ReservationInput,
   type BakeState,
 } from './domain';
@@ -65,18 +74,49 @@ async function demo<T>(fn: (data: Demo) => T | Promise<T>): Promise<T> {
 const useDemo = () => !sql || isDemo;
 const madridDay = (at = new Date()) =>
   new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Madrid' }).format(at);
-export type ActiveBake = typeof bake & { reserved: number };
+// `reserved` counts loaves (the bake's capacity); banana bread has its own
+// smaller quota, counted in halves.
+export type ActiveBake = typeof bake & {
+  reserved: number;
+  bananaReserved: number;
+};
+const halvesOf = (i: Pick<OrderItem, 'product' | 'quantity'>) =>
+  i.product === 'banana'
+    ? i.quantity * 2
+    : i.product === 'banana-mitad'
+      ? i.quantity
+      : 0;
+const liveOrders = (d: Demo, bakeId: string) =>
+  d.orders.filter((o) => o.bakeId === bakeId && o.status !== 'CANCELLED');
 const reservedIn = (d: Demo, bakeId: string) =>
-  d.orders
-    .filter((o) => o.bakeId === bakeId && o.status !== 'CANCELLED')
-    .reduce((n, o) => n + o.quantity, 0);
+  liveOrders(d, bakeId).reduce((n, o) => n + o.quantity, 0);
+const bananaIn = (d: Demo, bakeId: string) =>
+  liveOrders(d, bakeId).reduce(
+    (n, o) => n + (o.items || []).reduce((m, i) => m + halvesOf(i), 0),
+    0,
+  );
+// The local demo always shows next Saturday's bake, open until Thursday
+// 20:00; on Friday and Saturday it moves on to the following week.
+const demoDates = (now = new Date()) => {
+  let plan = weeklyCyclePlan(now);
+  if (Date.parse(plan.deadline) <= now.getTime())
+    plan = weeklyCyclePlan(new Date(now.getTime() + 3 * 86400000));
+  return {
+    pickupDate: plan.pickupAt,
+    deadline: plan.deadline,
+    opensAt: madridIso(weeklyCyclePlan(now).today, '00:00'),
+  };
+};
 const demoBake = (d: Demo): ActiveBake => ({
   ...bake,
+  ...demoDates(),
   status: d.bakeStatus || bake.status,
   reserved: reservedIn(d, bake.id),
+  bananaReserved: bananaIn(d, bake.id),
 });
 const reservedSql = sql
-  ? sql`COALESCE((SELECT SUM(i.quantity) FROM orders o JOIN order_items i ON i.order_id=o.id WHERE o.bake_id=b.id AND o.status!='CANCELLED'),0)::int AS reserved`
+  ? sql`COALESCE((SELECT SUM(i.quantity) FROM orders o JOIN order_items i ON i.order_id=o.id WHERE o.bake_id=b.id AND o.status!='CANCELLED' AND i.product_id='clasica'),0)::int AS reserved,
+        COALESCE((SELECT SUM(CASE i.product_id WHEN 'banana' THEN i.quantity*2 WHEN 'banana-mitad' THEN i.quantity ELSE 0 END) FROM orders o JOIN order_items i ON i.order_id=o.id WHERE o.bake_id=b.id AND o.status!='CANCELLED'),0)::int AS banana_reserved`
   : null;
 // The database decides the active bake: the next pickup not yet completed,
 // or the most recent one so the page shows "closed" until the next is created.
@@ -95,6 +135,7 @@ const toBake = (b: postgres.Row): ActiveBake => ({
   pickupDate: new Date(b.pickup_date).toISOString(),
   pickupWindow: (b.pickup_window as string | null) || brand.pickupWindow,
   reserved: b.reserved as number,
+  bananaReserved: (b.banana_reserved as number) || 0,
 });
 export async function currentBake(): Promise<ActiveBake> {
   if (useDemo()) return demo(demoBake);
@@ -108,9 +149,32 @@ export async function listBakes(): Promise<ActiveBake[]> {
     await sql!`SELECT b.*, ${reservedSql!} FROM bakes b ORDER BY b.pickup_date DESC LIMIT 12`;
   return rows.map(toBake);
 }
+// Lines of an order, priced from the catalog and named in the buyer's language.
+function itemsFor(input: ReservationInput, lang: Lang): OrderItem[] {
+  const names = ui[lang].catalog;
+  const { whole, half } = bananaSplit(input.banana);
+  const lines: [string, number, string][] = [
+    ['clasica', input.quantity, names.loaf],
+    ['banana', whole, names.bananaWhole],
+    ['banana-mitad', half, names.bananaHalf],
+  ];
+  return lines
+    .filter(([, quantity]) => quantity > 0)
+    .map(([product, quantity, name]) => ({
+      product,
+      name,
+      quantity,
+      unitPrice: productById(product)!.price,
+    }));
+}
+const assertBanana = (reserved: number, halves: number) => {
+  if (halves > 0 && reserved + halves > BANANA_HALVES_PER_BAKE)
+    throw new AppError('bananaCapacity');
+};
 export async function reserve(
   input: ReservationInput & { lang: Lang },
 ): Promise<Order> {
+  const items = itemsFor(input, input.lang);
   const order: Order = {
     id: randomUUID(),
     code: '',
@@ -120,9 +184,10 @@ export async function reserve(
     email: input.email,
     phone: input.phone,
     quantity: input.quantity,
-    product: input.product,
-    productName: products[0].name,
-    total: products[0].price * input.quantity,
+    product: items[0]!.product,
+    productName: items[0]!.name,
+    total: items.reduce((n, i) => n + i.unitPrice * i.quantity, 0),
+    items,
     pickupDate: bake.pickupDate,
     pickupAddress: brand.pickupLabel[input.lang],
     pickupWindow: bake.pickupWindow,
@@ -140,11 +205,13 @@ export async function reserve(
         return prior;
       }
       if (input.bakeId !== bake.id) throw new AppError('bakeChanged');
+      order.pickupDate = demoDates().pickupDate;
       assertCapacity(
-        { ...bake, status: d.bakeStatus || bake.status },
+        { ...bake, ...demoDates(), status: d.bakeStatus || bake.status },
         reservedIn(d, bake.id),
         input.quantity,
       );
+      assertBanana(bananaIn(d, bake.id), input.banana);
       do order.code = pickupCode(bake.number, randomBytes(4));
       while (d.orders.some((o) => o.code === order.code));
       d.orders.push(order);
@@ -165,7 +232,9 @@ export async function reserve(
     const [active] = await activeBakeRow(tx as unknown as postgres.Sql);
     if (active?.id !== b.id) throw new AppError('bakeChanged');
     const [count] =
-      await tx`SELECT COALESCE(SUM(i.quantity),0)::int AS n FROM orders o JOIN order_items i ON i.order_id=o.id WHERE o.bake_id=${input.bakeId} AND o.status!='CANCELLED'`;
+      await tx`SELECT COALESCE(SUM(i.quantity) FILTER (WHERE i.product_id='clasica'),0)::int AS n,
+        COALESCE(SUM(CASE i.product_id WHEN 'banana' THEN i.quantity*2 WHEN 'banana-mitad' THEN i.quantity ELSE 0 END),0)::int AS banana
+        FROM orders o JOIN order_items i ON i.order_id=o.id WHERE o.bake_id=${input.bakeId} AND o.status!='CANCELLED'`;
     assertCapacity(
       {
         status: b.status,
@@ -176,23 +245,29 @@ export async function reserve(
       count?.n || 0,
       input.quantity,
     );
+    assertBanana(count?.banana || 0, input.banana);
     order.pickupDate = new Date(b.pickup_date).toISOString();
     order.pickupWindow = b.pickup_window || brand.pickupWindow;
     // The bake row is locked, so no concurrent reservation can take the same code.
     do order.code = pickupCode(b.number, randomBytes(4));
     while ((await tx`SELECT 1 FROM orders WHERE code=${order.code}`).length);
-    const [p] = await tx`SELECT * FROM products WHERE id=${input.product}`;
-    if (!p) throw new AppError('productUnavailable');
-    if (p.price !== products[0].price) throw new AppError('priceChanged');
-    order.total = p.price * input.quantity;
-    order.productName = p.name;
+    // The catalog in the database must agree with the price on the page.
+    const ids = items.map((i) => i.product);
+    const rows =
+      await tx`SELECT id, price FROM products WHERE id IN ${tx(ids)}`;
+    for (const item of items) {
+      const p = rows.find((r) => r.id === item.product);
+      if (!p) throw new AppError('productUnavailable');
+      if (p.price !== item.unitPrice) throw new AppError('priceChanged');
+    }
     // An existing customer keeps their stored details: anyone can type an
     // email, so a new order must not overwrite someone else's name or phone.
     // Each order snapshot keeps the details given with that order.
     const [customer] =
       await tx`INSERT INTO customers (id,email,name,phone) VALUES (${randomUUID()},${input.email},${input.name},${input.phone}) ON CONFLICT(email) DO UPDATE SET email=customers.email RETURNING id`;
     await tx`INSERT INTO orders (id,code,request_id,bake_id,customer_id,snapshot,status) VALUES (${order.id},${order.code},${order.requestId},${input.bakeId},${customer!.id},${tx.json(order)},'CONFIRMED')`;
-    await tx`INSERT INTO order_items (order_id,product_id,quantity,unit_price) VALUES (${order.id},${input.product},${input.quantity},${p.price})`;
+    for (const item of items)
+      await tx`INSERT INTO order_items (order_id,product_id,quantity,unit_price) VALUES (${order.id},${item.product},${item.quantity},${item.unitPrice})`;
     return order;
   });
   return result as unknown as Order;

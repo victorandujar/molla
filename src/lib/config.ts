@@ -1,5 +1,13 @@
 import type { BakeState } from './domain';
 export const WEEKLY_LOAF_PRICE_CENTS = 500;
+// Banana bread (molde de 3 plátanos, ~140 g de harina ecológica, yogur y
+// 100 g de pepitas de chocolate). Coste aproximado de ingredientes: 8 € el
+// molde entero. Entero a 15 € y mitad a 8 € (la mitad lleva su corte y su
+// envoltorio aparte).
+export const BANANA_WHOLE_PRICE_CENTS = 1500;
+export const BANANA_HALF_PRICE_CENTS = 800;
+// Cupo por hornada, contado en mitades: 4 mitades = 2 moldes enteros.
+export const BANANA_HALVES_PER_BAKE = 4;
 export const brand = {
   name: 'Molla',
   locale: 'es-ES',
@@ -44,6 +52,30 @@ export const products = [
     available: true,
   },
   {
+    id: 'banana',
+    name: 'Banana bread',
+    subtitle: 'Molde entero',
+    price: BANANA_WHOLE_PRICE_CENTS,
+    weight: 'Molde entero',
+    ingredients:
+      'Plátano maduro, harina de trigo ecológica, yogur y pepitas de chocolate.',
+    allergens: 'Contiene trigo (gluten) y leche.',
+    image: 'banana',
+    available: true,
+  },
+  {
+    id: 'banana-mitad',
+    name: 'Banana bread · mitad',
+    subtitle: 'Medio molde',
+    price: BANANA_HALF_PRICE_CENTS,
+    weight: 'Medio molde',
+    ingredients:
+      'Plátano maduro, harina de trigo ecológica, yogur y pepitas de chocolate.',
+    allergens: 'Contiene trigo (gluten) y leche.',
+    image: 'banana',
+    available: true,
+  },
+  {
     id: 'especial',
     name: 'La que está por venir',
     subtitle: 'La especial de la semana',
@@ -56,6 +88,8 @@ export const products = [
     available: false,
   },
 ] as const;
+export type ProductId = (typeof products)[number]['id'];
+export const productById = (id: string) => products.find((p) => p.id === id);
 // Seed/fallback bake. Production rolls subsequent dates forward automatically.
 export const bake = {
   id: 'hornada-001',

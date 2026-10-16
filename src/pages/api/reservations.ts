@@ -1,11 +1,10 @@
 import type { APIRoute } from 'astro';
 import { guard, body, json, langOf, error, issue, after } from '../../lib/http';
-import { reservationSchema } from '../../lib/domain';
+import { reservationSchema, orderItems } from '../../lib/domain';
 import { reserve } from '../../lib/store';
 import { sendConfirmation, notifyOwner } from '../../lib/email';
 import { isDemo, brand } from '../../lib/config';
 import { AppError } from '../../lib/messages';
-import { ui } from '../../lib/i18n';
 export const POST: APIRoute = async (ctx) => {
   const lang = langOf(ctx);
   try {
@@ -23,7 +22,10 @@ export const POST: APIRoute = async (ctx) => {
         id: order.id,
         code: order.code,
         quantity: order.quantity,
-        productName: ui[lang].loaf.name,
+        items: orderItems(order).map(({ name, quantity }) => ({
+          name,
+          quantity,
+        })),
         total: order.total,
         pickupDate: order.pickupDate,
         pickupAddress: order.pickupAddress,

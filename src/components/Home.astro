@@ -1,13 +1,15 @@
 ---
 import Base from '../layouts/Base.astro';
 import Photo from './Photo.astro';
+import Sticker from './Sticker.astro';
 import {
   brand,
   bake,
-  products,
   money,
   isDemo,
   launchReady,
+  productById,
+  BANANA_HALVES_PER_BAKE,
 } from '../lib/config';
 import { ui, routes, dayFormat, type Lang } from '../lib/i18n';
 import { currentBake } from '../lib/store';
@@ -17,7 +19,7 @@ interface Props {
 }
 const { lang } = Astro.props;
 const t = ui[lang];
-let current = { ...bake, reserved: 0 };
+let current = { ...bake, reserved: 0, bananaReserved: 0 };
 let unavailable = false;
 if (isDemo || launchReady) {
   try {
@@ -34,8 +36,11 @@ const state = unavailable
 const open = state === 'OPEN';
 const statusLabel = t.status[state];
 const canSubmit = isDemo || launchReady;
-const loaf = products[0];
+const loaf = productById('clasica')!;
+const bananaWhole = productById('banana')!;
+const bananaHalf = productById('banana-mitad')!;
 const left = Math.max(0, current.capacity - current.reserved);
+const bananaLeft = Math.max(0, BANANA_HALVES_PER_BAKE - current.bananaReserved);
 // Without the database the configured bake is only a placeholder: never show its date.
 const pickupDay = unavailable
   ? t.bake.dateSoon
@@ -49,8 +54,25 @@ const steps = t.process.steps.map((step, i) =>
         ? { ...step, when: t.process.pickupWhen(current.pickupDate) }
         : step,
 );
+// Hours on the counter when each step reaches the middle of the screen.
+const stepHours = [0, 12, 35, 35];
+const stepPhotos = ['maker', 'dough', 'tiles', 'hero'];
+const orderHref = open ? '#reserva' : '#avisame';
 const abs = (path: string) =>
   brand.site ? new URL(path, brand.site).href : undefined;
+const offer = (price: number, available: boolean) => ({
+  '@type': 'Offer',
+  url: abs(`${routes.home[lang]}#carta`),
+  price: (price / 100).toFixed(2),
+  priceCurrency: 'EUR',
+  availability: available
+    ? 'https://schema.org/InStock'
+    : 'https://schema.org/OutOfStock',
+  availableDeliveryMethod:
+    'http://purl.org/goodrelations/v1#DeliveryModePickUp',
+  areaServed: { '@type': 'AdministrativeArea', name: 'Baix Llobregat' },
+  seller: { '@id': abs('/#organization') },
+});
 const jsonLd = [
   {
     '@context': 'https://schema.org',
@@ -65,19 +87,25 @@ const jsonLd = [
       maxValue: 850,
       unitCode: 'GRM',
     },
-    offers: {
-      '@type': 'Offer',
-      url: abs(`${routes.home[lang]}#reserva`),
-      price: (loaf.price / 100).toFixed(2),
-      priceCurrency: 'EUR',
-      availability: open
-        ? 'https://schema.org/InStock'
-        : 'https://schema.org/OutOfStock',
-      availableDeliveryMethod:
-        'http://purl.org/goodrelations/v1#DeliveryModePickUp',
-      areaServed: { '@type': 'AdministrativeArea', name: 'Baix Llobregat' },
-      seller: { '@id': abs('/#organization') },
-    },
+    offers: offer(loaf.price, open),
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: `${t.banana.h2a} ${t.banana.h2b.replace(/\.$/, '')}`,
+    description: `${t.banana.p} ${t.banana.ingredientsValue}`,
+    image: [abs('/images/banana-1100.webp')],
+    brand: { '@type': 'Brand', name: brand.name },
+    offers: [
+      {
+        ...offer(bananaWhole.price, open && bananaLeft >= 2),
+        name: t.catalog.bananaWhole,
+      },
+      {
+        ...offer(bananaHalf.price, open && bananaLeft >= 1),
+        name: t.catalog.bananaHalf,
+      },
+    ],
   },
   {
     '@context': 'https://schema.org',
@@ -94,67 +122,61 @@ const jsonLd = [
 
 <Base lang={lang} route="home" jsonLd={jsonLd}>
   <main id="contenido">
+    <!-- 1 · Portada: el pan abierto en las manos de mi madre -->
     <section class="hero" aria-labelledby="hero-title">
       <div class="wrap hero-grid">
         <div class="hero-copy">
-          <p class="eyebrow">{t.hero.kicker}</p>
+          <p class="eyebrow hero-in" style="--i:0">
+            {t.hero.kicker}
+          </p>
           <h1 id="hero-title" class="hero-title">
-            <span>{t.hero.h1a}</span> <span class="soft">{t.hero.h1b}</span>
+            <span class="hero-mask">
+              <span class="hero-line" style="--i:0">
+                {t.hero.h1a}
+              </span>
+            </span>{' '}
+            <span class="hero-mask">
+              <span class="hero-line hero-light" style="--i:1">
+                {t.hero.h1b}
+              </span>
+            </span>
           </h1>
-          <p class="hero-lede">{t.hero.lede}</p>
-          <div class="hero-actions">
-            <a class="button" href={open ? '#reserva' : '#avisame'}>
+          <p class="hero-lede hero-in" style="--i:3">
+            {t.hero.lede}
+          </p>
+          <div class="hero-actions hero-in" style="--i:4">
+            <a class="button" href={open ? '#carta' : '#avisame'}>
               {open ? t.hero.order : t.hero.notify}
+              <span class="button-arrow" aria-hidden="true">
+                →
+              </span>
             </a>
             <a class="link-arrow" href="#proceso">
-              {t.hero.how} <span aria-hidden="true">→</span>
+              {t.hero.how} <span aria-hidden="true">↓</span>
             </a>
           </div>
-        </div>
-        <div class="hero-visual">
-          <div class="print" aria-hidden="true"></div>
-          <figure class="hero-photo hero-photo-main">
-            <Photo
-              name="crumb2"
-              alt={t.hero.photos[1]!}
-              eager
-              sizes="(max-width: 860px) 86vw, 40vw"
-            />
-          </figure>
-          <figure class="hero-photo hero-photo-small">
-            <Photo
-              name="boule"
-              alt={t.hero.photos[0]!}
-              eager
-              sizes="(max-width: 860px) 36vw, 16vw"
-            />
-          </figure>
-        </div>
-      </div>
-
-      <div class="wrap">
-        <div
-          id="hornada"
-          class="bake-card"
-          data-state={state}
-          data-event-view="view_current_bake"
-          aria-labelledby="bake-title"
-          role="region"
-        >
-          <div class="bake-cell bake-head">
-            <span class="status">
-              <span class="status-dot" aria-hidden="true"></span>
-              <span data-bake-label>{statusLabel}</span>
-            </span>
-            <span class="bake-number">
-              {t.bake.number} {current.number}
-            </span>
-          </div>
-          <div class="bake-cell bake-main">
-            <h2 id="bake-title" class="bake-day">
+          <div
+            id="hornada"
+            class="hero-bake hero-in"
+            style="--i:5"
+            data-state={state}
+            data-event-view="view_current_bake"
+            aria-labelledby="bake-title"
+            role="region"
+          >
+            <div class="stub-row">
+              <span class="status">
+                <span class="status-dot" aria-hidden="true"></span>
+                <span data-bake-label>{statusLabel}</span>
+              </span>
+              <span class="stub-number">
+                {t.bake.number} {current.number}
+              </span>
+            </div>
+            <h2 id="bake-title" class="stub-day">
               {pickupDay}
             </h2>
-            <p class="bake-deadline">
+            <p class="stub-deadline">
               {open
                 ? t.bake.open(current.deadline)
                 : state === 'UPCOMING'
@@ -162,121 +184,371 @@ const jsonLd = [
                   : t.bake.closed}
             </p>
             {unavailable && (
-              <p role="status" class="bake-deadline">
+              <p role="status" class="stub-deadline">
                 {t.bake.unavailable}
               </p>
             )}
+            <div class="stub-stock">
+              <p class="stub-count" data-bake-count>
+                <span data-count-small hidden={current.reserved > 0}>
+                  {t.bake.small(current.capacity)}
+                  {isDemo ? t.bake.test : ''}
+                </span>
+                <span data-count-left hidden={current.reserved === 0}>
+                  <strong data-left>{left}</strong>
+                  {` ${t.bake.leftOf(current.capacity)}${isDemo ? t.bake.test : ''}`}
+                </span>
+              </p>
+              <div
+                class="loaf-meter"
+                aria-hidden="true"
+                style={`--n:${current.capacity}`}
+              >
+                {Array.from({ length: current.capacity }, (_, i) => (
+                  <span class:list={{ taken: i < current.reserved }} />
+                ))}
+              </div>
+              <progress
+                class="visually-hidden"
+                value={current.reserved}
+                max={current.capacity}
+                hidden={current.reserved === 0}
+                aria-label={`${current.reserved} ${t.bake.of} ${current.capacity} ${t.bake.reserved}`}
+              ></progress>
+            </div>
+            <a class="stub-cta" href={orderHref} data-bake-cta>
+              {open ? t.bake.ctaOpen : t.bake.ctaClosed}
+              <span aria-hidden="true">↓</span>
+            </a>
           </div>
-          <div class="bake-cell bake-stock">
-            <p class="bake-count" data-bake-count>
-              <span data-count-small hidden={current.reserved > 0}>
-                {t.bake.small(current.capacity)}
-                {isDemo ? t.bake.test : ''}
-              </span>
-              <span data-count-left hidden={current.reserved === 0}>
-                <strong data-left>{left}</strong>
-                {` ${t.bake.leftOf(current.capacity)}${isDemo ? t.bake.test : ''}`}
-              </span>
+        </div>
+        <figure class="hero-photo" data-hero-photo>
+          <div class="hero-photo-frame">
+            <Photo
+              name="crumb2"
+              alt={t.hero.photos[1]!}
+              eager
+              sizes="(max-width: 860px) calc(100vw - 40px), 48vw"
+            />
+          </div>
+          <figcaption>
+            <span class="hero-caption-line" aria-hidden="true"></span>
+            {t.hero.hands}
+          </figcaption>
+          <span class="hero-seal" aria-hidden="true" data-seal>
+            <small>{t.hero.sealTop}</small>
+            <strong>35 h</strong>
+            <small>{t.hero.sealBottom}</small>
+          </span>
+        </figure>
+      </div>
+    </section>
+
+    <!-- 2 · La cocina, en fotos: una tira que se desliza con el scroll -->
+    <section class="film" aria-label={t.film.label}>
+      <div class="film-track" data-film>
+        {t.film.items.map(([name, title, text, alt], i) => (
+          <figure class:list={['film-item', `film-${i}`]}>
+            <div class="film-photo">
+              <Photo
+                name={name}
+                alt={alt}
+                sizes="(max-width: 720px) 70vw, 30vw"
+              />
+            </div>
+            <figcaption>
+              <span class="num">0{i + 1}</span>
+              <strong>{title}</strong>
+              <span>{text}</span>
+            </figcaption>
+          </figure>
+        ))}
+      </div>
+    </section>
+
+    <!-- 3 · La carta -->
+    <section
+      id="carta"
+      class="catalog"
+      aria-labelledby="catalog-title"
+      data-event-view="view_product"
+    >
+      <div class="wrap">
+        <header class="section-head" data-reveal>
+          <div>
+            <p class="eyebrow">
+              <span class="num">01</span>
+              {t.catalog.kicker}
             </p>
-            <progress
-              value={current.reserved}
-              max={current.capacity}
-              hidden={current.reserved === 0}
-              aria-label={`${current.reserved} ${t.bake.of} ${current.capacity} ${t.bake.reserved}`}
-            ></progress>
+            <h2 id="catalog-title">
+              {t.catalog.h2a} <em>{t.catalog.h2b}</em>
+            </h2>
           </div>
-          <a
-            class="bake-cta"
-            href={open ? '#reserva' : '#avisame'}
-            data-bake-cta
-          >
-            {open ? t.bake.ctaOpen : t.bake.ctaClosed}{' '}
-            <span aria-hidden="true">↓</span>
-          </a>
+          <p class="section-intro">{t.catalog.intro}</p>
+        </header>
+
+        <article class="dish dish-loaf" aria-labelledby="loaf-title">
+          <div class="dish-media" data-reveal>
+            <figure class="dish-photo">
+              <Photo
+                name="loaves"
+                alt={t.loaf.alt}
+                sizes="(max-width: 860px) calc(100vw - 40px), 56vw"
+              />
+            </figure>
+            <figure class="dish-inset" data-parallax="-0.08">
+              <Photo
+                name="slice"
+                alt={t.loaf.altSlice}
+                sizes="(max-width: 860px) 50vw, 22vw"
+              />
+            </figure>
+            <span class="price-seal" aria-hidden="true">
+              <span>{money(loaf.price)}</span>
+            </span>
+          </div>
+          <div class="dish-info" data-reveal>
+            <p class="dish-index">
+              <span>01</span>
+              {t.loaf.kicker}
+            </p>
+            <h3 id="loaf-title">{t.loaf.name}</h3>
+            <p class="dish-desc">{t.loaf.fermentationValue}.</p>
+            <p class="dish-price">
+              <strong>{money(loaf.price)}</strong>
+              <span>{loaf.weight}</span>
+            </p>
+            <dl class="spec">
+              <div>
+                <dt>{t.loaf.ingredients}</dt>
+                <dd>{t.loaf.ingredientsValue}</dd>
+              </div>
+              <div>
+                <dt>{t.loaf.allergens}</dt>
+                <dd>{t.loaf.allergensValue}</dd>
+              </div>
+              <div>
+                <dt>{t.loaf.keeps}</dt>
+                <dd>{t.loaf.keepsValue}</dd>
+              </div>
+            </dl>
+            {open ? (
+              <div class="dish-buy" data-buy="loaf">
+                <button type="button" class="button" data-add="loaf">
+                  {t.catalog.add}
+                  <span class="button-plus" aria-hidden="true">
+                    +
+                  </span>
+                </button>
+                <div class="mini-stepper" data-mini="loaf" hidden>
+                  <button
+                    type="button"
+                    data-sub="loaf"
+                    aria-label={t.reserve.less}
+                  >
+                    −
+                  </button>
+                  <output data-count="loaf" aria-live="polite"></output>
+                  <button
+                    type="button"
+                    data-add="loaf"
+                    aria-label={t.reserve.more}
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <a class="button button-ghost" href="#avisame">
+                {t.loaf.notify}
+              </a>
+            )}
+          </div>
+        </article>
+
+        <article class="dish dish-banana" aria-labelledby="banana-title">
+          <div class="dish-info" data-reveal>
+            <p class="dish-index">
+              <span>02</span>
+              {t.banana.kicker}
+            </p>
+            <h3 id="banana-title">
+              {t.banana.h2a} <em>{t.banana.h2b}</em>
+            </h3>
+            <p class="dish-desc">{t.banana.p}</p>
+            <ul class="tags">
+              <li>{t.banana.point1}</li>
+              <li>{t.banana.point2}</li>
+              <li>{t.banana.point3}</li>
+            </ul>
+            <dl class="spec">
+              <div>
+                <dt>{t.loaf.ingredients}</dt>
+                <dd>{t.banana.ingredientsValue}</dd>
+              </div>
+              <div>
+                <dt>{t.loaf.allergens}</dt>
+                <dd>{t.banana.allergensValue}</dd>
+              </div>
+            </dl>
+            <fieldset class="size-choice" disabled={!open}>
+              <legend>{t.catalog.size}</legend>
+              <label>
+                <input type="radio" name="banana-size" value="2" checked />
+                <span>
+                  <strong>{t.catalog.whole}</strong>
+                  <em>{money(bananaWhole.price)}</em>
+                </span>
+              </label>
+              <label>
+                <input type="radio" name="banana-size" value="1" />
+                <span>
+                  <strong>{t.catalog.half}</strong>
+                  <em>{money(bananaHalf.price)}</em>
+                </span>
+              </label>
+            </fieldset>
+            <p class="dish-stock" data-banana-left={bananaLeft}>
+              {open ? t.catalog.bananaLeft(bananaLeft) : t.catalog.closed}
+            </p>
+            {open ? (
+              <div class="dish-buy" data-buy="banana">
+                <button
+                  type="button"
+                  class="button"
+                  data-add="banana"
+                  disabled={bananaLeft === 0}
+                >
+                  {t.catalog.add}
+                  <span class="button-plus" aria-hidden="true">
+                    +
+                  </span>
+                </button>
+                <div class="mini-stepper" data-mini="banana" hidden>
+                  <button
+                    type="button"
+                    data-sub="banana"
+                    aria-label={t.reserve.bananaLess}
+                  >
+                    −
+                  </button>
+                  <output data-count="banana" aria-live="polite"></output>
+                  <button
+                    type="button"
+                    data-add="banana"
+                    data-halves="1"
+                    aria-label={t.reserve.bananaMore}
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <a class="button button-ghost" href="#avisame">
+                {t.banana.notify}
+              </a>
+            )}
+          </div>
+          <div class="dish-media" data-reveal>
+            <figure class="dish-photo">
+              <Photo
+                name="banana"
+                alt={t.banana.alt}
+                sizes="(max-width: 860px) calc(100vw - 40px), 44vw"
+              />
+            </figure>
+            <figure class="dish-inset" data-parallax="-0.1">
+              <Photo
+                name="bananaDetail"
+                alt={t.banana.altDetail}
+                sizes="(max-width: 860px) 50vw, 22vw"
+              />
+            </figure>
+            <span class="price-seal price-seal-orange" aria-hidden="true">
+              <span>{money(bananaHalf.price)}</span>
+              <small>{t.catalog.half.toLowerCase()}</small>
+            </span>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- 4 · 35 horas: la foto de cada paso y el contador avanzan con el scroll -->
+    <section id="proceso" class="process" aria-labelledby="process-title">
+      <div class="wrap">
+        <header class="section-head" data-reveal>
+          <div>
+            <p class="eyebrow">
+              <span class="num">02</span>
+              {t.nav.process}
+            </p>
+            <h2 id="process-title">
+              {t.process.h2a} <em>{t.process.h2b}</em>
+            </h2>
+          </div>
+          <div>
+            <p class="section-intro">{t.process.intro}</p>
+            <a class="link-arrow" href={routes.poolish[lang]}>
+              {t.process.more} <span aria-hidden="true">→</span>
+            </a>
+          </div>
+        </header>
+        <div class="process-grid" data-process>
+          <div class="process-aside">
+            <div class="process-window">
+              {stepPhotos.map((name, i) => (
+                <figure class="process-photo" data-step-photo={i}>
+                  <Photo
+                    name={name}
+                    alt=""
+                    sizes="(max-width: 960px) 80vw, 36vw"
+                  />
+                </figure>
+              ))}
+              <div class="hours" aria-hidden="true">
+                <span class="hours-num" data-hours>
+                  35
+                </span>
+                <span class="hours-unit">h</span>
+              </div>
+            </div>
+            <p class="hours-label">{t.process.hours}</p>
+          </div>
+          <ol class="steps">
+            {steps.map((step, i) => (
+              <li class="step" data-step-hours={stepHours[i]}>
+                <span class="step-num">0{i + 1}</span>
+                <span class="when">{step.when}</span>
+                <h3>{step.title}</h3>
+                {'time' in step && <span class="step-time">{step.time}</span>}
+                <p>{step.text}</p>
+              </li>
+            ))}
+          </ol>
         </div>
       </div>
     </section>
 
-    <section class="values" aria-label={t.organic.kicker}>
-      <ul class="wrap values-list">
-        {t.hero.values.map(([title, text], i) => (
-          <li>
-            <span class="num">0{i + 1}</span>
-            <strong>{title}</strong>
-            <span>{text}</span>
-          </li>
-        ))}
-      </ul>
-    </section>
-
-    <section
-      class="product wrap"
-      aria-labelledby="loaf-title"
-      data-event-view="view_product"
-    >
-      <div class="product-media">
-        <figure class="product-photo">
-          <Photo
-            name="loaves"
-            alt={t.loaf.alt}
-            sizes="(max-width: 860px) calc(100vw - 40px), 54vw"
-          />
-        </figure>
-        <figure class="product-inset">
-          <Photo
-            name="slice"
-            alt={t.loaf.altSlice}
-            sizes="(max-width: 860px) 50vw, 22vw"
-          />
-        </figure>
-      </div>
-      <div class="product-info">
-        <p class="eyebrow">
-          <span class="num">01</span>
-          {t.loaf.kicker}
-        </p>
-        <h2 id="loaf-title">{t.loaf.name}</h2>
-        <p class="price">
-          {money(loaf.price)} <span>{loaf.weight}</span>
-        </p>
-        <dl class="spec">
-          <div>
-            <dt>{t.loaf.fermentation}</dt>
-            <dd>{t.loaf.fermentationValue}</dd>
-          </div>
-          <div>
-            <dt>{t.loaf.ingredients}</dt>
-            <dd>{t.loaf.ingredientsValue}</dd>
-          </div>
-          <div>
-            <dt>{t.loaf.allergens}</dt>
-            <dd>{t.loaf.allergensValue}</dd>
-          </div>
-          <div>
-            <dt>{t.loaf.keeps}</dt>
-            <dd>{t.loaf.keepsValue}</dd>
-          </div>
-        </dl>
-        <a class="button" href={open ? '#reserva' : '#avisame'}>
-          {open ? t.loaf.order : t.loaf.notify}
-        </a>
-      </div>
-    </section>
-
+    <!-- 5 · Harina: la cocina de azulejos azules, a sangre -->
     <section class="manifesto" aria-labelledby="organic-title">
+      <figure class="manifesto-photo" aria-hidden="true" data-drift>
+        <Photo name="kitchen" alt="" sizes="100vw" />
+      </figure>
       <div class="wrap manifesto-inner">
-        <p class="eyebrow">
-          <span class="num">02</span>
+        <p class="eyebrow" data-reveal>
+          <span class="num">03</span>
           {t.organic.kicker}
         </p>
-        <h2 id="organic-title">
-          {t.organic.h2a} <span class="soft">{t.organic.h2b}</span>
+        <h2 id="organic-title" data-reveal>
+          {t.organic.h2a} <em>{t.organic.h2b}</em>
         </h2>
-        <p class="manifesto-text">{t.organic.p}</p>
+        <p class="manifesto-text" data-reveal>
+          {t.organic.p}
+        </p>
         <ul class="manifesto-stats">
-          {t.organic.items.map(([n, label]) => (
-            <li>
-              <strong>{n}</strong>
+          {t.organic.items.map(([n, label], i) => (
+            <li data-reveal style={`--i:${i}`}>
+              <strong data-countup>{n}</strong>
               <span>{label}</span>
             </li>
           ))}
@@ -284,93 +556,9 @@ const jsonLd = [
       </div>
     </section>
 
-    <section id="proceso" class="process" aria-labelledby="process-title">
-      <div class="wrap">
-        <div class="section-head">
-          <div>
-            <p class="eyebrow">
-              <span class="num">03</span>
-              {t.nav.process}
-            </p>
-            <h2 id="process-title">
-              {t.process.h2a} <span class="soft">{t.process.h2b}</span>
-            </h2>
-          </div>
-          <div>
-            <p>{t.process.intro}</p>
-            <a class="link-arrow" href={routes.poolish[lang]}>
-              {t.process.more} <span aria-hidden="true">→</span>
-            </a>
-          </div>
-        </div>
-        <ol class="steps">
-          {steps.map((step, i) => (
-            <li class:list={{ long: 'time' in step }}>
-              <span class="step-num">0{i + 1}</span>
-              <span class="when">{step.when}</span>
-              <h3>{step.title}</h3>
-              {'time' in step && <span class="step-time">{step.time}</span>}
-              <p>{step.text}</p>
-            </li>
-          ))}
-        </ol>
-      </div>
-    </section>
-
-    <section class="banana" aria-labelledby="banana-title">
-      <div class="wrap banana-grid">
-        <div class="banana-copy">
-          <p class="eyebrow">
-            <span class="num">04</span>
-            {t.banana.kicker}
-          </p>
-          <h2 id="banana-title">
-            {t.banana.h2a} <span class="soft">{t.banana.h2b}</span>
-          </h2>
-          <p class="banana-text">{t.banana.p}</p>
-          <ul class="tags">
-            <li>{t.banana.point1}</li>
-            <li>{t.banana.point2}</li>
-            <li>{t.banana.point3}</li>
-          </ul>
-          <p class="note">{t.banana.note}</p>
-          {brand.whatsapp ? (
-            <a
-              class="button"
-              data-event="click_whatsapp"
-              href={`https://wa.me/${brand.whatsapp}`}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {t.banana.ask} <span aria-hidden="true">↗</span>
-            </a>
-          ) : (
-            <a class="button" href="#avisame">
-              {t.banana.notify}
-            </a>
-          )}
-        </div>
-        <div class="banana-media">
-          <figure class="banana-main">
-            <Photo
-              name="banana"
-              alt={t.banana.alt}
-              sizes="(max-width: 860px) 70vw, 32vw"
-            />
-          </figure>
-          <figure class="banana-detail">
-            <Photo
-              name="bananaDetail"
-              alt={t.banana.altDetail}
-              sizes="(max-width: 860px) 50vw, 22vw"
-            />
-          </figure>
-        </div>
-      </div>
-    </section>
-
+    <!-- 6 · Quién -->
     <section class="maker wrap" aria-labelledby="maker-title">
-      <div class="maker-media">
+      <div class="maker-media" data-reveal>
         <figure class="maker-main">
           <Photo
             name="person"
@@ -378,17 +566,10 @@ const jsonLd = [
             sizes="(max-width: 860px) 70vw, 34vw"
           />
         </figure>
-        <figure class="maker-side">
-          <Photo
-            name="dough"
-            alt={t.maker.altDough}
-            sizes="(max-width: 860px) 40vw, 16vw"
-          />
-        </figure>
       </div>
-      <div class="maker-copy">
+      <div class="maker-copy" data-reveal>
         <p class="eyebrow">
-          <span class="num">05</span>
+          <span class="num">04</span>
           {t.maker.kicker}
         </p>
         <h2 id="maker-title">{t.maker.h2}</h2>
@@ -397,11 +578,12 @@ const jsonLd = [
       </div>
     </section>
 
+    <!-- 7 · Reserva: las rebanadas, servidas, junto al tiquet -->
     <section id="reserva" class="reserve" aria-labelledby="reserve-title">
       <div class="wrap reserve-grid">
-        <div class="reserve-intro">
+        <div class="reserve-intro" data-reveal>
           <p class="eyebrow">
-            <span class="num">06</span>
+            <span class="num">05</span>
             {t.reserve.kicker}
           </p>
           <h2 id="reserve-title">{t.reserve.h2}</h2>
@@ -429,7 +611,10 @@ const jsonLd = [
               <div>
                 <dt>{t.reserve.left}</dt>
                 <dd>
-                  {left} {t.bake.of} {current.capacity} {t.reserve.loaves}
+                  <span>
+                    <span data-left>{left}</span> {t.bake.of} {current.capacity}{' '}
+                    {t.reserve.loaves}
+                  </span>
                 </dd>
               </div>
             )}
@@ -446,13 +631,15 @@ const jsonLd = [
             </a>
           )}
         </div>
-        <div class="reservation-panel">
+        <div class="reservation-panel ticket">
           {open ? (
             <form
               id="reservation-form"
               action={`/api/reservations?lang=${lang}`}
               method="post"
               data-price={loaf.price}
+              data-banana-whole={bananaWhole.price}
+              data-banana-half={bananaHalf.price}
             >
               <h3>{t.reserve.yourOrder}</h3>
               {isDemo && <p class="form-intro">{t.reserve.demoIntro}</p>}
@@ -460,40 +647,99 @@ const jsonLd = [
               <input type="hidden" name="bakeId" value={current.id} />
               <input type="hidden" name="product" value="clasica" />
               <input type="hidden" name="source" value="direct" />
-              <div class="quantity-line">
-                <label for="quantity">
-                  {t.reserve.qty}
-                  <small>{t.reserve.qtyMax}</small>
-                </label>
-                <div class="stepper">
-                  <button
-                    type="button"
-                    data-step="-1"
-                    aria-label={t.reserve.less}
-                  >
-                    −
-                  </button>
-                  <input
-                    id="quantity"
-                    name="quantity"
-                    type="number"
-                    min="1"
-                    max={Math.min(4, left)}
-                    value="1"
-                    required
-                  />
-                  <button
-                    type="button"
-                    data-step="1"
-                    aria-label={t.reserve.more}
-                  >
-                    +
-                  </button>
+              <div class="order-lines">
+                <div class="order-line">
+                  <label for="quantity">
+                    <span class="line-name">{t.catalog.loaf}</span>
+                    <small>
+                      {money(loaf.price)} · {t.reserve.qtyMax}
+                    </small>
+                  </label>
+                  <div class="stepper">
+                    <button
+                      type="button"
+                      data-step="-1"
+                      data-target="quantity"
+                      aria-label={t.reserve.less}
+                    >
+                      −
+                    </button>
+                    <input
+                      id="quantity"
+                      name="quantity"
+                      type="number"
+                      inputmode="numeric"
+                      min="0"
+                      max={Math.min(4, left)}
+                      value="0"
+                      required
+                    />
+                    <button
+                      type="button"
+                      data-step="1"
+                      data-target="quantity"
+                      aria-label={t.reserve.more}
+                    >
+                      +
+                    </button>
+                  </div>
                 </div>
-                <output id="total" aria-live="polite">
-                  {money(loaf.price)}
-                </output>
+                <div class="order-line">
+                  <label for="banana-view">
+                    <span class="line-name">{t.reserve.bananaQty}</span>
+                    <small>
+                      {t.catalog.whole} {money(bananaWhole.price)} ·{' '}
+                      {t.catalog.half} {money(bananaHalf.price)}
+                    </small>
+                    <small data-banana-left={bananaLeft}>
+                      {t.catalog.bananaLeft(bananaLeft)}
+                    </small>
+                  </label>
+                  <div class="stepper">
+                    <button
+                      type="button"
+                      data-step="-1"
+                      data-target="banana"
+                      aria-label={t.reserve.bananaLess}
+                    >
+                      −
+                    </button>
+                    <output
+                      id="banana-view"
+                      class="stepper-view"
+                      aria-live="polite"
+                    >
+                      0
+                    </output>
+                    <input
+                      id="banana"
+                      name="banana"
+                      type="hidden"
+                      value="0"
+                      data-max={Math.min(4, bananaLeft)}
+                    />
+                    <button
+                      type="button"
+                      data-step="1"
+                      data-target="banana"
+                      aria-label={t.reserve.bananaMore}
+                      disabled={bananaLeft === 0}
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+                <div class="order-total">
+                  <span>{t.reserve.totalLabel}</span>
+                  <output id="total" aria-live="polite">
+                    {money(0)}
+                  </output>
+                </div>
               </div>
+              <p class="form-empty" data-empty>
+                {t.reserve.emptyOrder}
+              </p>
+              <div class="perforation" aria-hidden="true"></div>
               <div class="field">
                 <label for="name">{t.reserve.name}</label>
                 <input
@@ -584,14 +830,16 @@ const jsonLd = [
             </div>
           )}
           <div id="confirmation" hidden tabindex="-1" role="status"></div>
+          <Sticker class="ticket-stamp" />
         </div>
       </div>
     </section>
 
+    <!-- 8 · Preguntas -->
     <section id="preguntas" class="faq wrap" aria-labelledby="faq-title">
-      <div>
+      <div class="faq-head" data-reveal>
         <p class="eyebrow">
-          <span class="num">07</span>
+          <span class="num">06</span>
           {t.nav.faq}
         </p>
         <h2 id="faq-title">{t.faq.h2}</h2>
@@ -609,28 +857,17 @@ const jsonLd = [
       </div>
     </section>
 
+    <!-- 9 · Aviso de la próxima hornada -->
     <section id="avisame" class="waitlist" aria-labelledby="waitlist-title">
       <div class="wrap waitlist-grid">
-        <figure class="poster">
-          <picture>
-            <source
-              type="image/avif"
-              srcset="/images/poster-720.avif 720w, /images/poster-1100.avif 1100w, /images/poster-1536.avif 1536w"
-              sizes="(max-width: 860px) calc(100vw - 40px), 46vw"
-            />
-            <img
-              src="/images/poster-1100.webp"
-              srcset="/images/poster-720.webp 720w, /images/poster-1100.webp 1100w, /images/poster-1536.webp 1536w"
-              sizes="(max-width: 860px) calc(100vw - 40px), 46vw"
-              alt={t.waitlist.poster}
-              width="1536"
-              height="1024"
-              loading="lazy"
-              decoding="async"
-            />
-          </picture>
+        <figure class="poster" data-reveal>
+          <Photo
+            name="crumb"
+            alt={t.waitlist.poster}
+            sizes="(max-width: 860px) calc(100vw - 40px), 44vw"
+          />
         </figure>
-        <div class="waitlist-body">
+        <div class="waitlist-body" data-reveal>
           <h2 id="waitlist-title">{t.waitlist.h2}</h2>
           <p>{t.waitlist.p}</p>
           <form
@@ -692,13 +929,27 @@ const jsonLd = [
       </div>
     </section>
   </main>
-  <div class="mobile-cta" role="navigation" aria-label={t.mobile.label}>
-    <span>
-      {t.mobile.loaf} · {money(loaf.price)}
-      <small>{pickupDay}</small>
+
+  <!-- Pedido flotante: aparece al añadir algo; en el móvil, siempre a mano -->
+  <div
+    class="order-pill"
+    role="navigation"
+    aria-label={t.mobile.label}
+    data-pill
+    data-open={open ? 'true' : 'false'}
+  >
+    <span class="pill-badge" data-pill-count aria-hidden="true">
+      0
     </span>
-    <a class="button button-light" href={open ? '#reserva' : '#avisame'}>
-      {open ? t.mobile.order : t.mobile.notify}
+    <span class="pill-text">
+      <strong data-pill-title>{t.catalog.pill}</strong>
+      <small data-pill-items>
+        {t.mobile.loaf} · {money(loaf.price)} · {pickupDay}
+      </small>
+    </span>
+    <span class="pill-total" data-pill-total hidden></span>
+    <a class="button button-light" href={orderHref} data-pill-cta>
+      {open ? t.catalog.pillCta : t.mobile.notify}
     </a>
   </div>
 </Base>

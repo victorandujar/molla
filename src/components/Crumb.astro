@@ -1,0 +1,31 @@
+---
+// The crumb of the packaging print, drawn as SVG: a cobalt dough with each
+// alveolus as its own path, so the page can open them one by one. It lives
+// only in the footer, as the wrapping paper of the loaf.
+import crumb from '../assets/crumb.json';
+interface Props {
+  class?: string;
+}
+const { class: className = '' } = Astro.props;
+// Centre of the swirl in the print, in the SVG's own units.
+const swirl = { x: 520, y: 600 };
+const far = Math.hypot(crumb.w, crumb.h) / 2;
+// 0 at the swirl, 1 at the far corners: the opening travels outward.
+const reach = (h: { cx: number; cy: number }) =>
+  Math.min(1, Math.hypot(h.cx - swirl.x, h.cy - swirl.y) / far).toFixed(3);
+---
+
+<svg
+  class:list={['crumb', 'crumb-field', className]}
+  viewBox={`0 0 ${crumb.w} ${crumb.h}`}
+  preserveAspectRatio="xMidYMid slice"
+  aria-hidden="true"
+  focusable="false"
+>
+  <rect class="crumb-dough" width={crumb.w} height={crumb.h}></rect>
+  <g class="crumb-holes">
+    {crumb.holes.map((h) => (
+      <path d={h.d} data-x={h.cx} data-y={h.cy} style={`--r:${reach(h)}`} />
+    ))}
+  </g>
+</svg>

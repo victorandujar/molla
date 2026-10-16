@@ -79,33 +79,216 @@ const requestId = form?.querySelector<HTMLInputElement>(
   'input[name=requestId]',
 );
 if (requestId) requestId.value = crypto.randomUUID();
+
+/* ---- El pedido: el formulario es la única fuente de verdad. La carta, el
+   tiquet y la píldora flotante leen y escriben los mismos dos campos. ---- */
 const quantity = document.querySelector<HTMLInputElement>('#quantity');
+const banana = document.querySelector<HTMLInputElement>('#banana');
 const total = document.querySelector<HTMLOutputElement>('#total');
-function update() {
-  if (quantity && total && form) {
-    const n = quantity.valueAsNumber;
-    total.value = Number.isFinite(n)
-      ? money(n * Number(form.dataset.price))
-      : '—';
-  }
+const prices = {
+  loaf: Number(form?.dataset.price || 0),
+  whole: Number(form?.dataset.bananaWhole || 0),
+  half: Number(form?.dataset.bananaHalf || 0),
+};
+const words = isCa
+  ? {
+      inOrder: (n: string) => `${n} a la comanda`,
+      loaves: (n: number) => `${n} ${n === 1 ? 'pa' : 'pans'}`,
+      empty: 'Afegeix un pa o un banana bread per reservar.',
+      left: (h: number) =>
+        h <= 0
+          ? 'Exhaurit aquesta setmana'
+          : h === 1
+            ? 'Queda mig motlle aquesta setmana'
+            : h === 2
+              ? 'Queda un motlle aquesta setmana'
+              : h === 3
+                ? 'Queda un motlle i mig aquesta setmana'
+                : `Queden ${h % 2 ? `${Math.floor(h / 2)} motlles i mig` : `${h / 2} motlles`} aquesta setmana`,
+    }
+  : {
+      inOrder: (n: string) => `${n} en tu pedido`,
+      loaves: (n: number) => `${n} ${n === 1 ? 'hogaza' : 'hogazas'}`,
+      empty: 'Añade una hogaza o un banana bread para reservar.',
+      left: (h: number) =>
+        h <= 0
+          ? 'Agotado esta semana'
+          : h === 1
+            ? 'Queda medio molde esta semana'
+            : h === 2
+              ? 'Queda un molde esta semana'
+              : h === 3
+                ? 'Queda un molde y medio esta semana'
+                : `Quedan ${h % 2 ? `${Math.floor(h / 2)} moldes y medio` : `${h / 2} moldes`} esta semana`,
+    };
+// Halves shown the way people say them: ½, 1, 1½, 2.
+const halvesLabel = (h: number) =>
+  h === 1 ? '½' : `${Math.floor(h / 2)}${h % 2 ? '½' : ''}`;
+const read = (el: HTMLInputElement | null) =>
+  Math.max(0, Math.floor(Number(el?.value) || 0));
+const maxOf = (el: HTMLInputElement | null) =>
+  Number(el?.max || el?.dataset.max || 0);
+type Cart = { loaves: number; halves: number; total: number };
+function cart(): Cart {
+  const loaves = read(quantity);
+  const halves = read(banana);
+  return {
+    loaves,
+    halves,
+    total:
+      loaves * prices.loaf +
+      Math.floor(halves / 2) * prices.whole +
+      (halves % 2) * prices.half,
+  };
 }
-document.querySelectorAll<HTMLButtonElement>('[data-step]').forEach((button) =>
-  button.addEventListener('click', () => {
-    if (!quantity) return;
-    const n = quantity.valueAsNumber || 1;
-    quantity.value = String(
-      Math.min(
-        Number(quantity.max),
-        Math.max(1, n + Number(button.dataset.step)),
-      ),
+function render(origin?: Element | null) {
+  if (!form) return;
+  const c = cart();
+  if (total) total.value = money(c.total);
+  const view = document.querySelector('#banana-view');
+  if (view) view.textContent = c.halves ? halvesLabel(c.halves) : '0';
+  for (const [key, n, label] of [
+    ['loaf', c.loaves, String(c.loaves)],
+    ['banana', c.halves, halvesLabel(c.halves)],
+  ] as const) {
+    const mini = document.querySelector<HTMLElement>(`[data-mini="${key}"]`);
+    const main = document.querySelector<HTMLElement>(
+      `[data-buy="${key}"] > [data-add]`,
     );
-    quantity.dispatchEvent(new Event('input', { bubbles: true }));
+    if (mini) mini.hidden = n === 0;
+    if (main) main.hidden = n > 0;
+    const out = document.querySelector(`[data-count="${key}"]`);
+    if (out) out.textContent = words.inOrder(label);
+  }
+  // Steppers never go past what is left in the bake.
+  document
+    .querySelectorAll<HTMLButtonElement>('[data-step], [data-add], [data-sub]')
+    .forEach((b) => {
+      const isBanana =
+        b.dataset.target === 'banana' ||
+        b.dataset.add === 'banana' ||
+        b.dataset.sub === 'banana';
+      const input = isBanana ? banana : quantity;
+      const n = read(input);
+      const up = b.dataset.step === '1' || b.dataset.add !== undefined;
+      const step = up ? addStep(b) : 1;
+      b.disabled = up ? n + step > maxOf(input) : n <= 0;
+    });
+  const items = [
+    c.loaves ? words.loaves(c.loaves) : '',
+    c.halves ? `${halvesLabel(c.halves)} banana bread` : '',
+  ].filter(Boolean);
+  // Pieces to carry home: a half banana bread is still one piece.
+  const count = c.loaves + Math.ceil(c.halves / 2);
+  document.querySelectorAll<HTMLElement>('[data-cart-count]').forEach((el) => {
+    el.hidden = count === 0;
+    el.textContent = String(count);
+  });
+  const pill = document.querySelector<HTMLElement>('[data-pill]');
+  if (pill) {
+    pill.classList.toggle('has-items', count > 0);
+    const badge = pill.querySelector('[data-pill-count]');
+    if (badge) badge.textContent = String(count);
+    const list = pill.querySelector('[data-pill-items]');
+    if (list && count) list.textContent = items.join(' · ');
+    const sum = pill.querySelector<HTMLElement>('[data-pill-total]');
+    if (sum) {
+      sum.hidden = count === 0;
+      sum.textContent = money(c.total);
+    }
+  }
+  const empty = form.querySelector<HTMLElement>('[data-empty]');
+  if (empty) empty.hidden = count > 0;
+  window.dispatchEvent(
+    new CustomEvent('molla:cart', { detail: { ...c, origin } }),
+  );
+  updatePill();
+}
+// The product card adds the size picked (whole = 2 halves, half = 1).
+function addStep(button: HTMLElement) {
+  if (button.dataset.add !== 'banana') return 1;
+  if (button.dataset.halves) return Number(button.dataset.halves);
+  const size = document.querySelector<HTMLInputElement>(
+    'input[name=banana-size]:checked',
+  );
+  return Number(size?.value || 2);
+}
+let started = false;
+function startOnce() {
+  if (started) return;
+  started = true;
+  track('start_reservation');
+}
+function change(
+  input: HTMLInputElement | null,
+  delta: number,
+  origin: Element,
+) {
+  if (!input) return;
+  const next = Math.min(maxOf(input), Math.max(0, read(input) + delta));
+  if (next === read(input)) return;
+  input.value = String(next);
+  if (delta > 0) startOnce();
+  render(delta > 0 ? origin : null);
+}
+document
+  .querySelectorAll<HTMLButtonElement>('[data-step]')
+  .forEach((button) =>
+    button.addEventListener('click', () =>
+      change(
+        button.dataset.target === 'banana' ? banana : quantity,
+        Number(button.dataset.step),
+        button,
+      ),
+    ),
+  );
+document.querySelectorAll<HTMLButtonElement>('[data-add]').forEach((button) =>
+  button.addEventListener('click', () => {
+    const input = button.dataset.add === 'banana' ? banana : quantity;
+    const step = addStep(button);
+    // A whole mould when only a half is left: add what remains.
+    const room = maxOf(input) - read(input);
+    change(input, Math.min(step, room), button);
   }),
 );
-quantity?.addEventListener('input', update);
-form?.addEventListener('focusin', () => track('start_reservation'), {
-  once: true,
-});
+document
+  .querySelectorAll<HTMLButtonElement>('[data-sub]')
+  .forEach((button) =>
+    button.addEventListener('click', () =>
+      change(button.dataset.sub === 'banana' ? banana : quantity, -1, button),
+    ),
+  );
+document
+  .querySelectorAll<HTMLInputElement>('input[name=banana-size]')
+  .forEach((r) => r.addEventListener('change', () => render()));
+quantity?.addEventListener('input', () => render());
+
+/* ---- Píldora flotante: aparece con el pedido (o, en el móvil, al dejar
+   atrás la portada) y se aparta cuando el tiquet ya está a la vista. ---- */
+const pill = document.querySelector<HTMLElement>('[data-pill]');
+const seen = { hero: true, reserve: false };
+function updatePill() {
+  if (!pill) return;
+  const hasItems = pill.classList.contains('has-items');
+  const mobile = matchMedia('(max-width: 720px)').matches;
+  const show = !seen.reserve && (hasItems || (mobile && !seen.hero));
+  pill.classList.toggle('is-visible', show);
+}
+if (pill) {
+  const watch = new IntersectionObserver((entries) => {
+    for (const e of entries) {
+      if (e.target.id === 'reserva') seen.reserve = e.isIntersecting;
+      else seen.hero = e.isIntersecting;
+    }
+    updatePill();
+  });
+  const hero = document.querySelector('.hero');
+  const reserve = document.querySelector('#reserva');
+  if (hero) watch.observe(hero);
+  if (reserve) watch.observe(reserve);
+}
+render();
+form?.addEventListener('focusin', startOnce, { once: true });
 async function submit(target: HTMLFormElement) {
   const response = await fetch(target.action, {
     method: 'POST',
@@ -148,6 +331,10 @@ form?.addEventListener('submit', async (event) => {
   event.preventDefault();
   const button = form.querySelector<HTMLButtonElement>('button[type=submit]')!;
   if (button.disabled) return;
+  if (cart().loaves + cart().halves === 0) {
+    showError(form, new Error(words.empty));
+    return;
+  }
   button.disabled = true;
   const label = button.textContent;
   button.textContent = isCa
@@ -180,8 +367,11 @@ form?.addEventListener('submit', async (event) => {
       timeZone: 'Europe/Madrid',
       dateStyle: 'full',
     }).format(new Date(order.pickupDate));
+    const lines = (order.items as { quantity: number; name: string }[]).map(
+      (i) => `${i.quantity} × ${i.name}`,
+    );
     for (const line of [
-      `${order.quantity} × ${order.productName}`,
+      lines.join(' · '),
       isCa
         ? `Total: ${money(order.total)} · Pagament en recollir`
         : `Total: ${money(order.total)} · Pago al recoger`,
@@ -224,6 +414,12 @@ form?.addEventListener('submit', async (event) => {
     }
     result.hidden = false;
     result.focus();
+    pill?.classList.remove('has-items', 'is-visible');
+    pill?.remove();
+    document
+      .querySelectorAll<HTMLElement>('[data-cart-count]')
+      .forEach((el) => (el.hidden = true));
+    window.dispatchEvent(new CustomEvent('molla:confirmed'));
     track('reservation_completed', {
       quantity: order.quantity,
       total: order.total,
@@ -264,8 +460,22 @@ async function refreshBake() {
     const response = await fetch('/api/bake', { cache: 'no-store' });
     if (!response.ok) return;
     const b = await response.json();
-    const n = document.querySelector('[data-left]');
-    if (n && b.capacity) n.textContent = String(b.capacity - b.reserved);
+    if (b.capacity)
+      document
+        .querySelectorAll('[data-left]')
+        .forEach((n) => (n.textContent = String(b.capacity - b.reserved)));
+    document
+      .querySelectorAll('.loaf-meter span')
+      .forEach((dot, i) => dot.classList.toggle('taken', i < b.reserved));
+    if (typeof b.bananaLeft === 'number') {
+      document
+        .querySelectorAll<HTMLElement>('[data-banana-left]')
+        .forEach((el) => {
+          el.dataset.bananaLeft = String(b.bananaLeft);
+          el.textContent = words.left(b.bananaLeft);
+        });
+      if (banana) banana.dataset.max = String(Math.min(4, b.bananaLeft));
+    }
     // At zero reservations the card shows the small batch, never an empty counter.
     document
       .querySelector<HTMLElement>('[data-count-small]')
@@ -321,6 +531,11 @@ async function refreshBake() {
     } else if (quantity && b.capacity) {
       quantity.max = String(Math.min(4, b.capacity - b.reserved));
     }
+    // Keep the order within what is left after other people's reservations.
+    for (const input of [quantity, banana])
+      if (input && read(input) > maxOf(input))
+        input.value = String(maxOf(input));
+    render();
   } catch {
     /* Server validates availability on every submission. */
   }
