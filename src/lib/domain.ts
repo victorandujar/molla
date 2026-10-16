@@ -2,34 +2,42 @@ import { z } from 'zod';
 import { AppError, type Lang } from './messages';
 export type { Lang };
 const lang = z.enum(['es', 'ca']).default('es');
-export const reservationSchema = z.object({
-  requestId: z.uuid(),
-  bakeId: z.string().min(1).max(80),
-  name: z.string().trim().min(2, 'name').max(100, 'name'),
-  email: z
-    .string()
-    .trim()
-    .max(254)
-    .pipe(z.email('email'))
-    .transform((v) => v.toLowerCase()),
-  phone: z
-    .string()
-    .trim()
-    .regex(/^\+?[\d\s()-]{9,22}$/, 'phone')
-    .refine((v) => {
-      const digits = v.replace(/\D/g, '');
-      return digits.length >= 9 && digits.length <= 15;
-    }, 'phone'),
-  quantity: z.coerce.number().int().min(1).max(4),
-  product: z.literal('clasica'),
-  pickup: z.literal('yes', { error: 'pickup' }),
-  privacy: z.literal('yes', { error: 'privacy' }),
-  website: z.string().max(0).default(''),
-  source: z
-    .enum(['instagram', 'google', 'whatsapp', 'direct', 'referral'])
-    .default('direct'),
-  lang,
-});
+export const reservationSchema = z
+  .object({
+    requestId: z.uuid(),
+    bakeId: z.string().min(1).max(80),
+    name: z.string().trim().min(2, 'name').max(100, 'name'),
+    email: z
+      .string()
+      .trim()
+      .max(254)
+      .pipe(z.email('email'))
+      .transform((v) => v.toLowerCase()),
+    phone: z
+      .string()
+      .trim()
+      .regex(/^\+?[\d\s()-]{9,22}$/, 'phone')
+      .refine((v) => {
+        const digits = v.replace(/\D/g, '');
+        return digits.length >= 9 && digits.length <= 15;
+      }, 'phone'),
+    // Loaves of the weekly bread (0 when the order is only banana bread).
+    quantity: z.coerce.number().int().min(0).max(4),
+    // Banana bread counted in halves: 1 = half, 2 = whole, 3 = whole + half…
+    banana: z.coerce.number().int().min(0).max(4).default(0),
+    product: z.literal('clasica').default('clasica'),
+    pickup: z.literal('yes', { error: 'pickup' }),
+    privacy: z.literal('yes', { error: 'privacy' }),
+    website: z.string().max(0).default(''),
+    source: z
+      .enum(['instagram', 'google', 'whatsapp', 'direct', 'referral'])
+      .default('direct'),
+    lang,
+  })
+  .refine((o) => o.quantity + o.banana > 0, {
+    message: 'empty',
+    path: ['quantity'],
+  });
 export const waitlistSchema = z.object({
   email: z
     .string()
@@ -129,6 +137,17 @@ export function pickupCode(bakeNumber: string, bytes: Uint8Array) {
   return `${bakeNumber}-${chars.join('')}`;
 }
 export const pickupCodePattern = /^\d{3}-[A-Z2-9]{4}$/;
+// Halves of banana bread become whole moulds plus, at most, one half.
+export const bananaSplit = (halves: number) => ({
+  whole: Math.floor(halves / 2),
+  half: halves % 2,
+});
+export type OrderItem = {
+  product: string;
+  name: string;
+  quantity: number;
+  unitPrice: number;
+};
 export type Order = {
   id: string;
   code: string;
@@ -150,7 +169,26 @@ export type Order = {
   emailStatus: 'PENDING' | 'SENT' | 'FAILED' | 'DISABLED';
   // Absent on orders created before emails were translated.
   lang?: Lang;
+  // Absent on orders created before banana bread could be ordered online:
+  // those are `quantity` loaves of `productName`.
+  items?: OrderItem[];
 };
+export const orderItems = (o: Order): OrderItem[] =>
+  o.items?.length
+    ? o.items
+    : [
+        {
+          product: o.product,
+          name: o.productName,
+          quantity: o.quantity,
+          unitPrice: o.quantity ? Math.round(o.total / o.quantity) : o.total,
+        },
+      ];
+// "2 × La de cada semana · 1 × Banana bread": one line for subjects and lists.
+export const orderSummary = (o: Order, separator = ' · ') =>
+  orderItems(o)
+    .map((i) => `${i.quantity} × ${i.name}`)
+    .join(separator);
 // The daily job reminds customers whose pickup falls within the next 30 hours.
 export const reminderWindowHours = 30;
 export const reminderDue = (pickupIso: string, now = Date.now()) => {

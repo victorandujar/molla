@@ -1,0 +1,17 @@
+---
+// The round orange sticker of the packaging: "m." in cobalt.
+interface Props {
+  class?: string;
+  size?: string;
+}
+const { class: className = '', size } = Astro.props;
+---
+
+<span
+  class:list={['sticker', className]}
+  style={size ? `--size:${size}` : undefined}
+  aria-hidden="true"
+  data-sticker
+>
+  <span class="sticker-face">m.</span>
+</span>

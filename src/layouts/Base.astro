@@ -1,10 +1,13 @@
 ---
 import '../styles/global.css';
-import '@fontsource-variable/bricolage-grotesque/opsz.css';
+import '@fontsource-variable/bricolage-grotesque/wdth.css';
 import '@fontsource/instrument-sans/latin-400.css';
 import '@fontsource/instrument-sans/latin-600.css';
-import displayFont from '@fontsource-variable/bricolage-grotesque/files/bricolage-grotesque-latin-opsz-normal.woff2?url';
+import '@fontsource/fraunces/latin-600.css';
+import displayFont from '@fontsource-variable/bricolage-grotesque/files/bricolage-grotesque-latin-wdth-normal.woff2?url';
 import bodyFont from '@fontsource/instrument-sans/files/instrument-sans-latin-400-normal.woff2?url';
+import Ribbon from '../components/Ribbon.astro';
+import Crumb from '../components/Crumb.astro';
 import { brand, searchIndexable, isDemo } from '../lib/config';
 import { ui, routes, type Lang, type RouteKey } from '../lib/i18n';
 interface Props {
@@ -95,7 +98,7 @@ const graph = [organization, website, webpage, ...jsonLd];
       type="font/woff2"
       crossorigin
     />
-    <meta name="theme-color" content="#f6f2ea" />
+    <meta name="theme-color" content="#f3ecdf" />
     <meta name="color-scheme" content="light" />
     <title>{title}</title>
     <meta name="description" content={description} />
@@ -175,15 +178,25 @@ const graph = [organization, website, webpage, ...jsonLd];
         {t.demo}
       </div>
     )}
-    <header class="site-header">
+    <header class="site-header" data-header>
       <div class="wrap header-inner">
         <a class="wordmark" href={home} aria-label={t.home}>
-          {brand.name.toLowerCase()}.
+          {brand.name.toLowerCase()}
+          <span class="wordmark-dot">.</span>
         </a>
         <nav aria-label={lang === 'ca' ? 'Principal' : 'Principal'}>
-          <a href={`${home}#proceso`}>{t.nav.process}</a>
-          <a href={routes.pickup[lang]}>{t.nav.pickup}</a>
-          <a href={`${home}#preguntas`}>{t.nav.faq}</a>
+          <a class="nav-hide" href={`${home}#carta`}>
+            {lang === 'ca' ? 'La carta' : 'La carta'}
+          </a>
+          <a class="nav-hide" href={`${home}#proceso`}>
+            {t.nav.process}
+          </a>
+          <a class="nav-hide" href={routes.pickup[lang]}>
+            {t.nav.pickup}
+          </a>
+          <a class="nav-hide" href={`${home}#preguntas`}>
+            {t.nav.faq}
+          </a>
           {route && (
             <a
               class="lang-switch"
@@ -197,19 +210,41 @@ const graph = [organization, website, webpage, ...jsonLd];
           )}
           <a class="nav-order" href={`${home}#reserva`}>
             {t.nav.order}
+            <span class="nav-count" data-cart-count hidden>
+              0
+            </span>
           </a>
         </nav>
       </div>
     </header>
     <slot />
     <footer class="site-footer">
-      <div class="wrap footer-inner">
-        <a class="wordmark" href={home}>
-          {brand.name.toLowerCase()}.
+      <!-- El envoltorio: el único sitio donde aparece la miga del packaging. -->
+      <div class="wrapper-panel" data-wrapper>
+        <div class="wrapper-field">
+          <Crumb />
+        </div>
+        <Ribbon
+          words={t.hero.ribbon}
+          class="wrapper-ribbon wrapper-ribbon-top"
+        />
+        <Ribbon
+          words={t.hero.ribbon}
+          class="wrapper-ribbon wrapper-ribbon-bottom"
+          reverse
+        />
+        <a class="wrapper-label" href={home} aria-label={t.home} data-wave>
+          <span class="footer-mark">
+            {[...brand.name.toLowerCase()].map((c) => (
+              <span class="wave-letter">{c}</span>
+            ))}
+            <span class="wave-letter wave-dot">.</span>
+          </span>
+          <span class="wrapper-line">{t.footer.line}</span>
         </a>
+      </div>
+      <div class="wrap footer-inner">
         <p>
-          {t.footer.line}
-          <br />
           <span>{t.footer.area}</span>
         </p>
         <div class="footer-links">
@@ -241,5 +276,6 @@ const graph = [organization, website, webpage, ...jsonLd];
       </div>
     </footer>
     <script src="../lib/client.ts"></script>
+    <script src="../lib/motion.ts"></script>
   </body>
 </html>

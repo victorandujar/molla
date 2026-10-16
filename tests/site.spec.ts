@@ -24,8 +24,12 @@ test('real photos, keyboard access, responsive layout and accessibility', async 
     await expect(page.getByRole('heading', { level: 1 })).toContainText(
       'Pan artesanal por encargo',
     );
-    await expect(page.locator('.hero-photo img')).toHaveCount(2);
-    await expect(page.locator('.hero-photo img').first()).toBeVisible();
+    // The packaging crumb, traced into one path per alveolus, wraps the footer.
+    expect(
+      await page.locator('.site-footer .crumb-field path').count(),
+    ).toBeGreaterThan(400);
+    // The hero is the loaf opened in the maker's mother's hands.
+    await expect(page.locator('.hero-photo img')).toBeVisible();
     expect(
       await page.evaluate(
         () => document.documentElement.scrollWidth <= window.innerWidth,
@@ -64,12 +68,26 @@ test('reservation, validation and waitlist journey', async ({ page }) => {
   await page.locator('#phone').fill('612345678');
   await page.locator('input[name=pickup]').check();
   await page.locator('input[name=privacy]').check();
-  await page.getByRole('button', { name: 'Añadir una hogaza' }).click();
+  // An empty order explains itself instead of reaching the server.
+  await page.locator('#reservation-form button[type=submit]').click();
+  await expect(page.locator('#reservation-form .form-error')).toContainText(
+    'Añade una hogaza o un banana bread',
+  );
+  const moreLoaves = page.locator(
+    '#reservation-form [data-target=quantity][data-step="1"]',
+  );
+  await moreLoaves.click();
+  await moreLoaves.click();
   await expect(page.locator('#total')).toContainText('10,00');
+  await page
+    .locator('#reservation-form [data-target=banana][data-step="1"]')
+    .click();
+  await expect(page.locator('#banana-view')).toHaveText('½');
+  await expect(page.locator('#total')).toContainText('18,00');
   await page.locator('#reservation-form button[type=submit]').click();
   await expect(page.locator('#confirmation')).toBeVisible();
   await expect(page.locator('#confirmation')).toContainText(
-    '2 × La de cada semana',
+    '2 × La de cada semana · 1 × Medio banana bread',
   );
   await page.locator('#waitlist-email').fill('ana@example.com');
   await page.locator('input[name=consent]').check();
@@ -80,7 +98,8 @@ test('reservation, validation and waitlist journey', async ({ page }) => {
   );
   const d = await readData();
   expect(d.orders).toHaveLength(1);
-  expect(d.orders[0].total).toBe(1000);
+  expect(d.orders[0].total).toBe(1800);
+  expect(d.orders[0].quantity).toBe(2);
   expect(d.orders[0].lang).toBe('es');
   expect(d.waitlist).toHaveLength(1);
   expect(d.waitlist[0].confirmedAt).toBeNull();
@@ -272,7 +291,7 @@ test('sold out bake becomes waitlist and cannot accept more orders', async ({
         {
           id: 'fixture',
           bakeId: 'hornada-001',
-          quantity: 6,
+          quantity: 10,
           status: 'CONFIRMED',
         },
       ],
@@ -448,4 +467,52 @@ test('Catalan is the main language, Spanish lives under /es/', async ({
   await expect(page.locator('body')).not.toContainText('Ronda de Sant Ramon');
   await page.locator('.lang-switch').click();
   await expect(page).toHaveURL(/\/recollida$/);
+});
+
+test('banana bread is ordered by halves, alone or with bread, within its quota', async ({
+  page,
+  request,
+}) => {
+  const order = (banana: number, quantity = 0) =>
+    request.post('/api/reservations', {
+      headers: origin,
+      data: {
+        requestId: crypto.randomUUID(),
+        bakeId: 'hornada-001',
+        name: 'Pau',
+        email: 'pau@example.com',
+        phone: '612345678',
+        quantity,
+        banana,
+        pickup: 'yes',
+        privacy: 'yes',
+      },
+    });
+  const empty = await order(0);
+  expect(empty.status()).toBe(400);
+  const whole = await order(2);
+  expect(whole.status()).toBe(201);
+  expect((await whole.json()).total).toBe(1500);
+  const oneAndHalf = await order(1);
+  expect((await oneAndHalf.json()).total).toBe(800);
+  // Four halves per bake: one half is left, a whole one no longer fits.
+  const tooMuch = await order(2);
+  expect(tooMuch.status()).toBe(409);
+  expect((await tooMuch.json()).error).toContain('banana bread');
+  const d = await readData();
+  expect(
+    d.orders.map((o: { items: { product: string }[] }) => o.items[0]?.product),
+  ).toEqual(['banana', 'banana-mitad']);
+  // Loaves stay untouched by banana orders.
+  const bake = await (await request.get('/api/bake')).json();
+  expect(bake.reserved).toBe(0);
+  expect(bake.bananaLeft).toBe(1);
+  // The product card adds to the same order as the ticket.
+  await page.goto('/es/');
+  await page.locator('[data-buy="loaf"] > [data-add]').click();
+  await expect(page.locator('#quantity')).toHaveValue('1');
+  await expect(page.locator('[data-cart-count]')).toHaveText('1');
+  await expect(page.locator('[data-count="loaf"]')).toHaveText(
+    '1 en tu pedido',
+  );
 });

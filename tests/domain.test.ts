@@ -22,6 +22,8 @@ import {
   reminderDue,
   weeklyCyclePlan,
   csvCell,
+  bananaSplit,
+  orderSummary,
   type Order,
 } from '../src/lib/domain';
 const b = {
@@ -227,4 +229,54 @@ test('deadline copy comes from the bake date, in Madrid time', () => {
   );
   assert.equal(ui.ca.process.steps[1]!.time, 'Fins a 35 h');
   assert.equal(ui.es.process.steps[1]!.time, 'Hasta 35 h');
+});
+
+test('banana bread goes by halves and an order needs at least one piece', () => {
+  assert.deepEqual(bananaSplit(1), { whole: 0, half: 1 });
+  assert.deepEqual(bananaSplit(3), { whole: 1, half: 1 });
+  assert.deepEqual(bananaSplit(4), { whole: 2, half: 0 });
+  const base = { ...input, quantity: 0 };
+  assert.equal(reservationSchema.safeParse(base).success, false);
+  assert.equal(
+    reservationSchema.safeParse({ ...base, banana: 1 }).success,
+    true,
+  );
+  assert.equal(
+    reservationSchema.safeParse({ ...base, banana: 5 }).success,
+    false,
+  );
+  assert.equal(
+    reservationSchema.safeParse({ ...base, banana: 1.5 }).success,
+    false,
+  );
+});
+test('order summaries list every line; older orders keep their single line', () => {
+  const legacy = {
+    quantity: 2,
+    product: 'clasica',
+    productName: 'La de cada semana',
+    total: 1000,
+  } as Order;
+  assert.equal(orderSummary(legacy), '2 × La de cada semana');
+  const mixed = {
+    ...legacy,
+    items: [
+      {
+        product: 'clasica',
+        name: 'La de cada semana',
+        quantity: 2,
+        unitPrice: 500,
+      },
+      {
+        product: 'banana-mitad',
+        name: 'Medio banana bread',
+        quantity: 1,
+        unitPrice: 800,
+      },
+    ],
+  } as Order;
+  assert.equal(
+    orderSummary(mixed),
+    '2 × La de cada semana · 1 × Medio banana bread',
+  );
 });

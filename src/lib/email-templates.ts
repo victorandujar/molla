@@ -1,5 +1,5 @@
 import { brand, money } from './config';
-import type { Lang, Order } from './domain';
+import { orderSummary, type Lang, type Order } from './domain';
 // Email clients ignore stylesheets and web fonts unevenly: inline styles,
 // table layout, hosted PNGs and system-font fallbacks for everything.
 const c = {
@@ -192,7 +192,7 @@ export function confirmationText(o: Order) {
 ${t.heading}. ${t.confirmed}.
 
 ${t.code}: ${o.code}
-${o.quantity} × ${o.productName} — ${money(o.total)} (${t.payLater})
+${orderSummary(o)} — ${money(o.total)} (${t.payLater})
 
 ${t.when}: ${pickupDay(o.pickupDate, langOf(o))}, ${o.pickupWindow}
 ${t.where}: ${o.pickupAddress}
@@ -221,7 +221,7 @@ function pickupBlock(o: Order, totalLabel: string) {
 <tr><td class="pad" style="padding:20px 40px 8px;">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
     ${details([
-      [t.order, `${o.quantity} × ${esc(o.productName)}`],
+      [t.order, esc(orderSummary(o, '\n')).replaceAll('\n', '<br>')],
       [t.total, `<strong>${money(o.total)}</strong> · ${totalLabel}`],
       [
         t.when,
@@ -283,7 +283,7 @@ export function reminderText(o: Order) {
 ${t.reminderIntro}
 
 ${t.code}: ${o.code}
-${o.quantity} × ${o.productName} — ${money(o.total)} (${t.payLater})
+${orderSummary(o)} — ${money(o.total)} (${t.payLater})
 ${t.when}: ${pickupDay(o.pickupDate, lang)}, ${o.pickupWindow}
 ${t.where}: ${o.pickupAddress}
 ${t.pickupNote}
@@ -330,13 +330,13 @@ export function waitlistConfirmation(
 }
 
 export function ownerSubject(o: Order) {
-  return `Nueva reserva ${o.code}: ${o.quantity} × ${o.productName} · ${o.name}`;
+  return `Nueva reserva ${o.code}: ${orderSummary(o)} · ${o.name}`;
 }
 
 export function ownerText(o: Order) {
   return `Nueva reserva ${o.code}
 
-${o.quantity} × ${o.productName} — ${money(o.total)}
+${orderSummary(o)} — ${money(o.total)}
 Nombre: ${o.name}
 Email: ${o.email}
 Teléfono: ${o.phone}
@@ -350,7 +350,7 @@ export function ownerHtml(o: Order) {
   const content = `
 <tr><td class="pad" style="padding:40px 40px 8px;">
   <p style="margin:0 0 10px;font-family:${body};font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:${c.tile};">Nueva reserva · ${esc(o.code)}</p>
-  <h1 class="h1" style="margin:0;font-family:${display};font-size:38px;line-height:1.05;font-weight:800;color:${c.ink};">${o.quantity} × ${esc(o.productName)}</h1>
+  <h1 class="h1" style="margin:0;font-family:${display};font-size:38px;line-height:1.05;font-weight:800;color:${c.ink};">${esc(orderSummary(o, '\n')).replaceAll('\n', '<br>')}</h1>
   <p style="margin:12px 0 0;font-family:${body};font-size:16px;color:${c.muted};">${money(o.total)} a cobrar al recoger · ${esc(pickupDay(o.pickupDate))}</p>
 </td></tr>
 <tr><td class="pad" style="padding:20px 40px 40px;">
@@ -364,9 +364,5 @@ export function ownerHtml(o: Order) {
     ])}
   </table>
 </td></tr>`;
-  return layout(
-    'es',
-    `${o.name} · ${o.quantity} hogaza(s) · ${o.code}`,
-    content,
-  );
+  return layout('es', `${o.name} · ${orderSummary(o)} · ${o.code}`, content);
 }

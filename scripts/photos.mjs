@@ -10,6 +10,12 @@ const roles = {
   dough: '1000045169',
   person: '1000041581',
   slice: 'miga-mano',
+  kitchen: '1000041564',
+  smell: '1000041578',
+  proof: '1000045161',
+  slices: '1000041608',
+  cut: '1000041600',
+  tiles: 'azulejos',
 };
 // Optional region (original pixels) cut before resizing, for shots with busy surroundings.
 const regions = {
@@ -25,9 +31,17 @@ const ratios = {
   dough: 0.8,
   person: 0.75,
   slice: 1.6,
+  kitchen: 1.4,
+  smell: 0.8,
+  proof: 0.8,
+  slices: 0.8,
+  cut: 0.8,
+  tiles: 0.75,
 };
 for (const [name, id] of Object.entries(roles))
   for (const width of [400, 720, 1100, 1600]) {
+    // Small originals (the tiles photo) are never enlarged.
+    if (name === 'tiles' && width > 1100) continue;
     const image = sharp(`${dir}/${id}.jpg`).rotate();
     if (regions[name]) image.extract(regions[name]);
     const source = image.resize(width, Math.round(width / ratios[name]), {

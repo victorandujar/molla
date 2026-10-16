@@ -17,8 +17,8 @@ import {
   funnel,
   rateLimit,
 } from '../lib/store';
-import { bakeState, type Order } from '../lib/domain';
-import { money } from '../lib/config';
+import { bakeState, orderSummary, type Order } from '../lib/domain';
+import { money, BANANA_HALVES_PER_BAKE } from '../lib/config';
 import { pickupDay } from '../lib/email-templates';
 import { ui } from '../lib/i18n';
 import { clientIp } from '../lib/http';
@@ -186,7 +186,13 @@ const steps = [
             </dd>
           </div>
           <div>
-            <dt>Por recoger</dt>
+            <dt>Banana bread</dt>
+            <dd>
+              {data.bake.bananaReserved / 2} / {BANANA_HALVES_PER_BAKE / 2}
+            </dd>
+          </div>
+          <div>
+            <dt>Hogazas por recoger</dt>
             <dd>{pending.reduce((n, o) => n + o.quantity, 0)}</dd>
           </div>
           <div>
@@ -216,7 +222,7 @@ const steps = [
                   <span class="admin-badge">{labels[o.status]}</span>
                 </div>
                 <p class="admin-name">
-                  {o.name} · {o.quantity} × {money(o.total / o.quantity)} ={' '}
+                  {o.name} · {orderSummary(o)} ={' '}
                   <strong>{money(o.total)}</strong>
                 </p>
                 <p class="admin-contact">
@@ -282,9 +288,7 @@ const steps = [
                           name="bake"
                           value={data!.bake.id}
                         />
-                        <p>
-                          Libera {o.quantity} hogaza(s). No se puede deshacer.
-                        </p>
+                        <p>Libera {orderSummary(o)}. No se puede deshacer.</p>
                         <button
                           class="button admin-danger"
                           name="to"
