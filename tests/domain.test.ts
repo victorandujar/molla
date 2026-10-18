@@ -84,6 +84,16 @@ test('validate and normalize reservation, no unknown products or malicious quant
     false,
   );
 });
+test('accept known acquisition channels only', () => {
+  assert.equal(
+    reservationSchema.parse({ ...input, source: 'qr' }).source,
+    'qr',
+  );
+  assert.equal(
+    reservationSchema.safeParse({ ...input, source: 'tiktok' }).success,
+    false,
+  );
+});
 test('waitlist requires explicit consent', () => {
   assert.equal(
     waitlistSchema.safeParse({ email: 'ana@example.com' }).success,

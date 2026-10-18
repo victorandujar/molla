@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { AppError, type Lang } from './messages';
+import { sources } from './sources';
 export type { Lang };
 const lang = z.enum(['es', 'ca']).default('es');
 export const reservationSchema = z
@@ -29,9 +30,7 @@ export const reservationSchema = z
     pickup: z.literal('yes', { error: 'pickup' }),
     privacy: z.literal('yes', { error: 'privacy' }),
     website: z.string().max(0).default(''),
-    source: z
-      .enum(['instagram', 'google', 'whatsapp', 'direct', 'referral'])
-      .default('direct'),
+    source: z.enum(sources).default('direct'),
     lang,
   })
   .refine((o) => o.quantity + o.banana > 0, {
@@ -47,9 +46,7 @@ export const waitlistSchema = z.object({
     .transform((v) => v.toLowerCase()),
   consent: z.literal('yes'),
   website: z.string().max(0).default(''),
-  source: z
-    .enum(['instagram', 'google', 'whatsapp', 'direct', 'referral'])
-    .default('direct'),
+  source: z.enum(sources).default('direct'),
   lang,
 });
 export type ReservationInput = z.infer<typeof reservationSchema>;
