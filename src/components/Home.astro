@@ -10,6 +10,7 @@ import {
   launchReady,
   productById,
   BANANA_HALVES_PER_BAKE,
+  welcomeGift,
 } from '../lib/config';
 import { ui, routes, dayFormat, type Lang } from '../lib/i18n';
 import { currentBake } from '../lib/store';
@@ -59,6 +60,11 @@ const steps = t.process.steps.map((step, i) =>
 const stepHours = [0, 12, 35, 35];
 const stepPhotos = ['maker', 'dough', 'tiles', 'hero'];
 const orderHref = open ? '#reserva' : '#avisame';
+// Booking by WhatsApp with the message half written: for neighbours who
+// prefer a chat to a form.
+const whatsappBook = brand.whatsapp
+  ? `https://wa.me/${brand.whatsapp}?text=${encodeURIComponent(t.reserve.whatsappText(pickupDay))}`
+  : '';
 const abs = (path: string) =>
   brand.site ? new URL(path, brand.site).href : undefined;
 const offer = (price: number, available: boolean) => ({
@@ -161,6 +167,10 @@ const jsonLd = [
               {t.hero.how} <span aria-hidden="true">↓</span>
             </a>
           </div>
+          <p class="hero-trust hero-in" style="--i:4">
+            {t.hero.trust}
+            {welcomeGift.active && <> · {t.hero.gift}</>}
+          </p>
           <div
             id="hornada"
             class="hero-bake hero-in"
@@ -626,6 +636,13 @@ const jsonLd = [
               </div>
             )}
           </dl>
+          {welcomeGift.active && (
+            <div class="gift-box">
+              <p class="gift-title">{t.reserve.giftH}</p>
+              <p>{t.reserve.gift}</p>
+              <p class="gift-small">{t.reserve.giftAllergens}</p>
+            </div>
+          )}
           {brand.whatsapp && (
             <a
               class="text-link"
@@ -855,6 +872,17 @@ const jsonLd = [
                 {isDemo ? t.reserve.submitDemo : t.reserve.submit}
               </button>
               <p class="form-footnote">{t.reserve.footnote}</p>
+              {whatsappBook && (
+                <a
+                  class="button button-ghost full"
+                  data-event="click_whatsapp"
+                  href={whatsappBook}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {t.reserve.whatsappCta} <span aria-hidden="true">↗</span>
+                </a>
+              )}
               <noscript>
                 <p>
                   {t.reserve.noscript}{' '}

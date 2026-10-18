@@ -5,6 +5,7 @@ import {
   brand,
   isDemo,
   productById,
+  welcomeGift,
   BANANA_HALVES_PER_BAKE,
 } from './config';
 import { ui } from './i18n';
@@ -224,6 +225,11 @@ export async function reserve(
         input.quantity,
       );
       assertBanana(bananaIn(d, bake.id), input.banana);
+      order.firstOrder =
+        welcomeGift.active &&
+        !d.orders.some(
+          (o) => o.email === input.email && o.status !== 'CANCELLED',
+        );
       do order.code = pickupCode(bake.number, randomBytes(4));
       while (d.orders.some((o) => o.code === order.code));
       d.orders.push(order);
@@ -258,6 +264,9 @@ export async function reserve(
       input.quantity,
     );
     assertBanana(count?.banana || 0, input.banana);
+    const [seen] =
+      await tx`SELECT 1 FROM orders o JOIN customers c ON c.id=o.customer_id WHERE c.email=${input.email} AND o.status!='CANCELLED' LIMIT 1`;
+    order.firstOrder = welcomeGift.active && !seen;
     order.pickupDate = new Date(b.pickup_date).toISOString();
     if (!town) order.pickupWindow = b.pickup_window || brand.pickupWindow;
     // The bake row is locked, so no concurrent reservation can take the same code.

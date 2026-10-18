@@ -135,6 +135,8 @@ export const ui = {
         'Fins a 35 h de fermentació',
         'Baix Llobregat',
       ],
+      trust: 'Pagas al recibirlo · Cancelas con un clic · Sin cuenta',
+      gift: 'Tu primera comanda lleva un regalo de bienvenida.',
       scroll: 'Desliza',
       hands: 'Las manos de mi madre',
       sealTop: 'hasta',
@@ -374,7 +376,15 @@ export const ui = {
       privacyLink: 'privacidad y las condiciones',
       submitDemo: 'Probar reserva',
       submit: 'Confirmar reserva',
-      footnote: 'Recibirás la confirmación por email. Sin suscripciones.',
+      footnote:
+        'Pagas al recibirlo. Cancelas con un clic hasta el jueves a las 20:00. Sin cuenta ni suscripciones.',
+      giftH: 'Regalo de bienvenida',
+      gift: 'Si es tu primera comanda, te regalo un cuarto de banana bread y un chutney de pimiento rojo y tomate.',
+      giftAllergens:
+        'El banana bread contiene gluten y leche. Pregúntame por los ingredientes del chutney.',
+      whatsappCta: 'Reservar por WhatsApp',
+      whatsappText: (day: string) =>
+        `¡Hola! Quiero reservar pan para el ${day}. Me gustaría: `,
       noscript: 'Activa JavaScript para ver la confirmación en esta página.',
       noscriptMail: 'También puedes escribirme para reservar.',
       closedH3: 'Esta semana ya no quedan hogazas.',
@@ -526,6 +536,8 @@ export const ui = {
         'Fins a 35 h de fermentació',
         'Baix Llobregat',
       ],
+      trust: 'Pagues en rebre’l · Cancel·les amb un clic · Sense compte',
+      gift: 'La teva primera comanda porta un regal de benvinguda.',
       scroll: 'Llisca',
       hands: 'Les mans de la meva mare',
       sealTop: 'fins a',
@@ -764,7 +776,15 @@ export const ui = {
       privacyLink: 'privacitat i les condicions',
       submitDemo: 'Provar la reserva',
       submit: 'Confirmar la reserva',
-      footnote: 'Rebràs la confirmació per correu. Sense subscripcions.',
+      footnote:
+        'Pagues en rebre’l. Cancel·les amb un clic fins dijous a les 20:00. Sense compte ni subscripcions.',
+      giftH: 'Regal de benvinguda',
+      gift: 'Si és la teva primera comanda, et regalo un quart de banana bread i un chutney de pebrot vermell i tomàquet.',
+      giftAllergens:
+        'El banana bread conté gluten i llet. Pregunta’m pels ingredients del chutney.',
+      whatsappCta: 'Reservar per WhatsApp',
+      whatsappText: (day: string) =>
+        `Hola! Voldria reservar pa per al ${day}. M’agradaria: `,
       noscript: 'Activa JavaScript per veure la confirmació en aquesta pàgina.',
       noscriptMail: 'També em pots escriure per reservar.',
       closedH3: 'Aquesta setmana ja no queden pans.',

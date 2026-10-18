@@ -189,6 +189,9 @@ import {
             name="password"
             type="password"
             autocomplete="current-password"
+            autocapitalize="off"
+            autocorrect="off"
+            spellcheck="false"
             required
           />
         </div>
@@ -276,6 +279,9 @@ import {
                   <strong class="admin-code">{o.code}</strong>
                   <span class="admin-badge">{labels[o.status]}</span>
                   {o.subscription && <span class="admin-badge">Pan fijo</span>}
+                  {o.firstOrder && (
+                    <span class="admin-badge">Primera · regalo</span>
+                  )}
                 </div>
                 <p class="admin-name">
                   {o.name} · {orderSummary(o)} ={' '}
