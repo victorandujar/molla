@@ -794,3 +794,64 @@ test('owner panel lists pa fix subscribers and can pause, resume and cancel them
   const result = await new AxeBuilder({ page }).analyze();
   expect(result.violations).toEqual([]);
 });
+
+test('first order gets the welcome gift; the second one does not', async ({
+  page,
+  request,
+}) => {
+  await page.goto('/es/');
+  await expect(page.locator('.hero-trust')).toContainText(
+    'Cancelas con un clic',
+  );
+  await expect(page.locator('.gift-box')).toContainText(
+    'un cuarto de banana bread',
+  );
+  await expect(page.locator('.form-footnote').first()).toContainText(
+    'Cancelas con un clic hasta el jueves',
+  );
+  const book = (email: string) =>
+    request.post('/api/reservations', {
+      headers: origin,
+      data: {
+        requestId: crypto.randomUUID(),
+        bakeId: 'hornada-001',
+        name: 'Ana Prueba',
+        email,
+        phone: '612345678',
+        product: 'clasica',
+        quantity: 1,
+        pickup: 'yes',
+        privacy: 'yes',
+      },
+    });
+  expect((await (await book('ana@example.com')).json()).firstOrder).toBe(true);
+  expect((await (await book('ana@example.com')).json()).firstOrder).toBe(false);
+  expect((await (await book('otra@example.com')).json()).firstOrder).toBe(true);
+  const orders = (await readData()).orders;
+  expect(orders.map((o: { firstOrder: boolean }) => o.firstOrder)).toEqual([
+    true,
+    false,
+    true,
+  ]);
+  // The on-screen confirmation mentions the gift and offers the pa fix.
+  await reset();
+  await page.goto('/es/');
+  await page
+    .locator('#reservation-form [data-target=quantity][data-step="1"]')
+    .click();
+  await page.locator('#town').selectOption('sant-boi');
+  await page.locator('#address').fill('Carrer Major 1, 2n');
+  await page.getByLabel('Tu nombre', { exact: true }).fill('Bea Prueba');
+  await page.locator('#email').fill('bea@example.com');
+  await page.locator('#phone').fill('612345678');
+  await page.locator('input[name=pickup]').check();
+  await page.locator('input[name=privacy]').check();
+  await page.locator('#reservation-form button[type=submit]').click();
+  await expect(page.locator('#confirmation')).toContainText(
+    'Regalo de bienvenida',
+  );
+  await expect(
+    page.locator('#confirmation').getByRole('link', { name: /Pan fijo/ }),
+  ).toHaveAttribute('href', '/es/pan-fijo');
+  expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+});

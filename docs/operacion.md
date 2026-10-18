@@ -141,3 +141,19 @@ Un cliente elige cantidad, frecuencia (cada semana o cada dos) y entrega en `/pa
 **Antes de publicar este cambio** hay una migración nueva (`006_standing_orders.sql`): ejecuta `npm run db:migrate:prod` **antes** de desplegar `main`, porque el código nuevo escribe columnas que no existen todavía. La migración es compatible con la versión anterior.
 
 **Pruebas con PostgreSQL.** `TEST_DATABASE_URL=postgres://… npm test` ejecuta además `tests/subscriptions.db.test.ts` contra una base con las migraciones aplicadas (vacía las tablas de pedidos: no la apuntes a producción).
+
+## Variables de entorno de Vercel
+
+Se configuran en Vercel → proyecto → Settings → Environment Variables, marcando **Production** (y Preview si las quieres allí), y hay que **redesplegar** después. Sin valor, la función correspondiente simplemente no se muestra.
+
+| Variable               | Valor                                                    | Para qué                                                                                  |
+| ---------------------- | -------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `WHATSAPP_NUMBER`      | `34649907912` (con prefijo de país, sin `+` ni espacios) | Botón «Reservar por WhatsApp», «Tengo una pregunta» y teléfono en los datos estructurados |
+| `WHATSAPP_CHANNEL_URL` | enlace del canal (`https://whatsapp.com/channel/…`)      | Botón del canal en el pie, junto al aviso y en el email de confirmación                   |
+| `GOOGLE_PROFILE_URL`   | enlace público del Perfil de Empresa de Google           | Datos estructurados (`sameAs`)                                                            |
+| `WELCOME_GIFT`         | `false` para quitar el regalo                            | Regalo de bienvenida de la primera comanda (por defecto activo)                           |
+| `ADMIN_PASSWORD`       | 16 caracteres o más                                      | Contraseña de `/gestio`                                                                   |
+
+## Regalo de bienvenida
+
+La primera comanda de cada cliente (por email, sin contar las canceladas) lleva de regalo **un cuarto de banana bread y un chutney de pimiento rojo y tomate**. La web lo anuncia, el email de confirmación lo menciona y a ti te llega en el aviso «Nueva reserva» y como etiqueta «Primera · regalo» en `/gestio`: el regalo lo añades tú al preparar el pedido. Confirma los ingredientes y alérgenos del chutney antes de entregarlo: la web solo dice que el banana bread contiene gluten y leche.

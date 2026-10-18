@@ -7,7 +7,7 @@ import {
   type Subscription,
 } from './domain';
 import { townById } from './delivery';
-import { ui } from './i18n';
+import { routes, ui } from './i18n';
 // Email clients ignore stylesheets and web fonts unevenly: inline styles,
 // table layout, hosted PNGs and system-font fallbacks for everything.
 const c = {
@@ -88,6 +88,10 @@ const copy = {
     cancelNote:
       '¿No vas a poder recibirlo? Cancela el pedido con un clic hasta el cierre de pedidos (el jueves a las 20:00), sin dar explicaciones.',
     cancelLink: 'Cancelar el pedido →',
+    giftLabel: 'Regalo',
+    giftText:
+      'Por ser tu primera comanda: un cuarto de banana bread (gluten y leche) y un chutney de pimiento rojo y tomate.',
+    fixCta: '¿Lo quieres cada semana? Pan fijo:',
     standingKicker: 'Pan fijo',
     standingHeading: (name: string) => `${name}, esta semana te toca pan.`,
     standingIntro:
@@ -164,6 +168,10 @@ const copy = {
     cancelNote:
       'No el podràs rebre? Cancel·la la comanda amb un clic fins al tancament de comandes (dijous a les 20:00), sense donar explicacions.',
     cancelLink: 'Cancel·lar la comanda →',
+    giftLabel: 'Regal',
+    giftText:
+      'Per ser la teva primera comanda: un quart de banana bread (gluten i llet) i un chutney de pebrot vermell i tomàquet.',
+    fixCta: 'El vols cada setmana? Pa fix:',
     standingKicker: 'Pa fix',
     standingHeading: (name: string) => `${name}, aquesta setmana et toca pa.`,
     standingIntro:
@@ -294,6 +302,7 @@ ${orderSummary(o)} — ${money(o.total)} (${o.delivery ? t.payOnDelivery : t.pay
 ${t.when}: ${pickupDay(o.pickupDate, langOf(o))}, ${o.pickupWindow}
 ${t.where}: ${where(o)}
 ${o.delivery ? t.deliveryNote : t.pickupNote}
+${o.firstOrder ? `\n${t.giftLabel}: ${t.giftText}` : ''}
 
 ${
   o.subscription
@@ -301,7 +310,7 @@ ${
     : o.cancelToken
       ? `${t.cancelNote}\n${cancelUrl(o)}`
       : t.changesText(brand.contact)
-}
+}${o.subscription ? '' : `\n${t.fixCta} ${asset(routes.standing[langOf(o)])}`}
 ${brand.whatsappChannel ? `\n${t.channel} ${brand.whatsappChannel}\n` : ''}
 ${t.thanks}
 ${brand.name}`;
@@ -334,6 +343,9 @@ function pickupBlock(o: Order, totalLabel: string) {
         t.where,
         `${esc(o.pickupAddress)}${o.delivery?.address ? `<br>${esc(o.delivery.address)}` : ''}<br><span style="font-size:13px;color:${c.muted};">${esc(o.delivery ? t.deliveryNote : t.pickupNote)}</span>`,
       ],
+      ...(o.firstOrder
+        ? ([[t.giftLabel, esc(t.giftText)]] as [string, string][])
+        : []),
     ])}
   </table>
 </td></tr>`;
@@ -374,7 +386,7 @@ export function confirmationHtml(o: Order) {
       )
     : closing(
         channel,
-        `${o.cancelToken ? `${esc(t.cancelNote)}<br>${link(cancelUrl(o), t.cancelLink)}` : t.changes}${
+        `${o.cancelToken ? `${esc(t.cancelNote)}<br>${link(cancelUrl(o), t.cancelLink)}` : t.changes}<br><br>${esc(t.fixCta)} ${link(asset(routes.standing[lang]), asset(routes.standing[lang]).replace(/^https?:\/\//, ''))}${
           brand.whatsappChannel ? `<br><br>${esc(t.channel)}` : ''
         }`,
       );
@@ -478,7 +490,7 @@ ${o.delivery ? 'Entrega a domicilio' : 'Recogida'}: ${pickupDay(o.pickupDate)}, 
 Dirección: ${where(o)}`
       : ''
   }
-Canal: ${o.source}
+Canal: ${o.source}${o.firstOrder ? '\nPrimera comanda: añade el regalo (¼ de banana bread + chutney de pimiento rojo y tomate)' : ''}
 Referencia interna: ${o.id}`;
 }
 
@@ -500,6 +512,14 @@ export function ownerHtml(o: Order) {
         ? ([['Entrega', esc(where(o))]] as [string, string][])
         : []),
       ['Canal', esc(o.source)],
+      ...(o.firstOrder
+        ? ([
+            [
+              'Regalo',
+              'Primera comanda: añade ¼ de banana bread + chutney de pimiento rojo y tomate',
+            ],
+          ] as [string, string][])
+        : []),
       ['Código', `<strong>${esc(o.code)}</strong>`],
     ])}
   </table>

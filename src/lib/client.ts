@@ -412,6 +412,11 @@ form?.addEventListener('submit', async (event) => {
     const home = order.delivery as { address: string } | undefined;
     for (const line of [
       lines.join(' · '),
+      order.firstOrder
+        ? isCa
+          ? 'Regal de benvinguda: un quart de banana bread i un chutney de pebrot vermell i tomàquet.'
+          : 'Regalo de bienvenida: un cuarto de banana bread y un chutney de pimiento rojo y tomate.'
+        : '',
       home
         ? isCa
           ? `Total: ${money(order.total)} · Pagament en rebre’l`
@@ -437,7 +442,7 @@ form?.addEventListener('submit', async (event) => {
         : isCa
           ? 'Et confirmarem el punt exacte de recollida amb la teva comanda.'
           : 'Te confirmaremos el punto exacto de recogida con tu pedido.',
-    ]) {
+    ].filter(Boolean)) {
       const row = document.createElement('div');
       row.textContent = line;
       details.append(row);
@@ -483,6 +488,13 @@ form?.addEventListener('submit', async (event) => {
         : 'Pásaselo a un vecino por WhatsApp ↗';
       result.append(share);
     }
+    const fix = document.createElement('a');
+    fix.className = 'text-link';
+    fix.href = isCa ? '/pa-fix' : '/es/pan-fijo';
+    fix.textContent = isCa
+      ? 'El vols cada setmana? Pa fix →'
+      : '¿Lo quieres cada semana? Pan fijo →';
+    result.append(fix);
     result.hidden = false;
     result.focus();
     pill?.classList.remove('has-items', 'is-visible');
