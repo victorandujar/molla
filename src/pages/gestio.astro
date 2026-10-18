@@ -17,7 +17,13 @@ import {
   funnel,
   rateLimit,
 } from '../lib/store';
-import { bakeState, orderSummary, type Order } from '../lib/domain';
+import {
+  bakeState,
+  bananaSplit,
+  orderSummary,
+  type Order,
+} from '../lib/domain';
+import { townById } from '../lib/delivery';
 import { money, BANANA_HALVES_PER_BAKE } from '../lib/config';
 import { pickupDay } from '../lib/email-templates';
 import { ui } from '../lib/i18n';
@@ -53,6 +59,17 @@ if (Astro.request.method === 'POST') {
   } else if (action === 'logout') {
     Astro.cookies.delete(sessionCookie, cookie);
     return Astro.redirect('/gestio', 303);
+  } else if (signedIn && action === 'sub') {
+    // Pause, resume or cancel a pa fix for a customer who asked by phone.
+    const to = String(form.get('to'));
+    const id = String(form.get('sub'));
+    let ok = false;
+    if (to === 'PAUSED' || to === 'ACTIVE' || to === 'CANCELLED') {
+      const target = (await listSubscriptions()).find((s) => s.id === id);
+      if (target) ok = !!(await setSubscriptionStatus(target.token, to));
+    }
+    const query = new URLSearchParams({ subdone: ok ? to : 'none' });
+    return Astro.redirect(`/gestio?${query.toString()}#panfijo`, 303);
   } else if (signedIn && action === 'status') {
     const to = String(form.get('to'));
     const id = String(form.get('id'));
@@ -77,24 +94,28 @@ let data: null | {
   waitlist: Awaited<ReturnType<typeof waitlistCounts>>;
   events: Record<string, number>;
   standing: Awaited<ReturnType<typeof subscriptionStats>>;
+  subs: Awaited<ReturnType<typeof listSubscriptions>>;
 } = null;
 let loadError = '';
 if (signedIn) {
   try {
-    const [bakes, active, waitlist, events, standing] = await Promise.all([
-      listBakes(),
-      currentBake(),
-      waitlistCounts(),
-      funnel(28),
-      subscriptionStats(),
-    ]);
+    const [bakes, active, waitlist, events, standing, subs] = await Promise.all(
+      [
+        listBakes(),
+        currentBake(),
+        waitlistCounts(),
+        funnel(28),
+        subscriptionStats(),
+        listSubscriptions(),
+      ],
+    );
     const bake =
       bakes.find((b) => b.id === Astro.url.searchParams.get('bake')) || active;
     const orders = (await ordersForBake(bake.id)).sort(
       (a, b) =>
         order[a.status] - order[b.status] || a.name.localeCompare(b.name),
     );
-    data = { bakes, bake, orders, waitlist, events, standing };
+    data = { bakes, bake, orders, waitlist, events, standing, subs };
   } catch (e) {
     console.error('Admin panel failed', e instanceof Error ? e.message : e);
     loadError = 'No se han podido cargar los datos. Recarga en unos segundos.';
@@ -107,6 +128,33 @@ const notice =
     : done
       ? `Pedido marcado como ${labels[done as Order['status']]?.toLowerCase() || 'actualizado'}.`
       : '';
+const subDone = Astro.url.searchParams.get('subdone');
+const subNotice =
+  subDone === 'none'
+    ? 'Ese pan fijo ya había cambiado. Revisa la lista.'
+    : subDone === 'PAUSED'
+      ? 'Pan fijo pausado. Su pedido abierto de esta semana se ha cancelado.'
+      : subDone === 'ACTIVE'
+        ? 'Pan fijo reanudado.'
+        : subDone === 'CANCELLED'
+          ? 'Pan fijo dado de baja. Su pedido abierto de esta semana se ha cancelado.'
+          : '';
+const subItems = (s: NonNullable<typeof data>['subs'][number]) => {
+  const names = ui.es.catalog;
+  const { whole, half } = bananaSplit(s.banana);
+  return [
+    s.quantity ? `${s.quantity} × ${names.loaf}` : '',
+    whole ? `${whole} × ${names.bananaWhole}` : '',
+    half ? `${half} × ${names.bananaHalf}` : '',
+  ]
+    .filter(Boolean)
+    .join(' · ');
+};
+const subStatus = {
+  ACTIVE: 'Activo',
+  PAUSED: 'En pausa',
+  CANCELLED: 'De baja',
+};
 const live = data?.orders.filter((o) => o.status !== 'CANCELLED') || [];
 const pending = live.filter((o) => o.status === 'CONFIRMED');
 const whatsapp = (phone: string) => {
@@ -120,7 +168,11 @@ const steps = [
   ['reservation_completed', 'Reservan'],
   ['waitlist_signup', 'Se apuntan al aviso'],
 ] as const;
-import { subscriptionStats } from '../lib/subscriptions';
+import {
+  listSubscriptions,
+  setSubscriptionStatus,
+  subscriptionStats,
+} from '../lib/subscriptions';
 ---
 
 <Base lang="es" title="Gestión · Molla" noindex>
@@ -319,6 +371,93 @@ import { subscriptionStats } from '../lib/subscriptions';
                     </details>
                   )}
                 </div>
+              </li>
+            ))}
+          </ul>
+        </section>
+        <section id="panfijo" aria-labelledby="panfijo-title">
+          <h2 id="panfijo-title">
+            Pan fijo ({data.standing.active} activos
+            {data.standing.paused > 0 && `, ${data.standing.paused} en pausa`})
+          </h2>
+          {subNotice && (
+            <p class="admin-notice" role="status">
+              {subNotice}
+            </p>
+          )}
+          {data.subs.length === 0 && <p>Todavía no hay nadie con pan fijo.</p>}
+          <ul class="admin-orders">
+            {data.subs.map((s) => (
+              <li
+                data-status={
+                  s.status === 'CANCELLED' ? 'CANCELLED' : 'CONFIRMED'
+                }
+              >
+                <div class="admin-order-top">
+                  <strong class="admin-code">{s.name}</strong>
+                  <span class="admin-badge">{subStatus[s.status]}</span>
+                </div>
+                <p class="admin-name">
+                  {subItems(s)} ·{' '}
+                  {s.frequency === 'weekly'
+                    ? 'cada semana'
+                    : 'cada dos semanas'}
+                  {s.skipRemaining > 0 && ' · salta la próxima entrega'}
+                </p>
+                <p class="admin-contact">
+                  <a href={`tel:${s.phone.replace(/[^\d+]/g, '')}`}>
+                    {s.phone}
+                  </a>
+                  <a
+                    href={whatsapp(s.phone)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    WhatsApp ↗
+                  </a>
+                  <a href={`mailto:${s.email}`}>{s.email}</a>
+                </p>
+                <p class="admin-meta">
+                  {s.delivery === 'home'
+                    ? `A domicilio · ${townById(s.town)?.name ?? s.town} · ${s.address}`
+                    : 'Recogida en Sant Boi'}
+                </p>
+                {s.status !== 'CANCELLED' && (
+                  <div class="admin-actions">
+                    <form method="post">
+                      <input type="hidden" name="action" value="sub" />
+                      <input type="hidden" name="sub" value={s.id} />
+                      <button
+                        class="button"
+                        name="to"
+                        value={s.status === 'ACTIVE' ? 'PAUSED' : 'ACTIVE'}
+                        type="submit"
+                      >
+                        {s.status === 'ACTIVE' ? 'Pausar' : 'Reanudar'}
+                      </button>
+                    </form>
+                    <details>
+                      <summary>Dar de baja…</summary>
+                      <form method="post">
+                        <input type="hidden" name="action" value="sub" />
+                        <input type="hidden" name="sub" value={s.id} />
+                        <p>
+                          Deja de prepararle pedidos y cancela el de esta semana
+                          si aún está abierto. No se puede deshacer: tendría que
+                          volver a apuntarse.
+                        </p>
+                        <button
+                          class="button admin-danger"
+                          name="to"
+                          value="CANCELLED"
+                          type="submit"
+                        >
+                          Sí, dar de baja a {s.name}
+                        </button>
+                      </form>
+                    </details>
+                  </div>
+                )}
               </li>
             ))}
           </ul>

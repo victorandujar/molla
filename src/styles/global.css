@@ -2736,11 +2736,13 @@ details[open] p {
 }
 .admin-orders li[data-status='COLLECTED'] {
   border-left-color: var(--cobalt);
-  opacity: 0.75;
 }
+/* Faded text failed contrast: cancelled ones are struck through instead. */
 .admin-orders li[data-status='CANCELLED'] {
   border-left-color: var(--line);
-  opacity: 0.55;
+}
+.admin-orders li[data-status='CANCELLED'] .admin-code {
+  text-decoration: line-through;
 }
 .admin-order-top {
   display: flex;

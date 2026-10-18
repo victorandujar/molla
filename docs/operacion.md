@@ -133,7 +133,7 @@ Un cliente elige cantidad, frecuencia (cada semana o cada dos) y entrega en `/pa
 
 **Para ti.**
 
-- `/gestio` muestra cuántos pan fijo hay activos y en pausa, las hogazas por semana que suponen y una etiqueta «Pan fijo» en sus pedidos. Revisa que la suma de hogazas fijas quepa en el cupo de la hornada.
+- `/gestio`, sección «Pan fijo»: lista de quién está suscrito (nombre, teléfono con WhatsApp, email, pedido, frecuencia y entrega), con botones **Pausar / Reanudar** y **Dar de baja** (pide confirmar). Pausar o dar de baja cancela también el pedido abierto de esa semana. Además muestra los totales y una etiqueta «Pan fijo» en sus pedidos. Revisa que la suma de hogazas fijas quepa en el cupo de la hornada.
 - `npm run orders:prod -- subs` lista los suscriptores.
 - `npm run orders:prod -- subpause|subresume|subcancel ana@example.com --yes` cambia un pan fijo si el cliente te lo pide por WhatsApp (pausar o cancelar también cancela su pedido abierto).
 - `purge` anonimiza además las suscripciones canceladas hace más de N meses.

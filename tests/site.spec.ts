@@ -738,3 +738,59 @@ test('cancel an order with one click from its private link', async ({
   const left = await request.get('/api/bake');
   expect((await left.json()).reserved).toBe(0);
 });
+
+test('owner panel lists pa fix subscribers and can pause, resume and cancel them', async ({
+  page,
+  request,
+}) => {
+  const joined = await request.post('/api/subscriptions?lang=es', {
+    headers: origin,
+    data: {
+      name: 'Marta Fija',
+      email: 'marta@example.com',
+      phone: '612345678',
+      quantity: 2,
+      frequency: 'biweekly',
+      delivery: 'home',
+      town: 'sant-boi',
+      address: 'Carrer Major 1',
+      terms: 'yes',
+      privacy: 'yes',
+    },
+  });
+  expect(joined.status()).toBe(201);
+  await page.goto('/gestio');
+  await page.getByLabel('Contraseña').fill('e2e-password-local');
+  await page.getByRole('button', { name: 'Entrar' }).click();
+  await expect(page.locator('#panfijo-title')).toContainText('1 activos');
+  const card = page.locator('#panfijo .admin-orders li', {
+    hasText: 'Marta Fija',
+  });
+  await expect(card).toContainText('2 × La de cada semana');
+  await expect(card).toContainText('cada dos semanas');
+  await expect(card).toContainText('Carrer Major 1');
+  await expect(card).toContainText('612345678');
+  await card.getByRole('button', { name: 'Pausar' }).click();
+  await expect(page.locator('#panfijo .admin-notice')).toContainText(
+    'Pan fijo pausado',
+  );
+  const data = await readData();
+  expect(data.subscriptions[0].status).toBe('PAUSED');
+  // Pausing also cancels this week's open order.
+  expect(data.orders[0].status).toBe('CANCELLED');
+  await expect(page.locator('#panfijo-title')).toContainText('1 en pausa');
+  await card.getByRole('button', { name: 'Reanudar' }).click();
+  expect((await readData()).subscriptions[0].status).toBe('ACTIVE');
+  await card.locator('summary', { hasText: 'Dar de baja' }).click();
+  await card
+    .getByRole('button', { name: 'Sí, dar de baja a Marta Fija' })
+    .click();
+  await expect(page.locator('#panfijo .admin-notice')).toContainText(
+    'Pan fijo dado de baja',
+  );
+  expect((await readData()).subscriptions[0].status).toBe('CANCELLED');
+  await expect(card).toContainText('De baja');
+  await expect(card.getByRole('button')).toHaveCount(0);
+  const result = await new AxeBuilder({ page }).analyze();
+  expect(result.violations).toEqual([]);
+});

@@ -215,6 +215,20 @@ export async function openOrderOf(
     : null;
 }
 
+// Everyone with a pa fix, for the owner's panel: active first, then paused.
+export async function listSubscriptions(): Promise<Subscription[]> {
+  const rank = { ACTIVE: 0, PAUSED: 1, CANCELLED: 2 };
+  const sorted = (list: Subscription[]) =>
+    [...list].sort(
+      (a, b) =>
+        rank[a.status] - rank[b.status] ||
+        a.createdAt.localeCompare(b.createdAt),
+    );
+  if (useDemo()) return demo((d) => sorted(d.subscriptions || []));
+  const rows = await sql!`SELECT * FROM subscriptions ORDER BY created_at`;
+  return sorted(rows.map(toSubscription));
+}
+
 export async function subscriptionStats() {
   if (useDemo())
     return demo((d) => {
