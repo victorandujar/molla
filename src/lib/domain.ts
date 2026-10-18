@@ -4,25 +4,35 @@ import { sources } from './sources';
 import { townById } from './delivery';
 export type { Lang };
 const lang = z.enum(['es', 'ca']).default('es');
+// Who orders and where it goes: shared by one-off orders and "pa fix".
+const contact = {
+  name: z.string().trim().min(2, 'name').max(100, 'name'),
+  email: z
+    .string()
+    .trim()
+    .max(254)
+    .pipe(z.email('email'))
+    .transform((v) => v.toLowerCase()),
+  phone: z
+    .string()
+    .trim()
+    .regex(/^\+?[\d\s()-]{9,22}$/, 'phone')
+    .refine((v) => {
+      const digits = v.replace(/\D/g, '');
+      return digits.length >= 9 && digits.length <= 15;
+    }, 'phone'),
+};
+// Home delivery needs a town in the zone and a street address.
+const deliveryFields = {
+  delivery: z.enum(['home', 'pickup']).default('pickup'),
+  town: z.string().default(''),
+  address: z.string().trim().max(160, 'address').default(''),
+};
 export const reservationSchema = z
   .object({
     requestId: z.uuid(),
     bakeId: z.string().min(1).max(80),
-    name: z.string().trim().min(2, 'name').max(100, 'name'),
-    email: z
-      .string()
-      .trim()
-      .max(254)
-      .pipe(z.email('email'))
-      .transform((v) => v.toLowerCase()),
-    phone: z
-      .string()
-      .trim()
-      .regex(/^\+?[\d\s()-]{9,22}$/, 'phone')
-      .refine((v) => {
-        const digits = v.replace(/\D/g, '');
-        return digits.length >= 9 && digits.length <= 15;
-      }, 'phone'),
+    ...contact,
     // Loaves of the weekly bread (0 when the order is only banana bread).
     quantity: z.coerce.number().int().min(0).max(4),
     // Banana bread counted in halves: 1 = half, 2 = whole, 3 = whole + half…
@@ -32,10 +42,7 @@ export const reservationSchema = z
     privacy: z.literal('yes', { error: 'privacy' }),
     website: z.string().max(0).default(''),
     source: z.enum(sources).default('direct'),
-    // Home delivery needs a town in the zone and a street address.
-    delivery: z.enum(['home', 'pickup']).default('pickup'),
-    town: z.string().default(''),
-    address: z.string().trim().max(160, 'address').default(''),
+    ...deliveryFields,
     lang,
   })
   .refine((o) => o.quantity + o.banana > 0, {
@@ -50,6 +57,89 @@ export const reservationSchema = z
     message: 'address',
     path: ['address'],
   });
+// A standing order: the same bread every week (or every other week).
+export const subscriptionSchema = z
+  .object({
+    ...contact,
+    quantity: z.coerce.number().int().min(0).max(4),
+    banana: z.coerce.number().int().min(0).max(4).default(0),
+    frequency: z.enum(['weekly', 'biweekly']).default('weekly'),
+    ...deliveryFields,
+    terms: z.literal('yes', { error: 'terms' }),
+    privacy: z.literal('yes', { error: 'privacy' }),
+    website: z.string().max(0).default(''),
+    source: z.enum(sources).default('direct'),
+    lang,
+  })
+  .refine((o) => o.quantity + o.banana > 0, {
+    message: 'empty',
+    path: ['quantity'],
+  })
+  .refine((o) => o.delivery === 'pickup' || townById(o.town), {
+    message: 'town',
+    path: ['town'],
+  })
+  .refine((o) => o.delivery === 'pickup' || o.address.length >= 5, {
+    message: 'address',
+    path: ['address'],
+  });
+export type SubscriptionInput = z.infer<typeof subscriptionSchema>;
+export type SubscriptionStatus = 'ACTIVE' | 'PAUSED' | 'CANCELLED';
+export type Subscription = {
+  id: string;
+  // Private link to manage it; never shown to anyone else.
+  token: string;
+  email: string;
+  name: string;
+  phone: string;
+  lang: Lang;
+  quantity: number;
+  banana: number;
+  delivery: 'home' | 'pickup';
+  town: string;
+  address: string;
+  frequency: 'weekly' | 'biweekly';
+  status: SubscriptionStatus;
+  // Upcoming bakes the customer asked to skip before they exist.
+  skipRemaining: number;
+  // Last bake already handled, so a repeated job never doubles an order.
+  lastBakeId: string | null;
+  source: string;
+  createdAt: string;
+  cancelledAt: string | null;
+};
+// What the weekly job does with a subscription for a given bake.
+//  inactive: paused or cancelled · handled: already done for this bake
+//  skip: the customer asked to skip it · rest: the off week of a fortnightly
+//  place: create the order.
+export type SubscriptionAction =
+  'inactive' | 'handled' | 'skip' | 'rest' | 'place';
+export function subscriptionAction(
+  sub: Pick<
+    Subscription,
+    'status' | 'frequency' | 'skipRemaining' | 'lastBakeId'
+  >,
+  bake: { id: string; pickupDate: string },
+  // Pickup date of the subscription's latest order that was not cancelled.
+  lastDelivery: string | null,
+): SubscriptionAction {
+  if (sub.status !== 'ACTIVE') return 'inactive';
+  if (sub.lastBakeId === bake.id) return 'handled';
+  if (sub.skipRemaining > 0) return 'skip';
+  if (
+    sub.frequency === 'biweekly' &&
+    lastDelivery &&
+    Date.parse(bake.pickupDate) - Date.parse(lastDelivery) < 13 * 86400000
+  )
+    return 'rest';
+  return 'place';
+}
+// An order can be cancelled with its private link until the bake closes.
+export const cancellable = (
+  o: Pick<Order, 'status'>,
+  deadline: string,
+  now = Date.now(),
+) => o.status === 'CONFIRMED' && now < Date.parse(deadline);
 export const waitlistSchema = z.object({
   email: z
     .string()
@@ -181,6 +271,10 @@ export type Order = {
   lang?: Lang;
   // Home delivery; absent on pickup orders. The purge removes `address`.
   delivery?: { town: string; address?: string };
+  // Private one-click cancellation link; absent on orders made before it existed.
+  cancelToken?: string;
+  // Set on orders the weekly job placed for a "pa fix": token manages it.
+  subscription?: { token: string };
   // Absent on orders created before banana bread could be ordered online:
   // those are `quantity` loaves of `productName`.
   items?: OrderItem[];

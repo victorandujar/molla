@@ -1,0 +1,390 @@
+---
+import Article from '../layouts/Article.astro';
+import Photo from './Photo.astro';
+import { brand, isDemo, launchReady, money, productById } from '../lib/config';
+import { deliveryTowns, deliveryWindow } from '../lib/delivery';
+import { routes, type Lang } from '../lib/i18n';
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const [from, to] = deliveryWindow.split('–') as [string, string];
+const hours = `${Number(from.split(':')[0])} a ${Number(to.split(':')[0])} h`;
+const loaf = productById('clasica')!.price;
+const bananaWhole = productById('banana')!.price;
+const bananaHalf = productById('banana-mitad')!.price;
+const canSubmit = isDemo || launchReady;
+const text = {
+  es: {
+    crumb: 'Pan fijo',
+    title: `Pan fijo: tu pan de cada semana, a casa · ${brand.name}`,
+    description: `Suscríbete al pan fijo y recibe cada sábado de ${hours} tu pan artesano en Sant Boi, Sant Just Desvern y Santa Coloma de Cervelló. Salta, pausa o cancela con un clic. Pagas al recibirlo.`,
+    kicker: 'Pan fijo · suscripción semanal',
+    h1: 'Tu pan de cada semana, sin pensar en ello.',
+    lede: `Eliges una vez cuánto quieres. Cada semana te preparo el pan y te lo llevo a casa el sábado de ${hours}. Si una semana no lo quieres, lo saltas con un clic.`,
+    howH: 'Cómo funciona',
+    how: [
+      'Eliges cuántas hogazas quieres (y banana bread, si te apetece), cada semana o una sí y otra no.',
+      'Te escribo cada semana para avisarte de lo que te toca. No tienes que hacer nada.',
+      `El sábado, de ${hours}, te lo llevo a casa. Pagas al recibirlo: no hay tarjeta ni cobros por adelantado.`,
+      'Cuando quieras, saltas una semana, lo pausas o te das de baja.',
+    ],
+    cancelH: 'Cancelar es un clic',
+    cancel: [
+      'Sin llamar, sin escribir y sin explicar por qué. Cada email que te envío lleva un botón.',
+      'Saltar una semana: un clic, hasta el jueves a las 20:00 (cuando cierro los pedidos).',
+      'Pausar o darte de baja del todo: un clic desde el enlace de tu email de bienvenida.',
+      'Puedes volver a apuntarte cuando quieras.',
+    ],
+    priceH: 'Qué cuesta',
+    price: `La hogaza de poolish cuesta ${money(loaf)}; el banana bread, ${money(bananaWhole)} entero o ${money(bananaHalf)} la mitad. Sin coste de envío. Si algún día cambian los precios te aviso con 14 días de antelación y puedes darte de baja.`,
+    capacityH: 'Hornadas pequeñas',
+    capacity:
+      'Horneo en tandas pequeñas y los suscriptores tienen su pan reservado antes que nadie. Si una semana la hornada está completa, te lo digo, no te cobro nada y sigues con tu pan fijo la semana siguiente.',
+    formH: 'Apúntate al pan fijo',
+    qty: 'Hogazas por entrega',
+    banana: 'Banana bread por entrega',
+    bananaOptions: ['Ninguno', '½', '1', '1½', '2'],
+    frequency: 'Frecuencia',
+    weekly: 'Cada sábado',
+    biweekly: 'Un sábado sí, otro no',
+    deliveryH: '¿Cómo lo quieres?',
+    home: `A domicilio · sábado de ${hours}`,
+    homeHint: 'Sant Boi, Sant Just Desvern y Santa Coloma de Cervelló',
+    pickup: 'Lo recojo en Sant Boi',
+    pickupHint: 'Resto del Baix Llobregat. Te confirmo el punto exacto.',
+    town: 'Municipio',
+    townPick: 'Elige tu municipio',
+    address: 'Dirección de entrega',
+    addressPlaceholder: 'Calle, número, piso y puerta',
+    name: 'Tu nombre',
+    email: 'Email',
+    phone: 'Móvil o WhatsApp',
+    per: 'Por entrega',
+    honey: 'Deja este campo vacío',
+    termsA: 'He leído las',
+    termsLink: 'condiciones del pan fijo',
+    termsB: 'y acepto que cada semana se prepare mi pedido.',
+    privacyA: 'He leído la',
+    privacyLink: 'política de privacidad',
+    submit: 'Empezar mi pan fijo',
+    footnote:
+      'Pagas al recibirlo. Puedes saltar, pausar o darte de baja con un clic.',
+    closed: 'El pan fijo se abrirá junto con las reservas.',
+    demo: 'Modo de prueba: usa datos ficticios.',
+    doneH: 'Ya tienes tu pan fijo.',
+    doneP: 'Te he enviado un email con todo y con el enlace para gestionarlo.',
+    manage: 'Gestionar mi pan fijo',
+    photo: 'El panadero sostiene una hogaza recién horneada y sonríe',
+    service: 'Pan fijo: suscripción semanal de pan artesano a domicilio',
+  },
+  ca: {
+    crumb: 'Pa fix',
+    title: `Pa fix: el teu pa de cada setmana, a casa · ${brand.name}`,
+    description: `Subscriu-te al pa fix i rep cada dissabte de ${hours} el teu pa artesà a Sant Boi, Sant Just Desvern i Santa Coloma de Cervelló. Salta, pausa o cancel·la amb un clic. Pagues en rebre’l.`,
+    kicker: 'Pa fix · subscripció setmanal',
+    h1: 'El teu pa de cada setmana, sense pensar-hi.',
+    lede: `Tries una vegada quant en vols. Cada setmana et preparo el pa i te’l porto a casa dissabte de ${hours}. Si una setmana no en vols, el saltes amb un clic.`,
+    howH: 'Com funciona',
+    how: [
+      'Tries quants pans vols (i banana bread, si et ve de gust), cada setmana o una sí i una no.',
+      'Cada setmana t’escric per avisar-te del que et toca. No has de fer res.',
+      `Dissabte, de ${hours}, te’l porto a casa. Pagues en rebre’l: no hi ha targeta ni cobraments per avançat.`,
+      'Quan vulguis, saltes una setmana, el pauses o te’n dones de baixa.',
+    ],
+    cancelH: 'Cancel·lar és un clic',
+    cancel: [
+      'Sense trucar, sense escriure i sense explicar per què. Cada correu que t’envio porta un botó.',
+      'Saltar una setmana: un clic, fins dijous a les 20:00 (quan tanco les comandes).',
+      'Pausar-lo o donar-te de baixa del tot: un clic des de l’enllaç del teu correu de benvinguda.',
+      'Pots tornar a apuntar-t’hi quan vulguis.',
+    ],
+    priceH: 'Què costa',
+    price: `El pa de poolish costa ${money(loaf)}; el banana bread, ${money(bananaWhole)} sencer o ${money(bananaHalf)} la meitat. Sense cost d’enviament. Si algun dia canvien els preus t’aviso amb 14 dies d’antelació i pots donar-te de baixa.`,
+    capacityH: 'Fornades petites',
+    capacity:
+      'Cuino en tandes petites i els subscriptors tenen el pa reservat abans que ningú. Si una setmana la fornada és plena, t’ho dic, no et cobro res i continues amb el teu pa fix la setmana següent.',
+    formH: 'Apunta’t al pa fix',
+    qty: 'Pans per entrega',
+    banana: 'Banana bread per entrega',
+    bananaOptions: ['Cap', '½', '1', '1½', '2'],
+    frequency: 'Freqüència',
+    weekly: 'Cada dissabte',
+    biweekly: 'Un dissabte sí, un altre no',
+    deliveryH: 'Com el vols?',
+    home: `A domicili · dissabte de ${hours}`,
+    homeHint: 'Sant Boi, Sant Just Desvern i Santa Coloma de Cervelló',
+    pickup: 'El recullo a Sant Boi',
+    pickupHint: 'Resta del Baix Llobregat. Et confirmo el punt exacte.',
+    town: 'Municipi',
+    townPick: 'Tria el teu municipi',
+    address: 'Adreça d’entrega',
+    addressPlaceholder: 'Carrer, número, pis i porta',
+    name: 'El teu nom',
+    email: 'Correu electrònic',
+    phone: 'Mòbil o WhatsApp',
+    per: 'Per entrega',
+    honey: 'Deixa aquest camp buit',
+    termsA: 'He llegit les',
+    termsLink: 'condicions del pa fix',
+    termsB: 'i accepto que cada setmana es prepari la meva comanda.',
+    privacyA: 'He llegit la',
+    privacyLink: 'política de privacitat',
+    submit: 'Començar el meu pa fix',
+    footnote:
+      'Pagues en rebre’l. Pots saltar, pausar o donar-te de baixa amb un clic.',
+    closed: 'El pa fix s’obrirà juntament amb les reserves.',
+    demo: 'Mode de prova: fes servir dades fictícies.',
+    doneH: 'Ja tens el teu pa fix.',
+    doneP: 'T’he enviat un correu amb tot i amb l’enllaç per gestionar-lo.',
+    manage: 'Gestionar el meu pa fix',
+    photo: 'El forner sosté un pa acabat de coure i somriu',
+    service: 'Pa fix: subscripció setmanal de pa artesà a domicili',
+  },
+}[lang];
+const privacyHref = routes.privacy[lang];
+const service = {
+  '@context': 'https://schema.org',
+  '@type': 'Service',
+  name: text.service,
+  serviceType: text.crumb,
+  description: text.description,
+  provider: {
+    '@id': brand.site ? new URL('/#organization', brand.site).href : undefined,
+  },
+  areaServed: deliveryTowns.map((town) => ({
+    '@type': 'City',
+    name: town.name,
+  })),
+  offers: {
+    '@type': 'Offer',
+    price: (loaf / 100).toFixed(2),
+    priceCurrency: 'EUR',
+    description: lang === 'ca' ? 'Preu per pa' : 'Precio por hogaza',
+  },
+};
+---
+
+<Article
+  lang={lang}
+  route="standing"
+  crumb={text.crumb}
+  title={text.title}
+  description={text.description}
+  kicker={text.kicker}
+  h1={text.h1}
+  lede={text.lede}
+  jsonLd={[service]}
+>
+  <div class="article-grid">
+    <div class="prose">
+      <h2>{text.howH}</h2>
+      <ol>
+        {text.how.map((step) => (
+          <li>{step}</li>
+        ))}
+      </ol>
+
+      <h2>{text.cancelH}</h2>
+      <ul>
+        {text.cancel.map((line) => (
+          <li>{line}</li>
+        ))}
+      </ul>
+
+      <h2>{text.priceH}</h2>
+      <p>{text.price}</p>
+
+      <h2>{text.capacityH}</h2>
+      <p>{text.capacity}</p>
+    </div>
+    <figure class="article-photo">
+      <Photo
+        name="person"
+        alt={text.photo}
+        sizes="(max-width: 860px) calc(100vw - 40px), 40vw"
+      />
+    </figure>
+  </div>
+
+  <section
+    class="standing-panel"
+    id="alta-pa-fix"
+    aria-labelledby="standing-title"
+  >
+    <h2 id="standing-title">{text.formH}</h2>
+    {isDemo && <p class="form-intro">{text.demo}</p>}
+    {canSubmit ? (
+      <form
+        id="subscription-form"
+        action={`/api/subscriptions?lang=${lang}`}
+        method="post"
+        data-loaf={loaf}
+        data-whole={bananaWhole}
+        data-half={bananaHalf}
+      >
+        <input type="hidden" name="source" value="direct" />
+        <div class="form-columns">
+          <div class="field">
+            <label for="sub-quantity">{text.qty}</label>
+            <select id="sub-quantity" name="quantity">
+              {[1, 2, 3, 4].map((n) => (
+                <option value={n}>{n}</option>
+              ))}
+              <option value="0">0</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="sub-banana">{text.banana}</label>
+            <select id="sub-banana" name="banana">
+              {text.bananaOptions.map((label, n) => (
+                <option value={n}>{label}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+        <fieldset class="size-choice delivery-choice">
+          <legend>{text.frequency}</legend>
+          <label>
+            <input type="radio" name="frequency" value="weekly" checked />
+            <span>
+              <strong>{text.weekly}</strong>
+            </span>
+          </label>
+          <label>
+            <input type="radio" name="frequency" value="biweekly" />
+            <span>
+              <strong>{text.biweekly}</strong>
+            </span>
+          </label>
+        </fieldset>
+        <fieldset class="size-choice delivery-choice">
+          <legend>{text.deliveryH}</legend>
+          <label>
+            <input type="radio" name="delivery" value="home" checked />
+            <span>
+              <strong>{text.home}</strong>
+              <em>{text.homeHint}</em>
+            </span>
+          </label>
+          <label>
+            <input type="radio" name="delivery" value="pickup" />
+            <span>
+              <strong>{text.pickup}</strong>
+              <em>{text.pickupHint}</em>
+            </span>
+          </label>
+        </fieldset>
+        <div class="form-columns address-columns" data-home-fields>
+          <div class="field">
+            <label for="sub-town">{text.town}</label>
+            <select id="sub-town" name="town" required>
+              <option value="">{text.townPick}</option>
+              {deliveryTowns.map((town) => (
+                <option value={town.id}>{town.name}</option>
+              ))}
+            </select>
+          </div>
+          <div class="field">
+            <label for="sub-address">{text.address}</label>
+            <input
+              id="sub-address"
+              name="address"
+              autocomplete="street-address"
+              minlength="5"
+              maxlength="160"
+              required
+              placeholder={text.addressPlaceholder}
+            />
+          </div>
+        </div>
+        <div class="field">
+          <label for="sub-name">{text.name}</label>
+          <input
+            id="sub-name"
+            name="name"
+            autocomplete="name"
+            minlength="2"
+            maxlength="100"
+            required
+          />
+        </div>
+        <div class="form-columns">
+          <div class="field">
+            <label for="sub-email">{text.email}</label>
+            <input
+              id="sub-email"
+              name="email"
+              type="email"
+              autocomplete="email"
+              maxlength="254"
+              required
+              placeholder="tu@email.com"
+            />
+          </div>
+          <div class="field">
+            <label for="sub-phone">{text.phone}</label>
+            <input
+              id="sub-phone"
+              name="phone"
+              type="tel"
+              autocomplete="tel"
+              minlength="9"
+              maxlength="22"
+              pattern="[0-9 \(\)\+\-]{9,22}"
+              required
+              placeholder="612 345 678"
+            />
+          </div>
+        </div>
+        <div class="honey" aria-hidden="true">
+          <label>
+            {text.honey}
+            <input name="website" tabindex="-1" autocomplete="off" />
+          </label>
+        </div>
+        <div class="order-total">
+          <span>{text.per}</span>
+          <output id="sub-total" aria-live="polite">
+            {money(loaf)}
+          </output>
+        </div>
+        <label class="check">
+          <input type="checkbox" name="terms" value="yes" required />
+          <span>
+            {text.termsA}{' '}
+            <a href={`${privacyHref}#pa-fix`} target="_blank">
+              {text.termsLink}
+            </a>{' '}
+            {text.termsB}
+          </span>
+        </label>
+        <label class="check">
+          <input type="checkbox" name="privacy" value="yes" required />
+          <span>
+            {text.privacyA}{' '}
+            <a href={privacyHref} target="_blank">
+              {text.privacyLink}
+            </a>
+            .
+          </span>
+        </label>
+        <p class="form-error" role="alert" tabindex="-1" hidden></p>
+        <button type="submit" class="button full">
+          {text.submit}
+        </button>
+        <p class="form-footnote">{text.footnote}</p>
+      </form>
+    ) : (
+      <p>{text.closed}</p>
+    )}
+    <div id="subscription-result" hidden tabindex="-1" role="status">
+      <h3>{text.doneH}</h3>
+      <p>{text.doneP}</p>
+      <p data-first></p>
+      <a class="button" data-manage href="#">
+        {text.manage}
+      </a>
+    </div>
+  </section>
+</Article>

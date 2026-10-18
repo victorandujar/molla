@@ -76,15 +76,17 @@ let data: null | {
   orders: Awaited<ReturnType<typeof ordersForBake>>;
   waitlist: Awaited<ReturnType<typeof waitlistCounts>>;
   events: Record<string, number>;
+  standing: Awaited<ReturnType<typeof subscriptionStats>>;
 } = null;
 let loadError = '';
 if (signedIn) {
   try {
-    const [bakes, active, waitlist, events] = await Promise.all([
+    const [bakes, active, waitlist, events, standing] = await Promise.all([
       listBakes(),
       currentBake(),
       waitlistCounts(),
       funnel(28),
+      subscriptionStats(),
     ]);
     const bake =
       bakes.find((b) => b.id === Astro.url.searchParams.get('bake')) || active;
@@ -92,7 +94,7 @@ if (signedIn) {
       (a, b) =>
         order[a.status] - order[b.status] || a.name.localeCompare(b.name),
     );
-    data = { bakes, bake, orders, waitlist, events };
+    data = { bakes, bake, orders, waitlist, events, standing };
   } catch (e) {
     console.error('Admin panel failed', e instanceof Error ? e.message : e);
     loadError = 'No se han podido cargar los datos. Recarga en unos segundos.';
@@ -118,6 +120,7 @@ const steps = [
   ['reservation_completed', 'Reservan'],
   ['waitlist_signup', 'Se apuntan al aviso'],
 ] as const;
+import { subscriptionStats } from '../lib/subscriptions';
 ---
 
 <Base lang="es" title="Gestión · Molla" noindex>
@@ -220,6 +223,7 @@ const steps = [
                 <div class="admin-order-top">
                   <strong class="admin-code">{o.code}</strong>
                   <span class="admin-badge">{labels[o.status]}</span>
+                  {o.subscription && <span class="admin-badge">Pan fijo</span>}
                 </div>
                 <p class="admin-name">
                   {o.name} · {orderSummary(o)} ={' '}
@@ -328,6 +332,16 @@ const steps = [
                 <dd>{data!.events[key] || 0}</dd>
               </div>
             ))}
+            <div>
+              <dt>Pan fijo activos</dt>
+              <dd>
+                {data.standing.active} ({data.standing.loaves} hogazas/semana)
+              </dd>
+            </div>
+            <div>
+              <dt>Pan fijo en pausa</dt>
+              <dd>{data.standing.paused}</dd>
+            </div>
             <div>
               <dt>Avisos confirmados</dt>
               <dd>{data.waitlist.confirmed}</dd>

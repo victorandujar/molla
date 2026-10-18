@@ -1,0 +1,205 @@
+---
+import Base from '../layouts/Base.astro';
+import { brand } from '../lib/config';
+import { dayFormat, madridParts, routes } from '../lib/i18n';
+import { orderSummary, cancellable } from '../lib/domain';
+import { cancelOrder, orderByCancelToken } from '../lib/subscriptions';
+import { notifyOwnerCancellation } from '../lib/email';
+import { manageUrl } from '../lib/email-templates';
+import { after } from '../lib/http';
+
+// Private link from the confirmation email. The GET only shows the order: the
+// cancellation is a POST, so a mail scanner that opens the link cannot cancel.
+const token = String(
+  (Astro.request.method === 'POST'
+    ? (await Astro.request.clone().formData()).get('token')
+    : Astro.url.searchParams.get('token')) || '',
+);
+const valid = /^[0-9a-f-]{36}$/i.test(token);
+let view: 'ask' | 'done' | 'already' | 'late' | 'missing' | 'error' = 'missing';
+let link: Awaited<ReturnType<typeof orderByCancelToken>> = null;
+try {
+  if (valid) {
+    if (
+      Astro.request.method === 'POST' &&
+      Astro.request.headers.get('origin') === Astro.url.origin
+    ) {
+      const { result, order } = await cancelOrder(token);
+      if (result === 'cancelled' && order)
+        after(notifyOwnerCancellation(order));
+      view = result === 'cancelled' ? 'done' : result;
+    }
+    link = await orderByCancelToken(token);
+    if (view === 'missing' && link)
+      view =
+        link.order.status === 'CANCELLED'
+          ? 'already'
+          : cancellable(link.order, link.deadline)
+            ? 'ask'
+            : 'late';
+  }
+} catch {
+  view = 'error';
+}
+const order = link?.order;
+const wanted = Astro.url.searchParams.get('lang');
+const lang =
+  wanted === 'es'
+    ? 'es'
+    : wanted === 'ca'
+      ? 'ca'
+      : order?.lang === 'es'
+        ? 'es'
+        : 'ca';
+const standing = !!order?.subscription;
+const t = {
+  es: {
+    title: 'Cancelar pedido',
+    ask: '¿Cancelar este pedido?',
+    askStanding: '¿Saltar esta semana?',
+    button: 'Sí, cancelar el pedido',
+    buttonStanding: 'Sí, saltar esta semana',
+    keep: 'No, mantenerlo',
+    done: 'Pedido cancelado.',
+    doneStanding: 'Listo: esta semana no recibirás pan.',
+    doneText:
+      'No se te cobra nada. Si cambias de idea, puedes hacer otra reserva mientras queden hogazas.',
+    doneStandingText:
+      'Tu pan fijo sigue activo: la semana que viene volveremos a preparar tu pedido.',
+    already: 'Este pedido ya estaba cancelado.',
+    late: 'Ya no se puede cancelar con un clic.',
+    lateText:
+      'La hornada se cerró el jueves a las 20:00 y tu pan ya está en marcha. Si de verdad no puedes recibirlo, escríbeme cuanto antes y buscamos una solución.',
+    missing: 'El enlace no es válido.',
+    missingText: 'Revisa que hayas abierto el enlace completo del email.',
+    error: 'No hemos podido tramitarlo.',
+    errorText: 'Inténtalo de nuevo en un momento o escríbeme.',
+    code: 'Código',
+    when: 'Entrega',
+    until: (s: string) => `Puedes cancelar hasta el ${s}.`,
+    manage: 'Gestionar mi pan fijo (pausar o darme de baja)',
+    whatsapp: 'Escríbeme por WhatsApp',
+    mail: 'Escríbeme un email',
+    back: 'Volver al pan',
+  },
+  ca: {
+    title: 'Cancel·lar comanda',
+    ask: 'Vols cancel·lar aquesta comanda?',
+    askStanding: 'Vols saltar aquesta setmana?',
+    button: 'Sí, cancel·lar la comanda',
+    buttonStanding: 'Sí, saltar aquesta setmana',
+    keep: 'No, mantenir-la',
+    done: 'Comanda cancel·lada.',
+    doneStanding: 'Fet: aquesta setmana no rebràs pa.',
+    doneText:
+      'No se’t cobra res. Si canvies d’idea, pots fer una altra reserva mentre quedin pans.',
+    doneStandingText:
+      'El teu pa fix continua actiu: la setmana vinent tornarem a preparar la teva comanda.',
+    already: 'Aquesta comanda ja estava cancel·lada.',
+    late: 'Ja no es pot cancel·lar amb un clic.',
+    lateText:
+      'La fornada es va tancar dijous a les 20:00 i el teu pa ja està en marxa. Si de debò no el pots rebre, escriu-me com més aviat millor i busquem una solució.',
+    missing: 'L’enllaç no és vàlid.',
+    missingText: 'Comprova que has obert l’enllaç complet del correu.',
+    error: 'No ho hem pogut tramitar.',
+    errorText: 'Torna-ho a provar d’aquí a un moment o escriu-me.',
+    code: 'Codi',
+    when: 'Entrega',
+    until: (s: string) => `Pots cancel·lar fins ${s}.`,
+    manage: 'Gestionar el meu pa fix (pausar-lo o donar-me de baixa)',
+    whatsapp: 'Escriu-me per WhatsApp',
+    mail: 'Escriu-me un correu',
+    back: 'Tornar al pa',
+  },
+}[lang];
+const deadline = link ? madridParts(lang, link.deadline) : null;
+const heading = {
+  ask: standing ? t.askStanding : t.ask,
+  done: standing ? t.doneStanding : t.done,
+  already: t.already,
+  late: t.late,
+  missing: t.missing,
+  error: t.error,
+}[view];
+const text = {
+  done: standing ? t.doneStandingText : t.doneText,
+  late: t.lateText,
+  missing: t.missingText,
+  error: t.errorText,
+  ask: '',
+  already: '',
+}[view];
+---
+
+<Base lang={lang} title={`${t.title} · ${brand.name}`} noindex>
+  <main id="contenido" class="legal manage">
+    <h1>{heading}</h1>
+    {text && <p>{text}</p>}
+    {order &&
+      (view === 'ask' ||
+        view === 'late' ||
+        view === 'done' ||
+        view === 'already') && (
+        <div class="manage-summary">
+          <p>
+            <strong>{t.code}</strong> {order.code}
+          </p>
+          <p>{orderSummary(order)}</p>
+          <p>
+            <strong>{t.when}</strong> {dayFormat(lang, order.pickupDate)} ·{' '}
+            {order.pickupWindow}
+          </p>
+        </div>
+      )}
+    {view === 'ask' && order && (
+      <>
+        {deadline && (
+          <p>{t.until(`${deadline.weekday} a les ${deadline.time}`)}</p>
+        )}
+        <form method="post" class="manage-actions">
+          <input type="hidden" name="token" value={token} />
+          <button class="button" type="submit">
+            {standing ? t.buttonStanding : t.button}
+          </button>
+          <a class="button button-ghost" href={routes.home[lang]}>
+            {t.keep}
+          </a>
+        </form>
+      </>
+    )}
+    {order?.subscription && view !== 'missing' && view !== 'error' && (
+      <p>
+        <a
+          href={manageUrl(order.subscription.token, lang).replace(
+            /^https?:\/\/[^/]+/,
+            '',
+          )}
+        >
+          {t.manage}
+        </a>
+      </p>
+    )}
+    {(view === 'late' || view === 'error') && (
+      <p class="manage-contact">
+        {brand.whatsapp && (
+          <a
+            class="button"
+            href={`https://wa.me/${brand.whatsapp}`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {t.whatsapp}
+          </a>
+        )}
+        {brand.contact && (
+          <a class="button button-ghost" href={`mailto:${brand.contact}`}>
+            {t.mail}
+          </a>
+        )}
+      </p>
+    )}
+    <p>
+      <a href={routes.home[lang]}>{t.back}</a>
+    </p>
+  </main>
+</Base>

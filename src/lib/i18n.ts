@@ -8,11 +8,18 @@ export const routes = {
   home: { ca: '/', es: '/es/' },
   pickup: { ca: '/recollida', es: '/es/recogida' },
   delivery: { ca: '/pa-a-domicili', es: '/es/pan-a-domicilio' },
+  standing: { ca: '/pa-fix', es: '/es/pan-fijo' },
   poolish: { ca: '/poolish', es: '/es/poolish' },
   privacy: { ca: '/privacitat', es: '/privacidad' },
 } as const;
 // Pages listed in the sitemap; the privacy page is noindex.
-export const indexedRoutes = ['home', 'delivery', 'pickup', 'poolish'] as const;
+export const indexedRoutes = [
+  'home',
+  'delivery',
+  'standing',
+  'pickup',
+  'poolish',
+] as const;
 export type RouteKey = keyof typeof routes;
 
 export const dayFormat = (lang: Lang, iso = bake.pickupDate) =>
@@ -66,6 +73,7 @@ export const ui = {
       process: 'El proceso',
       pickup: 'Recogida',
       delivery: 'A domicilio',
+      standing: 'Pan fijo',
       faq: 'Preguntas',
       order: 'Reservar',
     },
@@ -330,6 +338,7 @@ export const ui = {
         'En Sant Boi de Llobregat, Sant Just Desvern y Santa Coloma de Cervelló. Si vives en otro municipio del Baix Llobregat, lo recoges en Sant Boi: te confirmo el punto exacto con tu pedido.',
       windowPending: 'Recogida en Sant Boi · horario confirmado con el pedido',
       pickupInfo: 'Zonas y horario de reparto',
+      standingCta: '¿Lo quieres cada semana? Pan fijo',
       deliveryH: '¿Cómo lo quieres?',
       deliveryHome: `A domicilio · sábado ${hours.es}`,
       deliveryHomeHint:
@@ -455,6 +464,7 @@ export const ui = {
       process: 'El procés',
       pickup: 'Recollida',
       delivery: 'A domicili',
+      standing: 'Pa fix',
       faq: 'Preguntes',
       order: 'Reservar',
     },
@@ -718,6 +728,7 @@ export const ui = {
         'A Sant Boi de Llobregat, Sant Just Desvern i Santa Coloma de Cervelló. Si vius en un altre municipi del Baix Llobregat, el reculls a Sant Boi: et confirmo el punt exacte amb la comanda.',
       windowPending: 'Recollida a Sant Boi · horari confirmat amb la comanda',
       pickupInfo: 'Zones i horari de repartiment',
+      standingCta: 'El vols cada setmana? Pa fix',
       deliveryH: 'Com el vols?',
       deliveryHome: `A domicili · dissabte ${hours.ca}`,
       deliveryHomeHint:

@@ -14,6 +14,7 @@ export const events = [
   'click_instagram',
   'click_whatsapp',
   'click_channel',
+  'subscription_completed',
   'pickup_info_view',
 ] as const;
 const schema = z.object({

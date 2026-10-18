@@ -6,6 +6,7 @@ export const sources = [
   'whatsapp',
   'facebook',
   'qr',
+  'pafix',
   'direct',
   'referral',
 ] as const;

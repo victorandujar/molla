@@ -10,6 +10,7 @@ type EventName =
   | 'click_instagram'
   | 'click_whatsapp'
   | 'click_channel'
+  | 'subscription_completed'
   | 'pickup_info_view';
 function source(): Source {
   const q = new URLSearchParams(location.search)
@@ -346,21 +347,25 @@ function showError(target: HTMLFormElement, error: unknown) {
   el.focus();
 }
 // Home delivery asks for the town and street; pickup does not.
-const homeFields = form?.querySelector<HTMLElement>('[data-home-fields]');
-function syncDelivery() {
+function syncDelivery(target: HTMLFormElement | null) {
+  const homeFields = target?.querySelector<HTMLElement>('[data-home-fields]');
+  if (!target || !homeFields) return;
   const home =
-    form?.querySelector<HTMLInputElement>('input[name=delivery]:checked')
+    target.querySelector<HTMLInputElement>('input[name=delivery]:checked')
       ?.value === 'home';
-  if (!homeFields) return;
   homeFields.hidden = !home;
   homeFields
     .querySelectorAll<HTMLInputElement | HTMLSelectElement>('input, select')
     .forEach((el) => (el.disabled = !home));
 }
-form
-  ?.querySelectorAll('input[name=delivery]')
-  .forEach((el) => el.addEventListener('change', syncDelivery));
-syncDelivery();
+const subscriptionForm =
+  document.querySelector<HTMLFormElement>('#subscription-form');
+for (const target of [form, subscriptionForm]) {
+  target
+    ?.querySelectorAll('input[name=delivery]')
+    .forEach((el) => el.addEventListener('change', () => syncDelivery(target)));
+  syncDelivery(target);
+}
 form?.addEventListener('submit', async (event) => {
   event.preventDefault();
   const button = form.querySelector<HTMLButtonElement>('button[type=submit]')!;
@@ -612,3 +617,59 @@ if (form || document.querySelector('[data-left]')) void refreshBake();
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible') void refreshBake();
 });
+
+// ---- Pa fix: join a standing order --------------------------------------
+if (subscriptionForm) {
+  const sub = subscriptionForm;
+  const total = sub.querySelector<HTMLOutputElement>('#sub-total');
+  // Price of one delivery, in the same halves logic as the order form.
+  const perDelivery = () => {
+    const value = (name: string) =>
+      Number(
+        sub.querySelector<HTMLSelectElement>(`[name=${name}]`)?.value || 0,
+      );
+    const halves = value('banana');
+    const cents =
+      value('quantity') * Number(sub.dataset.loaf) +
+      Math.floor(halves / 2) * Number(sub.dataset.whole) +
+      (halves % 2) * Number(sub.dataset.half);
+    if (total) total.textContent = money(cents);
+  };
+  sub
+    .querySelectorAll('select[name=quantity], select[name=banana]')
+    .forEach((el) => el.addEventListener('change', perDelivery));
+  perDelivery();
+  sub.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const button = sub.querySelector<HTMLButtonElement>('button[type=submit]')!;
+    if (button.disabled) return;
+    button.disabled = true;
+    const label = button.textContent;
+    button.textContent = isCa ? 'Desant…' : 'Guardando…';
+    sub.querySelector<HTMLElement>('.form-error')!.hidden = true;
+    try {
+      const data = await submit(sub);
+      const result = document.querySelector<HTMLElement>(
+        '#subscription-result',
+      )!;
+      const first = result.querySelector<HTMLElement>('[data-first]')!;
+      first.textContent = data.firstDay
+        ? isCa
+          ? `La teva primera entrega: ${data.firstDay}${data.firstWindow ? `, ${data.firstWindow}` : ''}.`
+          : `Tu primera entrega: ${data.firstDay}${data.firstWindow ? `, ${data.firstWindow}` : ''}.`
+        : isCa
+          ? 'Aquesta setmana la fornada és plena: començaràs la setmana vinent.'
+          : 'Esta semana la hornada está completa: empezarás la semana que viene.';
+      result.querySelector<HTMLAnchorElement>('[data-manage]')!.href =
+        data.manage;
+      sub.hidden = true;
+      result.hidden = false;
+      result.focus();
+      track('subscription_completed', { total: data.total });
+    } catch (error) {
+      showError(sub, error);
+      button.disabled = false;
+      button.textContent = label;
+    }
+  });
+}

@@ -110,3 +110,34 @@ Tras añadir una variable hay que volver a desplegar. Cada clic en el canal cuen
 ## Tarjetas con QR
 
 `npm run qr` genera `exports/targetes-qr.pdf`: A4 con cuatro tarjetas A6 por campaña (por defecto `entrega`, `santjust` y `santboi`), con un QR a `/pa-a-domicili?utm_source=qr&utm_campaign=<campaña>`. Con `WHATSAPP_CHANNEL_URL` definida (o `--channel=<enlace>`) añade un segundo QR al canal. Otras campañas: `npm run qr -- --campaigns=cafe,mercat --out=exports/otra.pdf`. Escanea cada QR con el móvil antes de imprimir.
+
+## Pan fijo (suscripción semanal)
+
+Un cliente elige cantidad, frecuencia (cada semana o cada dos) y entrega en `/pa-fix` (`/es/pan-fijo`) y no vuelve a reservar. Se paga al recibir, sin tarjeta ni cobros automáticos.
+
+**Cómo funciona.**
+
+- Al unirse se coloca su primer pedido en la hornada abierta, si hay hueco, y recibe un email de bienvenida con su enlace privado.
+- Cada vez que se abre una hornada, `/api/cron/cycle` (y de respaldo `/api/cron/daily`) crea un pedido normal por cada pan fijo activo, **antes** de que nadie más pueda coger las hogazas, y envía su confirmación con código.
+- Si el cupo no alcanza, ese pan fijo no se coloca, el cliente recibe un aviso, no se le cobra nada y sigue activo la semana siguiente.
+- Un pan fijo quincenal descansa la semana siguiente a su último pedido no cancelado.
+- Cada hornada se procesa una sola vez por suscripción, así que repetir el trabajo no duplica pedidos.
+
+**Cancelar, lo más fácil posible.** Todos los enlaces son privados (token) y llevan a una página con un botón; el cambio solo ocurre al pulsarlo, así un antivirus de correo que abra el enlace no cancela nada.
+
+- Cada email de confirmación de un pedido suelto lleva «Cancelar el pedido» (`/comanda?token=…`), válido hasta el cierre del jueves a las 20:00.
+- El email de cada entrega del pan fijo lleva «Saltar esta semana» (mismo enlace) y «Gestionar mi pan fijo».
+- `/subscripcio?token=…` permite saltar la entrega, pausar, reanudar o darse de baja, cada cosa con un clic. Pausar o darse de baja cancelan también el pedido abierto de esa semana.
+- Después del cierre ya no se cancela con el enlace (el pan está en marcha); la página ofrece WhatsApp y email.
+- Tú recibes un email por cada alta, salto, pausa, baja o cancelación.
+
+**Para ti.**
+
+- `/gestio` muestra cuántos pan fijo hay activos y en pausa, las hogazas por semana que suponen y una etiqueta «Pan fijo» en sus pedidos. Revisa que la suma de hogazas fijas quepa en el cupo de la hornada.
+- `npm run orders:prod -- subs` lista los suscriptores.
+- `npm run orders:prod -- subpause|subresume|subcancel ana@example.com --yes` cambia un pan fijo si el cliente te lo pide por WhatsApp (pausar o cancelar también cancela su pedido abierto).
+- `purge` anonimiza además las suscripciones canceladas hace más de N meses.
+
+**Antes de publicar este cambio** hay una migración nueva (`006_standing_orders.sql`): ejecuta `npm run db:migrate:prod` **antes** de desplegar `main`, porque el código nuevo escribe columnas que no existen todavía. La migración es compatible con la versión anterior.
+
+**Pruebas con PostgreSQL.** `TEST_DATABASE_URL=postgres://… npm test` ejecuta además `tests/subscriptions.db.test.ts` contra una base con las migraciones aplicadas (vacía las tablas de pedidos: no la apuntes a producción).
