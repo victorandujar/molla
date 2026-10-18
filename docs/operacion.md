@@ -74,6 +74,8 @@ Se paga al recoger. El cliente ve una confirmación con su código de recogida y
 
 Los eventos `molla:analytics` se emiten sin datos personales. Incluyen los nueve eventos: landing_view, view_current_bake, view_product, start_reservation, reservation_completed, waitlist_signup, click_instagram, click_whatsapp, pickup_info_view. Además se cuentan en la propia base (`analytics_daily`): solo evento, canal y día, sin cookies, IP ni identificador. Se consultan en `/gestio` o con `orders -- funnel`. No distingue visitantes únicos: una misma persona que recarga cuenta dos veces. El origen sí se guarda junto con cada pedido o alta. La atribución es del enlace o la visita actual, sin cookies ni seguimiento entre sesiones.
 
+Vercel Web Analytics (sin cookies) mide visitas, visitantes, páginas, países, referentes y parámetros `utm_*`; se carga desde el JavaScript del propio dominio, porque la CSP bloquea scripts en línea. Hay que activarlo una vez en Vercel: proyecto → Analytics → Enable. Los mismos eventos del embudo (salvo landing_view) se envían como eventos personalizados con su canal, que Vercel solo muestra en planes de pago. Canales admitidos en `utm_source`: instagram, google, whatsapp, facebook, qr, direct y referral (`src/lib/sources.ts`).
+
 La tasa de repetición del resumen usa clientes con más de un pedido no cancelado. Para evaluar ventas reales, contrasta con COLLECTED. La ocupación se calcula dividiendo hogazas de la hornada por su capacidad. Los ingresos del resumen son el valor reservado, no cobros liquidados.
 
 ## Idiomas y SEO

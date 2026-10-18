@@ -58,6 +58,7 @@ En Bing Webmaster Tools, verifica el mismo dominio con `BING_SITE_VERIFICATION` 
 - `docs/fotografia.md`: selección de las 15 fotos originales.
 - `docs/operacion.md`: abrir hornadas, consultar pedidos, pagos, avisos y métricas.
 - `docs/lanzamiento-30-dias.md`: captación local y primeros textos de Instagram.
+- `docs/crecimiento-baix-llobregat.md`: propuesta de valor y plan para llegar a Sant Boi, Sant Just Desvern y el Baix Llobregat.
 - `docs/verificacion.md`: pruebas realizadas y límites de la entrega.
 
 ## Referencias consultadas

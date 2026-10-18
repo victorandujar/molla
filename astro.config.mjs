@@ -3,7 +3,8 @@ import vercel from '@astrojs/vercel';
 import tailwindcss from '@tailwindcss/vite';
 export default defineConfig({
   output: 'server',
-  adapter: vercel({ webAnalytics: { enabled: true } }),
+  // Web Analytics is injected by src/lib/client.ts (CSP blocks inline scripts).
+  adapter: vercel(),
   site: process.env.PUBLIC_SITE_URL || 'http://localhost:4321',
   vite: { plugins: [tailwindcss()] },
   devToolbar: { enabled: false },

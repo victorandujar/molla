@@ -1,3 +1,5 @@
+import { inject, track as vercelTrack } from '@vercel/analytics';
+import { sources, type Source } from './sources';
 type EventName =
   | 'landing_view'
   | 'view_current_bake'
@@ -8,25 +10,37 @@ type EventName =
   | 'click_instagram'
   | 'click_whatsapp'
   | 'pickup_info_view';
-const allowed = ['instagram', 'google', 'whatsapp', 'direct', 'referral'];
-function source() {
+function source(): Source {
   const q = new URLSearchParams(location.search)
     .get('utm_source')
     ?.toLowerCase();
-  if (q && allowed.includes(q)) return q;
+  if (q && (sources as readonly string[]).includes(q)) return q as Source;
   const ref = document.referrer;
   try {
     const host = new URL(ref).hostname;
     if (/(^|\.)google\./.test(host)) return 'google';
     if (host.endsWith('instagram.com')) return 'instagram';
+    if (/(^|\.)facebook\.com$/.test(host)) return 'facebook';
     if (host !== location.hostname) return 'referral';
   } catch {}
   return 'direct';
 }
 const acquisition = source();
-// Provider-neutral hooks plus first-party daily counters (event and channel
-// only). No personal data, cookies, or third-party scripts.
+// Provider-neutral hooks, first-party daily counters (event and channel only)
+// and Vercel Web Analytics custom events. No personal data or cookies.
 const counted = !location.pathname.startsWith('/gestio');
+// Loaded from this bundle, not inline, so the strict CSP allows it. Only the
+// utm_* parameters reach Vercel: /alta and /baja carry private tokens.
+if (counted)
+  inject({
+    framework: 'astro',
+    beforeSend: (event) => {
+      const url = new URL(event.url);
+      for (const key of [...url.searchParams.keys()])
+        if (!key.startsWith('utm_')) url.searchParams.delete(key);
+      return { ...event, url: url.href };
+    },
+  });
 function track(
   name: EventName,
   properties: Record<string, string | number> = {},
@@ -36,13 +50,16 @@ function track(
       detail: { event: name, source: acquisition, ...properties },
     }),
   );
-  if (counted)
-    fetch('/api/events', {
-      method: 'POST',
-      keepalive: true,
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ event: name, source: acquisition }),
-    }).catch(() => {});
+  if (!counted) return;
+  // Page views are automatic; Vercel shows the funnel steps as custom events.
+  if (name !== 'landing_view')
+    vercelTrack(name, { source: acquisition, ...properties });
+  fetch('/api/events', {
+    method: 'POST',
+    keepalive: true,
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ event: name, source: acquisition }),
+  }).catch(() => {});
 }
 track('landing_view');
 document

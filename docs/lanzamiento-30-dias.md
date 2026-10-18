@@ -13,6 +13,8 @@ Publicar el retrato de la cocina y la foto del pan cortado. Compartir el enlace 
 - Instagram: `/?utm_source=instagram`
 - WhatsApp: `/?utm_source=whatsapp`
 - Recomendación o colaboración: `/?utm_source=referral`
+- Grupos de Facebook: `/?utm_source=facebook`
+- Carteles y flyers (código QR): `/?utm_source=qr&utm_campaign=<lugar>`
 
 ## Un ritmo que puedes sostener
 
@@ -40,6 +42,6 @@ Domingo: contar qué cambias la próxima semana y revisar números.
 
 Repetir el ritmo. Hablar personalmente con un café o comercio cercano que tenga sentido como colaborador; empezar con una degustación, sin prometer un punto de recogida adicional todavía. Priorizar mejorar el pan, la puntualidad y las ganas de repetir.
 
-Cada domingo registrar: pedidos confirmados, recogidos y cancelados; hogazas; ocupación del cupo; importe medio; clientes distintos; compradores que vuelven; lista de espera; canal de origen. Los hooks de visitas están preparados pero no envían datos a un proveedor: no calcular una tasa de conversión web sin medir el denominador. Ver `operacion.md`.
+Cada domingo registrar: pedidos confirmados, recogidos y cancelados; hogazas; ocupación del cupo; importe medio; clientes distintos; compradores que vuelven; lista de espera; canal de origen. Las visitas se miden con Vercel Web Analytics (ver `operacion.md`); el embudo propio cuenta también las recargas, así que la tasa de conversión se calcula con los visitantes de Vercel. Ver `operacion.md`.
 
 No comprar seguidores ni convertir el perfil en una cuadrícula de carteles. Predominan pan, proceso y persona. No crear páginas casi idénticas de otros municipios. La relevancia local debe venir de información real del Baix Llobregat, compartida por personas de cerca.
