@@ -290,3 +290,36 @@ test('order summaries list every line; older orders keep their single line', () 
     '2 × La de cada semana · 1 × Medio banana bread',
   );
 });
+test('home delivery needs a town in the zone and an address; pickup needs neither', () => {
+  const home = { ...input, delivery: 'home', town: 'sant-just' };
+  assert.equal(
+    reservationSchema.safeParse({ ...home, address: 'Carrer Major 1, 2n' })
+      .success,
+    true,
+  );
+  const noAddress = reservationSchema.safeParse(home);
+  assert.equal(noAddress.success, false);
+  assert.equal(noAddress.error?.issues[0]?.message, 'address');
+  const outside = reservationSchema.safeParse({
+    ...home,
+    town: 'cornella',
+    address: 'Carrer Major 1',
+  });
+  assert.equal(outside.error?.issues[0]?.message, 'town');
+  assert.equal(isMessageKey('town') && isMessageKey('address'), true);
+  assert.equal(reservationSchema.parse(input).delivery, 'pickup');
+});
+test('delivery emails show the address and payment on delivery', () => {
+  const delivered: Order = {
+    ...order,
+    pickupAddress: ui.es.reserve.deliveryLabel('Sant Just Desvern'),
+    pickupWindow: '12:00–14:00',
+    delivery: { town: 'Sant Just Desvern', address: 'Carrer <b>Major</b> 1' },
+  };
+  const html = confirmationHtml(delivered);
+  assert.match(html, /Entrega a domicilio en Sant Just Desvern/);
+  assert.match(html, /Carrer &lt;b&gt;Major&lt;\/b&gt; 1/);
+  assert.match(html, /pago al recibirlo/);
+  assert.doesNotMatch(html, /punto exacto de recogida/);
+  assert.match(reminderHtml(delivered), /Te lo llevo a casa/);
+});

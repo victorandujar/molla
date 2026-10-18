@@ -8,6 +8,8 @@ const cacheable = new Set([
   '/es/',
   '/recollida',
   '/es/recogida',
+  '/pa-a-domicili',
+  '/es/pan-a-domicilio',
   '/poolish',
   '/es/poolish',
   '/privacidad',

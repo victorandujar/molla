@@ -13,7 +13,7 @@ Las Preview tienen `LIVE_ORDERS=true` contra `molla_dev` y sin `RESEND_API_KEY`:
 
 ## Gestión desde el móvil: /gestio
 
-`https://www.mollapa.com/gestio`, con la contraseña `ADMIN_PASSWORD` (en `.env.production`; en Vercel, Production). Muestra la hornada activa (o cualquiera de las 12 últimas): reservadas, por recoger, importe por cobrar y cada pedido con código, teléfono, WhatsApp y email. Botones:
+`https://www.mollapa.com/gestio`, con la contraseña `ADMIN_PASSWORD` (en `.env.production`; en Vercel, Production). Muestra la hornada activa (o cualquiera de las 12 últimas): reservadas, por recoger, importe por cobrar y cada pedido con código, teléfono, WhatsApp, email y, si es a domicilio, municipio y dirección (enlazada a Google Maps para preparar la ruta). Botones:
 
 - **Marcar recogido** (con **Deshacer** por si te equivocas).
 - **Cancelar…**: pide confirmación, libera las hogazas y no se puede deshacer.
@@ -48,7 +48,7 @@ Los comandos siguientes aparecen sin sufijo; para producción usa `orders:prod`.
 - `npm run orders -- collected 001-K7QM --yes`: marca una reserva confirmada como recogida. Acepta el código de recogida (número de hornada + 4 caracteres sin 0/O, 1/I/L) o la referencia UUID interna.
 - `npm run orders -- cancel 001-K7QM --yes`: cancela una reserva confirmada. No se puede reactivar una cancelada mediante este comando; se crea una nueva reserva para validar cupo.
 - `npm run orders -- waitlist .data/avisos.json`: exporta solo los avisos **confirmados** (doble opt-in), con su idioma. Incluir un enlace a `https://DOMINIO/baja?token=TOKEN&lang=IDIOMA` por destinatario. Los avisos semanales no se envían automáticamente en este MVP.
-- `npm run orders -- purge --months=12 --yes`: anonimiza nombre, email y teléfono de los pedidos cuya recogida tiene más de N meses. Conserva importes, cantidades, fechas y canal para las métricas. Ajusta N al plazo de conservación publicado.
+- `npm run orders -- purge --months=12 --yes`: anonimiza nombre, email, teléfono y dirección de entrega de los pedidos cuya recogida tiene más de N meses. Conserva importes, cantidades, fechas, canal y municipio de entrega para las métricas. Ajusta N al plazo de conservación publicado.
 
 Las exportaciones se crean con permisos privados. No subirlas a Git. En local sin DATABASE_URL, los comandos de lectura usan `.data/demo.json`. No trasladar datos ficticios a producción. La lista y el resumen son herramientas de operación; no hay un panel público con pedidos.
 
@@ -68,7 +68,9 @@ Al apuntarse, el email queda pendiente y recibe un correo con el botón «Confir
 
 ## Confirmaciones, pagos y no presentados
 
-Se paga al recoger. El cliente ve una confirmación con su código de recogida y puede imprimirla o guardarla. Los emails al cliente (confirmación, recordatorio y aviso) van en el idioma de la página donde reservó. Se envían después de responder, así que un Resend lento no retrasa la confirmación en pantalla. Con RESEND_API_KEY y EMAIL_FROM se envía además un email HTML con la identidad de Molla (código, detalle, mapa estático enlazado a Google Maps y botón «Cómo llegar») con alternativa en texto, y un aviso «Nueva reserva» a CONTACT_EMAIL con teléfono y email clicables. Vista previa en `docs/screenshots/email-confirmacion.png`. Las imágenes se sirven desde `public/email/` del dominio, así que deben estar desplegadas; el dominio mollapa.com está verificado en Resend. Los rechazos del proveedor quedan en los logs de Vercel sin datos personales («Email rejected», «Owner notification failed»). En demo nunca se envían emails. El registro conserva SENT, FAILED, PENDING o DISABLED para que un fallo de correo no pierda un pedido confirmado. Si falla, la tarea diaria lo reintenta; si sigue en FAILED, contacta al cliente desde `/gestio`. El proveedor usa una clave idempotente. Las condiciones publicadas piden avisar antes del cierre y advierten que quien no recoja ni avise podrá tener que pagar por adelantado. La interfaz en `payments.ts` es el punto de integración de un pago online futuro, todavía sin activar.
+Entrega a domicilio: los sábados de 12:00 a 14:00 en Sant Boi de Llobregat, Sant Just Desvern y Santa Coloma de Cervelló, sin coste de envío. Al reservar, el cliente elige «A domicilio» (municipio y dirección) o «Lo recojo en Sant Boi». Los municipios y la franja se cambian solo en `src/lib/delivery.ts`; los textos de la web, los emails y los datos estructurados los toman de ahí. La dirección se guarda en el pedido, aparece en `/gestio`, en el aviso «Nueva reserva» y en `orders -- export`.
+
+Se paga al recibir o recoger. El cliente ve una confirmación con su código de recogida y puede imprimirla o guardarla. Los emails al cliente (confirmación, recordatorio y aviso) van en el idioma de la página donde reservó. Se envían después de responder, así que un Resend lento no retrasa la confirmación en pantalla. Con RESEND_API_KEY y EMAIL_FROM se envía además un email HTML con la identidad de Molla (código, detalle, mapa estático enlazado a Google Maps y botón «Cómo llegar») con alternativa en texto, y un aviso «Nueva reserva» a CONTACT_EMAIL con teléfono y email clicables. Vista previa en `docs/screenshots/email-confirmacion.png`. Las imágenes se sirven desde `public/email/` del dominio, así que deben estar desplegadas; el dominio mollapa.com está verificado en Resend. Los rechazos del proveedor quedan en los logs de Vercel sin datos personales («Email rejected», «Owner notification failed»). En demo nunca se envían emails. El registro conserva SENT, FAILED, PENDING o DISABLED para que un fallo de correo no pierda un pedido confirmado. Si falla, la tarea diaria lo reintenta; si sigue en FAILED, contacta al cliente desde `/gestio`. El proveedor usa una clave idempotente. Las condiciones publicadas piden avisar antes del cierre y advierten que quien no recoja ni avise podrá tener que pagar por adelantado. La interfaz en `payments.ts` es el punto de integración de un pago online futuro, todavía sin activar.
 
 ## Medición
 
@@ -80,7 +82,7 @@ La tasa de repetición del resumen usa clientes con más de un pedido no cancela
 
 ## Idiomas y SEO
 
-El catalán es el idioma principal: `/`, `/recollida` y `/poolish`. El castellano vive en `/es/`, `/es/recogida` y `/es/poolish`. Cada página tiene canonical propio y hreflang recíproco `ca`, `es` y `x-default` (catalán), también en el sitemap. Las URLs antiguas `/ca/…` y `/recogida` redirigen con 308 (definidas en `astro.config.mjs`). Privacidad tiene versión catalana (`/privacitat`) y castellana (`/privacidad`); sus textos legales salen de `PRIVACY_*` y `PRIVACY_*_CA`. Alta y baja de avisos, emails al cliente y mensajes de error del servidor siguen el idioma de la página (`?lang=ca`). El aviso al obrador y `/gestio` están en castellano.
+El catalán es el idioma principal: `/`, `/pa-a-domicili`, `/recollida` y `/poolish`. El castellano vive en `/es/`, `/es/pan-a-domicilio`, `/es/recogida` y `/es/poolish`. Cada página tiene canonical propio y hreflang recíproco `ca`, `es` y `x-default` (catalán), también en el sitemap. Las URLs antiguas `/ca/…` y `/recogida` redirigen con 308 (definidas en `astro.config.mjs`). Privacidad tiene versión catalana (`/privacitat`) y castellana (`/privacidad`); sus textos legales salen de `PRIVACY_*` y `PRIVACY_*_CA`. Alta y baja de avisos, emails al cliente y mensajes de error del servidor siguen el idioma de la página (`?lang=ca`). El aviso al obrador y `/gestio` están en castellano.
 
 ## Caché y seguridad
 

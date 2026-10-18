@@ -66,6 +66,17 @@ test('reservation, validation and waitlist journey', async ({ page }) => {
   await page.getByLabel('Tu nombre', { exact: true }).fill('Ana Prueba');
   await page.locator('#email').fill('ana@example.com');
   await page.locator('#phone').fill('612345678');
+  // Home delivery is the default and asks for the town and the street.
+  await expect(page.locator('#address')).toBeVisible();
+  await page.locator('input[name=delivery][value=pickup]').check({
+    force: true,
+  });
+  await expect(page.locator('#address')).toBeHidden();
+  await page.locator('input[name=delivery][value=home]').check({
+    force: true,
+  });
+  await page.locator('#town').selectOption('sant-just');
+  await page.locator('#address').fill('Carrer Major 1, 2n 1a');
   await page.locator('input[name=pickup]').check();
   await page.locator('input[name=privacy]').check();
   // An empty order explains itself instead of reaching the server.
@@ -89,6 +100,9 @@ test('reservation, validation and waitlist journey', async ({ page }) => {
   await expect(page.locator('#confirmation')).toContainText(
     '2 × La de cada semana · 1 × Medio banana bread',
   );
+  await expect(page.locator('#confirmation')).toContainText(
+    'Entrega a domicilio en Sant Just Desvern · Carrer Major 1, 2n 1a',
+  );
   await page.locator('#waitlist-email').fill('ana@example.com');
   await page.locator('input[name=consent]').check();
   await page.locator('#waitlist-form button[type=submit]').click();
@@ -101,6 +115,10 @@ test('reservation, validation and waitlist journey', async ({ page }) => {
   expect(d.orders[0].total).toBe(1800);
   expect(d.orders[0].quantity).toBe(2);
   expect(d.orders[0].lang).toBe('es');
+  expect(d.orders[0].delivery).toEqual({
+    town: 'Sant Just Desvern',
+    address: 'Carrer Major 1, 2n 1a',
+  });
   expect(d.waitlist).toHaveLength(1);
   expect(d.waitlist[0].confirmedAt).toBeNull();
   // Double opt-in: opening the link does nothing until the button is pressed.
@@ -436,6 +454,8 @@ test('Catalan is the main language, Spanish lives under /es/', async ({
     'Pa artesà per encàrrec',
   );
   for (const path of [
+    '/pa-a-domicili',
+    '/es/pan-a-domicilio',
     '/recollida',
     '/poolish',
     '/es/',

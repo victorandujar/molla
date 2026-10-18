@@ -1681,6 +1681,7 @@ figure picture {
   font-weight: 600;
 }
 .field input,
+.field select,
 .waitlist-input input {
   width: 100%;
   height: 54px;
@@ -1693,10 +1694,12 @@ figure picture {
   transition: box-shadow 0.2s ease;
 }
 .field input:hover,
+.field select:hover,
 .waitlist-input input:hover {
   box-shadow: inset 0 0 0 1.5px var(--ink-2);
 }
 .field input:focus-visible,
+.field select:focus-visible,
 .waitlist-input input:focus-visible {
   outline: none;
   box-shadow:
@@ -1710,6 +1713,22 @@ input::placeholder {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 0 14px;
+}
+.address-columns {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr);
+}
+.address-columns[hidden] {
+  display: none;
+}
+.delivery-choice label {
+  flex: 1 1 200px;
+}
+.delivery-choice label > span {
+  min-width: 0;
+  height: 100%;
+}
+.delivery-choice strong {
+  font-size: 17px;
 }
 .check {
   display: grid;
@@ -2266,6 +2285,13 @@ details[open] p {
 }
 .prose h2:first-child {
   margin-top: 0;
+}
+.prose h3 {
+  margin-top: 32px;
+  font-size: clamp(20px, 1.8vw, 24px);
+}
+.prose h2 + h3 {
+  margin-top: 20px;
 }
 .prose p,
 .prose ul,

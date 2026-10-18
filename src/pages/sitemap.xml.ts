@@ -1,7 +1,7 @@
 import { brand, searchIndexable } from '../lib/config';
 import { routes, indexedRoutes } from '../lib/i18n';
 const esc = (s: string) => s.replace(/[<>&"']/g, '');
-const lastmod = '2026-10-02';
+const lastmod = '2026-10-18';
 export function GET() {
   const site = esc(brand.site).replace(/\/$/, '');
   const urls = searchIndexable
