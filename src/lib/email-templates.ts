@@ -1,5 +1,13 @@
 import { brand, money } from './config';
-import { orderSummary, type Lang, type Order } from './domain';
+import {
+  bananaSplit,
+  orderSummary,
+  type Lang,
+  type Order,
+  type Subscription,
+} from './domain';
+import { townById } from './delivery';
+import { ui } from './i18n';
 // Email clients ignore stylesheets and web fonts unevenly: inline styles,
 // table layout, hosted PNGs and system-font fallbacks for everything.
 const c = {
@@ -74,6 +82,38 @@ const copy = {
       '¿Cambios o no puedes venir? Responde a este email con tu código antes del cierre de pedidos y la hogaza pasará a otra persona.',
     changesText: (contact: string) =>
       `¿Cambios o no puedes venir? Responde a este email${contact ? ` o escribe a ${contact}` : ''} con tu código antes del cierre de pedidos.`,
+    channel:
+      'Si quieres enterarte de la próxima hornada, sigue el canal de WhatsApp.',
+    channelButton: 'Seguir el canal →',
+    cancelNote:
+      '¿No vas a poder recibirlo? Cancela el pedido con un clic hasta el cierre de pedidos (el jueves a las 20:00), sin dar explicaciones.',
+    cancelLink: 'Cancelar el pedido →',
+    standingKicker: 'Pan fijo',
+    standingHeading: (name: string) => `${name}, esta semana te toca pan.`,
+    standingIntro:
+      'Es tu pan fijo de este sábado. Si esta semana no lo quieres, sáltalo con un clic hasta el jueves a las 20:00: no pasa nada y seguirás con tu pan fijo.',
+    skipLink: 'Saltar esta semana →',
+    manageLink: 'Gestionar mi pan fijo: pausar o darme de baja',
+    standingSubject: (o: Order) =>
+      `Tu pan fijo del ${onDay(o)} · código ${o.code}`,
+    welcomeSubject: 'Ya tienes tu pan fijo',
+    welcomeKicker: 'Pan fijo',
+    welcomeHeading: (name: string) => `Bienvenido, ${name}.`,
+    welcomeIntro: (first: string) =>
+      first
+        ? `Tu primera entrega es el ${first}. Desde ahí, cada semana preparo tu pan sin que tengas que reservar nada.`
+        : 'Esta semana la hornada ya está completa: empezarás con la próxima. Desde ahí, cada semana preparo tu pan sin que tengas que reservar nada.',
+    welcomeButton: 'Gestionar mi pan fijo →',
+    welcomeHow:
+      'Cuando quieras, desde ese enlace puedes saltar una semana, pausarlo o darte de baja con un solo clic. Cada semana te aviso por email, y tienes hasta el jueves a las 20:00 para saltar la entrega. Pagas al recibirlo; nunca se cobra nada por adelantado.',
+    plan: 'Tu pan fijo',
+    frequency: 'Frecuencia',
+    weekly: 'Cada sábado',
+    biweekly: 'Un sábado sí y otro no',
+    fullSubject: 'Esta semana no hemos podido reservar tu pan fijo',
+    fullHeading: 'Esta semana, sin pan fijo.',
+    fullIntro:
+      'La hornada de esta semana se ha completado y no ha quedado sitio para tu pedido. No se te cobra nada y tu pan fijo sigue activo: la semana que viene lo volveremos a preparar.',
     thanks: 'Gracias por reservar,',
     reminderSubject: (o: Order) =>
       `Recordatorio · Recoge tu pan el ${onDay(o)} (${o.code})`,
@@ -118,6 +158,38 @@ const copy = {
       'Canvis o no pots venir? Respon aquest correu amb el teu codi abans del tancament de comandes i el pa passarà a una altra persona.',
     changesText: (contact: string) =>
       `Canvis o no pots venir? Respon aquest correu${contact ? ` o escriu a ${contact}` : ''} amb el teu codi abans del tancament de comandes.`,
+    channel:
+      'Si vols assabentar-te de la propera fornada, segueix el canal de WhatsApp.',
+    channelButton: 'Segueix el canal →',
+    cancelNote:
+      'No el podràs rebre? Cancel·la la comanda amb un clic fins al tancament de comandes (dijous a les 20:00), sense donar explicacions.',
+    cancelLink: 'Cancel·lar la comanda →',
+    standingKicker: 'Pa fix',
+    standingHeading: (name: string) => `${name}, aquesta setmana et toca pa.`,
+    standingIntro:
+      'És el teu pa fix d’aquest dissabte. Si aquesta setmana no el vols, salta’l amb un clic fins dijous a les 20:00: no passa res i continuaràs amb el teu pa fix.',
+    skipLink: 'Saltar aquesta setmana →',
+    manageLink: 'Gestionar el meu pa fix: pausar-lo o donar-me de baixa',
+    standingSubject: (o: Order) =>
+      `El teu pa fix de ${onDay(o)} · codi ${o.code}`,
+    welcomeSubject: 'Ja tens el teu pa fix',
+    welcomeKicker: 'Pa fix',
+    welcomeHeading: (name: string) => `Benvingut, ${name}.`,
+    welcomeIntro: (first: string) =>
+      first
+        ? `La teva primera entrega és ${first}. A partir d’aquí, cada setmana et preparo el pa sense que hagis de reservar res.`
+        : 'Aquesta setmana la fornada ja està completa: començaràs amb la propera. A partir d’aquí, cada setmana et preparo el pa sense que hagis de reservar res.',
+    welcomeButton: 'Gestionar el meu pa fix →',
+    welcomeHow:
+      'Quan vulguis, des d’aquest enllaç pots saltar una setmana, pausar-lo o donar-te de baixa amb un sol clic. Cada setmana t’aviso per correu, i tens fins dijous a les 20:00 per saltar l’entrega. Pagues en rebre’l; mai es cobra res per avançat.',
+    plan: 'El teu pa fix',
+    frequency: 'Freqüència',
+    weekly: 'Cada dissabte',
+    biweekly: 'Un dissabte sí i un altre no',
+    fullSubject: 'Aquesta setmana no hem pogut reservar el teu pa fix',
+    fullHeading: 'Aquesta setmana, sense pa fix.',
+    fullIntro:
+      'La fornada d’aquesta setmana s’ha completat i no ha quedat lloc per a la teva comanda. No se’t cobra res i el teu pa fix continua actiu: la setmana vinent el tornarem a preparar.',
     thanks: 'Gràcies per reservar,',
     reminderSubject: (o: Order) =>
       `Recordatori · Recull el teu pa ${onDay(o)} (${o.code})`,
@@ -196,15 +268,25 @@ function button(href: string, label: string) {
   return `<table role="presentation" cellpadding="0" cellspacing="0"><tr><td style="background:${c.tile};border-radius:999px;"><a href="${href}" style="display:inline-block;padding:14px 26px;font-family:${body};font-size:15px;font-weight:600;color:${c.crumb};text-decoration:none;border-radius:999px;">${label}</a></td></tr></table>`;
 }
 
+// Private one-click links. The page that opens asks for a confirming click,
+// so a mail scanner that follows the link cannot cancel anything.
+export const cancelUrl = (o: Order) =>
+  o.cancelToken
+    ? asset(`/comanda?token=${o.cancelToken}&lang=${langOf(o)}`)
+    : '';
+export const manageUrl = (token: string, lang: Lang) =>
+  asset(`/subscripcio?token=${token}&lang=${lang}`);
+
 export function confirmationSubject(o: Order) {
-  return copy[langOf(o)].subject(o);
+  const t = copy[langOf(o)];
+  return o.subscription ? t.standingSubject(o) : t.subject(o);
 }
 
 export function confirmationText(o: Order) {
   const t = copy[langOf(o)];
   return `${t.hello} ${firstName(o.name)},
 
-${t.heading}. ${t.confirmed}.
+${o.subscription ? t.standingHeading(firstName(o.name)) : `${t.heading}. ${t.confirmed}.`}
 
 ${t.code}: ${o.code}
 ${orderSummary(o)} — ${money(o.total)} (${o.delivery ? t.payOnDelivery : t.payLater})
@@ -213,8 +295,14 @@ ${t.when}: ${pickupDay(o.pickupDate, langOf(o))}, ${o.pickupWindow}
 ${t.where}: ${where(o)}
 ${o.delivery ? t.deliveryNote : t.pickupNote}
 
-${t.changesText(brand.contact)}
-
+${
+  o.subscription
+    ? `${t.standingIntro}\n${t.skipLink} ${cancelUrl(o)}\n${t.manageLink}: ${manageUrl(o.subscription.token, langOf(o))}`
+    : o.cancelToken
+      ? `${t.cancelNote}\n${cancelUrl(o)}`
+      : t.changesText(brand.contact)
+}
+${brand.whatsappChannel ? `\n${t.channel} ${brand.whatsappChannel}\n` : ''}
 ${t.thanks}
 ${brand.name}`;
 }
@@ -271,14 +359,39 @@ function closing(button: string, note: string) {
 export function confirmationHtml(o: Order) {
   const lang = langOf(o);
   const t = copy[lang];
+  const pay = o.delivery ? t.payOnDelivery : t.payLater;
+  const link = (href: string, label: string) =>
+    `<a href="${esc(href)}" style="color:${c.tile};font-weight:600;">${esc(label)}</a>`;
+  const channel = brand.whatsappChannel
+    ? button(esc(brand.whatsappChannel), t.channelButton)
+    : '';
+  const ending = o.subscription
+    ? closing(
+        button(esc(cancelUrl(o)), t.skipLink),
+        `${link(manageUrl(o.subscription.token, lang), t.manageLink)}${
+          brand.whatsappChannel ? `<br><br>${esc(t.channel)}` : ''
+        }`,
+      )
+    : closing(
+        channel,
+        `${o.cancelToken ? `${esc(t.cancelNote)}<br>${link(cancelUrl(o), t.cancelLink)}` : t.changes}${
+          brand.whatsappChannel ? `<br><br>${esc(t.channel)}` : ''
+        }`,
+      );
   const content =
-    intro(
-      t.confirmed,
-      `${t.heading}, ${esc(firstName(o.name))}.`,
-      esc(t.intro(o)),
-    ) +
-    pickupBlock(o, o.delivery ? t.payOnDelivery : t.payLater) +
-    closing('', t.changes);
+    (o.subscription
+      ? intro(
+          t.standingKicker,
+          esc(t.standingHeading(firstName(o.name))),
+          t.standingIntro,
+        )
+      : intro(
+          t.confirmed,
+          `${t.heading}, ${esc(firstName(o.name))}.`,
+          esc(t.intro(o)),
+        )) +
+    pickupBlock(o, pay) +
+    ending;
   return layout(
     lang,
     `${t.code} ${o.code} · ${pickupDay(o.pickupDate, lang)}, ${o.pickupWindow} · ${o.pickupAddress}`,
@@ -392,4 +505,84 @@ export function ownerHtml(o: Order) {
   </table>
 </td></tr>`;
   return layout('es', `${o.name} · ${orderSummary(o)} · ${o.code}`, content);
+}
+
+// ---- Pa fix ---------------------------------------------------------------
+
+const planRows = (sub: Subscription): [string, string][] => {
+  const lang = sub.lang;
+  const t = copy[lang];
+  const names = ui[lang].catalog;
+  const { whole, half } = bananaSplit(sub.banana);
+  const items = [
+    sub.quantity ? `${sub.quantity} × ${names.loaf}` : '',
+    whole ? `${whole} × ${names.bananaWhole}` : '',
+    half ? `${half} × ${names.bananaHalf}` : '',
+  ].filter(Boolean);
+  const where =
+    sub.delivery === 'home'
+      ? `${ui[lang].reserve.deliveryLabel(townById(sub.town)?.name ?? sub.town)}<br>${sub.address}`
+      : brand.pickupLabel[lang];
+  return [
+    [t.plan, items.map(esc).join('<br>')],
+    [t.frequency, sub.frequency === 'weekly' ? t.weekly : t.biweekly],
+    [
+      t.where,
+      where.includes('<br>')
+        ? where.split('<br>').map(esc).join('<br>')
+        : esc(where),
+    ],
+  ];
+};
+
+// Sent when someone joins; `firstDay` is the first delivery if it was placed.
+export function subscriptionWelcome(sub: Subscription, firstDay: string) {
+  const t = copy[sub.lang];
+  const url = manageUrl(sub.token, sub.lang);
+  const content =
+    intro(
+      t.welcomeKicker,
+      esc(t.welcomeHeading(firstName(sub.name))),
+      esc(t.welcomeIntro(firstDay)),
+    ) +
+    `<tr><td class="pad" style="padding:20px 40px 8px;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0">${details(planRows(sub))}</table></td></tr>` +
+    closing(button(esc(url), t.welcomeButton), esc(t.welcomeHow));
+  const lines = planRows(sub)
+    .map(([k, v]) => `${k}: ${v.replaceAll('<br>', ' · ')}`)
+    .join('\n');
+  return {
+    subject: t.welcomeSubject,
+    html: layout(sub.lang, t.welcomeSubject, content),
+    text: `${t.hello} ${firstName(sub.name)},\n\n${t.welcomeIntro(firstDay)}\n\n${lines}\n\n${t.welcomeHow}\n${url}\n\n${brand.name}`,
+  };
+}
+
+// The weekly job could not place the order: no room left in this bake.
+export function subscriptionFull(sub: Subscription) {
+  const t = copy[sub.lang];
+  const url = manageUrl(sub.token, sub.lang);
+  const content =
+    intro(t.welcomeKicker, esc(t.fullHeading), esc(t.fullIntro)) +
+    closing(button(esc(url), t.welcomeButton), esc(t.welcomeHow));
+  return {
+    subject: t.fullSubject,
+    html: layout(sub.lang, t.fullSubject, content),
+    text: `${t.hello} ${firstName(sub.name)},\n\n${t.fullIntro}\n\n${url}\n\n${brand.name}`,
+  };
+}
+
+// A short plain notice for the baker, in Spanish like the other owner emails.
+export function ownerNotice(subject: string, rows: [string, string][]) {
+  const content = `
+<tr><td class="pad" style="padding:40px 40px 8px;">
+  <h1 class="h1" style="margin:0;font-family:${display};font-size:32px;line-height:1.1;font-weight:800;color:${c.ink};">${esc(subject)}</h1>
+</td></tr>
+<tr><td class="pad" style="padding:20px 40px 40px;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0">${details(rows.map(([k, v]) => [esc(k), esc(v)]))}</table>
+</td></tr>`;
+  return {
+    subject,
+    html: layout('es', subject, content),
+    text: `${subject}\n\n${rows.map(([k, v]) => `${k}: ${v}`).join('\n')}`,
+  };
 }

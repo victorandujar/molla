@@ -456,6 +456,8 @@ test('Catalan is the main language, Spanish lives under /es/', async ({
   for (const path of [
     '/pa-a-domicili',
     '/es/pan-a-domicilio',
+    '/pa-fix',
+    '/es/pan-fijo',
     '/recollida',
     '/poolish',
     '/es/',
@@ -535,4 +537,260 @@ test('banana bread is ordered by halves, alone or with bread, within its quota',
   await expect(page.locator('[data-count="loaf"]')).toHaveText(
     '1 en tu pedido',
   );
+});
+
+test('pa fix: sign up, skip, pause, resume and cancel with one click each', async ({
+  page,
+}) => {
+  await page.goto('/es/pan-fijo');
+  await expect(page.locator('#sub-total')).toContainText('5,00');
+  await page.locator('#sub-quantity').selectOption('2');
+  await page.locator('#sub-banana').selectOption('1');
+  await expect(page.locator('#sub-total')).toContainText('18,00');
+  // Home delivery asks for the town and street; pickup hides them.
+  await expect(page.locator('#sub-address')).toBeVisible();
+  await page
+    .locator('#subscription-form input[value=pickup]')
+    .check({ force: true });
+  await expect(page.locator('#sub-address')).toBeHidden();
+  await page
+    .locator('#subscription-form input[value=home]')
+    .check({ force: true });
+  await page.locator('#sub-town').selectOption('sant-just');
+  await page.locator('#sub-address').fill('Carrer Major 1, 2n 1a');
+  await page.locator('#sub-name').fill('Ana Prueba');
+  await page.locator('#sub-email').fill('ana@example.com');
+  await page.locator('#sub-phone').fill('612345678');
+  await page.locator('input[name=terms]').check();
+  await page.locator('input[name=privacy]').check();
+  await page.locator('#subscription-form button[type=submit]').click();
+  await expect(page.locator('#subscription-result')).toBeVisible();
+  await expect(page.locator('#subscription-result [data-first]')).toContainText(
+    'Tu primera entrega',
+  );
+  let data = await readData();
+  expect(data.subscriptions).toHaveLength(1);
+  expect(data.subscriptions[0]).toMatchObject({
+    quantity: 2,
+    banana: 1,
+    frequency: 'weekly',
+    town: 'sant-just',
+    status: 'ACTIVE',
+  });
+  // The first order is placed right away, flagged as a pa fix with its links.
+  expect(data.orders).toHaveLength(1);
+  expect(data.orders[0].subscription.token).toBe(data.subscriptions[0].token);
+  expect(data.orders[0].cancelToken).toBeTruthy();
+  expect(data.orders[0].source).toBe('pafix');
+
+  await page.locator('#subscription-result [data-manage]').click();
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText(
+    'Tu pan fijo',
+  );
+  await expect(page.locator('main')).toContainText('2 × La de cada semana');
+  await expect(page.locator('main')).toContainText('Carrer Major 1, 2n 1a');
+  // Opening the link never changes anything: only the buttons do.
+  data = await readData();
+  expect(data.orders[0].status).toBe('CONFIRMED');
+
+  await page.getByRole('button', { name: 'Saltar esta semana' }).click();
+  await expect(page.locator('.manage-notice')).toContainText(
+    'esta semana no recibirás pan',
+  );
+  expect((await readData()).orders[0].status).toBe('CANCELLED');
+  // With nothing open, the next skip applies to the next bake.
+  await page.getByRole('button', { name: 'Saltar la próxima entrega' }).click();
+  await expect(page.locator('.manage-notice')).toContainText(
+    'saltaremos la próxima entrega',
+  );
+  expect((await readData()).subscriptions[0].skipRemaining).toBe(1);
+  await page
+    .getByRole('button', { name: 'No, mantener la próxima entrega' })
+    .click();
+  expect((await readData()).subscriptions[0].skipRemaining).toBe(0);
+
+  await page.getByRole('button', { name: 'Pausar mi pan fijo' }).click();
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText(
+    'Tu pan fijo está en pausa',
+  );
+  await page.getByRole('button', { name: 'Reanudar mi pan fijo' }).click();
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText(
+    'Tu pan fijo',
+  );
+  await page.getByRole('button', { name: 'Darme de baja' }).click();
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText(
+    'Pan fijo cancelado',
+  );
+  expect((await readData()).subscriptions[0].status).toBe('CANCELLED');
+  await expect(
+    page.getByRole('link', { name: 'Volver a apuntarme' }),
+  ).toBeVisible();
+  const result = await new AxeBuilder({ page }).analyze();
+  expect(result.violations).toEqual([]);
+});
+
+test('pa fix sign-up validation, language and bad links', async ({
+  page,
+  request,
+}) => {
+  const base = {
+    name: 'Ana',
+    email: 'ana@example.com',
+    phone: '612345678',
+    quantity: 1,
+    delivery: 'pickup',
+    terms: 'yes',
+    privacy: 'yes',
+  };
+  const post = (data: object, lang = 'es', headers = origin) =>
+    request.post(`/api/subscriptions?lang=${lang}`, { headers, data });
+  expect((await post({ ...base, terms: '' })).status()).toBe(400);
+  const noTown = await post(
+    { ...base, delivery: 'home', address: 'Carrer Major 1' },
+    'ca',
+  );
+  expect(noTown.status()).toBe(400);
+  expect((await noTown.json()).error).toBe(
+    'Tria el teu municipi per a l’entrega a domicili.',
+  );
+  expect((await post({ ...base, quantity: 0 })).status()).toBe(400);
+  expect((await post({ ...base, frequency: 'daily' })).status()).toBe(400);
+  expect((await post({ ...base, website: 'spam' })).status()).toBe(400);
+  expect((await post(base, 'es', {} as typeof origin)).status()).toBe(403);
+  expect((await readData()).subscriptions ?? []).toHaveLength(0);
+  const ok = await post(base);
+  expect(ok.status()).toBe(201);
+  // A repeated request does not create a second subscription.
+  expect((await post(base)).status()).toBe(201);
+  expect((await readData()).subscriptions).toHaveLength(1);
+
+  await page.goto(
+    '/subscripcio?token=00000000-0000-4000-8000-000000000000&lang=ca',
+  );
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText(
+    'L’enllaç no és vàlid.',
+  );
+  await page.goto('/subscripcio');
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText(
+    'L’enllaç no és vàlid.',
+  );
+  await page.goto('/pa-fix');
+  await expect(page.locator('html')).toHaveAttribute('lang', 'ca');
+  await expect(page.getByRole('heading', { level: 1 })).toContainText(
+    'El teu pa de cada setmana',
+  );
+  await expect(page.locator('.lang-switch')).toHaveAttribute(
+    'href',
+    '/es/pan-fijo',
+  );
+});
+
+test('cancel an order with one click from its private link', async ({
+  page,
+  request,
+}) => {
+  const created = await request.post('/api/reservations?lang=ca', {
+    headers: origin,
+    data: {
+      requestId: crypto.randomUUID(),
+      bakeId: 'hornada-001',
+      name: 'Ana Prueba',
+      email: 'ana@example.com',
+      phone: '612345678',
+      product: 'clasica',
+      quantity: 2,
+      pickup: 'yes',
+      privacy: 'yes',
+    },
+  });
+  expect(created.status()).toBe(201);
+  const [order] = (await readData()).orders;
+  expect(order.cancelToken).toMatch(/^[0-9a-f-]{36}$/);
+  await page.goto(`/comanda?token=${order.cancelToken}&lang=ca`);
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText(
+    'Vols cancel·lar aquesta comanda?',
+  );
+  await expect(page.locator('main')).toContainText(order.code);
+  // The page alone (what a mail scanner opens) cancels nothing.
+  expect((await readData()).orders[0].status).toBe('CONFIRMED');
+  expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+  await page.getByRole('button', { name: 'Sí, cancel·lar la comanda' }).click();
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText(
+    'Comanda cancel·lada.',
+  );
+  expect((await readData()).orders[0].status).toBe('CANCELLED');
+  await page.goto(`/comanda?token=${order.cancelToken}&lang=es`);
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText(
+    'Este pedido ya estaba cancelado.',
+  );
+  await page.goto('/comanda?token=nope');
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText(
+    'L’enllaç no és vàlid.',
+  );
+  // Cross-origin posts are ignored.
+  const forged = await request.post(`/comanda?lang=es`, {
+    headers: { origin: 'https://evil.example' },
+    form: { token: order.cancelToken },
+  });
+  // Astro refuses cross-origin form posts outright.
+  expect(forged.status()).toBe(403);
+  // The freed loaves can be booked again.
+  const left = await request.get('/api/bake');
+  expect((await left.json()).reserved).toBe(0);
+});
+
+test('owner panel lists pa fix subscribers and can pause, resume and cancel them', async ({
+  page,
+  request,
+}) => {
+  const joined = await request.post('/api/subscriptions?lang=es', {
+    headers: origin,
+    data: {
+      name: 'Marta Fija',
+      email: 'marta@example.com',
+      phone: '612345678',
+      quantity: 2,
+      frequency: 'biweekly',
+      delivery: 'home',
+      town: 'sant-boi',
+      address: 'Carrer Major 1',
+      terms: 'yes',
+      privacy: 'yes',
+    },
+  });
+  expect(joined.status()).toBe(201);
+  await page.goto('/gestio');
+  await page.getByLabel('Contraseña').fill('e2e-password-local');
+  await page.getByRole('button', { name: 'Entrar' }).click();
+  await expect(page.locator('#panfijo-title')).toContainText('1 activos');
+  const card = page.locator('#panfijo .admin-orders li', {
+    hasText: 'Marta Fija',
+  });
+  await expect(card).toContainText('2 × La de cada semana');
+  await expect(card).toContainText('cada dos semanas');
+  await expect(card).toContainText('Carrer Major 1');
+  await expect(card).toContainText('612345678');
+  await card.getByRole('button', { name: 'Pausar' }).click();
+  await expect(page.locator('#panfijo .admin-notice')).toContainText(
+    'Pan fijo pausado',
+  );
+  const data = await readData();
+  expect(data.subscriptions[0].status).toBe('PAUSED');
+  // Pausing also cancels this week's open order.
+  expect(data.orders[0].status).toBe('CANCELLED');
+  await expect(page.locator('#panfijo-title')).toContainText('1 en pausa');
+  await card.getByRole('button', { name: 'Reanudar' }).click();
+  expect((await readData()).subscriptions[0].status).toBe('ACTIVE');
+  await card.locator('summary', { hasText: 'Dar de baja' }).click();
+  await card
+    .getByRole('button', { name: 'Sí, dar de baja a Marta Fija' })
+    .click();
+  await expect(page.locator('#panfijo .admin-notice')).toContainText(
+    'Pan fijo dado de baja',
+  );
+  expect((await readData()).subscriptions[0].status).toBe('CANCELLED');
+  await expect(card).toContainText('De baja');
+  await expect(card.getByRole('button')).toHaveCount(0);
+  const result = await new AxeBuilder({ page }).analyze();
+  expect(result.violations).toEqual([]);
 });

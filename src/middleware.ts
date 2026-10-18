@@ -10,6 +10,8 @@ const cacheable = new Set([
   '/es/recogida',
   '/pa-a-domicili',
   '/es/pan-a-domicilio',
+  '/pa-fix',
+  '/es/pan-fijo',
   '/poolish',
   '/es/poolish',
   '/privacidad',
@@ -49,7 +51,9 @@ export const onRequest = defineMiddleware(async (ctx, next) => {
   response.headers.set('X-Frame-Options', 'DENY');
   if (
     process.env.VERCEL_ENV === 'preview' ||
-    ['/alta', '/baja', '/gestio'].includes(ctx.url.pathname) ||
+    ['/alta', '/baja', '/gestio', '/comanda', '/subscripcio'].includes(
+      ctx.url.pathname,
+    ) ||
     ctx.url.pathname.startsWith('/api/')
   )
     response.headers.set('X-Robots-Tag', 'noindex, nofollow, noarchive');

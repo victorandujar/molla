@@ -1,0 +1,292 @@
+---
+import Base from '../layouts/Base.astro';
+import { brand } from '../lib/config';
+import { townById } from '../lib/delivery';
+import { bananaSplit, orderSummary } from '../lib/domain';
+import { dayFormat, madridParts, routes, ui } from '../lib/i18n';
+import { after } from '../lib/http';
+import { notifyOwnerChange } from '../lib/email';
+import {
+  clearSkips,
+  openOrderOf,
+  setSubscriptionStatus,
+  skipNext,
+  subscriptionByToken,
+} from '../lib/subscriptions';
+
+// Private link from the "pa fix" emails. Every change is one click on a
+// button (a POST), so a mail scanner that opens the link changes nothing.
+const posted = Astro.request.method === 'POST';
+const form = posted ? await Astro.request.clone().formData() : null;
+const token = String(
+  (form ? form.get('token') : Astro.url.searchParams.get('token')) || '',
+);
+const valid = /^[0-9a-f-]{36}$/i.test(token);
+let notice:
+  | 'skipped'
+  | 'skippedNext'
+  | 'paused'
+  | 'resumed'
+  | 'cancelled'
+  | 'cleared'
+  | '' = '';
+let error = false;
+let sub = null as Awaited<ReturnType<typeof subscriptionByToken>>;
+try {
+  if (
+    valid &&
+    form &&
+    Astro.request.headers.get('origin') === Astro.url.origin
+  ) {
+    const action = String(form.get('action') || '');
+    if (action === 'skip') {
+      const r = await skipNext(token);
+      if (r) {
+        notice = r.cancelled.length ? 'skipped' : 'skippedNext';
+        after(notifyOwnerChange(r.sub, 'skip'));
+      }
+    } else if (action === 'unskip') {
+      await clearSkips(token);
+      notice = 'cleared';
+    } else if (action === 'pause') {
+      const r = await setSubscriptionStatus(token, 'PAUSED');
+      if (r) {
+        notice = 'paused';
+        after(notifyOwnerChange(r.sub, 'pause'));
+      }
+    } else if (action === 'resume') {
+      if (await setSubscriptionStatus(token, 'ACTIVE')) notice = 'resumed';
+    } else if (action === 'cancel') {
+      const r = await setSubscriptionStatus(token, 'CANCELLED');
+      if (r) {
+        notice = 'cancelled';
+        after(notifyOwnerChange(r.sub, 'cancel'));
+      }
+    }
+  }
+  if (valid) sub = await subscriptionByToken(token);
+} catch {
+  error = true;
+}
+const wanted = Astro.url.searchParams.get('lang');
+const lang =
+  wanted === 'es' ? 'es' : wanted === 'ca' ? 'ca' : (sub?.lang ?? 'ca');
+const open = sub ? await openOrderOf(sub).catch(() => null) : null;
+const t = {
+  es: {
+    title: 'Mi pan fijo',
+    active: 'Tu pan fijo',
+    paused: 'Tu pan fijo está en pausa',
+    cancelled: 'Pan fijo cancelado',
+    missing: 'El enlace no es válido.',
+    missingText: 'Revisa que hayas abierto el enlace completo del email.',
+    error: 'No hemos podido tramitarlo.',
+    errorText: 'Inténtalo de nuevo en un momento o escríbeme.',
+    notice: {
+      skipped:
+        'Hecho: esta semana no recibirás pan. La semana que viene seguimos.',
+      skippedNext: 'Hecho: saltaremos la próxima entrega y después seguimos.',
+      paused:
+        'Tu pan fijo está en pausa. No recibirás nada hasta que lo reanudes.',
+      resumed: 'Tu pan fijo vuelve a estar activo.',
+      cancelled:
+        'Te has dado de baja del pan fijo. Gracias por haberlo probado.',
+      cleared: 'Hecho: ya no saltaremos ninguna entrega.',
+      '': '',
+    },
+    order: 'Pedido',
+    frequency: 'Frecuencia',
+    weekly: 'Cada sábado',
+    biweekly: 'Un sábado sí, otro no',
+    where: 'Entrega',
+    pickup: 'Recogida en Sant Boi',
+    next: 'Próxima entrega',
+    nextOpen: (day: string) => `${day}, de 12 a 14 h`,
+    nextNone: 'La preparo cuando abra la próxima hornada.',
+    skipping: 'Saltarás la próxima entrega.',
+    until: (s: string) => `Puedes saltarla hasta el ${s}.`,
+    skip: 'Saltar esta semana',
+    skipNext: 'Saltar la próxima entrega',
+    unskip: 'No, mantener la próxima entrega',
+    pause: 'Pausar mi pan fijo',
+    resume: 'Reanudar mi pan fijo',
+    cancel: 'Darme de baja',
+    again: 'Volver a apuntarme',
+    help: '¿Quieres cambiar la cantidad o la dirección? Escríbeme y lo hago yo.',
+    whatsapp: 'Escríbeme por WhatsApp',
+    back: 'Volver al pan',
+  },
+  ca: {
+    title: 'El meu pa fix',
+    active: 'El teu pa fix',
+    paused: 'El teu pa fix està en pausa',
+    cancelled: 'Pa fix cancel·lat',
+    missing: 'L’enllaç no és vàlid.',
+    missingText: 'Comprova que has obert l’enllaç complet del correu.',
+    error: 'No ho hem pogut tramitar.',
+    errorText: 'Torna-ho a provar d’aquí a un moment o escriu-me.',
+    notice: {
+      skipped:
+        'Fet: aquesta setmana no rebràs pa. La setmana vinent continuem.',
+      skippedNext: 'Fet: saltarem la propera entrega i després continuem.',
+      paused:
+        'El teu pa fix està en pausa. No rebràs res fins que el reprenguis.',
+      resumed: 'El teu pa fix torna a estar actiu.',
+      cancelled:
+        'T’has donat de baixa del pa fix. Gràcies per haver-lo provat.',
+      cleared: 'Fet: ja no saltarem cap entrega.',
+      '': '',
+    },
+    order: 'Comanda',
+    frequency: 'Freqüència',
+    weekly: 'Cada dissabte',
+    biweekly: 'Un dissabte sí, un altre no',
+    where: 'Entrega',
+    pickup: 'Recollida a Sant Boi',
+    next: 'Propera entrega',
+    nextOpen: (day: string) => `${day}, de 12 a 14 h`,
+    nextNone: 'El preparo quan obri la propera fornada.',
+    skipping: 'Saltaràs la propera entrega.',
+    until: (s: string) => `Pots saltar-la fins ${s}.`,
+    skip: 'Saltar aquesta setmana',
+    skipNext: 'Saltar la propera entrega',
+    unskip: 'No, mantenir la propera entrega',
+    pause: 'Pausar el meu pa fix',
+    resume: 'Reprendre el meu pa fix',
+    cancel: 'Donar-me de baixa',
+    again: 'Tornar a apuntar-m’hi',
+    help: 'Vols canviar la quantitat o l’adreça? Escriu-me i ho faig jo.',
+    whatsapp: 'Escriu-me per WhatsApp',
+    back: 'Tornar al pa',
+  },
+}[lang];
+const names = ui[lang].catalog;
+const items = (() => {
+  if (!sub) return '';
+  const { whole, half } = bananaSplit(sub.banana);
+  return [
+    sub.quantity ? `${sub.quantity} × ${names.loaf}` : '',
+    whole ? `${whole} × ${names.bananaWhole}` : '',
+    half ? `${half} × ${names.bananaHalf}` : '',
+  ]
+    .filter(Boolean)
+    .join(' · ');
+})();
+const where = sub
+  ? sub.delivery === 'home'
+    ? `${ui[lang].reserve.deliveryLabel(townById(sub.town)?.name ?? sub.town)} · ${sub.address}`
+    : t.pickup
+  : '';
+const heading = error
+  ? t.error
+  : !sub
+    ? t.missing
+    : sub.status === 'ACTIVE'
+      ? t.active
+      : sub.status === 'PAUSED'
+        ? t.paused
+        : t.cancelled;
+const deadline = open ? madridParts(lang, open.deadline) : null;
+const act = (action: string, label: string, ghost = false) => ({
+  action,
+  label,
+  ghost,
+});
+const actions = !sub
+  ? []
+  : sub.status === 'ACTIVE'
+    ? [
+        sub.skipRemaining > 0
+          ? act('unskip', t.unskip)
+          : act('skip', open ? t.skip : t.skipNext),
+        act('pause', t.pause, true),
+        act('cancel', t.cancel, true),
+      ]
+    : sub.status === 'PAUSED'
+      ? [act('resume', t.resume), act('cancel', t.cancel, true)]
+      : [];
+---
+
+<Base lang={lang} title={`${t.title} · ${brand.name}`} noindex>
+  <main id="contenido" class="legal manage">
+    <h1>{heading}</h1>
+    {(error || !sub) && <p>{error ? t.errorText : t.missingText}</p>}
+    {notice && (
+      <p class="manage-notice" role="status">
+        {t.notice[notice]}
+      </p>
+    )}
+    {sub && (
+      <div class="manage-summary">
+        <p>
+          <strong>{t.order}</strong> {items}
+        </p>
+        <p>
+          <strong>{t.frequency}</strong>{' '}
+          {sub.frequency === 'weekly' ? t.weekly : t.biweekly}
+        </p>
+        <p>
+          <strong>{t.where}</strong> {where}
+        </p>
+        {sub.status === 'ACTIVE' && (
+          <p>
+            <strong>{t.next}</strong>{' '}
+            {sub.skipRemaining > 0
+              ? t.skipping
+              : open
+                ? t.nextOpen(dayFormat(lang, open.order.pickupDate))
+                : t.nextNone}
+          </p>
+        )}
+        {open &&
+          sub.status === 'ACTIVE' &&
+          sub.skipRemaining === 0 &&
+          deadline && (
+            <p>
+              {t.until(`${deadline.weekday} a les ${deadline.time}`)} (
+              {orderSummary(open.order)})
+            </p>
+          )}
+      </div>
+    )}
+    {actions.length > 0 && (
+      <div class="manage-actions">
+        {actions.map((a) => (
+          <form method="post">
+            <input type="hidden" name="token" value={token} />
+            <input type="hidden" name="action" value={a.action} />
+            <button
+              class={`button full${a.ghost ? ' button-ghost' : ''}`}
+              type="submit"
+            >
+              {a.label}
+            </button>
+          </form>
+        ))}
+      </div>
+    )}
+    {sub?.status === 'CANCELLED' && (
+      <p>
+        <a class="button" href={routes.standing[lang]}>
+          {t.again}
+        </a>
+      </p>
+    )}
+    {sub && sub.status !== 'CANCELLED' && <p>{t.help}</p>}
+    {brand.whatsapp && sub && (
+      <p>
+        <a
+          class="button button-ghost"
+          href={`https://wa.me/${brand.whatsapp}`}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {t.whatsapp}
+        </a>
+      </p>
+    )}
+    <p>
+      <a href={routes.home[lang]}>{t.back}</a>
+    </p>
+  </main>
+</Base>

@@ -42,11 +42,11 @@ No requiere credenciales de pago para arrancar. El email transaccional es opcion
 
 Remoto `github.com/victorandujar/molla`. `main` despliega producción en Vercel; las demás ramas generan Preview contra la base `molla_dev`, sin emails.
 
-Entornos locales: `.env` apunta a `molla_dev` y `.env.production` a producción. Los scripts de producción llevan el sufijo `:prod`. Si un despliegue incluye migraciones nuevas, ejecuta `npm run db:migrate:prod` antes de publicarlo; las migraciones deben ser compatibles con la versión anterior. Gestión diaria: `/gestio` (ver `docs/operacion.md`).
+Entornos locales: `.env` apunta a `molla_dev` y `.env.production` a producción. Los scripts de producción llevan el sufijo `:prod`. Si un despliegue incluye migraciones nuevas (el pan fijo añade `006_standing_orders.sql`), ejecuta `npm run db:migrate:prod` antes de publicarlo; las migraciones deben ser compatibles con la versión anterior. Gestión diaria: `/gestio` (ver `docs/operacion.md`).
 
 ## SEO e indexación
 
-Producción usa `https://www.mollapa.com`; `/robots.txt` permite rastrear las páginas públicas y `/sitemap.xml` enumera las ocho páginas indexables en catalán y castellano. Tras cada cambio SEO, despliega `main` y vuelve a enviar el sitemap.
+Producción usa `https://www.mollapa.com`; `/robots.txt` permite rastrear las páginas públicas y `/sitemap.xml` enumera las diez páginas indexables en catalán y castellano. Tras cada cambio SEO, despliega `main` y vuelve a enviar el sitemap.
 
 En Google Search Console, añade la propiedad de prefijo `https://www.mollapa.com/`. Si verificas con la etiqueta HTML, guarda el valor de `content` como `GOOGLE_SITE_VERIFICATION` en el entorno Production de Vercel, despliega y completa la verificación. Después envía `https://www.mollapa.com/sitemap.xml` y solicita la indexación de las páginas principales desde Inspección de URLs. La alternativa es verificar el dominio mediante un registro DNS TXT.
 
@@ -58,6 +58,8 @@ En Bing Webmaster Tools, verifica el mismo dominio con `BING_SITE_VERIFICATION` 
 - `docs/fotografia.md`: selección de las 15 fotos originales.
 - `docs/operacion.md`: abrir hornadas, consultar pedidos, pagos, avisos y métricas.
 - `docs/lanzamiento-30-dias.md`: captación local y primeros textos de Instagram.
+- `docs/operacion.md` también describe el pan fijo (suscripción semanal) y la cancelación con un clic.
+- `docs/publicacions-4-setmanes.md`: textos en catalán, con fechas, para el canal de WhatsApp, Instagram y Google.
 - `docs/crecimiento-baix-llobregat.md`: propuesta de valor y plan para llegar a Sant Boi, Sant Just Desvern y el Baix Llobregat.
 - `docs/verificacion.md`: pruebas realizadas y límites de la entrega.
 

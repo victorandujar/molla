@@ -28,7 +28,7 @@ Mensajes que funcionan en local:
   - El título y la descripción de la portada nombran «a domicilio», Sant Boi y Sant Just.
   - Las preguntas frecuentes incluyen «¿Lleváis pan a Sant Just Desvern?».
   - Datos estructurados `Bakery` con las zonas de servicio y el horario del sábado, y un `Service` de reparto.
-  - El sitemap tiene 8 URL.
+  - El sitemap tiene 10 URL.
 - **Boca a boca medible**: tras reservar aparece «Pásaselo a un vecino por WhatsApp», con el enlace etiquetado `utm_source=whatsapp&utm_campaign=vecino`.
 - **Medición**: Vercel Web Analytics (hay que activarlo en el panel), el embudo propio por canal y los canales `qr` y `facebook` para flyers y grupos.
 
@@ -69,7 +69,7 @@ Mensajes que funcionan en local:
 
 ### Semanas 5–6: escalar lo que funciona
 
-- [ ] **«Pan fijo» (suscripción semanal)**: el siguiente cambio de código con más impacto. Pedido recurrente cada sábado o cada dos semanas, con opción de saltarse una semana.
+- [ ] **«Pan fijo» (suscripción semanal)**, ya en la web en `/pa-fix`: ofrécelo a cada cliente que repite («¿te lo preparo cada semana?») y en el canal de WhatsApp. Ver `operacion.md`.
 - [ ] **Pedido de escalera u oficina**: 4 o más hogazas a una misma dirección. Sant Just tiene muchas oficinas.
 - [ ] Repetir solo los canales que hayan traído pedidos. Quitar el resto.
 

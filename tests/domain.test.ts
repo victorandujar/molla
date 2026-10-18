@@ -4,8 +4,11 @@ import { randomBytes } from 'node:crypto';
 import {
   confirmationHtml,
   confirmationSubject,
+  confirmationText,
   reminderHtml,
   reminderSubject,
+  subscriptionFull,
+  subscriptionWelcome,
   waitlistConfirmation,
 } from '../src/lib/email-templates';
 import { madridParts, ui } from '../src/lib/i18n';
@@ -16,6 +19,9 @@ import {
   assertCapacity,
   reservationSchema,
   waitlistSchema,
+  subscriptionSchema,
+  subscriptionAction,
+  cancellable,
   madridIso,
   pickupCode,
   pickupCodePattern,
@@ -322,4 +328,153 @@ test('delivery emails show the address and payment on delivery', () => {
   assert.match(html, /pago al recibirlo/);
   assert.doesNotMatch(html, /punto exacto de recogida/);
   assert.match(reminderHtml(delivered), /Te lo llevo a casa/);
+});
+const pafix = {
+  name: 'Ana',
+  email: 'ana@example.com',
+  phone: '612345678',
+  quantity: 2,
+  terms: 'yes',
+  privacy: 'yes',
+};
+test('pa fix needs terms, a quantity and, for home delivery, a town and address', () => {
+  const ok = subscriptionSchema.parse(pafix);
+  assert.deepEqual(
+    [ok.frequency, ok.delivery, ok.banana],
+    ['weekly', 'pickup', 0],
+  );
+  for (const bad of [
+    { terms: '' },
+    { privacy: '' },
+    { quantity: 0 },
+    { quantity: 5 },
+    { frequency: 'daily' },
+    { website: 'x' },
+    { delivery: 'home', town: 'sant-just' },
+    { delivery: 'home', address: 'Carrer Major 1', town: 'cornella' },
+  ])
+    assert.equal(
+      subscriptionSchema.safeParse({ ...pafix, ...bad }).success,
+      false,
+      JSON.stringify(bad),
+    );
+  assert.equal(
+    subscriptionSchema.safeParse({ ...pafix, quantity: 0, banana: 2 }).success,
+    true,
+  );
+  assert.equal(
+    subscriptionSchema.safeParse({
+      ...pafix,
+      delivery: 'home',
+      town: 'sant-just',
+      address: 'Carrer Major 1',
+    }).success,
+    true,
+  );
+});
+test('the weekly job places, skips or rests each subscription once per bake', () => {
+  const bake = { id: 'hornada-010', pickupDate: '2026-10-24T10:00:00.000Z' };
+  const sub = {
+    status: 'ACTIVE' as const,
+    frequency: 'weekly' as const,
+    skipRemaining: 0,
+    lastBakeId: null,
+  };
+  assert.equal(subscriptionAction(sub, bake, null), 'place');
+  assert.equal(
+    subscriptionAction({ ...sub, status: 'PAUSED' }, bake, null),
+    'inactive',
+  );
+  assert.equal(
+    subscriptionAction({ ...sub, status: 'CANCELLED' }, bake, null),
+    'inactive',
+  );
+  assert.equal(
+    subscriptionAction({ ...sub, lastBakeId: bake.id }, bake, null),
+    'handled',
+  );
+  assert.equal(
+    subscriptionAction({ ...sub, skipRemaining: 1 }, bake, null),
+    'skip',
+  );
+  // Weekly keeps going whatever the last delivery; fortnightly rests after one.
+  assert.equal(
+    subscriptionAction(sub, bake, '2026-10-17T10:00:00.000Z'),
+    'place',
+  );
+  const fortnight = { ...sub, frequency: 'biweekly' as const };
+  assert.equal(
+    subscriptionAction(fortnight, bake, '2026-10-17T10:00:00.000Z'),
+    'rest',
+  );
+  assert.equal(
+    subscriptionAction(fortnight, bake, '2026-10-10T10:00:00.000Z'),
+    'place',
+  );
+  assert.equal(subscriptionAction(fortnight, bake, null), 'place');
+});
+test('an order is cancellable with its link only until the bake closes', () => {
+  const deadline = '2026-10-22T18:00:00.000Z';
+  const before = Date.parse(deadline) - 1000;
+  assert.equal(cancellable({ status: 'CONFIRMED' }, deadline, before), true);
+  assert.equal(
+    cancellable({ status: 'CONFIRMED' }, deadline, Date.parse(deadline)),
+    false,
+  );
+  assert.equal(cancellable({ status: 'CANCELLED' }, deadline, before), false);
+  assert.equal(cancellable({ status: 'COLLECTED' }, deadline, before), false);
+});
+test('pa fix and cancellation emails carry one-click private links', () => {
+  const token = '11111111-1111-4111-8111-111111111111';
+  const manage = '22222222-2222-4222-8222-222222222222';
+  const regular = { ...order, cancelToken: token, lang: 'ca' as const };
+  const html = confirmationHtml(regular);
+  assert.match(html, new RegExp(`/comanda\\?token=${token}&amp;lang=ca`));
+  assert.match(html, /Cancel·lar la comanda/);
+  assert.doesNotMatch(confirmationHtml(order), /\/comanda\?token/);
+  const standing = { ...regular, subscription: { token: manage } };
+  const standingHtml = confirmationHtml(standing);
+  assert.match(standingHtml, /Saltar aquesta setmana/);
+  assert.match(
+    standingHtml,
+    new RegExp(`/subscripcio\\?token=${manage}&amp;lang=ca`),
+  );
+  assert.match(confirmationSubject(standing), /El teu pa fix/);
+  assert.match(
+    confirmationText(standing),
+    new RegExp(`/comanda\\?token=${token}`),
+  );
+  const sub = {
+    id: 's',
+    token: manage,
+    email: 'a@example.com',
+    name: '<b>Ana</b> Prueba',
+    phone: '600000000',
+    lang: 'es' as const,
+    quantity: 2,
+    banana: 3,
+    delivery: 'home' as const,
+    town: 'sant-just',
+    address: 'Carrer <i>Major</i> 1',
+    frequency: 'biweekly' as const,
+    status: 'ACTIVE' as const,
+    skipRemaining: 0,
+    lastBakeId: null,
+    source: 'direct',
+    createdAt: '',
+    cancelledAt: null,
+  };
+  const welcome = subscriptionWelcome(sub, 'sábado, 24 de octubre');
+  assert.match(welcome.html, /sábado, 24 de octubre/);
+  assert.match(welcome.html, /2 × La de cada semana/);
+  assert.match(welcome.html, /1 × Banana bread entero/);
+  assert.match(welcome.html, /Un sábado sí y otro no/);
+  assert.match(welcome.html, /Sant Just Desvern/);
+  assert.doesNotMatch(welcome.html, /<b>Ana|<i>Major/);
+  assert.match(
+    welcome.text,
+    new RegExp(`/subscripcio\\?token=${manage}&lang=es`),
+  );
+  assert.match(subscriptionWelcome(sub, '').html, /empezarás con la próxima/);
+  assert.match(subscriptionFull(sub).html, /no ha quedado sitio/);
 });

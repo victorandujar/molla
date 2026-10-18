@@ -1714,6 +1714,9 @@ input::placeholder {
   grid-template-columns: 1fr 1fr;
   gap: 0 14px;
 }
+.waitlist-channel {
+  margin-top: 12px;
+}
 .address-columns {
   grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr);
 }
@@ -2733,11 +2736,13 @@ details[open] p {
 }
 .admin-orders li[data-status='COLLECTED'] {
   border-left-color: var(--cobalt);
-  opacity: 0.75;
 }
+/* Faded text failed contrast: cancelled ones are struck through instead. */
 .admin-orders li[data-status='CANCELLED'] {
   border-left-color: var(--line);
-  opacity: 0.55;
+}
+.admin-orders li[data-status='CANCELLED'] .admin-code {
+  text-decoration: line-through;
 }
 .admin-order-top {
   display: flex;
@@ -2799,4 +2804,68 @@ details[open] p {
 }
 .button.admin-danger {
   --bg: var(--crust);
+}
+
+/* Pa fix: sign-up panel and the private manage / cancel pages. */
+.standing-panel {
+  max-width: 680px;
+  margin: 56px auto 0;
+  padding: 28px 24px 32px;
+  border-radius: 20px;
+  background: var(--card);
+  box-shadow: inset 0 0 0 1.5px var(--line);
+}
+.standing-panel h2 {
+  font-size: clamp(28px, 3.4vw, 38px);
+}
+.standing-panel .order-total {
+  margin-top: 22px;
+}
+#subscription-result {
+  display: grid;
+  gap: 14px;
+  justify-items: start;
+}
+.manage-summary {
+  display: grid;
+  gap: 4px;
+  margin-top: 28px;
+  padding: 18px 22px 20px;
+  border-radius: 16px;
+  background: var(--card);
+  box-shadow: inset 0 0 0 1.5px var(--line);
+}
+.manage-summary p {
+  margin-top: 8px;
+}
+.manage-summary strong {
+  display: block;
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.manage-notice {
+  padding: 14px 18px;
+  border-radius: 12px;
+  background: var(--paper-2);
+  font-weight: 600;
+  color: var(--ink);
+}
+.manage-actions {
+  display: grid;
+  gap: 12px;
+  margin-top: 28px;
+}
+.manage-actions .button,
+.manage-contact .button {
+  width: 100%;
+  white-space: normal;
+  text-align: center;
+}
+.manage-contact {
+  display: grid;
+  gap: 12px;
+  margin-top: 28px;
 }

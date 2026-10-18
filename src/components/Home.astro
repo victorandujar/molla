@@ -606,6 +606,7 @@ const jsonLd = [
                 <small>{current.pickupWindow || t.reserve.windowPending}</small>
                 <span class="map-links">
                   <a href={routes.delivery[lang]}>{t.reserve.pickupInfo}</a>
+                  <a href={routes.standing[lang]}>{t.reserve.standingCta}</a>
                 </span>
               </dd>
             </div>
@@ -916,6 +917,19 @@ const jsonLd = [
         <div class="waitlist-body" data-reveal>
           <h2 id="waitlist-title">{t.waitlist.h2}</h2>
           <p>{t.waitlist.p}</p>
+          {brand.whatsappChannel && (
+            <p class="waitlist-channel">
+              <a
+                class="text-link"
+                data-event="click_channel"
+                href={brand.whatsappChannel}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {t.waitlist.channel} ↗
+              </a>
+            </p>
+          )}
           <form
             id="waitlist-form"
             action={`/api/waitlist?lang=${lang}`}
