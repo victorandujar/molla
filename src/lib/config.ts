@@ -49,6 +49,9 @@ export const privacy = {
   retention: privacyText('PRIVACY_RETENTION'),
   transfers: privacyText('PRIVACY_TRANSFERS'),
 };
+// Gift for a customer's first order (¼ banana bread + red pepper and tomato
+// chutney). The baker adds it by hand; WELCOME_GIFT=false turns the offer off.
+export const welcomeGift = { active: process.env.WELCOME_GIFT !== 'false' };
 export const products = [
   {
     id: 'clasica',

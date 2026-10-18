@@ -5,6 +5,7 @@ import {
   confirmationHtml,
   confirmationSubject,
   confirmationText,
+  ownerText,
   reminderHtml,
   reminderSubject,
   subscriptionFull,
@@ -477,4 +478,28 @@ test('pa fix and cancellation emails carry one-click private links', () => {
   );
   assert.match(subscriptionWelcome(sub, '').html, /empezarás con la próxima/);
   assert.match(subscriptionFull(sub).html, /no ha quedado sitio/);
+});
+test('first-order emails carry the welcome gift and the pa fix invitation', () => {
+  const first = { ...order, firstOrder: true, lang: 'ca' as const };
+  const html = confirmationHtml(first);
+  assert.match(html, /Regal/);
+  assert.match(html, /un quart de banana bread/);
+  assert.match(html, /chutney de pebrot vermell i tomàquet/);
+  assert.match(html, /\/pa-fix/);
+  assert.match(
+    confirmationText(first),
+    /Regal: Per ser la teva primera comanda/,
+  );
+  assert.doesNotMatch(
+    confirmationHtml({ ...order, lang: 'ca' as const }),
+    /chutney/,
+  );
+  const es = confirmationHtml({ ...order, firstOrder: true });
+  assert.match(es, /un cuarto de banana bread/);
+  assert.match(es, /\/es\/pan-fijo/);
+  assert.match(
+    ownerText({ ...order, firstOrder: true }),
+    /Primera comanda: añade el regalo/,
+  );
+  assert.doesNotMatch(ownerText(order), /regalo/);
 });

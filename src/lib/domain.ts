@@ -271,6 +271,8 @@ export type Order = {
   lang?: Lang;
   // Home delivery; absent on pickup orders. The purge removes `address`.
   delivery?: { town: string; address?: string };
+  // First order of this customer: the baker adds the welcome gift.
+  firstOrder?: boolean;
   // Private one-click cancellation link; absent on orders made before it existed.
   cancelToken?: string;
   // Set on orders the weekly job placed for a "pa fix": token manages it.

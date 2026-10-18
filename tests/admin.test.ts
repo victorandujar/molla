@@ -28,3 +28,21 @@ test('sessions are signed, expire and die when the password changes', () => {
   process.env.ADMIN_PASSWORD = 'otra-contrasena-larga';
   assert.equal(validSession(session, now + 1000), false);
 });
+test('stray spaces or line breaks around the password do not lock the owner out', () => {
+  process.env.ADMIN_PASSWORD = 'una-contrasena-larga\n';
+  assert.equal(adminEnabled(), true);
+  assert.equal(checkPassword('una-contrasena-larga'), true);
+  assert.equal(checkPassword('  una-contrasena-larga '), true);
+  assert.equal(checkPassword('Una-contrasena-larga'), false);
+  process.env.ADMIN_PASSWORD = '   corta   ';
+  assert.equal(adminEnabled(), false);
+});
+test('stray spaces or line breaks around the password do not lock the owner out', () => {
+  process.env.ADMIN_PASSWORD = 'una-contrasena-larga\n';
+  assert.equal(adminEnabled(), true);
+  assert.equal(checkPassword('una-contrasena-larga'), true);
+  assert.equal(checkPassword('  una-contrasena-larga '), true);
+  assert.equal(checkPassword('Una-contrasena-larga'), false);
+  process.env.ADMIN_PASSWORD = '   corta   ';
+  assert.equal(adminEnabled(), false);
+});
