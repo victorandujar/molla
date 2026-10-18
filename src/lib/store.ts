@@ -22,9 +22,11 @@ import {
   type Order,
   type OrderItem,
   type ReservationInput,
+  type Subscription,
   type BakeState,
 } from './domain';
-const sql = process.env.DATABASE_URL
+// Exported for subscriptions.ts, which shares this connection and the demo file.
+export const sql = process.env.DATABASE_URL
   ? postgres(process.env.DATABASE_URL, {
       max: 2,
       prepare: false,
@@ -32,7 +34,7 @@ const sql = process.env.DATABASE_URL
       idle_timeout: 10,
     })
   : null;
-type Demo = {
+export type Demo = {
   bakeStatus?: BakeState;
   orders: (Order & { reminderSentAt?: string | null })[];
   waitlist: {
@@ -46,11 +48,12 @@ type Demo = {
   }[];
   limits: Record<string, { count: number; until: number }>;
   events?: Record<string, number>;
+  subscriptions?: Subscription[];
 };
 // Vite may load this module once per route: the write queue lives on
 // globalThis so every copy serialises its read-modify-write of the file.
 const shared = globalThis as { mollaDemoQueue?: Promise<unknown> };
-async function demo<T>(fn: (data: Demo) => T | Promise<T>): Promise<T> {
+export async function demo<T>(fn: (data: Demo) => T | Promise<T>): Promise<T> {
   if (!isDemo) throw new Error('Las reservas todavía no están abiertas.');
   const run = (shared.mollaDemoQueue ?? Promise.resolve()).then(async () => {
     const { readFile, mkdir, writeFile, rename } =
@@ -72,7 +75,7 @@ async function demo<T>(fn: (data: Demo) => T | Promise<T>): Promise<T> {
   shared.mollaDemoQueue = run.catch(() => {});
   return run;
 }
-const useDemo = () => !sql || isDemo;
+export const useDemo = () => !sql || isDemo;
 const madridDay = (at = new Date()) =>
   new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Madrid' }).format(at);
 // `reserved` counts loaves (the bake's capacity); banana bread has its own
@@ -174,6 +177,8 @@ const assertBanana = (reserved: number, halves: number) => {
 };
 export async function reserve(
   input: ReservationInput & { lang: Lang },
+  // Set when the weekly job places the order of a "pa fix".
+  standing?: { id: string; token: string },
 ): Promise<Order> {
   const items = itemsFor(input, input.lang);
   const town = input.delivery === 'home' ? townById(input.town) : undefined;
@@ -196,6 +201,8 @@ export async function reserve(
       : brand.pickupLabel[input.lang],
     pickupWindow: town ? deliveryWindow : bake.pickupWindow,
     delivery: town ? { town: town.name, address: input.address } : undefined,
+    cancelToken: randomUUID(),
+    subscription: standing ? { token: standing.token } : undefined,
     source: input.source,
     status: 'CONFIRMED',
     createdAt: new Date().toISOString(),
@@ -270,7 +277,7 @@ export async function reserve(
     // Each order snapshot keeps the details given with that order.
     const [customer] =
       await tx`INSERT INTO customers (id,email,name,phone) VALUES (${randomUUID()},${input.email},${input.name},${input.phone}) ON CONFLICT(email) DO UPDATE SET email=customers.email RETURNING id`;
-    await tx`INSERT INTO orders (id,code,request_id,bake_id,customer_id,snapshot,status) VALUES (${order.id},${order.code},${order.requestId},${input.bakeId},${customer!.id},${tx.json(order)},'CONFIRMED')`;
+    await tx`INSERT INTO orders (id,code,request_id,bake_id,customer_id,snapshot,status,subscription_id,cancel_token) VALUES (${order.id},${order.code},${order.requestId},${input.bakeId},${customer!.id},${tx.json(order)},'CONFIRMED',${standing?.id ?? null},${order.cancelToken!})`;
     for (const item of items)
       await tx`INSERT INTO order_items (order_id,product_id,quantity,unit_price) VALUES (${order.id},${item.product},${item.quantity},${item.unitPrice})`;
     return order;

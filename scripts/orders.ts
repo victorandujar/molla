@@ -10,13 +10,20 @@ const flags = Object.fromEntries(
 const [arg] = rest.filter((a) => !a.startsWith('--'));
 const url = process.env.DATABASE_URL;
 const sql = url ? postgres(url, { max: 1 }) : null;
-const writes = ['cancel', 'collected', 'purge'].includes(command);
+const writes = [
+  'cancel',
+  'collected',
+  'purge',
+  'subcancel',
+  'subpause',
+  'subresume',
+].includes(command);
 if (url)
   console.log(`Base de datos: ${new URL(url).host}${new URL(url).pathname}`);
 try {
   if (writes && !sql)
     throw new Error('Los cambios requieren la base de datos configurada.');
-  if (writes && flags.yes === undefined)
+  if (writes && !('yes' in flags))
     throw new Error(
       'Este comando modifica la base de datos. Revisa el host y repite con --yes.',
     );
@@ -47,8 +54,39 @@ try {
       // A customer with a more recent order keeps their details.
       const customers =
         await tx`UPDATE customers c SET email='anonimo-' || c.id, name='—', phone='' WHERE c.email NOT LIKE 'anonimo-%' AND NOT EXISTS (SELECT 1 FROM orders o JOIN bakes b ON b.id=o.bake_id WHERE o.customer_id=c.id AND b.pickup_date >= now() - make_interval(months => ${months})) RETURNING c.id`;
+      // Cancelled "pa fix" subscriptions past the same period lose their details.
+      const subs =
+        await tx`UPDATE subscriptions SET name='—', email='anonimo-' || id, phone='', address='' WHERE status='CANCELLED' AND cancelled_at < now() - make_interval(months => ${months}) AND email NOT LIKE 'anonimo-%' RETURNING id`;
       console.log(
-        `Anonimizados ${orders.length} pedidos y ${customers.length} clientes.`,
+        `Anonimizados ${orders.length} pedidos, ${customers.length} clientes y ${subs.length} suscripciones.`,
+      );
+    });
+  } else if (command === 'subs') {
+    // npm run orders -- subs
+    if (!sql) throw new Error('Los pan fijo requieren la base de datos.');
+    const rows =
+      await sql`SELECT email,name,phone,quantity,banana,frequency,delivery,town,status,skip_remaining,created_at FROM subscriptions ORDER BY status, created_at`;
+    console.log(JSON.stringify(rows, null, 2));
+  } else if (['subcancel', 'subpause', 'subresume'].includes(command)) {
+    // npm run orders -- subcancel ana@example.com --yes   (also subpause, subresume)
+    const email = arg?.trim().toLowerCase() || '';
+    if (!email.includes('@'))
+      throw new Error('Indica el email del suscriptor.');
+    const to = {
+      subcancel: 'CANCELLED',
+      subpause: 'PAUSED',
+      subresume: 'ACTIVE',
+    }[command as 'subcancel' | 'subpause' | 'subresume'];
+    await sql!.begin(async (tx) => {
+      const subs =
+        await tx`UPDATE subscriptions SET status=${to}, cancelled_at=CASE WHEN ${to}='CANCELLED' THEN now() ELSE cancelled_at END, skip_remaining=CASE WHEN ${to}='ACTIVE' THEN skip_remaining ELSE 0 END WHERE email=${email} AND status!='CANCELLED' RETURNING id`;
+      // The open order of this week goes too, unless the bake is already closed.
+      const orders =
+        to === 'ACTIVE' || !subs.length
+          ? []
+          : await tx`UPDATE orders o SET status='CANCELLED', snapshot=jsonb_set(o.snapshot,'{status}','"CANCELLED"') FROM bakes b WHERE o.bake_id=b.id AND b.deadline > now() AND o.status='CONFIRMED' AND o.subscription_id IN ${tx(subs.map((x) => x.id))} RETURNING o.id`;
+      console.log(
+        `${subs.length} suscripciones → ${to}; ${orders.length} pedidos abiertos cancelados.`,
       );
     });
   } else {

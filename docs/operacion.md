@@ -74,7 +74,7 @@ Se paga al recibir o recoger. El cliente ve una confirmación con su código de 
 
 ## Medición
 
-Los eventos `molla:analytics` se emiten sin datos personales. Incluyen los nueve eventos: landing_view, view_current_bake, view_product, start_reservation, reservation_completed, waitlist_signup, click_instagram, click_whatsapp, pickup_info_view. Además se cuentan en la propia base (`analytics_daily`): solo evento, canal y día, sin cookies, IP ni identificador. Se consultan en `/gestio` o con `orders -- funnel`. No distingue visitantes únicos: una misma persona que recarga cuenta dos veces. El origen sí se guarda junto con cada pedido o alta. La atribución es del enlace o la visita actual, sin cookies ni seguimiento entre sesiones.
+Los eventos `molla:analytics` se emiten sin datos personales. Incluyen los diez eventos: landing_view, view_current_bake, view_product, start_reservation, reservation_completed, waitlist_signup, click_instagram, click_whatsapp, click_channel, pickup_info_view. Además se cuentan en la propia base (`analytics_daily`): solo evento, canal y día, sin cookies, IP ni identificador. Se consultan en `/gestio` o con `orders -- funnel`. No distingue visitantes únicos: una misma persona que recarga cuenta dos veces. El origen sí se guarda junto con cada pedido o alta. La atribución es del enlace o la visita actual, sin cookies ni seguimiento entre sesiones.
 
 Vercel Web Analytics (sin cookies) mide visitas, visitantes, páginas, países, referentes y parámetros `utm_*`; se carga desde el JavaScript del propio dominio, porque la CSP bloquea scripts en línea. Hay que activarlo una vez en Vercel: proyecto → Analytics → Enable. Los mismos eventos del embudo (salvo landing_view) se envían como eventos personalizados con su canal, que Vercel solo muestra en planes de pago. Canales admitidos en `utm_source`: instagram, google, whatsapp, facebook, qr, direct y referral (`src/lib/sources.ts`).
 
@@ -97,3 +97,47 @@ Producción (`www.mollapa.com`) tiene `LIVE_ORDERS=true`. Preview también, pero
 ## Marca
 
 `npm run brand` regenera con la tipografía de la web el wordmark del email (`public/email/molla-crema.png`) y los iconos (`favicon-48.png`, `apple-touch-icon.png`, `icon-512.png`). Ejecutarlo solo si cambia la marca.
+
+## Canal de WhatsApp y perfil de Google
+
+Dos variables opcionales del entorno Production de Vercel (y `.env` para los scripts):
+
+- `WHATSAPP_CHANNEL_URL`: enlace del canal (`https://whatsapp.com/channel/…`; cualquier otro valor se ignora). Muestra «Canal de WhatsApp» en el pie y junto al aviso de hornadas, añade un botón al email de confirmación y lo incluye en los datos estructurados (`sameAs`). Cópialo desde el canal → Compartir → Copiar enlace.
+- `GOOGLE_PROFILE_URL`: enlace público del Perfil de Empresa de Google (https). Solo va a `sameAs`.
+
+Tras añadir una variable hay que volver a desplegar. Cada clic en el canal cuenta como evento `click_channel`.
+
+## Tarjetas con QR
+
+`npm run qr` genera `exports/targetes-qr.pdf`: A4 con cuatro tarjetas A6 por campaña (por defecto `entrega`, `santjust` y `santboi`), con un QR a `/pa-a-domicili?utm_source=qr&utm_campaign=<campaña>`. Con `WHATSAPP_CHANNEL_URL` definida (o `--channel=<enlace>`) añade un segundo QR al canal. Otras campañas: `npm run qr -- --campaigns=cafe,mercat --out=exports/otra.pdf`. Escanea cada QR con el móvil antes de imprimir.
+
+## Pan fijo (suscripción semanal)
+
+Un cliente elige cantidad, frecuencia (cada semana o cada dos) y entrega en `/pa-fix` (`/es/pan-fijo`) y no vuelve a reservar. Se paga al recibir, sin tarjeta ni cobros automáticos.
+
+**Cómo funciona.**
+
+- Al unirse se coloca su primer pedido en la hornada abierta, si hay hueco, y recibe un email de bienvenida con su enlace privado.
+- Cada vez que se abre una hornada, `/api/cron/cycle` (y de respaldo `/api/cron/daily`) crea un pedido normal por cada pan fijo activo, **antes** de que nadie más pueda coger las hogazas, y envía su confirmación con código.
+- Si el cupo no alcanza, ese pan fijo no se coloca, el cliente recibe un aviso, no se le cobra nada y sigue activo la semana siguiente.
+- Un pan fijo quincenal descansa la semana siguiente a su último pedido no cancelado.
+- Cada hornada se procesa una sola vez por suscripción, así que repetir el trabajo no duplica pedidos.
+
+**Cancelar, lo más fácil posible.** Todos los enlaces son privados (token) y llevan a una página con un botón; el cambio solo ocurre al pulsarlo, así un antivirus de correo que abra el enlace no cancela nada.
+
+- Cada email de confirmación de un pedido suelto lleva «Cancelar el pedido» (`/comanda?token=…`), válido hasta el cierre del jueves a las 20:00.
+- El email de cada entrega del pan fijo lleva «Saltar esta semana» (mismo enlace) y «Gestionar mi pan fijo».
+- `/subscripcio?token=…` permite saltar la entrega, pausar, reanudar o darse de baja, cada cosa con un clic. Pausar o darse de baja cancelan también el pedido abierto de esa semana.
+- Después del cierre ya no se cancela con el enlace (el pan está en marcha); la página ofrece WhatsApp y email.
+- Tú recibes un email por cada alta, salto, pausa, baja o cancelación.
+
+**Para ti.**
+
+- `/gestio`, sección «Pan fijo»: lista de quién está suscrito (nombre, teléfono con WhatsApp, email, pedido, frecuencia y entrega), con botones **Pausar / Reanudar** y **Dar de baja** (pide confirmar). Pausar o dar de baja cancela también el pedido abierto de esa semana. Además muestra los totales y una etiqueta «Pan fijo» en sus pedidos. Revisa que la suma de hogazas fijas quepa en el cupo de la hornada.
+- `npm run orders:prod -- subs` lista los suscriptores.
+- `npm run orders:prod -- subpause|subresume|subcancel ana@example.com --yes` cambia un pan fijo si el cliente te lo pide por WhatsApp (pausar o cancelar también cancela su pedido abierto).
+- `purge` anonimiza además las suscripciones canceladas hace más de N meses.
+
+**Antes de publicar este cambio** hay una migración nueva (`006_standing_orders.sql`): ejecuta `npm run db:migrate:prod` **antes** de desplegar `main`, porque el código nuevo escribe columnas que no existen todavía. La migración es compatible con la versión anterior.
+
+**Pruebas con PostgreSQL.** `TEST_DATABASE_URL=postgres://… npm test` ejecuta además `tests/subscriptions.db.test.ts` contra una base con las migraciones aplicadas (vacía las tablas de pedidos: no la apuntes a producción).
