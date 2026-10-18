@@ -76,6 +76,7 @@ export const ui = {
       area: `Pan a domicilio los sábados ${hours.es} en Sant Boi, Sant Just Desvern y Santa Coloma de Cervelló · Recogida en Sant Boi de Llobregat`,
       privacy: 'Privacidad y condiciones',
       write: 'Escríbeme ↗',
+      channel: 'Canal de WhatsApp',
     },
     meta: {
       title: `Pan artesano a domicilio en Sant Boi y Sant Just Desvern · ${brand.name}`,
@@ -429,6 +430,7 @@ export const ui = {
       honey: 'Deja vacío',
       consentA: 'Quiero recibir avisos de hornadas y acepto la',
       consentLink: 'política de privacidad',
+      channel: 'O sigue el canal de WhatsApp: un aviso por hornada, sin chat.',
       disabled: 'Los avisos se activarán al anunciar la primera hornada.',
       demo: 'Modo de prueba: no recibirás emails.',
       success:
@@ -463,6 +465,7 @@ export const ui = {
       area: `Pa a domicili els dissabtes ${hours.ca} a Sant Boi, Sant Just Desvern i Santa Coloma de Cervelló · Recollida a Sant Boi de Llobregat`,
       privacy: 'Privacitat i condicions',
       write: 'Escriu-me ↗',
+      channel: 'Canal de WhatsApp',
     },
     meta: {
       title: `Pa artesà a domicili a Sant Boi i Sant Just Desvern · ${brand.name}`,
@@ -814,6 +817,8 @@ export const ui = {
       honey: 'Deixa-ho buit',
       consentA: 'Vull rebre avisos de fornades i accepto la',
       consentLink: 'política de privacitat',
+      channel:
+        'O segueix el canal de WhatsApp: un avís per fornada, sense xat.',
       disabled: 'Els avisos s’activaran quan s’anunciï la primera fornada.',
       demo: 'Mode de prova: no rebràs correus.',
       success:

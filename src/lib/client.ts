@@ -9,6 +9,7 @@ type EventName =
   | 'waitlist_signup'
   | 'click_instagram'
   | 'click_whatsapp'
+  | 'click_channel'
   | 'pickup_info_view';
 function source(): Source {
   const q = new URLSearchParams(location.search)

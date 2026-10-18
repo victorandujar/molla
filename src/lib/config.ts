@@ -17,6 +17,16 @@ export const brand = {
   contact: process.env.CONTACT_EMAIL || '',
   whatsapp: (process.env.WHATSAPP_NUMBER || '').replace(/\D/g, ''),
   instagram: process.env.INSTAGRAM_URL || '',
+  // Only a WhatsApp channel link is accepted: it is shown to every visitor.
+  whatsappChannel: /^https:\/\/(www\.)?whatsapp\.com\/channel\/[\w-]+$/.test(
+    process.env.WHATSAPP_CHANNEL_URL || '',
+  )
+    ? process.env.WHATSAPP_CHANNEL_URL!
+    : '',
+  // Public Google Business Profile link (Maps listing), for `sameAs`.
+  googleProfile: /^https:\/\//.test(process.env.GOOGLE_PROFILE_URL || '')
+    ? process.env.GOOGLE_PROFILE_URL!
+    : '',
   pickupLabel: {
     es: 'Punto de recogida en Sant Boi de Llobregat',
     ca: 'Punt de recollida a Sant Boi de Llobregat',

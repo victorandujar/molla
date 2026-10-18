@@ -13,6 +13,7 @@ export const events = [
   'waitlist_signup',
   'click_instagram',
   'click_whatsapp',
+  'click_channel',
   'pickup_info_view',
 ] as const;
 const schema = z.object({

@@ -74,6 +74,9 @@ const copy = {
       '¿Cambios o no puedes venir? Responde a este email con tu código antes del cierre de pedidos y la hogaza pasará a otra persona.',
     changesText: (contact: string) =>
       `¿Cambios o no puedes venir? Responde a este email${contact ? ` o escribe a ${contact}` : ''} con tu código antes del cierre de pedidos.`,
+    channel:
+      'Si quieres enterarte de la próxima hornada, sigue el canal de WhatsApp.',
+    channelButton: 'Seguir el canal →',
     thanks: 'Gracias por reservar,',
     reminderSubject: (o: Order) =>
       `Recordatorio · Recoge tu pan el ${onDay(o)} (${o.code})`,
@@ -118,6 +121,9 @@ const copy = {
       'Canvis o no pots venir? Respon aquest correu amb el teu codi abans del tancament de comandes i el pa passarà a una altra persona.',
     changesText: (contact: string) =>
       `Canvis o no pots venir? Respon aquest correu${contact ? ` o escriu a ${contact}` : ''} amb el teu codi abans del tancament de comandes.`,
+    channel:
+      'Si vols assabentar-te de la propera fornada, segueix el canal de WhatsApp.',
+    channelButton: 'Segueix el canal →',
     thanks: 'Gràcies per reservar,',
     reminderSubject: (o: Order) =>
       `Recordatori · Recull el teu pa ${onDay(o)} (${o.code})`,
@@ -214,7 +220,7 @@ ${t.where}: ${where(o)}
 ${o.delivery ? t.deliveryNote : t.pickupNote}
 
 ${t.changesText(brand.contact)}
-
+${brand.whatsappChannel ? `\n${t.channel} ${brand.whatsappChannel}\n` : ''}
 ${t.thanks}
 ${brand.name}`;
 }
@@ -278,7 +284,14 @@ export function confirmationHtml(o: Order) {
       esc(t.intro(o)),
     ) +
     pickupBlock(o, o.delivery ? t.payOnDelivery : t.payLater) +
-    closing('', t.changes);
+    closing(
+      brand.whatsappChannel
+        ? button(esc(brand.whatsappChannel), t.channelButton)
+        : '',
+      brand.whatsappChannel
+        ? `${t.changes}<br><br>${esc(t.channel)}`
+        : t.changes,
+    );
   return layout(
     lang,
     `${t.code} ${o.code} · ${pickupDay(o.pickupDate, lang)}, ${o.pickupWindow} · ${o.pickupAddress}`,

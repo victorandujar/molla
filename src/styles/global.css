@@ -1714,6 +1714,9 @@ input::placeholder {
   grid-template-columns: 1fr 1fr;
   gap: 0 14px;
 }
+.waitlist-channel {
+  margin-top: 12px;
+}
 .address-columns {
   grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr);
 }

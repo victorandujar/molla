@@ -38,6 +38,11 @@ const abs = (path: string) =>
   brand.site ? new URL(path, brand.site).href : null;
 const canonical = abs(route ? routes[route][lang] : Astro.url.pathname);
 const indexable = searchIndexable && !noindex;
+const sameAs = [
+  brand.instagram,
+  brand.whatsappChannel,
+  brand.googleProfile,
+].filter(Boolean);
 // A service-area bakery: no public address, Saturday delivery in its towns.
 const organization = {
   '@context': 'https://schema.org',
@@ -51,7 +56,7 @@ const organization = {
   description: ui[lang].meta.description,
   email: brand.contact || undefined,
   telephone: brand.whatsapp ? `+${brand.whatsapp}` : undefined,
-  sameAs: brand.instagram ? [brand.instagram] : undefined,
+  sameAs: sameAs.length ? sameAs : undefined,
   priceRange: '€',
   currenciesAccepted: 'EUR',
   paymentAccepted: 'Cash',
@@ -274,6 +279,16 @@ const graph = [organization, website, webpage, ...jsonLd];
             </a>
           )}
           <a href={routes.privacy[lang]}>{t.footer.privacy}</a>
+          {brand.whatsappChannel && (
+            <a
+              data-event="click_channel"
+              href={brand.whatsappChannel}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {t.footer.channel} ↗
+            </a>
+          )}
           {brand.instagram && (
             <a
               data-event="click_instagram"

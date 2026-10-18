@@ -74,7 +74,7 @@ Se paga al recibir o recoger. El cliente ve una confirmación con su código de 
 
 ## Medición
 
-Los eventos `molla:analytics` se emiten sin datos personales. Incluyen los nueve eventos: landing_view, view_current_bake, view_product, start_reservation, reservation_completed, waitlist_signup, click_instagram, click_whatsapp, pickup_info_view. Además se cuentan en la propia base (`analytics_daily`): solo evento, canal y día, sin cookies, IP ni identificador. Se consultan en `/gestio` o con `orders -- funnel`. No distingue visitantes únicos: una misma persona que recarga cuenta dos veces. El origen sí se guarda junto con cada pedido o alta. La atribución es del enlace o la visita actual, sin cookies ni seguimiento entre sesiones.
+Los eventos `molla:analytics` se emiten sin datos personales. Incluyen los diez eventos: landing_view, view_current_bake, view_product, start_reservation, reservation_completed, waitlist_signup, click_instagram, click_whatsapp, click_channel, pickup_info_view. Además se cuentan en la propia base (`analytics_daily`): solo evento, canal y día, sin cookies, IP ni identificador. Se consultan en `/gestio` o con `orders -- funnel`. No distingue visitantes únicos: una misma persona que recarga cuenta dos veces. El origen sí se guarda junto con cada pedido o alta. La atribución es del enlace o la visita actual, sin cookies ni seguimiento entre sesiones.
 
 Vercel Web Analytics (sin cookies) mide visitas, visitantes, páginas, países, referentes y parámetros `utm_*`; se carga desde el JavaScript del propio dominio, porque la CSP bloquea scripts en línea. Hay que activarlo una vez en Vercel: proyecto → Analytics → Enable. Los mismos eventos del embudo (salvo landing_view) se envían como eventos personalizados con su canal, que Vercel solo muestra en planes de pago. Canales admitidos en `utm_source`: instagram, google, whatsapp, facebook, qr, direct y referral (`src/lib/sources.ts`).
 
@@ -97,3 +97,16 @@ Producción (`www.mollapa.com`) tiene `LIVE_ORDERS=true`. Preview también, pero
 ## Marca
 
 `npm run brand` regenera con la tipografía de la web el wordmark del email (`public/email/molla-crema.png`) y los iconos (`favicon-48.png`, `apple-touch-icon.png`, `icon-512.png`). Ejecutarlo solo si cambia la marca.
+
+## Canal de WhatsApp y perfil de Google
+
+Dos variables opcionales del entorno Production de Vercel (y `.env` para los scripts):
+
+- `WHATSAPP_CHANNEL_URL`: enlace del canal (`https://whatsapp.com/channel/…`; cualquier otro valor se ignora). Muestra «Canal de WhatsApp» en el pie y junto al aviso de hornadas, añade un botón al email de confirmación y lo incluye en los datos estructurados (`sameAs`). Cópialo desde el canal → Compartir → Copiar enlace.
+- `GOOGLE_PROFILE_URL`: enlace público del Perfil de Empresa de Google (https). Solo va a `sameAs`.
+
+Tras añadir una variable hay que volver a desplegar. Cada clic en el canal cuenta como evento `click_channel`.
+
+## Tarjetas con QR
+
+`npm run qr` genera `exports/targetes-qr.pdf`: A4 con cuatro tarjetas A6 por campaña (por defecto `entrega`, `santjust` y `santboi`), con un QR a `/pa-a-domicili?utm_source=qr&utm_campaign=<campaña>`. Con `WHATSAPP_CHANNEL_URL` definida (o `--channel=<enlace>`) añade un segundo QR al canal. Otras campañas: `npm run qr -- --campaigns=cafe,mercat --out=exports/otra.pdf`. Escanea cada QR con el móvil antes de imprimir.
