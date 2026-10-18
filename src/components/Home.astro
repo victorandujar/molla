@@ -14,6 +14,7 @@ import {
 import { ui, routes, dayFormat, type Lang } from '../lib/i18n';
 import { currentBake } from '../lib/store';
 import { bakeState } from '../lib/domain';
+import { deliveryTowns } from '../lib/delivery';
 interface Props {
   lang: Lang;
 }
@@ -68,9 +69,14 @@ const offer = (price: number, available: boolean) => ({
   availability: available
     ? 'https://schema.org/InStock'
     : 'https://schema.org/OutOfStock',
-  availableDeliveryMethod:
+  availableDeliveryMethod: [
+    'http://purl.org/goodrelations/v1#DeliveryModeOwnFleet',
     'http://purl.org/goodrelations/v1#DeliveryModePickUp',
-  areaServed: { '@type': 'AdministrativeArea', name: 'Baix Llobregat' },
+  ],
+  areaServed: [
+    ...deliveryTowns.map((town) => ({ '@type': 'City', name: town.name })),
+    { '@type': 'AdministrativeArea', name: 'Baix Llobregat' },
+  ],
   seller: { '@id': abs('/#organization') },
 });
 const jsonLd = [
@@ -599,7 +605,7 @@ const jsonLd = [
                 <small>{t.reserve.pickupDetails}</small>
                 <small>{current.pickupWindow || t.reserve.windowPending}</small>
                 <span class="map-links">
-                  <a href={routes.pickup[lang]}>{t.reserve.pickupInfo}</a>
+                  <a href={routes.delivery[lang]}>{t.reserve.pickupInfo}</a>
                 </span>
               </dd>
             </div>
@@ -740,6 +746,46 @@ const jsonLd = [
                 {t.reserve.emptyOrder}
               </p>
               <div class="perforation" aria-hidden="true"></div>
+              <fieldset class="size-choice delivery-choice">
+                <legend>{t.reserve.deliveryH}</legend>
+                <label>
+                  <input type="radio" name="delivery" value="home" checked />
+                  <span>
+                    <strong>{t.reserve.deliveryHome}</strong>
+                    <em>{t.reserve.deliveryHomeHint}</em>
+                  </span>
+                </label>
+                <label>
+                  <input type="radio" name="delivery" value="pickup" />
+                  <span>
+                    <strong>{t.reserve.deliveryPickup}</strong>
+                    <em>{t.reserve.deliveryPickupHint}</em>
+                  </span>
+                </label>
+              </fieldset>
+              <div class="form-columns address-columns" data-home-fields>
+                <div class="field">
+                  <label for="town">{t.reserve.town}</label>
+                  <select id="town" name="town" required>
+                    <option value="">{t.reserve.townPick}</option>
+                    {deliveryTowns.map((town) => (
+                      <option value={town.id}>{town.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="address">{t.reserve.address}</label>
+                  <input
+                    id="address"
+                    name="address"
+                    autocomplete="street-address"
+                    minlength="5"
+                    maxlength="160"
+                    required
+                    placeholder={t.reserve.addressPlaceholder}
+                  />
+                </div>
+              </div>
               <div class="field">
                 <label for="name">{t.reserve.name}</label>
                 <input

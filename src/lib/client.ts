@@ -344,6 +344,22 @@ function showError(target: HTMLFormElement, error: unknown) {
   el.hidden = false;
   el.focus();
 }
+// Home delivery asks for the town and street; pickup does not.
+const homeFields = form?.querySelector<HTMLElement>('[data-home-fields]');
+function syncDelivery() {
+  const home =
+    form?.querySelector<HTMLInputElement>('input[name=delivery]:checked')
+      ?.value === 'home';
+  if (!homeFields) return;
+  homeFields.hidden = !home;
+  homeFields
+    .querySelectorAll<HTMLInputElement | HTMLSelectElement>('input, select')
+    .forEach((el) => (el.disabled = !home));
+}
+form
+  ?.querySelectorAll('input[name=delivery]')
+  .forEach((el) => el.addEventListener('change', syncDelivery));
+syncDelivery();
 form?.addEventListener('submit', async (event) => {
   event.preventDefault();
   const button = form.querySelector<HTMLButtonElement>('button[type=submit]')!;
@@ -387,23 +403,34 @@ form?.addEventListener('submit', async (event) => {
     const lines = (order.items as { quantity: number; name: string }[]).map(
       (i) => `${i.quantity} × ${i.name}`,
     );
+    const home = order.delivery as { address: string } | undefined;
     for (const line of [
       lines.join(' · '),
-      isCa
-        ? `Total: ${money(order.total)} · Pagament en recollir`
-        : `Total: ${money(order.total)} · Pago al recoger`,
+      home
+        ? isCa
+          ? `Total: ${money(order.total)} · Pagament en rebre’l`
+          : `Total: ${money(order.total)} · Pago al recibirlo`
+        : isCa
+          ? `Total: ${money(order.total)} · Pagament en recollir`
+          : `Total: ${money(order.total)} · Pago al recoger`,
       date,
       order.pickupWindow ||
         (isCa
           ? 'Dissabte · horari de recollida confirmat amb la comanda'
           : 'Sábado · horario de recogida confirmado con el pedido'),
-      order.pickupAddress ||
-        (isCa
-          ? 'Punt de recollida a Sant Boi de Llobregat'
-          : 'Punto de recogida en Sant Boi de Llobregat'),
-      isCa
-        ? 'Et confirmarem el punt exacte de recollida amb la teva comanda.'
-        : 'Te confirmaremos el punto exacto de recogida con tu pedido.',
+      home
+        ? `${order.pickupAddress} · ${home.address}`
+        : order.pickupAddress ||
+          (isCa
+            ? 'Punt de recollida a Sant Boi de Llobregat'
+            : 'Punto de recogida en Sant Boi de Llobregat'),
+      home
+        ? isCa
+          ? 'Te’l porto a casa dins de la franja.'
+          : 'Te lo llevo a casa dentro de la franja.'
+        : isCa
+          ? 'Et confirmarem el punt exacte de recollida amb la teva comanda.'
+          : 'Te confirmaremos el punto exacto de recogida con tu pedido.',
     ]) {
       const row = document.createElement('div');
       row.textContent = line;
@@ -428,6 +455,27 @@ form?.addEventListener('submit', async (event) => {
         ? 'Consultar o canviar la reserva ↗'
         : 'Consultar o cambiar mi reserva ↗';
       result.append(support);
+    }
+    // Word of mouth: a ready-made message for a neighbour, tagged so the
+    // visits it brings show up as their own campaign.
+    if (!order.demo) {
+      const invite = new URL(location.origin + location.pathname);
+      invite.searchParams.set('utm_source', 'whatsapp');
+      invite.searchParams.set('utm_campaign', 'vecino');
+      const share = document.createElement('a');
+      share.className = 'text-link';
+      share.target = '_blank';
+      share.rel = 'noopener noreferrer';
+      share.href = `https://wa.me/?text=${encodeURIComponent(
+        (isCa
+          ? 'Acabo d’encarregar pa artesà de fermentació lenta per a dissabte. Te’l porten a casa a Sant Boi, Sant Just i Santa Coloma: '
+          : 'Acabo de encargar pan artesano de fermentación lenta para el sábado. Te lo llevan a casa en Sant Boi, Sant Just y Santa Coloma: ') +
+          invite.href,
+      )}`;
+      share.textContent = isCa
+        ? 'Passa-ho a un veí per WhatsApp ↗'
+        : 'Pásaselo a un vecino por WhatsApp ↗';
+      result.append(share);
     }
     result.hidden = false;
     result.focus();

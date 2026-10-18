@@ -10,6 +10,7 @@ import Ribbon from '../components/Ribbon.astro';
 import Crumb from '../components/Crumb.astro';
 import { brand, searchIndexable, isDemo } from '../lib/config';
 import { ui, routes, type Lang, type RouteKey } from '../lib/i18n';
+import { deliveryTowns, deliveryWindow } from '../lib/delivery';
 interface Props {
   lang?: Lang;
   route?: RouteKey;
@@ -37,9 +38,10 @@ const abs = (path: string) =>
   brand.site ? new URL(path, brand.site).href : null;
 const canonical = abs(route ? routes[route][lang] : Astro.url.pathname);
 const indexable = searchIndexable && !noindex;
+// A service-area bakery: no public address, Saturday delivery in its towns.
 const organization = {
   '@context': 'https://schema.org',
-  '@type': 'Organization',
+  '@type': 'Bakery',
   '@id': abs('/#organization'),
   name: brand.name,
   legalName: brand.legalName || undefined,
@@ -50,11 +52,26 @@ const organization = {
   email: brand.contact || undefined,
   telephone: brand.whatsapp ? `+${brand.whatsapp}` : undefined,
   sameAs: brand.instagram ? [brand.instagram] : undefined,
+  priceRange: '€',
+  currenciesAccepted: 'EUR',
+  paymentAccepted: 'Cash',
+  servesCuisine: lang === 'ca' ? 'Pa artesà' : 'Pan artesano',
+  address: {
+    '@type': 'PostalAddress',
+    addressLocality: 'Sant Boi de Llobregat',
+    addressRegion: 'Barcelona',
+    addressCountry: 'ES',
+  },
   areaServed: [
+    ...deliveryTowns.map((town) => ({ '@type': 'City', name: town.name })),
     { '@type': 'AdministrativeArea', name: 'Baix Llobregat' },
-    { '@type': 'City', name: 'Sant Boi de Llobregat' },
-    { '@type': 'City', name: 'Santa Coloma de Cervelló' },
   ],
+  openingHoursSpecification: {
+    '@type': 'OpeningHoursSpecification',
+    dayOfWeek: 'https://schema.org/Saturday',
+    opens: deliveryWindow.split('–')[0],
+    closes: deliveryWindow.split('–')[1],
+  },
 };
 const website = {
   '@context': 'https://schema.org',
@@ -191,8 +208,8 @@ const graph = [organization, website, webpage, ...jsonLd];
           <a class="nav-hide" href={`${home}#proceso`}>
             {t.nav.process}
           </a>
-          <a class="nav-hide" href={routes.pickup[lang]}>
-            {t.nav.pickup}
+          <a class="nav-hide" href={routes.delivery[lang]}>
+            {t.nav.delivery}
           </a>
           <a class="nav-hide" href={`${home}#preguntas`}>
             {t.nav.faq}
@@ -249,6 +266,7 @@ const graph = [organization, website, webpage, ...jsonLd];
         </p>
         <div class="footer-links">
           <a href={routes.poolish[lang]}>Poolish</a>
+          <a href={routes.delivery[lang]}>{t.nav.delivery}</a>
           <a href={routes.pickup[lang]}>{t.nav.pickup}</a>
           {route && (
             <a href={routes[route][other]} hreflang={other} lang={other}>

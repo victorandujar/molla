@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { AppError, type Lang } from './messages';
 import { sources } from './sources';
+import { townById } from './delivery';
 export type { Lang };
 const lang = z.enum(['es', 'ca']).default('es');
 export const reservationSchema = z
@@ -31,11 +32,23 @@ export const reservationSchema = z
     privacy: z.literal('yes', { error: 'privacy' }),
     website: z.string().max(0).default(''),
     source: z.enum(sources).default('direct'),
+    // Home delivery needs a town in the zone and a street address.
+    delivery: z.enum(['home', 'pickup']).default('pickup'),
+    town: z.string().default(''),
+    address: z.string().trim().max(160, 'address').default(''),
     lang,
   })
   .refine((o) => o.quantity + o.banana > 0, {
     message: 'empty',
     path: ['quantity'],
+  })
+  .refine((o) => o.delivery === 'pickup' || townById(o.town), {
+    message: 'town',
+    path: ['town'],
+  })
+  .refine((o) => o.delivery === 'pickup' || o.address.length >= 5, {
+    message: 'address',
+    path: ['address'],
   });
 export const waitlistSchema = z.object({
   email: z
@@ -166,6 +179,8 @@ export type Order = {
   emailStatus: 'PENDING' | 'SENT' | 'FAILED' | 'DISABLED';
   // Absent on orders created before emails were translated.
   lang?: Lang;
+  // Home delivery; absent on pickup orders. The purge removes `address`.
+  delivery?: { town: string; address?: string };
   // Absent on orders created before banana bread could be ordered online:
   // those are `quantity` loaves of `productName`.
   items?: OrderItem[];

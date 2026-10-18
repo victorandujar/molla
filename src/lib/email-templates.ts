@@ -44,6 +44,11 @@ const langOf = (o: Order): Lang => (o.lang === 'ca' ? 'ca' : 'es');
 const privacyPath = { es: '/privacidad', ca: '/privacitat' };
 // Catalan dates read "dissabte, 26 de setembre"; after "el" they stay lowercase.
 const onDay = (o: Order) => pickupDay(o.pickupDate, langOf(o)).toLowerCase();
+// Delivery orders show the street under the town; pickup orders the note.
+const where = (o: Order) =>
+  o.delivery?.address
+    ? `${o.pickupAddress}, ${o.delivery.address}`
+    : o.pickupAddress;
 const copy = {
   es: {
     footer: 'Pan de poolish por encargo',
@@ -59,9 +64,12 @@ const copy = {
     order: 'Tu pedido',
     total: 'Total',
     payLater: 'pago al recoger',
+    payOnDelivery: 'pago al recibirlo',
     when: 'Cuándo',
     where: 'Dónde',
     pickupNote: 'Te confirmaremos el punto exacto de recogida con tu pedido.',
+    deliveryNote:
+      'Te lo llevo a casa dentro de la franja. Si necesito confirmar algo, te escribo por WhatsApp.',
     changes:
       '¿Cambios o no puedes venir? Responde a este email con tu código antes del cierre de pedidos y la hogaza pasará a otra persona.',
     changesText: (contact: string) =>
@@ -73,6 +81,8 @@ const copy = {
     reminderHeading: (o: Order) =>
       `${firstName(o.name)}, tu pan sale del horno el ${onDay(o)}.`,
     reminderIntro: 'Ven dentro de la franja con tu código. Se paga al recoger.',
+    reminderDelivery:
+      'Te lo llevo a casa dentro de la franja. Se paga al recibirlo.',
     reminderCancel:
       '¿Al final no puedes venir? Responde a este email cuanto antes: así la hogaza no se desperdicia.',
     toPay: 'A pagar al recoger',
@@ -97,10 +107,13 @@ const copy = {
     order: 'La teva comanda',
     total: 'Total',
     payLater: 'pagament en recollir',
+    payOnDelivery: 'pagament en rebre’l',
     when: 'Quan',
     where: 'On',
     pickupNote:
       'Et confirmarem el punt exacte de recollida amb la teva comanda.',
+    deliveryNote:
+      'Te’l porto a casa dins de la franja. Si he de confirmar alguna cosa, t’escric per WhatsApp.',
     changes:
       'Canvis o no pots venir? Respon aquest correu amb el teu codi abans del tancament de comandes i el pa passarà a una altra persona.',
     changesText: (contact: string) =>
@@ -113,6 +126,8 @@ const copy = {
       `${firstName(o.name)}, el teu pa surt del forn ${onDay(o)}.`,
     reminderIntro:
       'Vine dins de la franja amb el teu codi. Es paga en recollir.',
+    reminderDelivery:
+      'Te’l porto a casa dins de la franja. Es paga en rebre’l.',
     reminderCancel:
       'Al final no pots venir? Respon aquest correu com més aviat millor: així el pa no es malbarata.',
     toPay: 'A pagar en recollir',
@@ -192,11 +207,11 @@ export function confirmationText(o: Order) {
 ${t.heading}. ${t.confirmed}.
 
 ${t.code}: ${o.code}
-${orderSummary(o)} — ${money(o.total)} (${t.payLater})
+${orderSummary(o)} — ${money(o.total)} (${o.delivery ? t.payOnDelivery : t.payLater})
 
 ${t.when}: ${pickupDay(o.pickupDate, langOf(o))}, ${o.pickupWindow}
-${t.where}: ${o.pickupAddress}
-${t.pickupNote}
+${t.where}: ${where(o)}
+${o.delivery ? t.deliveryNote : t.pickupNote}
 
 ${t.changesText(brand.contact)}
 
@@ -229,7 +244,7 @@ function pickupBlock(o: Order, totalLabel: string) {
       ],
       [
         t.where,
-        `${esc(o.pickupAddress)}<br><span style="font-size:13px;color:${c.muted};">${esc(t.pickupNote)}</span>`,
+        `${esc(o.pickupAddress)}${o.delivery?.address ? `<br>${esc(o.delivery.address)}` : ''}<br><span style="font-size:13px;color:${c.muted};">${esc(o.delivery ? t.deliveryNote : t.pickupNote)}</span>`,
       ],
     ])}
   </table>
@@ -262,7 +277,7 @@ export function confirmationHtml(o: Order) {
       `${t.heading}, ${esc(firstName(o.name))}.`,
       esc(t.intro(o)),
     ) +
-    pickupBlock(o, t.payLater) +
+    pickupBlock(o, o.delivery ? t.payOnDelivery : t.payLater) +
     closing('', t.changes);
   return layout(
     lang,
@@ -280,13 +295,13 @@ export function reminderText(o: Order) {
   const t = copy[lang];
   return `${t.hello} ${firstName(o.name)},
 
-${t.reminderIntro}
+${o.delivery ? t.reminderDelivery : t.reminderIntro}
 
 ${t.code}: ${o.code}
-${orderSummary(o)} — ${money(o.total)} (${t.payLater})
+${orderSummary(o)} — ${money(o.total)} (${o.delivery ? t.payOnDelivery : t.payLater})
 ${t.when}: ${pickupDay(o.pickupDate, lang)}, ${o.pickupWindow}
-${t.where}: ${o.pickupAddress}
-${t.pickupNote}
+${t.where}: ${where(o)}
+${o.delivery ? t.deliveryNote : t.pickupNote}
 
 ${t.reminderCancel}
 
@@ -297,7 +312,11 @@ export function reminderHtml(o: Order) {
   const lang = langOf(o);
   const t = copy[lang];
   const content =
-    intro(t.reminderKicker, esc(t.reminderHeading(o)), t.reminderIntro) +
+    intro(
+      t.reminderKicker,
+      esc(t.reminderHeading(o)),
+      o.delivery ? t.reminderDelivery : t.reminderIntro,
+    ) +
     pickupBlock(o, t.toPay.toLowerCase()) +
     closing('', t.reminderCancel);
   return layout(
@@ -340,7 +359,12 @@ ${orderSummary(o)} — ${money(o.total)}
 Nombre: ${o.name}
 Email: ${o.email}
 Teléfono: ${o.phone}
-Recogida: ${pickupDay(o.pickupDate)}, ${o.pickupWindow}
+${o.delivery ? 'Entrega a domicilio' : 'Recogida'}: ${pickupDay(o.pickupDate)}, ${o.pickupWindow}${
+    o.delivery
+      ? `
+Dirección: ${where(o)}`
+      : ''
+  }
 Canal: ${o.source}
 Referencia interna: ${o.id}`;
 }
@@ -351,7 +375,7 @@ export function ownerHtml(o: Order) {
 <tr><td class="pad" style="padding:40px 40px 8px;">
   <p style="margin:0 0 10px;font-family:${body};font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:${c.tile};">Nueva reserva · ${esc(o.code)}</p>
   <h1 class="h1" style="margin:0;font-family:${display};font-size:38px;line-height:1.05;font-weight:800;color:${c.ink};">${esc(orderSummary(o, '\n')).replaceAll('\n', '<br>')}</h1>
-  <p style="margin:12px 0 0;font-family:${body};font-size:16px;color:${c.muted};">${money(o.total)} a cobrar al recoger · ${esc(pickupDay(o.pickupDate))}</p>
+  <p style="margin:12px 0 0;font-family:${body};font-size:16px;color:${c.muted};">${money(o.total)} a cobrar ${o.delivery ? 'en la entrega' : 'al recoger'} · ${esc(pickupDay(o.pickupDate))}</p>
 </td></tr>
 <tr><td class="pad" style="padding:20px 40px 40px;">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
@@ -359,6 +383,9 @@ export function ownerHtml(o: Order) {
       ['Nombre', esc(o.name)],
       ['Teléfono', `<a href="tel:${esc(tel)}">${esc(o.phone)}</a>`],
       ['Email', `<a href="mailto:${esc(o.email)}">${esc(o.email)}</a>`],
+      ...(o.delivery
+        ? ([['Entrega', esc(where(o))]] as [string, string][])
+        : []),
       ['Canal', esc(o.source)],
       ['Código', `<strong>${esc(o.code)}</strong>`],
     ])}
