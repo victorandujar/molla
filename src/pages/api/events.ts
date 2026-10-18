@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { isDemo, launchReady } from '../../lib/config';
 import { recordEvent } from '../../lib/store';
 import { sameOrigin } from '../../lib/http';
+import { sources } from '../../lib/sources';
 export const events = [
   'landing_view',
   'view_current_bake',
@@ -16,7 +17,7 @@ export const events = [
 ] as const;
 const schema = z.object({
   event: z.enum(events),
-  source: z.enum(['instagram', 'google', 'whatsapp', 'direct', 'referral']),
+  source: z.enum(sources),
 });
 const done = () => new Response(null, { status: 204 });
 // Cookie-free funnel counters: event name, channel and day. Nothing else.
