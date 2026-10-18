@@ -242,6 +242,20 @@ const steps = [
                     {o.email}
                   </a>
                 </p>
+                {o.delivery && (
+                  <p class="admin-contact">
+                    <strong>A domicilio · {o.delivery.town}</strong>
+                    {o.delivery.address && (
+                      <a
+                        href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${o.delivery.address}, ${o.delivery.town}`)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {o.delivery.address} ↗
+                      </a>
+                    )}
+                  </p>
+                )}
                 <p class="admin-meta">
                   Email {o.emailStatus.toLowerCase()} · Recordatorio{' '}
                   {o.reminderSentAt ? 'enviado' : 'no enviado'} · {o.source}

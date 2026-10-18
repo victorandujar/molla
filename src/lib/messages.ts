@@ -11,7 +11,9 @@ export const messages = {
     name: 'Escribe tu nombre.',
     email: 'Revisa tu email.',
     phone: 'Revisa tu teléfono.',
-    pickup: 'Confirma que podrás recoger el pan.',
+    pickup: 'Confirma la entrega o la recogida del pedido.',
+    town: 'Elige tu municipio para la entrega a domicilio.',
+    address: 'Escribe la dirección de entrega: calle, número y piso.',
     privacy: 'Necesitamos tu aceptación para gestionar el pedido.',
     capacity:
       'Esta hornada ya no admite esa cantidad. Puedes apuntarte a la próxima.',
@@ -37,7 +39,9 @@ export const messages = {
     name: 'Escriu el teu nom.',
     email: 'Revisa el correu electrònic.',
     phone: 'Revisa el telèfon.',
-    pickup: 'Confirma que podràs recollir el pa.',
+    pickup: 'Confirma el lliurament o la recollida de la comanda.',
+    town: 'Tria el teu municipi per a l’entrega a domicili.',
+    address: 'Escriu l’adreça d’entrega: carrer, número i pis.',
     privacy: 'Necessitem la teva acceptació per gestionar la comanda.',
     capacity:
       'Aquesta fornada ja no admet aquesta quantitat. Pots apuntar-te a la propera.',

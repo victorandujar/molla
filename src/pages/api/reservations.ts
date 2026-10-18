@@ -30,6 +30,7 @@ export const POST: APIRoute = async (ctx) => {
         pickupDate: order.pickupDate,
         pickupAddress: order.pickupAddress,
         pickupWindow: order.pickupWindow,
+        delivery: order.delivery,
         contact: brand.contact,
         demo: isDemo,
       },

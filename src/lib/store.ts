@@ -8,6 +8,7 @@ import {
   BANANA_HALVES_PER_BAKE,
 } from './config';
 import { ui } from './i18n';
+import { deliveryWindow, townById } from './delivery';
 import { AppError } from './messages';
 import {
   assertCapacity,
@@ -175,6 +176,7 @@ export async function reserve(
   input: ReservationInput & { lang: Lang },
 ): Promise<Order> {
   const items = itemsFor(input, input.lang);
+  const town = input.delivery === 'home' ? townById(input.town) : undefined;
   const order: Order = {
     id: randomUUID(),
     code: '',
@@ -189,8 +191,11 @@ export async function reserve(
     total: items.reduce((n, i) => n + i.unitPrice * i.quantity, 0),
     items,
     pickupDate: bake.pickupDate,
-    pickupAddress: brand.pickupLabel[input.lang],
-    pickupWindow: bake.pickupWindow,
+    pickupAddress: town
+      ? ui[input.lang].reserve.deliveryLabel(town.name)
+      : brand.pickupLabel[input.lang],
+    pickupWindow: town ? deliveryWindow : bake.pickupWindow,
+    delivery: town ? { town: town.name, address: input.address } : undefined,
     source: input.source,
     status: 'CONFIRMED',
     createdAt: new Date().toISOString(),
@@ -247,7 +252,7 @@ export async function reserve(
     );
     assertBanana(count?.banana || 0, input.banana);
     order.pickupDate = new Date(b.pickup_date).toISOString();
-    order.pickupWindow = b.pickup_window || brand.pickupWindow;
+    if (!town) order.pickupWindow = b.pickup_window || brand.pickupWindow;
     // The bake row is locked, so no concurrent reservation can take the same code.
     do order.code = pickupCode(b.number, randomBytes(4));
     while ((await tx`SELECT 1 FROM orders WHERE code=${order.code}`).length);

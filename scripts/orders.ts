@@ -11,7 +11,8 @@ const [arg] = rest.filter((a) => !a.startsWith('--'));
 const url = process.env.DATABASE_URL;
 const sql = url ? postgres(url, { max: 1 }) : null;
 const writes = ['cancel', 'collected', 'purge'].includes(command);
-if (url) console.log(`Base de datos: ${new URL(url).host}${new URL(url).pathname}`);
+if (url)
+  console.log(`Base de datos: ${new URL(url).host}${new URL(url).pathname}`);
 try {
   if (writes && !sql)
     throw new Error('Los cambios requieren la base de datos configurada.');
@@ -23,7 +24,9 @@ try {
     const ref = arg?.trim().toUpperCase() || '';
     const uuid = /^[0-9A-F-]{36}$/.test(ref);
     if (!uuid && !pickupCodePattern.test(ref))
-      throw new Error('Indica el código (001-K7QM) o la referencia del pedido.');
+      throw new Error(
+        'Indica el código (001-K7QM) o la referencia del pedido.',
+      );
     const status = command === 'cancel' ? 'CANCELLED' : 'COLLECTED';
     const rows =
       await sql!`UPDATE orders SET status=${status},snapshot=jsonb_set(snapshot,'{status}',${sql!.json(status)}) WHERE ${uuid ? sql!`id=${ref.toLowerCase()}` : sql!`code=${ref}`} AND status='CONFIRMED' RETURNING id`;
@@ -33,13 +36,14 @@ try {
   } else if (command === 'purge') {
     // npm run orders -- purge --months=12 --yes
     // Anonymises orders whose pickup is older than N months. Totals, quantities,
-    // dates and channels stay for the metrics; names and contact details go.
+    // dates, channels and delivery towns stay for the metrics; names, contact
+    // details and street addresses go.
     const months = Number(flags.months);
     if (!Number.isInteger(months) || months < 1)
       throw new Error('Indica --months=N (mínimo 1).');
     await sql!.begin(async (tx) => {
       const orders =
-        await tx`UPDATE orders o SET snapshot = o.snapshot || '{"name":"—","email":"","phone":""}'::jsonb FROM bakes b WHERE o.bake_id=b.id AND b.pickup_date < now() - make_interval(months => ${months}) AND o.snapshot->>'email' <> '' RETURNING o.customer_id`;
+        await tx`UPDATE orders o SET snapshot = (o.snapshot || '{"name":"—","email":"","phone":""}'::jsonb) #- '{delivery,address}' FROM bakes b WHERE o.bake_id=b.id AND b.pickup_date < now() - make_interval(months => ${months}) AND o.snapshot->>'email' <> '' RETURNING o.customer_id`;
       // A customer with a more recent order keeps their details.
       const customers =
         await tx`UPDATE customers c SET email='anonimo-' || c.id, name='—', phone='' WHERE c.email NOT LIKE 'anonimo-%' AND NOT EXISTS (SELECT 1 FROM orders o JOIN bakes b ON b.id=o.bake_id WHERE o.customer_id=c.id AND b.pickup_date >= now() - make_interval(months => ${months})) RETURNING c.id`;
@@ -83,8 +87,12 @@ try {
       await writeFile(
         arg,
         [
-          fields.join(','),
-          ...orders.map((o) => fields.map((f) => csvCell(o[f])).join(',')),
+          [...fields, 'deliveryTown', 'deliveryAddress'].join(','),
+          ...orders.map((o) =>
+            [...fields.map((f) => o[f]), o.delivery?.town, o.delivery?.address]
+              .map(csvCell)
+              .join(','),
+          ),
         ].join('\n'),
         { mode: 0o600 },
       );
@@ -113,7 +121,10 @@ try {
               return { event, source, n };
             },
           );
-      const totals: Record<string, { total: number; bySource: Record<string, number> }> = {};
+      const totals: Record<
+        string,
+        { total: number; bySource: Record<string, number> }
+      > = {};
       for (const r of rows) {
         const e = (totals[r.event] ??= { total: 0, bySource: {} });
         e.total += r.n;
