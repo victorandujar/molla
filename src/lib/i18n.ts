@@ -81,14 +81,14 @@ export const ui = {
     switchAria: 'Llegeix aquesta pàgina en català',
     footer: {
       line: 'Pan artesanal de fermentación lenta, por encargo.',
-      area: `Pan a domicilio los sábados ${hours.es} en Sant Boi, Sant Just Desvern y Santa Coloma de Cervelló · Recogida en Sant Boi de Llobregat`,
+      area: `Pan a domicilio los miércoles y los sábados ${hours.es} en Sant Boi, Sant Just Desvern y Santa Coloma de Cervelló · Recogida en Sant Boi de Llobregat`,
       privacy: 'Privacidad y condiciones',
       write: 'Escríbeme ↗',
       channel: 'Canal de WhatsApp',
     },
     meta: {
       title: `Pan artesano a domicilio en Sant Boi y Sant Just Desvern · ${brand.name}`,
-      description: `Pan de fermentación lenta y banana bread con harina ecológica, hechos a mano en el Baix Llobregat. Reserva online y te lo llevo a casa el sábado ${hours.es} en Sant Boi, Sant Just Desvern y Santa Coloma.`,
+      description: `Pan de fermentación lenta y banana bread con harina ecológica, hechos a mano en el Baix Llobregat. Reserva online y te lo llevo a casa el miércoles o el sábado ${hours.es} en Sant Boi, Sant Just Desvern y Santa Coloma.`,
       ogAlt: 'Hogazas de corteza tostada recién cortadas',
     },
     status: {
@@ -101,15 +101,15 @@ export const ui = {
     hero: {
       h1a: 'Pan artesanal',
       h1b: 'por encargo',
-      sub: `Cada sábado ${hours.es}, a domicilio en Sant Boi, Sant Just Desvern y Santa Coloma.`,
-      lede: 'Amaso a mano una hornada pequeña cada semana, con harinas ecológicas, poolish y hasta 35 horas de fermentación lenta. Tú lo reservas aquí y el sábado te lo llevo a casa, o lo recoges en Sant Boi.',
+      sub: `Cada miércoles y cada sábado ${hours.es}, a domicilio en Sant Boi, Sant Just Desvern y Santa Coloma.`,
+      lede: 'Amaso a mano dos hornadas pequeñas cada semana, con harinas ecológicas, poolish y hasta 35 horas de fermentación lenta. Tú lo reservas aquí y el miércoles o el sábado te lo llevo a casa, o lo recoges en Sant Boi.',
       kicker: 'Panadería de barrio · Baix Llobregat',
       keywords: [
         'Harinas ecológicas',
         'Poolish',
         'Hasta 35 h de fermentación',
         'Hecho a mano',
-        'A domicilio el sábado',
+        'A domicilio miércoles y sábado',
         'Baix Llobregat',
       ],
       order: 'Reservar hogaza',
@@ -125,7 +125,7 @@ export const ui = {
         ['Hornada pequeña', 'Pocas hogazas, hechas de una en una.'],
         [
           'A domicilio',
-          `Sábados ${hours.es} en Sant Boi, Sant Just y Santa Coloma.`,
+          `Miércoles y sábados ${hours.es} en Sant Boi, Sant Just y Santa Coloma.`,
         ],
       ],
       nextBake: 'Próxima hornada',
@@ -182,7 +182,7 @@ export const ui = {
       h2a: 'Dos piezas,',
       h2b: 'hechas sin prisa.',
       intro:
-        'Cada semana horneo solo lo que se reserva. Añade lo que te apetezca a tu pedido y el sábado es tuyo.',
+        'Cada semana horneo solo lo que se reserva. Añade lo que te apetezca a tu pedido y el día de entrega es tuyo.',
       loaf: 'La de cada semana',
       bananaWhole: 'Banana bread entero',
       bananaHalf: 'Medio banana bread',
@@ -284,7 +284,7 @@ export const ui = {
       h2a: 'Capas.',
       h2b: 'Siete pasos, ningún atajo.',
       intro:
-        'Mantequilla, plegar, estirar, cortar, enrollar, pintar y horno. Croissants y pains au chocolat de masa laminada, hechos a mano para el sábado. Por unidades.',
+        'Mantequilla, plegar, estirar, cortar, enrollar, pintar y horno. Croissants y pains au chocolat de masa laminada, hechos a mano solo para la hornada del sábado. Por unidades.',
       unit: 'La unidad',
       steps: [
         'Mantequilla',
@@ -307,6 +307,8 @@ export const ui = {
       less: (name: string) => `Quitar un ${name}`,
       more: (name: string) => `Añadir un ${name}`,
       notify: 'Avísame cuando haya',
+      saturdayOnly:
+        'Solo para la hornada del sábado: se reserva desde el domingo a las 20 h.',
     },
     organic: {
       kicker: 'Harina',
@@ -334,23 +336,23 @@ export const ui = {
         capital(madridParts('es', pickup).weekday),
       steps: [
         {
-          when: 'Hasta el jueves, 20:00',
+          when: 'Hasta el cierre, 20:00',
           title: 'Reservas',
           text: 'Cierro pedidos y sé exactamente cuántas hogazas hacer. Ni una de más.',
         },
         {
-          when: 'Desde el jueves',
+          when: 'Después del cierre',
           title: 'Fermentación lenta',
           time: 'Hasta 35 h',
           text: 'Poolish, amasado con pliegues a mano, formado y una larga fermentación en frío. Sin prisa: ahí nacen el sabor, el aroma y la miga.',
         },
         {
-          when: 'Sábado por la mañana',
+          when: 'La mañana de la entrega',
           title: 'Horno',
           text: 'Corteza oscura que cruje, miga abierta y húmeda.',
         },
         {
-          when: 'Sábado',
+          when: 'Miércoles o sábado',
           title: 'A tu casa',
           text: `Te lo llevo ${hours.es} a Sant Boi, Sant Just o Santa Coloma, o lo recoges en Sant Boi. Pagas al recibirlo.`,
         },
@@ -365,7 +367,7 @@ export const ui = {
       altDough: 'Dos masas formadas reposando en sus cestas de fermentación',
     },
     reserve: {
-      kicker: 'Pedido para el sábado',
+      kicker: 'Pedido para la próxima hornada',
       h2: 'Reserva tu pedido.',
       bananaQty: 'Banana bread',
       bananaHint: 'Por mitades: ½, 1, 1½ o 2',
@@ -376,14 +378,14 @@ export const ui = {
       totalLabel: 'Total a pagar al recibirlo',
       pickup: 'Entrega',
       where: 'Dónde',
-      pickupLocation: `A domicilio, sábado ${hours.es}`,
+      pickupLocation: `A domicilio, ${hours.es}`,
       pickupDetails:
         'En Sant Boi de Llobregat, Sant Just Desvern y Santa Coloma de Cervelló. Si vives en otro municipio del Baix Llobregat, lo recoges en Sant Boi: te confirmo el punto exacto con tu pedido.',
       windowPending: 'Recogida en Sant Boi · horario confirmado con el pedido',
       pickupInfo: 'Zonas y horario de reparto',
       standingCta: '¿Lo quieres cada semana? Pan fijo',
       deliveryH: '¿Cómo lo quieres?',
-      deliveryHome: `A domicilio · sábado ${hours.es}`,
+      deliveryHome: `A domicilio · ${hours.es}`,
       deliveryHomeHint:
         'Sant Boi, Sant Just Desvern y Santa Coloma de Cervelló',
       deliveryPickup: 'Lo recojo en Sant Boi',
@@ -418,7 +420,7 @@ export const ui = {
       submitDemo: 'Probar reserva',
       submit: 'Confirmar reserva',
       footnote:
-        'Pagas al recibirlo. Cancelas con un clic hasta el jueves a las 20:00. Sin cuenta ni suscripciones.',
+        'Pagas al recibirlo. Cancelas con un clic hasta el cierre de la hornada. Sin cuenta ni suscripciones.',
       giftH: 'Regalo de bienvenida',
       gift: 'Si es tu primera comanda, te regalo un cuarto de banana bread y un chutney de pimiento rojo y tomate.',
       giftAllergens:
@@ -462,11 +464,11 @@ export const ui = {
         ],
         [
           '¿Hacéis entrega a domicilio?',
-          `Sí, los sábados ${hours.es} en Sant Boi de Llobregat, Sant Just Desvern y Santa Coloma de Cervelló, sin coste de envío. Al reservar eliges «A domicilio» y escribes tu dirección. Pagas al recibirlo.`,
+          `Sí, los miércoles y los sábados ${hours.es} en Sant Boi de Llobregat, Sant Just Desvern y Santa Coloma de Cervelló, sin coste de envío. Al reservar eliges «A domicilio» y escribes tu dirección. Pagas al recibirlo.`,
         ],
         [
           '¿Lleváis pan a Sant Just Desvern?',
-          `Sí. Cada sábado reparto en Sant Just Desvern ${hours.es}, igual que en Sant Boi y Santa Coloma de Cervelló. Reserva antes del cierre de pedidos del jueves.`,
+          `Sí. Cada miércoles y cada sábado reparto en Sant Just Desvern ${hours.es}, igual que en Sant Boi y Santa Coloma de Cervelló. Reserva antes del cierre de pedidos: el domingo para el miércoles y el jueves para el sábado, a las 20:00.`,
         ],
         [
           '¿Cómo lo conservo?',
@@ -511,14 +513,14 @@ export const ui = {
       fig: '(Fig. 1) Pan de miga, partido por la mitad',
       ferment: 'Fermentado hasta 35 h',
       steps: [
-        'Reserva aquí, hasta el jueves a las 20 h',
-        `Entrega gratuita el sábado ${hours.es} · Sant Boi, Sant Just Desvern y Santa Coloma de Cervelló`,
+        'Para el miércoles, hasta el domingo a las 20 h · para el sábado, hasta el jueves a las 20 h',
+        `Entrega gratuita miércoles y sábado ${hours.es} · Sant Boi, Sant Just Desvern y Santa Coloma de Cervelló`,
         'Pagas al recibirlo',
       ],
       diary: 'Diario del obrador',
       swipe: 'Desliza',
       menuBar: 'Del horno a tu mesa',
-      processBar: 'Jueves → sábado',
+      processBar: 'Dos hornadas por semana',
       flourBar: 'Sin mejorantes',
       makerBar: 'Baix Llobregat',
       reserveBar: 'Sin tarjeta ni cuenta',
@@ -552,14 +554,14 @@ export const ui = {
     switchAria: 'Lee esta página en castellano',
     footer: {
       line: 'Pa artesà de fermentació lenta, per encàrrec.',
-      area: `Pa a domicili els dissabtes ${hours.ca} a Sant Boi, Sant Just Desvern i Santa Coloma de Cervelló · Recollida a Sant Boi de Llobregat`,
+      area: `Pa a domicili els dimecres i els dissabtes ${hours.ca} a Sant Boi, Sant Just Desvern i Santa Coloma de Cervelló · Recollida a Sant Boi de Llobregat`,
       privacy: 'Privacitat i condicions',
       write: 'Escriu-me ↗',
       channel: 'Canal de WhatsApp',
     },
     meta: {
       title: `Pa artesà a domicili a Sant Boi i Sant Just Desvern · ${brand.name}`,
-      description: `Pa de fermentació lenta i banana bread amb farina ecològica, fets a mà al Baix Llobregat. Reserva en línia i te’l porto a casa dissabte ${hours.ca} a Sant Boi, Sant Just Desvern i Santa Coloma.`,
+      description: `Pa de fermentació lenta i banana bread amb farina ecològica, fets a mà al Baix Llobregat. Reserva en línia i te’l porto a casa dimecres o dissabte ${hours.ca} a Sant Boi, Sant Just Desvern i Santa Coloma.`,
       ogAlt: 'Pans de crosta torrada acabats de tallar',
     },
     status: {
@@ -572,15 +574,15 @@ export const ui = {
     hero: {
       h1a: 'Pa artesà',
       h1b: 'per encàrrec',
-      sub: `Cada dissabte ${hours.ca}, a domicili a Sant Boi, Sant Just Desvern i Santa Coloma.`,
-      lede: 'Pasto a mà una fornada petita cada setmana, amb farines ecològiques, poolish i fins a 35 hores de fermentació lenta. Tu el reserves aquí i dissabte te’l porto a casa, o el reculls a Sant Boi.',
+      sub: `Cada dimecres i cada dissabte ${hours.ca}, a domicili a Sant Boi, Sant Just Desvern i Santa Coloma.`,
+      lede: 'Pasto a mà dues fornades petites cada setmana, amb farines ecològiques, poolish i fins a 35 hores de fermentació lenta. Tu el reserves aquí i dimecres o dissabte te’l porto a casa, o el reculls a Sant Boi.',
       kicker: 'Fleca de barri · Baix Llobregat',
       keywords: [
         'Farines ecològiques',
         'Poolish',
         'Fins a 35 h de fermentació',
         'Fet a mà',
-        'A domicili dissabte',
+        'A domicili dimecres i dissabte',
         'Baix Llobregat',
       ],
       order: 'Reservar pa',
@@ -596,7 +598,7 @@ export const ui = {
         ['Fornada petita', 'Pocs pans, fets d’un en un.'],
         [
           'A domicili',
-          `Dissabtes ${hours.ca} a Sant Boi, Sant Just i Santa Coloma.`,
+          `Dimecres i dissabtes ${hours.ca} a Sant Boi, Sant Just i Santa Coloma.`,
         ],
       ],
       nextBake: 'Propera fornada',
@@ -653,7 +655,7 @@ export const ui = {
       h2a: 'Dues peces,',
       h2b: 'fetes sense pressa.',
       intro:
-        'Cada setmana només cou el que es reserva. Afegeix el que et vingui de gust a la comanda i el dissabte és teu.',
+        'Cada setmana només cou el que es reserva. Afegeix el que et vingui de gust a la comanda i el dia d’entrega és teu.',
       loaf: 'El de cada setmana',
       bananaWhole: 'Banana bread sencer',
       bananaHalf: 'Mig banana bread',
@@ -753,7 +755,7 @@ export const ui = {
       h2a: 'Capes.',
       h2b: 'Set passos, cap drecera.',
       intro:
-        'Mantega, plegar, estirar, tallar, enrotllar, pintar i forn. Croissants i pains au chocolat de massa fullada, fets a mà per a dissabte. Per unitats.',
+        'Mantega, plegar, estirar, tallar, enrotllar, pintar i forn. Croissants i pains au chocolat de massa fullada, fets a mà només per a la fornada de dissabte. Per unitats.',
       unit: 'La unitat',
       steps: [
         'Mantega',
@@ -776,6 +778,8 @@ export const ui = {
       less: (name: string) => `Treure un ${name}`,
       more: (name: string) => `Afegir un ${name}`,
       notify: 'Avisa’m quan n’hi hagi',
+      saturdayOnly:
+        'Només per a la fornada de dissabte: es reserva des de diumenge a les 20 h.',
     },
     organic: {
       kicker: 'Farina',
@@ -803,23 +807,23 @@ export const ui = {
         capital(madridParts('ca', pickup).weekday),
       steps: [
         {
-          when: 'Fins dijous, 20:00',
+          when: 'Fins al tancament, 20:00',
           title: 'Reserves',
           text: 'Tanco comandes i sé exactament quants pans he de fer. Ni un de més.',
         },
         {
-          when: 'Des de dijous',
+          when: 'Després del tancament',
           title: 'Fermentació lenta',
           time: 'Fins a 35 h',
           text: 'Poolish, pastat amb plecs a mà, formació i una llarga fermentació en fred. Sense presses: aquí neixen el gust, l’aroma i la molla.',
         },
         {
-          when: 'Dissabte al matí',
+          when: 'El matí de l’entrega',
           title: 'Forn',
           text: 'Crosta fosca que cruix, molla oberta i humida.',
         },
         {
-          when: 'Dissabte',
+          when: 'Dimecres o dissabte',
           title: 'A casa teva',
           text: `Te’l porto ${hours.ca} a Sant Boi, Sant Just o Santa Coloma, o el reculls a Sant Boi. Pagues en rebre’l.`,
         },
@@ -835,7 +839,7 @@ export const ui = {
         'Dues masses formades reposant als seus cistells de fermentació',
     },
     reserve: {
-      kicker: 'Comanda per a dissabte',
+      kicker: 'Comanda per a la propera fornada',
       h2: 'Reserva la teva comanda.',
       bananaQty: 'Banana bread',
       bananaHint: 'Per meitats: ½, 1, 1½ o 2',
@@ -846,14 +850,14 @@ export const ui = {
       totalLabel: 'Total a pagar en rebre’l',
       pickup: 'Entrega',
       where: 'On',
-      pickupLocation: `A domicili, dissabte ${hours.ca}`,
+      pickupLocation: `A domicili, ${hours.ca}`,
       pickupDetails:
         'A Sant Boi de Llobregat, Sant Just Desvern i Santa Coloma de Cervelló. Si vius en un altre municipi del Baix Llobregat, el reculls a Sant Boi: et confirmo el punt exacte amb la comanda.',
       windowPending: 'Recollida a Sant Boi · horari confirmat amb la comanda',
       pickupInfo: 'Zones i horari de repartiment',
       standingCta: 'El vols cada setmana? Pa fix',
       deliveryH: 'Com el vols?',
-      deliveryHome: `A domicili · dissabte ${hours.ca}`,
+      deliveryHome: `A domicili · ${hours.ca}`,
       deliveryHomeHint:
         'Sant Boi, Sant Just Desvern i Santa Coloma de Cervelló',
       deliveryPickup: 'El recullo a Sant Boi',
@@ -888,7 +892,7 @@ export const ui = {
       submitDemo: 'Provar la reserva',
       submit: 'Confirmar la reserva',
       footnote:
-        'Pagues en rebre’l. Cancel·les amb un clic fins dijous a les 20:00. Sense compte ni subscripcions.',
+        'Pagues en rebre’l. Cancel·les amb un clic fins al tancament de la fornada. Sense compte ni subscripcions.',
       giftH: 'Regal de benvinguda',
       gift: 'Si és la teva primera comanda, et regalo un quart de banana bread i un chutney de pebrot vermell i tomàquet.',
       giftAllergens:
@@ -931,11 +935,11 @@ export const ui = {
         ],
         [
           'Feu entrega a domicili?',
-          `Sí, els dissabtes ${hours.ca} a Sant Boi de Llobregat, Sant Just Desvern i Santa Coloma de Cervelló, sense cost d’enviament. En reservar tries «A domicili» i escrius la teva adreça. Pagues en rebre’l.`,
+          `Sí, els dimecres i els dissabtes ${hours.ca} a Sant Boi de Llobregat, Sant Just Desvern i Santa Coloma de Cervelló, sense cost d’enviament. En reservar tries «A domicili» i escrius la teva adreça. Pagues en rebre’l.`,
         ],
         [
           'Porteu pa a Sant Just Desvern?',
-          `Sí. Cada dissabte reparteixo a Sant Just Desvern ${hours.ca}, igual que a Sant Boi i Santa Coloma de Cervelló. Reserva abans del tancament de comandes del dijous.`,
+          `Sí. Cada dimecres i cada dissabte reparteixo a Sant Just Desvern ${hours.ca}, igual que a Sant Boi i Santa Coloma de Cervelló. Reserva abans del tancament de comandes: diumenge per al dimecres i dijous per al dissabte, a les 20:00.`,
         ],
         [
           'Com el conservo?',
@@ -981,14 +985,14 @@ export const ui = {
       fig: '(Fig. 1) Pa de molla, tallat per la meitat',
       ferment: 'Fermentat fins a 35 h',
       steps: [
-        'Reserva aquí, fins dijous a les 20 h',
-        `Entrega gratuïta dissabte ${hours.ca} · Sant Boi, Sant Just Desvern i Santa Coloma de Cervelló`,
+        'Per a dimecres, fins diumenge a les 20 h · per a dissabte, fins dijous a les 20 h',
+        `Entrega gratuïta dimecres i dissabte ${hours.ca} · Sant Boi, Sant Just Desvern i Santa Coloma de Cervelló`,
         'Pagues quan el reps',
       ],
       diary: 'Diari de l’obrador',
       swipe: 'Llisca',
       menuBar: 'Del forn a la taula',
-      processBar: 'Dijous → dissabte',
+      processBar: 'Dues fornades per setmana',
       flourBar: 'Sense milloradors',
       makerBar: 'Baix Llobregat',
       reserveBar: 'Sense targeta ni compte',

@@ -1,6 +1,6 @@
 import type { APIRoute } from 'astro';
 import { currentBake } from '../../lib/store';
-import { bakeState } from '../../lib/domain';
+import { bakeState, pastryBake } from '../../lib/domain';
 import {
   isDemo,
   launchReady,
@@ -17,7 +17,11 @@ export const GET: APIRoute = async () => {
       reserved: b.reserved,
       capacity: b.capacity,
       bananaLeft: Math.max(0, BANANA_HALVES_PER_BAKE - b.bananaReserved),
-      pastryLeft: Math.max(0, PASTRY_UNITS_PER_BAKE - b.pastryReserved),
+      // Pastries only on Saturday's bake.
+      pastries: pastryBake(b.pickupDate),
+      pastryLeft: pastryBake(b.pickupDate)
+        ? Math.max(0, PASTRY_UNITS_PER_BAKE - b.pastryReserved)
+        : 0,
     });
   } catch {
     return json({ error: 'No podemos consultar la disponibilidad.' }, 503);

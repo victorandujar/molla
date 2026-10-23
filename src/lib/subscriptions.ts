@@ -5,6 +5,7 @@ import { townById } from './delivery';
 import {
   bakeState,
   cancellable,
+  madridWeekday,
   subscriptionAction,
   type Lang,
   type Order,
@@ -462,6 +463,8 @@ export async function generateSubscriptionOrders(): Promise<GenerationResult> {
   }
   const state = bakeState(bake, bake.reserved);
   if (state !== 'OPEN' && state !== 'SOLD_OUT') return result;
+  // "Pa fix" is Saturday bread: the Wednesday bake takes one-off orders only.
+  if (madridWeekday(bake.pickupDate) !== 6) return result;
   result.bakeId = bake.id;
   for (const sub of await activeSubscriptions()) {
     const r = await placeForSubscription(sub, bake);

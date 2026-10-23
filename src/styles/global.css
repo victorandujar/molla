@@ -1783,6 +1783,17 @@ figure picture {
   grid-column: 2 / -1;
   margin-top: 16px;
 }
+.pastry-later {
+  justify-self: start;
+  padding: 10px 14px;
+  box-shadow: inset 0 0 0 1.5px var(--on-night-line);
+  font-family: var(--mono);
+  font-size: 11.5px;
+  line-height: 1.5;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--on-night);
+}
 .pastry .mini-stepper button:hover {
   background: rgba(246, 239, 229, 0.12);
 }

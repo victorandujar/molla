@@ -31,10 +31,10 @@ const place = {
   route="pickup"
   crumb="Recogida"
   title={`Recogida de pan artesanal en Sant Boi de Llobregat · ${brand.name}`}
-  description="Dónde y cuándo recoger tu hogaza de fermentación lenta en Sant Boi de Llobregat. Reserva online, recógela el sábado y paga al recoger. El punto exacto se confirma con el pedido."
+  description="Dónde y cuándo recoger tu hogaza de fermentación lenta en Sant Boi de Llobregat. Reserva online, recógela el miércoles o el sábado y paga al recoger. El punto exacto se confirma con el pedido."
   kicker="Recogida · Sant Boi de Llobregat"
   h1="Recoge tu pan en Sant Boi de Llobregat."
-  lede="Una vez por semana, el sábado, en Sant Boi de Llobregat. Reservas antes, pagas al recoger y te llevas el pan del día."
+  lede="Dos veces por semana, miércoles y sábado, en Sant Boi de Llobregat. Reservas antes, pagas al recoger y te llevas el pan del día."
   jsonLd={[place]}
 >
   <div class="article-grid">
@@ -49,7 +49,7 @@ const place = {
       <p>
         {current ? (
           <>
-            Los sábados. La próxima recogida es el{' '}
+            Los miércoles y los sábados. La próxima recogida es el{' '}
             <strong>{dayFormat('es', current.pickupDate)}</strong>
             {current.pickupWindow
               ? `, ${current.pickupWindow}`
@@ -59,9 +59,9 @@ const place = {
           </>
         ) : (
           <>
-            Sábado · horario de recogida confirmado con el pedido. Los pedidos
-            se cierran dos días antes a las 20:00 o cuando se completa la
-            hornada.
+            Miércoles y sábado · horario de recogida confirmado con el pedido.
+            Los pedidos se cierran el domingo (para el miércoles) o el jueves
+            (para el sábado) a las 20:00, o cuando se completa la hornada.
           </>
         )}
       </p>
@@ -73,7 +73,8 @@ const place = {
           de recogida. El día antes te llega un recordatorio.
         </li>
         <li>
-          El sábado vienes al punto de recogida dentro de la franja horaria.
+          El día de entrega vienes al punto de recogida dentro de la franja
+          horaria.
         </li>
         <li>
           Dices tu código, pagas y te llevas tu hogaza, horneada ese mismo día.
@@ -88,10 +89,11 @@ const place = {
       <p>
         Hago pan para todo el Baix Llobregat. Si vives en Sant Boi de Llobregat,
         Sant Just Desvern o Santa Coloma de Cervelló, te lo llevo a casa el
-        sábado de 12 a 14 h: <a href="/es/pan-a-domicilio">pan a domicilio</a>.
-        Si vives en otro municipio (Cornellà de Llobregat, Sant Joan Despí, Sant
-        Feliu de Llobregat, Sant Vicenç dels Horts, Viladecans…), lo recoges en
-        Sant Boi de Llobregat.
+        miércoles o el sábado de 12 a 14 h:{' '}
+        <a href="/es/pan-a-domicilio">pan a domicilio</a>. Si vives en otro
+        municipio (Cornellà de Llobregat, Sant Joan Despí, Sant Feliu de
+        Llobregat, Sant Vicenç dels Horts, Viladecans…), lo recoges en Sant Boi
+        de Llobregat.
       </p>
     </div>
     <figure class="article-photo">

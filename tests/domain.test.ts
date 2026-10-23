@@ -28,6 +28,8 @@ import {
   pickupCodePattern,
   reminderDue,
   weeklyCyclePlan,
+  pastryBake,
+  madridWeekday,
   csvCell,
   bananaSplit,
   orderSummary,
@@ -120,39 +122,50 @@ test('Madrid wall-clock times respect summer and winter offsets', () => {
   assert.throws(() => madridIso('26/09/2026'));
 });
 
-test('weekly cycle closes Thursday at 20:00 Madrid time and opens the next week right away', () => {
+test('two bakes a week: Wednesday closes Sunday 20:00, Saturday closes Thursday 20:00, always one open', () => {
+  // Sunday just after midnight: Wednesday's bake is still open.
   assert.deepEqual(weeklyCyclePlan(new Date('2026-09-26T22:05:00Z')), {
     today: '2026-09-27',
     weekday: 0,
-    pickupDate: '2026-10-03',
-    pickupAt: '2026-10-03T10:00:00.000Z',
-    deadline: '2026-10-01T18:00:00.000Z',
+    pickupDate: '2026-09-30',
+    pickupAt: '2026-09-30T10:00:00.000Z',
+    deadline: '2026-09-27T18:00:00.000Z',
   });
-  const thursday = weeklyCyclePlan(new Date('2026-12-03T12:00:00Z'));
-  assert.equal(thursday.pickupDate, '2026-12-05');
-  assert.equal(thursday.deadline, '2026-12-03T19:00:00.000Z');
-  // One minute before and right at the close.
+  // Sunday at 20:00 (CEST = 18:00 UTC) Wednesday closes and Saturday opens.
+  assert.equal(
+    weeklyCyclePlan(new Date('2026-09-27T17:59:00Z')).pickupDate,
+    '2026-09-30',
+  );
+  const sunday = weeklyCyclePlan(new Date('2026-09-27T18:00:00Z'));
+  assert.equal(sunday.pickupDate, '2026-10-03');
+  assert.equal(sunday.deadline, '2026-10-01T18:00:00.000Z');
+  // Monday to Thursday before 20:00: Saturday.
   assert.equal(
     weeklyCyclePlan(new Date('2026-12-03T18:59:00Z')).pickupDate,
     '2026-12-05',
   );
-  const closed = weeklyCyclePlan(new Date('2026-12-03T19:00:00Z'));
-  assert.equal(closed.pickupDate, '2026-12-12');
-  assert.equal(closed.deadline, '2026-12-10T19:00:00.000Z');
-  // Friday and Saturday already take orders for the following Saturday.
+  // Thursday at 20:00 (CET = 19:00 UTC): next Wednesday, closing on Sunday.
+  const thursday = weeklyCyclePlan(new Date('2026-12-03T19:00:00Z'));
+  assert.equal(thursday.pickupDate, '2026-12-09');
+  assert.equal(thursday.deadline, '2026-12-06T19:00:00.000Z');
+  // Friday and Saturday already take orders for Wednesday.
+  for (const at of ['2026-12-04T12:00:00Z', '2026-12-05T09:00:00Z'])
+    assert.equal(weeklyCyclePlan(new Date(at)).pickupDate, '2026-12-09');
+  // The night winter time starts (25 October): Sunday 20:00 is 19:00 UTC.
   assert.equal(
-    weeklyCyclePlan(new Date('2026-12-04T12:00:00Z')).pickupDate,
-    '2026-12-12',
+    weeklyCyclePlan(new Date('2026-10-25T18:59:00Z')).pickupDate,
+    '2026-10-28',
   );
   assert.equal(
-    weeklyCyclePlan(new Date('2026-12-05T09:00:00Z')).pickupDate,
-    '2026-12-12',
+    weeklyCyclePlan(new Date('2026-10-25T19:00:00Z')).pickupDate,
+    '2026-10-31',
   );
-  // Summer time: 20:00 CEST is 18:00 UTC.
-  assert.equal(
-    weeklyCyclePlan(new Date('2026-10-01T18:30:00Z')).pickupDate,
-    '2026-10-10',
-  );
+});
+
+test('pastries only on the Saturday bake', () => {
+  assert.equal(pastryBake('2026-10-31T11:00:00.000Z'), true);
+  assert.equal(pastryBake('2026-10-28T11:00:00.000Z'), false);
+  assert.equal(madridWeekday('2026-10-28T23:30:00.000Z'), 4);
 });
 
 test('pickup codes are short, readable and carry the bake number', () => {

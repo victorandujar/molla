@@ -31,10 +31,10 @@ const place = {
   route="pickup"
   crumb="Recollida"
   title={`Recollida de pa artesà a Sant Boi de Llobregat · ${brand.name}`}
-  description="On i quan recollir el teu pa de fermentació lenta a Sant Boi de Llobregat. Reserva en línia, recull-lo dissabte i paga en recollir. El punt exacte es confirma amb la comanda."
+  description="On i quan recollir el teu pa de fermentació lenta a Sant Boi de Llobregat. Reserva en línia, recull-lo dimecres o dissabte i paga en recollir. El punt exacte es confirma amb la comanda."
   kicker="Recollida · Sant Boi de Llobregat"
   h1="Recull el teu pa a Sant Boi de Llobregat."
-  lede="Un cop per setmana, dissabte, a Sant Boi de Llobregat. Reserves abans, pagues en recollir i t’emportes el pa del dia."
+  lede="Dos cops per setmana, dimecres i dissabte, a Sant Boi de Llobregat. Reserves abans, pagues en recollir i t’emportes el pa del dia."
   jsonLd={[place]}
 >
   <div class="article-grid">
@@ -49,7 +49,7 @@ const place = {
       <p>
         {current ? (
           <>
-            Els dissabtes. La propera recollida és{' '}
+            Els dimecres i els dissabtes. La propera recollida és{' '}
             <strong>{dayFormat('ca', current.pickupDate)}</strong>
             {current.pickupWindow
               ? `, ${current.pickupWindow}`
@@ -59,9 +59,9 @@ const place = {
           </>
         ) : (
           <>
-            Dissabte · horari de recollida confirmat amb la comanda. Les
-            comandes es tanquen dos dies abans a les 20:00 o quan s’acaba la
-            fornada.
+            Dimecres i dissabte · horari de recollida confirmat amb la comanda.
+            Les comandes es tanquen diumenge (per a dimecres) o dijous (per a
+            dissabte) a les 20:00, o quan s’acaba la fornada.
           </>
         )}
       </p>
@@ -72,7 +72,9 @@ const place = {
           Reserves a la web i reps per correu una confirmació amb el teu codi de
           recollida. El dia abans t’arriba un recordatori.
         </li>
-        <li>Dissabte vens al punt de recollida dins de la franja horària.</li>
+        <li>
+          El dia d’entrega vens al punt de recollida dins de la franja horària.
+        </li>
         <li>
           Dius el teu codi, pagues i t’emportes el pa, cuit aquell mateix dia.
         </li>
@@ -85,11 +87,11 @@ const place = {
       <h2>Entrega a domicili i recollida</h2>
       <p>
         Faig pa per a tot el Baix Llobregat. Si vius a Sant Boi de Llobregat,
-        Sant Just Desvern o Santa Coloma de Cervelló, te’l porto a casa dissabte
-        de 12 a 14 h: <a href="/pa-a-domicili">pa a domicili</a>. Si vius en un
-        altre municipi (Cornellà de Llobregat, Sant Joan Despí, Sant Feliu de
-        Llobregat, Sant Vicenç dels Horts, Viladecans…), el reculls a Sant Boi
-        de Llobregat.
+        Sant Just Desvern o Santa Coloma de Cervelló, te’l porto a casa dimecres
+        o dissabte de 12 a 14 h: <a href="/pa-a-domicili">pa a domicili</a>. Si
+        vius en un altre municipi (Cornellà de Llobregat, Sant Joan Despí, Sant
+        Feliu de Llobregat, Sant Vicenç dels Horts, Viladecans…), el reculls a
+        Sant Boi de Llobregat.
       </p>
     </div>
     <figure class="article-photo">
