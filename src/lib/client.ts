@@ -100,20 +100,41 @@ const requestId = form?.querySelector<HTMLInputElement>(
 if (requestId) requestId.value = crypto.randomUUID();
 
 /* ---- El pedido: el formulario es la única fuente de verdad. La carta, el
-   tiquet y la píldora flotante leen y escriben los mismos dos campos. ---- */
+   tiquet y la píldora flotante leen y escriben los mismos campos. ---- */
 const quantity = document.querySelector<HTMLInputElement>('#quantity');
 const banana = document.querySelector<HTMLInputElement>('#banana');
+const croissant = document.querySelector<HTMLInputElement>('#croissant');
+const pain = document.querySelector<HTMLInputElement>('#pain');
 const total = document.querySelector<HTMLOutputElement>('#total');
 const prices = {
   loaf: Number(form?.dataset.price || 0),
   whole: Number(form?.dataset.bananaWhole || 0),
   half: Number(form?.dataset.bananaHalf || 0),
+  croissant: Number(form?.dataset.croissant || 0),
+  pain: Number(form?.dataset.pain || 0),
 };
+// Buttons name the field they change: data-target, data-add or data-sub.
+const fields: Record<string, HTMLInputElement | null> = {
+  loaf: quantity,
+  quantity,
+  banana,
+  croissant,
+  pain,
+};
+const fieldOf = (b: HTMLElement) =>
+  fields[b.dataset.target || b.dataset.add || b.dataset.sub || 'loaf'] ||
+  quantity;
 const words = isCa
   ? {
       inOrder: (n: string) => `${n} a la comanda`,
       loaves: (n: number) => `${n} ${n === 1 ? 'pa' : 'pans'}`,
-      empty: 'Afegeix un pa o un banana bread per reservar.',
+      empty: 'Afegeix un pa, un banana bread o brioixeria per reservar.',
+      pastryLeft: (n: number) =>
+        n <= 0
+          ? 'Brioixeria exhaurida aquesta setmana'
+          : n === 1
+            ? 'Queda 1 peça de brioixeria aquesta setmana'
+            : `Queden ${n} peces de brioixeria aquesta setmana`,
       left: (h: number) =>
         h <= 0
           ? 'Exhaurit aquesta setmana'
@@ -128,7 +149,13 @@ const words = isCa
   : {
       inOrder: (n: string) => `${n} en tu pedido`,
       loaves: (n: number) => `${n} ${n === 1 ? 'hogaza' : 'hogazas'}`,
-      empty: 'Añade una hogaza o un banana bread para reservar.',
+      empty: 'Añade una hogaza, un banana bread o bollería para reservar.',
+      pastryLeft: (n: number) =>
+        n <= 0
+          ? 'Bollería agotada esta semana'
+          : n === 1
+            ? 'Queda 1 pieza de bollería esta semana'
+            : `Quedan ${n} piezas de bollería esta semana`,
       left: (h: number) =>
         h <= 0
           ? 'Agotado esta semana'
@@ -145,30 +172,64 @@ const halvesLabel = (h: number) =>
   h === 1 ? '½' : `${Math.floor(h / 2)}${h % 2 ? '½' : ''}`;
 const read = (el: HTMLInputElement | null) =>
   Math.max(0, Math.floor(Number(el?.value) || 0));
-const maxOf = (el: HTMLInputElement | null) =>
-  Number(el?.max || el?.dataset.max || 0);
-type Cart = { loaves: number; halves: number; total: number };
+// Croissants and pains au chocolat share the pieces left in the bake: each
+// can grow only into what the other one leaves free.
+const pastryLeft = () => Number(form?.dataset.pastryPool || 0);
+const maxOf = (el: HTMLInputElement | null) => {
+  const own = Number(el?.max || el?.dataset.max || 0);
+  if (el?.dataset.pool !== 'pastry') return own;
+  const other = el === croissant ? pain : croissant;
+  return Math.max(0, Math.min(own, pastryLeft() - read(other)));
+};
+type Cart = {
+  loaves: number;
+  halves: number;
+  croissants: number;
+  pains: number;
+  total: number;
+};
 function cart(): Cart {
   const loaves = read(quantity);
   const halves = read(banana);
+  const croissants = read(croissant);
+  const pains = read(pain);
   return {
     loaves,
     halves,
+    croissants,
+    pains,
     total:
       loaves * prices.loaf +
       Math.floor(halves / 2) * prices.whole +
-      (halves % 2) * prices.half,
+      (halves % 2) * prices.half +
+      croissants * prices.croissant +
+      pains * prices.pain,
   };
 }
+// Names in the visitor's language for the pill: "2 croissants".
+const pastryWords = {
+  croissants: (n: number) => `${n} ${n === 1 ? 'croissant' : 'croissants'}`,
+  pains: (n: number) =>
+    `${n} ${n === 1 ? 'pain au chocolat' : 'pains au chocolat'}`,
+};
 function render(origin?: Element | null) {
   if (!form) return;
   const c = cart();
   if (total) total.value = money(c.total);
   const view = document.querySelector('#banana-view');
   if (view) view.textContent = c.halves ? halvesLabel(c.halves) : '0';
+  for (const [id, n] of [
+    ['#croissant-view', c.croissants],
+    ['#pain-view', c.pains],
+  ] as const) {
+    const out = document.querySelector(id);
+    if (out) out.textContent = String(n);
+  }
   for (const [key, n, label] of [
     ['loaf', c.loaves, String(c.loaves)],
     ['banana', c.halves, halvesLabel(c.halves)],
+    ['croissant', c.croissants, String(c.croissants)],
+    ['pain', c.pains, String(c.pains)],
   ] as const) {
     const mini = document.querySelector<HTMLElement>(`[data-mini="${key}"]`);
     const main = document.querySelector<HTMLElement>(
@@ -183,11 +244,7 @@ function render(origin?: Element | null) {
   document
     .querySelectorAll<HTMLButtonElement>('[data-step], [data-add], [data-sub]')
     .forEach((b) => {
-      const isBanana =
-        b.dataset.target === 'banana' ||
-        b.dataset.add === 'banana' ||
-        b.dataset.sub === 'banana';
-      const input = isBanana ? banana : quantity;
+      const input = fieldOf(b);
       const n = read(input);
       const up = b.dataset.step === '1' || b.dataset.add !== undefined;
       const step = up ? addStep(b) : 1;
@@ -196,9 +253,11 @@ function render(origin?: Element | null) {
   const items = [
     c.loaves ? words.loaves(c.loaves) : '',
     c.halves ? `${halvesLabel(c.halves)} banana bread` : '',
+    c.croissants ? pastryWords.croissants(c.croissants) : '',
+    c.pains ? pastryWords.pains(c.pains) : '',
   ].filter(Boolean);
   // Pieces to carry home: a half banana bread is still one piece.
-  const count = c.loaves + Math.ceil(c.halves / 2);
+  const count = c.loaves + Math.ceil(c.halves / 2) + c.croissants + c.pains;
   document.querySelectorAll<HTMLElement>('[data-cart-count]').forEach((el) => {
     el.hidden = count === 0;
     el.textContent = String(count);
@@ -254,16 +313,12 @@ document
   .querySelectorAll<HTMLButtonElement>('[data-step]')
   .forEach((button) =>
     button.addEventListener('click', () =>
-      change(
-        button.dataset.target === 'banana' ? banana : quantity,
-        Number(button.dataset.step),
-        button,
-      ),
+      change(fieldOf(button), Number(button.dataset.step), button),
     ),
   );
 document.querySelectorAll<HTMLButtonElement>('[data-add]').forEach((button) =>
   button.addEventListener('click', () => {
-    const input = button.dataset.add === 'banana' ? banana : quantity;
+    const input = fieldOf(button);
     const step = addStep(button);
     // A whole mould when only a half is left: add what remains.
     const room = maxOf(input) - read(input);
@@ -273,9 +328,7 @@ document.querySelectorAll<HTMLButtonElement>('[data-add]').forEach((button) =>
 document
   .querySelectorAll<HTMLButtonElement>('[data-sub]')
   .forEach((button) =>
-    button.addEventListener('click', () =>
-      change(button.dataset.sub === 'banana' ? banana : quantity, -1, button),
-    ),
+    button.addEventListener('click', () => change(fieldOf(button), -1, button)),
   );
 document
   .querySelectorAll<HTMLInputElement>('input[name=banana-size]')
@@ -559,6 +612,19 @@ async function refreshBake() {
         });
       if (banana) banana.dataset.max = String(Math.min(4, b.bananaLeft));
     }
+    if (typeof b.pastryLeft === 'number') {
+      if (form) form.dataset.pastryPool = String(b.pastryLeft);
+      document
+        .querySelectorAll<HTMLElement>('[data-pastry-left]')
+        .forEach((el) => {
+          el.dataset.pastryLeft = String(b.pastryLeft);
+          el.textContent = words.pastryLeft(b.pastryLeft);
+        });
+      const ticks = document.querySelectorAll('[data-pastry-meter] span');
+      ticks.forEach((tick, i) =>
+        tick.classList.toggle('taken', i >= b.pastryLeft),
+      );
+    }
     // At zero reservations the card shows the small batch, never an empty counter.
     document
       .querySelector<HTMLElement>('[data-count-small]')
@@ -615,7 +681,7 @@ async function refreshBake() {
       quantity.max = String(Math.min(4, b.capacity - b.reserved));
     }
     // Keep the order within what is left after other people's reservations.
-    for (const input of [quantity, banana])
+    for (const input of [quantity, banana, croissant, pain])
       if (input && read(input) > maxOf(input))
         input.value = String(maxOf(input));
     render();
