@@ -109,8 +109,17 @@ if (signedIn) {
         listSubscriptions(),
       ],
     );
+    // After Thursday's close the shop shows next week's bake, but the panel
+    // keeps showing the one still to bake and deliver.
+    const toBake = bakes.findLast(
+      (b) =>
+        b.status !== 'COMPLETED' &&
+        Date.parse(b.pickupDate) > Date.now() - 12 * 3600000,
+    );
     const bake =
-      bakes.find((b) => b.id === Astro.url.searchParams.get('bake')) || active;
+      bakes.find((b) => b.id === Astro.url.searchParams.get('bake')) ||
+      toBake ||
+      active;
     const orders = (await ordersForBake(bake.id)).sort(
       (a, b) =>
         order[a.status] - order[b.status] || a.name.localeCompare(b.name),

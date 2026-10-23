@@ -24,7 +24,7 @@ Debajo, el embudo de los últimos 28 días y los avisos confirmados o pendientes
 
 `src/lib/config.ts` contiene marca, producto, receta y precio en céntimos. La hornada que se muestra y admite pedidos se lee de la base de datos: la próxima recogida no completada o, si no hay ninguna, la última (que aparecerá como cerrada con la lista de avisos).
 
-El ciclo semanal no requiere intervención: el jueves a las 20:00 (hora de Madrid) se cierran las solicitudes y el domingo de madrugada se crea la hornada del sábado siguiente. La hornada nueva conserva el cupo, la hora y la franja de recogida de la anterior, pero empieza con 0 reservas. Los pedidos anteriores no se borran: quedan en su hornada para el histórico y la gestión. La tarea diaria vuelve a reconciliar el ciclo, así que recupera automáticamente una ejecución de cron perdida entre domingo y jueves.
+El ciclo semanal no requiere intervención: el jueves a las 20:00 (hora de Madrid) se cierran las solicitudes y justo después se abre la hornada del sábado siguiente, para que nunca haya días sin poder reservar. Mientras tanto, `/gestio` sigue mostrando por defecto la hornada pendiente de hornear y entregar. La hornada nueva conserva el cupo, la hora y la franja de recogida de la anterior, pero empieza con 0 reservas. Los pedidos anteriores no se borran: quedan en su hornada para el histórico y la gestión. La tarea diaria vuelve a reconciliar el ciclo, así que recupera automáticamente una ejecución de cron perdida.
 
 Todos los comandos muestran el host de la base de datos. Los que escriben exigen `--yes`: revisa antes el host, porque `.env` apunta a producción.
 
@@ -54,7 +54,7 @@ Las exportaciones se crean con permisos privados. No subirlas a Git. En local si
 
 ## Tareas automáticas: ciclo, recordatorios y reintentos
 
-Vercel Cron llama cada día a `/api/cron/cycle` a las 00:00 UTC (01:00 en invierno y 02:00 en verano en Madrid). El cierre público se aplica exactamente a las 20:00 del jueves mediante la fecha límite de la hornada; el cron persiste después el estado `CLOSED`. Las invocaciones redundantes son seguras: una transacción bloqueada evita crear dos hornadas. Además llama cada día a `/api/cron/daily` a las 16:00 UTC (18:00 en verano y 17:00 en invierno), autenticado con `CRON_SECRET`. La tarea diaria reconcilia también el ciclo como respaldo y después:
+Vercel Cron llama cada día a `/api/cron/cycle` a las 19:05 UTC (20:05 en invierno y 21:05 en verano en Madrid), justo después del cierre del jueves. El cierre público se aplica exactamente a las 20:00 del jueves mediante la fecha límite de la hornada; el cron persiste después el estado `CLOSED`, abre la hornada siguiente y coloca los pedidos de pan fijo. Las invocaciones redundantes son seguras: una transacción bloqueada evita crear dos hornadas. Además llama cada día a `/api/cron/daily` a las 16:00 UTC (18:00 en verano y 17:00 en invierno), autenticado con `CRON_SECRET`. La tarea diaria reconcilia también el ciclo como respaldo y después:
 
 1. Envía un **recordatorio** en el idioma del cliente a los pedidos confirmados cuya recogida cae en las próximas 30 horas: con recogida el sábado a mediodía, llega el viernes por la tarde. Cada pedido se marca antes de enviar, para que dos ejecuciones no dupliquen el email. Si el envío falla, se desmarca.
 2. **Reintenta** las confirmaciones en FAILED o PENDING de más de 10 minutos, para recogidas futuras. Usa la misma clave idempotente, así que Resend no duplica un email que ya había aceptado.
