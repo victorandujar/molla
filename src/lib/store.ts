@@ -143,7 +143,20 @@ const toBake = (b: postgres.Row): ActiveBake => ({
 });
 export async function currentBake(): Promise<ActiveBake> {
   if (useDemo()) return demo(demoBake);
-  const [b] = await activeBakeRow(sql!);
+  let [b] = await activeBakeRow(sql!);
+  // Past Thursday's close with no next bake yet (the cron has not run, or
+  // failed): open it now so nobody lands on a closed shop.
+  if (!b || new Date(b.deadline).getTime() <= Date.now()) {
+    try {
+      await runWeeklyBakeCycle();
+      [b] = await activeBakeRow(sql!);
+    } catch (e) {
+      console.error(
+        'Opening the next bake failed',
+        e instanceof Error ? e.message : e,
+      );
+    }
+  }
   if (!b) throw new Error('La próxima hornada todavía se está preparando.');
   return toBake(b);
 }
