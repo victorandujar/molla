@@ -22,10 +22,14 @@ onScrollHeader();
 
 if (!reduce) {
   crumbField();
+  splitWords();
+  armOnEnter('.mono-bar[data-bar], .fig-bar:not(.hero .fig-bar), [data-wipe]');
   reveals();
   parallax();
   heroPhoto();
-  film();
+  marquee();
+  diary();
+  definition();
   processScroll();
   counters();
   manifestoDrift();
@@ -38,20 +42,8 @@ if (!reduce) {
 function heroPhoto() {
   const photo = $('[data-hero-photo]');
   if (!photo) return;
-  const seal = $('[data-seal]', photo);
-  if (seal)
-    animate(seal, {
-      rotate: [0, 40],
-      ease: 'linear',
-      autoplay: onScroll({
-        target: photo,
-        enter: 'top top',
-        leave: 'bottom top',
-        sync: true,
-      }),
-    });
   animate(photo, {
-    translateY: [0, 80],
+    translateY: [0, 60],
     ease: 'linear',
     autoplay: onScroll({
       target: photo,
@@ -62,20 +54,222 @@ function heroPhoto() {
   });
 }
 
-/* ---- La tira de fotos se desliza de lado mientras bajas ---- */
-function film() {
-  const track = $('[data-film]');
-  if (!track) return;
-  animate(track, {
-    translateX: () => [0, -(track.scrollWidth - innerWidth) - 0],
-    ease: 'linear',
-    autoplay: onScroll({
-      target: track,
-      enter: 'bottom top',
-      leave: 'top bottom',
-      sync: 0.4,
-    }),
+/* ---- Entran al verse: la regla se dibuja, la foto se abre ----
+   Solo se preparan los que aún están por debajo de la pantalla. */
+function below(el: Element) {
+  return el.getBoundingClientRect().top > innerHeight * 0.92;
+}
+function armOnEnter(selector: string) {
+  const items = $$(selector).filter(below);
+  items.forEach((el) => el.classList.add('is-armed'));
+  const io = new IntersectionObserver(
+    (entries) => {
+      for (const e of entries) {
+        if (!e.isIntersecting) continue;
+        io.unobserve(e.target);
+        e.target.classList.add('is-in');
+      }
+    },
+    { rootMargin: '0px 0px -10% 0px' },
+  );
+  items.forEach((el) => io.observe(el));
+}
+
+/* ---- Titulares: cada palabra sube desde debajo de su línea ---- */
+function splitWords() {
+  for (const heading of $$('[data-split]')) {
+    if (!below(heading)) continue;
+    let n = 0;
+    const walk = (node: Node) => {
+      for (const child of [...node.childNodes]) {
+        if (child.nodeType === Node.TEXT_NODE) {
+          const parts = child.textContent!.split(/(\s+)/);
+          const frag = document.createDocumentFragment();
+          for (const part of parts) {
+            if (!part) continue;
+            if (/^\s+$/.test(part)) {
+              frag.append(part);
+              continue;
+            }
+            const outer = document.createElement('span');
+            const inner = document.createElement('span');
+            outer.className = 'w';
+            inner.className = 'wi';
+            inner.style.setProperty('--w', String(n++));
+            inner.textContent = part;
+            outer.append(inner);
+            frag.append(outer);
+          }
+          child.replaceWith(frag);
+        } else if (child.nodeType === Node.ELEMENT_NODE) walk(child);
+      }
+    };
+    walk(heading);
+    const io = new IntersectionObserver(
+      ([e]) => {
+        if (!e?.isIntersecting) return;
+        io.disconnect();
+        heading.classList.add('is-in');
+      },
+      { rootMargin: '0px 0px -12% 0px' },
+    );
+    io.observe(heading);
+  }
+}
+
+/* ---- La cinta corre más o menos según el scroll, cada fila a un lado ---- */
+function marquee() {
+  const band = $('[data-marquee]');
+  if (!band) return;
+  const rows = $$('.marquee-row', band);
+  let queued = false;
+  const update = () => {
+    queued = false;
+    const top = band.getBoundingClientRect().top;
+    rows.forEach((row, i) => {
+      const x = top * (i % 2 ? 0.35 : -0.35) - innerWidth * 0.1;
+      row.style.transform = `translate3d(${x}px, 0, 0)`;
+    });
+  };
+  addEventListener(
+    'scroll',
+    () => {
+      if (!queued) {
+        queued = true;
+        requestAnimationFrame(update);
+      }
+    },
+    { passive: true },
+  );
+  update();
+}
+
+/* ---- Diari de l'obrador: en escritorio la sección se fija y la tira de
+   historias corre de lado con el scroll, con un poco de inercia; las
+   barras de arriba se llenan como en los reels. En el móvil es un
+   carrusel normal y solo se actualizan las barras. ---- */
+function diary() {
+  const section = $('[data-diary]');
+  const track = section && $('[data-film]', section);
+  if (!section || !track) return;
+  const stories = $$('.story', track);
+  const bars = $$('.diary-progress span', section);
+  const index = $('[data-diary-index]', section);
+  const wide = matchMedia('(min-width: 961px)');
+  const n = stories.length;
+  let dist = 0;
+  let target = 0;
+  let current = 0;
+  let running = false;
+  let lastIndex = -1;
+
+  const progress = (p: number) => {
+    bars.forEach((bar, i) => {
+      const fill = Math.min(1, Math.max(0, p * n - i));
+      bar.style.setProperty('--p', fill.toFixed(3));
+    });
+    const at = Math.min(n - 1, Math.floor(p * n));
+    if (at !== lastIndex) {
+      lastIndex = at;
+      bars.forEach((bar, i) => bar.classList.toggle('is-current', i === at));
+      if (index) index.textContent = String(at + 1);
+    }
+  };
+  const measure = () => {
+    if (!wide.matches) {
+      section.removeAttribute('data-pinned');
+      section.style.removeProperty('--dist');
+      track.style.transform = '';
+      stories.forEach((s) => (s.style.transform = ''));
+      return;
+    }
+    section.setAttribute('data-pinned', '');
+    const last = stories[n - 1]!;
+    const pad = parseFloat(getComputedStyle(track).paddingLeft) || 0;
+    dist = Math.max(0, last.offsetLeft + last.offsetWidth + pad - innerWidth);
+    section.style.setProperty('--dist', `${dist}px`);
+    read();
+  };
+  const read = () => {
+    if (!wide.matches || !dist) return;
+    const header = parseFloat(
+      getComputedStyle(document.documentElement).getPropertyValue('--header-h'),
+    );
+    const top = section.getBoundingClientRect().top;
+    target = Math.min(1, Math.max(0, (header - top) / dist)) * dist;
+  };
+  const frame = () => {
+    if (!running) return;
+    current += (target - current) * 0.1;
+    if (Math.abs(target - current) < 0.1) current = target;
+    track.style.transform = `translate3d(${-current}px, 0, 0)`;
+    // The faster it moves, the more the cards lean, like a flicked reel.
+    const lean = Math.max(-5, Math.min(5, (target - current) * -0.02));
+    stories.forEach((s) => (s.style.transform = `skewX(${lean}deg)`));
+    progress(dist ? current / dist : 0);
+    requestAnimationFrame(frame);
+  };
+  new IntersectionObserver(([e]) => {
+    const visible = !!e?.isIntersecting;
+    if (visible && !running && wide.matches) {
+      running = true;
+      requestAnimationFrame(frame);
+    } else if (!visible) running = false;
+  }).observe(section);
+  addEventListener('scroll', read, { passive: true });
+  addEventListener('resize', measure);
+  wide.addEventListener('change', () => {
+    measure();
+    if (wide.matches && !running) {
+      running = true;
+      requestAnimationFrame(frame);
+    }
   });
+  track.addEventListener(
+    'scroll',
+    () => {
+      if (wide.matches) return;
+      const max = track.scrollWidth - track.clientWidth;
+      progress(max > 0 ? Math.min(0.999, track.scrollLeft / max) : 0);
+    },
+    { passive: true },
+  );
+  measure();
+  progress(0);
+}
+
+/* ---- «molla» del diccionario: las letras caen en su sitio ---- */
+function definition() {
+  const word = $('.def-word');
+  if (!word || !below(word)) return;
+  const letters = [...word.textContent!].map((c) => {
+    const span = document.createElement('span');
+    span.textContent = c;
+    span.style.display = 'inline-block';
+    return span;
+  });
+  const label = document.createElement('span');
+  label.className = 'visually-hidden';
+  label.textContent = word.textContent;
+  word.replaceChildren(label, ...letters);
+  letters.forEach((l) => l.setAttribute('aria-hidden', 'true'));
+  utils.set(letters, { opacity: 0, translateY: '0.6em', rotate: 12 });
+  const io = new IntersectionObserver(
+    ([e]) => {
+      if (!e?.isIntersecting) return;
+      io.disconnect();
+      animate(letters, {
+        opacity: 1,
+        translateY: 0,
+        rotate: 0,
+        duration: 1300,
+        delay: stagger(70),
+        ease: 'outElastic(1, .75)',
+      });
+    },
+    { threshold: 0.4 },
+  );
+  io.observe(word);
 }
 
 /* ---- El envoltorio del pie: la miga se abre y se hincha bajo el dedo ----
@@ -212,19 +406,6 @@ function parallax() {
       ease: 'linear',
       autoplay: onScroll({
         target: el,
-        enter: 'bottom top',
-        leave: 'top bottom',
-        sync: true,
-      }),
-    });
-  }
-  // Los sellos de precio giran con el scroll, como una etiqueta que rueda.
-  for (const seal of $$('.price-seal')) {
-    animate(seal, {
-      rotate: [-24, 18],
-      ease: 'linear',
-      autoplay: onScroll({
-        target: seal,
         enter: 'bottom top',
         leave: 'top bottom',
         sync: true,
