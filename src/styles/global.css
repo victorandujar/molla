@@ -1716,35 +1716,17 @@ figure picture {
   align-items: start;
   gap: clamp(40px, 6vw, 104px);
 }
-.pastry-media {
-  position: relative;
-  padding-right: 12%;
-}
-.pastry-photo {
+.pastry-frame {
   aspect-ratio: 4 / 5;
   overflow: clip;
   background: #24252b;
 }
 .pastry-photo img {
-  object-position: 50% 55%;
+  object-position: 50% 58%;
   transition: transform 1.6s var(--ease-out);
 }
-.pastry-media:hover .pastry-photo img {
+.pastry-frame:hover img {
   transform: scale(1.04);
-}
-.pastry-side {
-  position: absolute;
-  z-index: 2;
-  right: 0;
-  bottom: 14%;
-  width: 38%;
-  aspect-ratio: 3 / 4;
-  border: 6px solid var(--night);
-  overflow: clip;
-  box-shadow: 0 30px 60px -30px rgba(0, 0, 0, 0.8);
-}
-.pastry-media .fig-bar {
-  margin-right: -14%;
 }
 .pastry-list {
   margin: 0;
@@ -1754,7 +1736,7 @@ figure picture {
 }
 .pastry-item {
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: start;
   gap: 8px 20px;
   padding: 26px 0 28px;
@@ -1787,7 +1769,8 @@ figure picture {
 }
 .pastry-price .outline-price {
   --stroke: var(--paper);
-  font-size: clamp(48px, 4.4vw, 76px);
+  font-size: clamp(44px, 3.6vw, 64px);
+  letter-spacing: 0;
 }
 .pastry-unit {
   font-family: var(--mono);
@@ -3128,6 +3111,15 @@ details[open] p {
 @media (max-width: 1180px) {
   .nav-hide:nth-child(n + 3) {
     display: none;
+  }
+  /* Narrow info column: the price goes under the name instead of beside it. */
+  .pastry-item {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+  .pastry-price {
+    grid-column: 2;
+    justify-items: start;
+    text-align: left;
   }
   .dish-loaf .dish-info {
     grid-column: 8 / span 5;
