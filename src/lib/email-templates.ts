@@ -95,7 +95,7 @@ const copy = {
     standingKicker: 'Pan fijo',
     standingHeading: (name: string) => `${name}, esta semana te toca pan.`,
     standingIntro:
-      'Es tu pan fijo de este sábado. Si esta semana no lo quieres, sáltalo con un clic hasta el jueves a las 20:00: no pasa nada y seguirás con tu pan fijo.',
+      'Ya tienes reservado tu pan fijo del sábado. Si esa semana no lo quieres, sáltalo con un clic hasta el cierre de pedidos (el jueves anterior, a las 20:00): no pasa nada y seguirás con tu pan fijo.',
     skipLink: 'Saltar esta semana →',
     manageLink: 'Gestionar mi pan fijo: pausar o darme de baja',
     standingSubject: (o: Order) =>
@@ -175,7 +175,7 @@ const copy = {
     standingKicker: 'Pa fix',
     standingHeading: (name: string) => `${name}, aquesta setmana et toca pa.`,
     standingIntro:
-      'És el teu pa fix d’aquest dissabte. Si aquesta setmana no el vols, salta’l amb un clic fins dijous a les 20:00: no passa res i continuaràs amb el teu pa fix.',
+      'Ja tens reservat el teu pa fix del dissabte. Si aquella setmana no el vols, salta’l amb un clic fins al tancament de comandes (el dijous abans, a les 20:00): no passa res i continuaràs amb el teu pa fix.',
     skipLink: 'Saltar aquesta setmana →',
     manageLink: 'Gestionar el meu pa fix: pausar-lo o donar-me de baixa',
     standingSubject: (o: Order) =>

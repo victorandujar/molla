@@ -100,16 +100,13 @@ const bananaIn = (d: Demo, bakeId: string) =>
     (n, o) => n + (o.items || []).reduce((m, i) => m + halvesOf(i), 0),
     0,
   );
-// The local demo always shows next Saturday's bake, open until Thursday
-// 20:00; on Friday and Saturday it moves on to the following week.
+// The local demo always shows the next bake still taking orders.
 const demoDates = (now = new Date()) => {
-  let plan = weeklyCyclePlan(now);
-  if (Date.parse(plan.deadline) <= now.getTime())
-    plan = weeklyCyclePlan(new Date(now.getTime() + 3 * 86400000));
+  const plan = weeklyCyclePlan(now);
   return {
     pickupDate: plan.pickupAt,
     deadline: plan.deadline,
-    opensAt: madridIso(weeklyCyclePlan(now).today, '00:00'),
+    opensAt: madridIso(plan.today, '00:00'),
   };
 };
 const demoBake = (d: Demo): ActiveBake => ({
@@ -123,12 +120,14 @@ const reservedSql = sql
   ? sql`COALESCE((SELECT SUM(i.quantity) FROM orders o JOIN order_items i ON i.order_id=o.id WHERE o.bake_id=b.id AND o.status!='CANCELLED' AND i.product_id='clasica'),0)::int AS reserved,
         COALESCE((SELECT SUM(CASE i.product_id WHEN 'banana' THEN i.quantity*2 WHEN 'banana-mitad' THEN i.quantity ELSE 0 END) FROM orders o JOIN order_items i ON i.order_id=o.id WHERE o.bake_id=b.id AND o.status!='CANCELLED'),0)::int AS banana_reserved`
   : null;
-// The database decides the active bake: the next pickup not yet completed,
-// or the most recent one so the page shows "closed" until the next is created.
+// The database decides the active bake: the next pickup still taking orders
+// (once Thursday's close passes, that is the following week's), else the next
+// pickup not yet completed, or the most recent one so the page shows "closed"
+// until the next is created.
 const activeBakeRow = (db: postgres.Sql) => db`
     SELECT b.*, ${reservedSql!}
     FROM bakes b, LATERAL (SELECT b.status!='COMPLETED' AND b.pickup_date > now() - interval '12 hours' AS upcoming) u
-    ORDER BY u.upcoming DESC, CASE WHEN u.upcoming THEN b.pickup_date END ASC, b.pickup_date DESC
+    ORDER BY u.upcoming DESC, (u.upcoming AND b.deadline > now()) DESC, CASE WHEN u.upcoming THEN b.pickup_date END ASC, b.pickup_date DESC
     LIMIT 1`;
 const toBake = (b: postgres.Row): ActiveBake => ({
   id: b.id as string,
@@ -534,14 +533,6 @@ export async function runWeeklyBakeCycle(
       UPDATE bakes SET status='COMPLETED'
       WHERE pickup_date < ${startOfToday} AND status!='COMPLETED'
       RETURNING id`;
-
-    if (!initialPlan.shouldEnsureBake)
-      return {
-        closed: closed.length,
-        completed: completed.length,
-        created: null,
-        active: null,
-      };
 
     const [existing] = await tx`
       SELECT id,status FROM bakes

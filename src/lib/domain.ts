@@ -202,19 +202,23 @@ const addCalendarDays = (date: string, days: number) =>
     .slice(0, 10);
 
 // The weekly cycle follows Madrid's calendar, not the cron server's UTC day.
-// Sunday through Thursday ensure the coming Saturday exists; Friday and
-// Saturday never create a last-minute bake.
+// Orders for a Saturday close on Thursday at 20:00; from that moment on the
+// plan points at the following Saturday, so there is always a bake to order.
 export function weeklyCyclePlan(now = new Date(), pickupTime = '12:00') {
   const today = madridDate(now);
   const weekday = new Date(`${today}T12:00:00Z`).getUTCDay();
-  const pickupDate = addCalendarDays(today, (6 - weekday + 7) % 7);
+  let pickupDate = addCalendarDays(today, (6 - weekday + 7) % 7);
+  let deadline = madridIso(addCalendarDays(pickupDate, -2), '20:00');
+  if (now.getTime() >= Date.parse(deadline)) {
+    pickupDate = addCalendarDays(pickupDate, 7);
+    deadline = madridIso(addCalendarDays(pickupDate, -2), '20:00');
+  }
   return {
     today,
     weekday,
-    shouldEnsureBake: weekday <= 4,
     pickupDate,
     pickupAt: madridIso(pickupDate, pickupTime),
-    deadline: madridIso(addCalendarDays(pickupDate, -2), '20:00'),
+    deadline,
   };
 }
 export function assertCapacity(
