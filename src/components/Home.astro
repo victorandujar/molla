@@ -83,6 +83,9 @@ const orderHref = open ? '#reserva' : '#avisame';
 // Prices in the flyer's shorthand: "5€", "8€".
 const short = (cents: number) =>
   cents % 100 ? money(cents) : `${cents / 100}€`;
+// "2,20€": the flyer's shorthand also for prices with cents.
+const tight = (cents: number) =>
+  `${(cents / 100).toFixed(2).replace('.', ',')}€`;
 const pad = (n: number | string) => String(n).padStart(2, '0');
 // Booking by WhatsApp with the message half written: for neighbours who
 // prefer a chat to a form.
@@ -635,24 +638,18 @@ const jsonLd = [
         </ol>
         <div class="pastry-grid">
           <div class="pastry-media">
-            <figure class="pastry-photo" data-wipe>
-              <Photo
-                name="pastries"
-                alt={t.pastry.alt}
-                sizes="(max-width: 960px) calc(100vw - 40px), 50vw"
-              />
+            <figure class="pastry-photo">
+              <div class="pastry-frame" data-wipe>
+                <Photo
+                  name="pastries"
+                  alt={t.pastry.alt}
+                  sizes="(max-width: 960px) calc(100vw - 40px), 50vw"
+                />
+              </div>
+              <figcaption class="fig-bar">
+                <span>{t.ed.fig5}</span>
+              </figcaption>
             </figure>
-            <figure class="pastry-side" data-parallax="-0.12">
-              <Photo
-                name="croissant"
-                alt={t.pastry.altSide}
-                sizes="(max-width: 960px) 44vw, 20vw"
-              />
-            </figure>
-            <p class="fig-bar">
-              <span>{t.ed.fig5}</span>
-              <span>{t.pastry.figSide}</span>
-            </p>
           </div>
           <div class="pastry-info" data-reveal>
             <ul class="pastry-list">
@@ -667,7 +664,7 @@ const jsonLd = [
                   </div>
                   <p class="pastry-price">
                     <span class="outline-price" aria-hidden="true">
-                      {short(p.product.price)}
+                      {tight(p.product.price)}
                     </span>
                     <span class="visually-hidden">
                       {money(p.product.price)}

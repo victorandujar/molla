@@ -302,10 +302,7 @@ export const ui = {
       allergens:
         'Contiene trigo (gluten), leche y huevo. Pregúntame por trazas antes de reservar.',
       quota: (n: number) => `${n} piezas por hornada, entre los dos`,
-      figSide: '(Fig. 5) Las capas, a contraluz',
       alt: 'Un pain au chocolat y un croissant dorados sobre una tabla de madera, con luz de tarde',
-      altSide:
-        'Croissant de lado a contraluz, con las capas de la masa a la vista',
       add: 'Añadir',
       less: (name: string) => `Quitar un ${name}`,
       more: (name: string) => `Añadir un ${name}`,
@@ -774,10 +771,7 @@ export const ui = {
       allergens:
         'Conté blat (gluten), llet i ou. Pregunta’m per traces abans de reservar.',
       quota: (n: number) => `${n} peces per fornada, entre els dos`,
-      figSide: '(Fig. 5) Les capes, a contrallum',
       alt: 'Un pain au chocolat i un croissant daurats sobre una taula de fusta, amb llum de tarda',
-      altSide:
-        'Croissant de costat a contrallum, amb les capes de la massa a la vista',
       add: 'Afegir',
       less: (name: string) => `Treure un ${name}`,
       more: (name: string) => `Afegir un ${name}`,
