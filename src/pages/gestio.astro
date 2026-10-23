@@ -20,11 +20,16 @@ import {
 import {
   bakeState,
   bananaSplit,
+  orderItems,
   orderSummary,
   type Order,
 } from '../lib/domain';
 import { townById } from '../lib/delivery';
-import { money, BANANA_HALVES_PER_BAKE } from '../lib/config';
+import {
+  money,
+  BANANA_HALVES_PER_BAKE,
+  PASTRY_UNITS_PER_BAKE,
+} from '../lib/config';
 import { pickupDay } from '../lib/email-templates';
 import { ui } from '../lib/i18n';
 import { clientIp } from '../lib/http';
@@ -166,6 +171,16 @@ const subStatus = {
 };
 const live = data?.orders.filter((o) => o.status !== 'CANCELLED') || [];
 const pending = live.filter((o) => o.status === 'CONFIRMED');
+// Pieces of one product across the bake's live orders, to know what to bake.
+const pieces = (orders: Order[], product: string) =>
+  orders.reduce(
+    (n, o) =>
+      n +
+      orderItems(o)
+        .filter((i) => i.product === product)
+        .reduce((m, i) => m + i.quantity, 0),
+    0,
+  );
 const whatsapp = (phone: string) => {
   const digits = phone.replace(/\D/g, '');
   return `https://wa.me/${digits.length === 9 ? `34${digits}` : digits}`;
@@ -257,6 +272,20 @@ import {
             <dd>
               {data.bake.bananaReserved / 2} / {BANANA_HALVES_PER_BAKE / 2}
             </dd>
+          </div>
+          <div>
+            <dt>Bollería</dt>
+            <dd>
+              {data.bake.pastryReserved} / {PASTRY_UNITS_PER_BAKE}
+            </dd>
+          </div>
+          <div>
+            <dt>Croissants</dt>
+            <dd>{pieces(live, 'croissant')}</dd>
+          </div>
+          <div>
+            <dt>Pains au chocolat</dt>
+            <dd>{pieces(live, 'pain-au-chocolat')}</dd>
           </div>
           <div>
             <dt>Hogazas por recoger</dt>

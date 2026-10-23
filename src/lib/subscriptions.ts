@@ -369,6 +369,8 @@ const requestFor = (
   phone: sub.phone,
   quantity: sub.quantity,
   banana: sub.banana,
+  croissant: 0,
+  pain: 0,
   product: 'clasica',
   pickup: 'yes',
   privacy: 'yes',

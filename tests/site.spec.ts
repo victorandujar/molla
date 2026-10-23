@@ -82,7 +82,7 @@ test('reservation, validation and waitlist journey', async ({ page }) => {
   // An empty order explains itself instead of reaching the server.
   await page.locator('#reservation-form button[type=submit]').click();
   await expect(page.locator('#reservation-form .form-error')).toContainText(
-    'Añade una hogaza o un banana bread',
+    'Añade una hogaza, un banana bread o bollería',
   );
   const moreLoaves = page.locator(
     '#reservation-form [data-target=quantity][data-step="1"]',
@@ -537,6 +537,92 @@ test('banana bread is ordered by halves, alone or with bread, within its quota',
   await expect(page.locator('[data-count="loaf"]')).toHaveText(
     '1 en tu pedido',
   );
+});
+
+test('croissants and pains au chocolat share 48 pieces per bake, by the unit', async ({
+  page,
+  request,
+}) => {
+  const order = (croissant: number, pain: number, email = 'nil@example.com') =>
+    request.post('/api/reservations', {
+      headers: origin,
+      data: {
+        requestId: crypto.randomUUID(),
+        bakeId: 'hornada-001',
+        name: 'Nil',
+        email,
+        phone: '612345678',
+        quantity: 0,
+        croissant,
+        pain,
+        pickup: 'yes',
+        privacy: 'yes',
+      },
+    });
+  // A pastry-only order is valid and priced by the unit.
+  const mixed = await order(3, 2);
+  expect(mixed.status()).toBe(201);
+  expect((await mixed.json()).total).toBe(3 * 220 + 2 * 250);
+  // More than a dozen of one piece in a single order is refused.
+  expect((await order(13, 0)).status()).toBe(400);
+  // Any split counts against the same 48: 5 + 12 + 12 + 12 = 41, 7 left.
+  for (const [c, p] of [
+    [12, 0],
+    [0, 12],
+    [6, 6],
+  ] as const)
+    expect((await order(c, p)).status()).toBe(201);
+  const tooMuch = await order(4, 4);
+  expect(tooMuch.status()).toBe(409);
+  expect((await tooMuch.json()).error).toContain('bollería');
+  expect((await order(4, 3)).status()).toBe(201);
+  let bake = await (await request.get('/api/bake')).json();
+  expect(bake.pastryLeft).toBe(0);
+  // Loaves and banana bread keep their own quotas.
+  expect(bake.reserved).toBe(0);
+  expect(bake.bananaLeft).toBe(4);
+  expect((await order(1, 0)).status()).toBe(409);
+  const d = await readData();
+  expect(d.orders[0].items).toEqual([
+    { product: 'croissant', name: 'Croissant', quantity: 3, unitPrice: 220 },
+    {
+      product: 'pain-au-chocolat',
+      name: 'Pain au chocolat',
+      quantity: 2,
+      unitPrice: 250,
+    },
+  ]);
+
+  // In the page, the two steppers share what is left of the pool.
+  await writeFile(
+    dataPath,
+    JSON.stringify({ orders: [], waitlist: [], limits: {} }),
+  );
+  for (const [c, p] of [
+    [12, 12],
+    [12, 6],
+  ] as const)
+    expect((await order(c, p, 'ona@example.com')).status()).toBe(201);
+  await page.goto('/es/');
+  await expect(page.locator('[data-pastry-left]').first()).toContainText(
+    'Quedan 6 piezas',
+  );
+  await page.locator('[data-buy="croissant"] > [data-add]').click();
+  await expect(page.locator('#croissant')).toHaveValue('1');
+  await expect(page.locator('[data-count="croissant"]')).toHaveText(
+    '1 en tu pedido',
+  );
+  const morePain = page.locator(
+    '#reservation-form [data-target=pain][data-step="1"]',
+  );
+  for (let i = 0; i < 5; i++) await morePain.click();
+  await expect(page.locator('#pain-view')).toHaveText('5');
+  await expect(morePain).toBeDisabled();
+  await expect(
+    page.locator('#reservation-form [data-target=croissant][data-step="1"]'),
+  ).toBeDisabled();
+  await expect(page.locator('#total')).toContainText('14,70');
+  await expect(page.locator('[data-cart-count]')).toHaveText('6');
 });
 
 test('pa fix: sign up, skip, pause, resume and cancel with one click each', async ({
