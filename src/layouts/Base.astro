@@ -4,8 +4,13 @@ import '@fontsource-variable/bricolage-grotesque/wdth.css';
 import '@fontsource/instrument-sans/latin-400.css';
 import '@fontsource/instrument-sans/latin-600.css';
 import '@fontsource/fraunces/latin-600.css';
+import '@fontsource-variable/archivo/wdth.css';
+import '@fontsource/instrument-serif/latin-400-italic.css';
+import '@fontsource/space-mono/latin-400.css';
+import '@fontsource/space-mono/latin-700.css';
 import displayFont from '@fontsource-variable/bricolage-grotesque/files/bricolage-grotesque-latin-wdth-normal.woff2?url';
-import bodyFont from '@fontsource/instrument-sans/files/instrument-sans-latin-400-normal.woff2?url';
+import bodyFont from '@fontsource-variable/archivo/files/archivo-latin-wdth-normal.woff2?url';
+import monoFont from '@fontsource/space-mono/files/space-mono-latin-400-normal.woff2?url';
 import Ribbon from '../components/Ribbon.astro';
 import Crumb from '../components/Crumb.astro';
 import { brand, searchIndexable, isDemo } from '../lib/config';
@@ -120,7 +125,14 @@ const graph = [organization, website, webpage, ...jsonLd];
       type="font/woff2"
       crossorigin
     />
-    <meta name="theme-color" content="#f3ecdf" />
+    <link
+      rel="preload"
+      href={monoFont}
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <meta name="theme-color" content="#f6efe5" />
     <meta name="color-scheme" content="light" />
     <title>{title}</title>
     <meta name="description" content={description} />

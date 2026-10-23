@@ -60,6 +60,10 @@ const steps = t.process.steps.map((step, i) =>
 const stepHours = [0, 12, 35, 35];
 const stepPhotos = ['maker', 'dough', 'tiles', 'hero'];
 const orderHref = open ? '#reserva' : '#avisame';
+// Prices in the flyer's shorthand: "5€", "8€".
+const short = (cents: number) =>
+  cents % 100 ? money(cents) : `${cents / 100}€`;
+const pad = (n: number | string) => String(n).padStart(2, '0');
 // Booking by WhatsApp with the message half written: for neighbours who
 // prefer a chat to a form.
 const whatsappBook = brand.whatsapp
@@ -134,30 +138,64 @@ const jsonLd = [
 
 <Base lang={lang} route="home" jsonLd={jsonLd}>
   <main id="contenido">
-    <!-- 1 · Portada: el pan abierto en las manos de mi madre -->
+    <!-- 1 · Portada: el flyer. El pan abierto en las manos de mi madre, en cobalto -->
     <section class="hero" aria-labelledby="hero-title">
+      <div class="wrap mono-bar hero-bar hero-in" style="--i:0">
+        <span>{t.ed.bar}</span>
+        <span>
+          {t.bake.number} Nº {pad(current.number)} · Baix Llobregat
+        </span>
+      </div>
       <div class="wrap hero-grid">
-        <div class="hero-copy">
-          <p class="eyebrow hero-in" style="--i:0">
-            {t.hero.kicker}
-          </p>
-          <h1 id="hero-title" class="hero-title">
-            <span class="hero-mask">
-              <span class="hero-line" style="--i:0">
-                {t.hero.h1a}
-              </span>
-            </span>{' '}
-            <span class="hero-mask">
-              <span class="hero-line hero-light" style="--i:1">
-                {t.hero.h1b}
-              </span>
+        <p class="hero-made">
+          <span class="hero-mask">
+            <span class="hero-line" style="--i:0">
+              {t.ed.made}
             </span>
-          </h1>
+          </span>
+        </p>
+        <h1 id="hero-title" class="hero-title">
+          <span class="hero-mask">
+            <span class="hero-line" style="--i:1">
+              {t.hero.h1a}
+            </span>
+          </span>{' '}
+          <span class="hero-mask">
+            <span class="hero-line hero-orange" style="--i:2">
+              {t.hero.h1b}.
+            </span>
+          </span>
+        </h1>
+        <p class="hero-price">
+          <span class="outline-price" aria-hidden="true">
+            {short(loaf.price)}
+          </span>
+          <span class="visually-hidden">{money(loaf.price)}</span>
+          <span class="hero-weight">{loaf.weight}</span>
+        </p>
+        <figure class="hero-photo" data-hero-photo>
+          <div class="hero-photo-frame">
+            <Photo
+              name="crumb2"
+              alt={t.hero.photos[1]!}
+              eager
+              sizes="(max-width: 960px) calc(100vw - 40px), 56vw"
+            />
+            <span class="hero-logo" aria-hidden="true">
+              molla<span>.</span>
+            </span>
+          </div>
+          <figcaption class="fig-bar">
+            <span>{t.ed.fig}</span>
+            <span>{t.ed.ferment}</span>
+          </figcaption>
+        </figure>
+        <div class="hero-info">
           <p class="hero-lede hero-in" style="--i:3">
             {t.hero.lede}
           </p>
           <div class="hero-actions hero-in" style="--i:4">
-            <a class="button" href={open ? '#carta' : '#avisame'}>
+            <a class="button button-light" href={open ? '#carta' : '#avisame'}>
               {open ? t.hero.order : t.hero.notify}
               <span class="button-arrow" aria-hidden="true">
                 →
@@ -167,14 +205,21 @@ const jsonLd = [
               {t.hero.how} <span aria-hidden="true">↓</span>
             </a>
           </div>
-          <p class="hero-trust hero-in" style="--i:4">
+          <ol class="hero-steps hero-in" style="--i:5">
+            {t.ed.steps.map((step, i) => (
+              <li>
+                <span aria-hidden="true">{pad(i + 1)} ·</span> {step}
+              </li>
+            ))}
+          </ol>
+          <p class="hero-trust hero-in" style="--i:5">
             {t.hero.trust}
             {welcomeGift.active && <> · {t.hero.gift}</>}
           </p>
           <div
             id="hornada"
             class="hero-bake hero-in"
-            style="--i:5"
+            style="--i:6"
             data-state={state}
             data-event-view="view_current_bake"
             aria-labelledby="bake-title"
@@ -238,47 +283,79 @@ const jsonLd = [
             </a>
           </div>
         </div>
-        <figure class="hero-photo" data-hero-photo>
-          <div class="hero-photo-frame">
-            <Photo
-              name="crumb2"
-              alt={t.hero.photos[1]!}
-              eager
-              sizes="(max-width: 860px) calc(100vw - 40px), 48vw"
-            />
-          </div>
-          <figcaption>
-            <span class="hero-caption-line" aria-hidden="true"></span>
-            {t.hero.hands}
-          </figcaption>
-          <span class="hero-seal" aria-hidden="true" data-seal>
-            <small>{t.hero.sealTop}</small>
-            <strong>35 h</strong>
-            <small>{t.hero.sealBottom}</small>
-          </span>
-        </figure>
       </div>
     </section>
 
-    <!-- 2 · La cocina, en fotos: una tira que se desliza con el scroll -->
-    <section class="film" aria-label={t.film.label}>
-      <div class="film-track" data-film>
-        {t.film.items.map(([name, title, text, alt], i) => (
-          <figure class:list={['film-item', `film-${i}`]}>
-            <div class="film-photo">
-              <Photo
-                name={name}
-                alt={alt}
-                sizes="(max-width: 720px) 70vw, 30vw"
-              />
-            </div>
-            <figcaption>
-              <span class="num">0{i + 1}</span>
-              <strong>{title}</strong>
-              <span>{text}</span>
-            </figcaption>
-          </figure>
-        ))}
+    <!-- La cinta: palabras del obrador que corren con el scroll -->
+    <div class="marquee" aria-hidden="true" data-marquee>
+      {[0, 1].map((row) => (
+        <div class:list={['marquee-row', { 'marquee-reverse': row === 1 }]}>
+          {[0, 1].map(() => (
+            <span class="marquee-track">
+              {[...t.hero.keywords, ...t.hero.keywords].map((w, i) => (
+                <span class:list={['marquee-word', { outline: (i + row) % 2 }]}>
+                  {w}
+                  <span class="star">✷</span>
+                </span>
+              ))}
+            </span>
+          ))}
+        </div>
+      ))}
+    </div>
+
+    <!-- 2 · Diari de l'obrador: las fotos de la cocina, como un reel -->
+    <section class="diary" aria-label={t.film.label} data-diary>
+      <div class="diary-pin">
+        <div class="wrap mono-bar diary-bar">
+          <span>{t.ed.diary}</span>
+          <span>
+            (Fig. <span data-diary-index>1</span> / {t.film.items.length})
+          </span>
+        </div>
+        <div class="wrap diary-progress" aria-hidden="true">
+          {t.film.items.map(() => (
+            <span>
+              <i />
+            </span>
+          ))}
+        </div>
+        <div
+          class="diary-track"
+          data-film
+          tabindex="0"
+          role="group"
+          aria-label={t.film.label}
+        >
+          {t.film.items.map(([name, title, text, alt], i) => (
+            <figure class:list={['story', { 'story-outline': i % 2 }]}>
+              <div class="story-photo">
+                <Photo
+                  name={name}
+                  alt={alt}
+                  sizes="(max-width: 720px) 78vw, 34vh"
+                />
+              </div>
+              <span class="story-word" aria-hidden="true">
+                {title}
+              </span>
+              <span class="story-num" aria-hidden="true">
+                {i + 1}
+              </span>
+              <figcaption>
+                <strong>{title}</strong>
+                <span>{text}</span>
+              </figcaption>
+              <span class="story-foot" aria-hidden="true">
+                <b>molla.</b>
+                <span>Baix Llobregat</span>
+              </span>
+            </figure>
+          ))}
+        </div>
+        <p class="wrap diary-hint" aria-hidden="true">
+          {t.ed.swipe} →
+        </p>
       </div>
     </section>
 
@@ -290,38 +367,39 @@ const jsonLd = [
       data-event-view="view_product"
     >
       <div class="wrap">
-        <header class="section-head" data-reveal>
-          <div>
-            <p class="eyebrow">
-              <span class="num">01</span>
-              {t.catalog.kicker}
-            </p>
-            <h2 id="catalog-title">
-              {t.catalog.h2a} <em>{t.catalog.h2b}</em>
-            </h2>
-          </div>
-          <p class="section-intro">{t.catalog.intro}</p>
+        <div class="mono-bar" data-bar>
+          <span>Nº 01 · {t.catalog.kicker}</span>
+          <span>{t.ed.menuBar}</span>
+        </div>
+        <header class="section-head">
+          <h2 id="catalog-title" data-split>
+            {t.catalog.h2a} <em>{t.catalog.h2b}</em>
+          </h2>
+          <p class="section-intro" data-reveal>
+            {t.catalog.intro}
+          </p>
         </header>
 
         <article class="dish dish-loaf" aria-labelledby="loaf-title">
-          <div class="dish-media" data-reveal>
-            <figure class="dish-photo">
+          <div class="dish-media">
+            <figure class="dish-photo" data-wipe>
               <Photo
                 name="loaves"
                 alt={t.loaf.alt}
-                sizes="(max-width: 860px) calc(100vw - 40px), 56vw"
+                sizes="(max-width: 960px) calc(100vw - 40px), 56vw"
               />
             </figure>
             <figure class="dish-inset" data-parallax="-0.08">
               <Photo
                 name="slice"
                 alt={t.loaf.altSlice}
-                sizes="(max-width: 860px) 50vw, 22vw"
+                sizes="(max-width: 960px) 50vw, 22vw"
               />
             </figure>
-            <span class="price-seal" aria-hidden="true">
-              <span>{money(loaf.price)}</span>
-            </span>
+            <p class="fig-bar fig-bar-ink">
+              <span>{t.ed.fig2}</span>
+              <span>{loaf.weight}</span>
+            </p>
           </div>
           <div class="dish-info" data-reveal>
             <p class="dish-index">
@@ -331,7 +409,10 @@ const jsonLd = [
             <h3 id="loaf-title">{t.loaf.name}</h3>
             <p class="dish-desc">{t.loaf.fermentationValue}.</p>
             <p class="dish-price">
-              <strong>{money(loaf.price)}</strong>
+              <span class="outline-price" aria-hidden="true">
+                {short(loaf.price)}
+              </span>
+              <strong class="visually-hidden">{money(loaf.price)}</strong>
               <span>{loaf.weight}</span>
             </p>
             <dl class="spec">
@@ -382,14 +463,38 @@ const jsonLd = [
           </div>
         </article>
 
+        <!-- El banana bread, como el reel: luz de tarde y precios en cursiva -->
         <article class="dish dish-banana" aria-labelledby="banana-title">
+          <div class="dish-media">
+            <figure class="dish-photo" data-wipe>
+              <Photo
+                name="banana"
+                alt={t.banana.alt}
+                sizes="(max-width: 960px) calc(100vw - 40px), 44vw"
+              />
+            </figure>
+            <figure class="dish-inset" data-parallax="-0.1">
+              <Photo
+                name="bananaDetail"
+                alt={t.banana.altDetail}
+                sizes="(max-width: 960px) 50vw, 22vw"
+              />
+            </figure>
+            <p class="fig-bar">
+              <span>{t.ed.fig3}</span>
+              <span>
+                {short(bananaWhole.price)} · {short(bananaHalf.price)}
+              </span>
+            </p>
+          </div>
           <div class="dish-info" data-reveal>
             <p class="dish-index">
               <span>02</span>
               {t.banana.kicker}
             </p>
             <h3 id="banana-title">
-              {t.banana.h2a} <em>{t.banana.h2b}</em>
+              <span class="serif-it">{t.banana.h2a}</span>{' '}
+              <em>{t.banana.h2b}</em>
             </h3>
             <p class="dish-desc">{t.banana.p}</p>
             <ul class="tags">
@@ -397,6 +502,25 @@ const jsonLd = [
               <li>{t.banana.point2}</li>
               <li>{t.banana.point3}</li>
             </ul>
+            <fieldset class="size-choice menu-choice" disabled={!open}>
+              <legend>{t.catalog.size}</legend>
+              <label>
+                <input type="radio" name="banana-size" value="2" checked />
+                <span>
+                  <strong>{t.ed.whole}</strong>
+                  <i class="leader" aria-hidden="true"></i>
+                  <em>{short(bananaWhole.price)}</em>
+                </span>
+              </label>
+              <label>
+                <input type="radio" name="banana-size" value="1" />
+                <span>
+                  <strong>{t.ed.half}</strong>
+                  <i class="leader" aria-hidden="true"></i>
+                  <em>{short(bananaHalf.price)}</em>
+                </span>
+              </label>
+            </fieldset>
             <dl class="spec">
               <div>
                 <dt>{t.loaf.ingredients}</dt>
@@ -407,23 +531,6 @@ const jsonLd = [
                 <dd>{t.banana.allergensValue}</dd>
               </div>
             </dl>
-            <fieldset class="size-choice" disabled={!open}>
-              <legend>{t.catalog.size}</legend>
-              <label>
-                <input type="radio" name="banana-size" value="2" checked />
-                <span>
-                  <strong>{t.catalog.whole}</strong>
-                  <em>{money(bananaWhole.price)}</em>
-                </span>
-              </label>
-              <label>
-                <input type="radio" name="banana-size" value="1" />
-                <span>
-                  <strong>{t.catalog.half}</strong>
-                  <em>{money(bananaHalf.price)}</em>
-                </span>
-              </label>
-            </fieldset>
             <p class="dish-stock" data-banana-left={bananaLeft}>
               {open ? t.catalog.bananaLeft(bananaLeft) : t.catalog.closed}
             </p>
@@ -431,7 +538,7 @@ const jsonLd = [
               <div class="dish-buy" data-buy="banana">
                 <button
                   type="button"
-                  class="button"
+                  class="button button-orange"
                   data-add="banana"
                   disabled={bananaLeft === 0}
                 >
@@ -460,30 +567,10 @@ const jsonLd = [
                 </div>
               </div>
             ) : (
-              <a class="button button-ghost" href="#avisame">
+              <a class="button button-light" href="#avisame">
                 {t.banana.notify}
               </a>
             )}
-          </div>
-          <div class="dish-media" data-reveal>
-            <figure class="dish-photo">
-              <Photo
-                name="banana"
-                alt={t.banana.alt}
-                sizes="(max-width: 860px) calc(100vw - 40px), 44vw"
-              />
-            </figure>
-            <figure class="dish-inset" data-parallax="-0.1">
-              <Photo
-                name="bananaDetail"
-                alt={t.banana.altDetail}
-                sizes="(max-width: 860px) 50vw, 22vw"
-              />
-            </figure>
-            <span class="price-seal price-seal-orange" aria-hidden="true">
-              <span>{money(bananaHalf.price)}</span>
-              <small>{t.catalog.half.toLowerCase()}</small>
-            </span>
           </div>
         </article>
       </div>
@@ -492,17 +579,15 @@ const jsonLd = [
     <!-- 4 · 35 horas: la foto de cada paso y el contador avanzan con el scroll -->
     <section id="proceso" class="process" aria-labelledby="process-title">
       <div class="wrap">
-        <header class="section-head" data-reveal>
-          <div>
-            <p class="eyebrow">
-              <span class="num">02</span>
-              {t.nav.process}
-            </p>
-            <h2 id="process-title">
-              {t.process.h2a} <em>{t.process.h2b}</em>
-            </h2>
-          </div>
-          <div>
+        <div class="mono-bar" data-bar>
+          <span>Nº 02 · {t.nav.process}</span>
+          <span>{t.ed.processBar}</span>
+        </div>
+        <header class="section-head">
+          <h2 id="process-title" data-split>
+            {t.process.h2a} <em>{t.process.h2b}</em>
+          </h2>
+          <div data-reveal>
             <p class="section-intro">{t.process.intro}</p>
             <a class="link-arrow" href={routes.poolish[lang]}>
               {t.process.more} <span aria-hidden="true">→</span>
@@ -533,7 +618,9 @@ const jsonLd = [
           <ol class="steps">
             {steps.map((step, i) => (
               <li class="step" data-step-hours={stepHours[i]}>
-                <span class="step-num">0{i + 1}</span>
+                <span class="step-num" aria-hidden="true">
+                  {i + 1}
+                </span>
                 <span class="when">{step.when}</span>
                 <h3>{step.title}</h3>
                 {'time' in step && <span class="step-time">{step.time}</span>}
@@ -545,17 +632,17 @@ const jsonLd = [
       </div>
     </section>
 
-    <!-- 5 · Harina: la cocina de azulejos azules, a sangre -->
+    <!-- 5 · Farina: la cocina de azulejos, teñida de cobalto -->
     <section class="manifesto" aria-labelledby="organic-title">
       <figure class="manifesto-photo" aria-hidden="true" data-drift>
         <Photo name="kitchen" alt="" sizes="100vw" />
       </figure>
       <div class="wrap manifesto-inner">
-        <p class="eyebrow" data-reveal>
-          <span class="num">03</span>
-          {t.organic.kicker}
-        </p>
-        <h2 id="organic-title" data-reveal>
+        <div class="mono-bar" data-bar>
+          <span>Nº 03 · {t.organic.kicker}</span>
+          <span>{t.ed.flourBar}</span>
+        </div>
+        <h2 id="organic-title" data-split>
           {t.organic.h2a} <em>{t.organic.h2b}</em>
         </h2>
         <p class="manifesto-text" data-reveal>
@@ -572,36 +659,48 @@ const jsonLd = [
       </div>
     </section>
 
-    <!-- 6 · Quién -->
-    <section class="maker wrap" aria-labelledby="maker-title">
-      <div class="maker-media" data-reveal>
-        <figure class="maker-main">
-          <Photo
-            name="person"
-            alt={t.maker.altPerson}
-            sizes="(max-width: 860px) 70vw, 34vw"
-          />
-        </figure>
-      </div>
-      <div class="maker-copy" data-reveal>
-        <p class="eyebrow">
-          <span class="num">04</span>
-          {t.maker.kicker}
+    <!-- 6 · Quién: «molla», en el diccionario -->
+    <section class="maker" aria-labelledby="maker-title">
+      <div class="wrap">
+        <div class="mono-bar" data-bar>
+          <span>Nº 04 · {t.maker.kicker}</span>
+          <span>{t.ed.makerBar}</span>
+        </div>
+        <p class="definition" data-reveal>
+          <span class="def-word">{t.ed.defWord}</span>
+          <span class="def-gram">{t.ed.defGram}</span>
+          <span class="def-text">{t.ed.defText}</span>
         </p>
-        <h2 id="maker-title">{t.maker.h2}</h2>
-        <p>{t.maker.p1}</p>
-        <p>{t.maker.p2}</p>
+        <div class="maker-grid">
+          <figure class="maker-main" data-wipe>
+            <Photo
+              name="person"
+              alt={t.maker.altPerson}
+              sizes="(max-width: 960px) 80vw, 34vw"
+            />
+            <figcaption class="fig-bar fig-bar-ink">
+              <span>{t.ed.fig4}</span>
+            </figcaption>
+          </figure>
+          <div class="maker-copy" data-reveal>
+            <h2 id="maker-title">{t.maker.h2}</h2>
+            <p>{t.maker.p1}</p>
+            <p>{t.maker.p2}</p>
+          </div>
+        </div>
       </div>
     </section>
 
-    <!-- 7 · Reserva: las rebanadas, servidas, junto al tiquet -->
+    <!-- 7 · Reserva: el tiquet, sobre el azul del flyer -->
     <section id="reserva" class="reserve" aria-labelledby="reserve-title">
+      <div class="wrap">
+        <div class="mono-bar" data-bar>
+          <span>Nº 05 · {t.reserve.kicker}</span>
+          <span>{t.ed.reserveBar}</span>
+        </div>
+      </div>
       <div class="wrap reserve-grid">
         <div class="reserve-intro" data-reveal>
-          <p class="eyebrow">
-            <span class="num">05</span>
-            {t.reserve.kicker}
-          </p>
           <h2 id="reserve-title">{t.reserve.h2}</h2>
           <dl class="summary">
             <div>
@@ -665,6 +764,10 @@ const jsonLd = [
               data-banana-whole={bananaWhole.price}
               data-banana-half={bananaHalf.price}
             >
+              <div class="ticket-head" aria-hidden="true">
+                <span>molla.</span>
+                <span>Nº {pad(current.number)}</span>
+              </div>
               <h3>{t.reserve.yourOrder}</h3>
               {isDemo && <p class="form-intro">{t.reserve.demoIntro}</p>}
               <input type="hidden" name="requestId" value="" />
@@ -911,36 +1014,54 @@ const jsonLd = [
     </section>
 
     <!-- 8 · Preguntas -->
-    <section id="preguntas" class="faq wrap" aria-labelledby="faq-title">
-      <div class="faq-head" data-reveal>
-        <p class="eyebrow">
-          <span class="num">06</span>
-          {t.nav.faq}
-        </p>
-        <h2 id="faq-title">{t.faq.h2}</h2>
-      </div>
-      <div class="faq-list">
-        {t.faq.items.map(([q, a]) => (
-          <details>
-            <summary>
-              {q}
-              <span aria-hidden="true" class="faq-icon"></span>
-            </summary>
-            <p>{a}</p>
-          </details>
-        ))}
+    <section id="preguntas" class="faq" aria-labelledby="faq-title">
+      <div class="wrap">
+        <div class="mono-bar" data-bar>
+          <span>Nº 06 · {t.nav.faq}</span>
+          <span>{t.ed.faqBar}</span>
+        </div>
+        <div class="faq-grid">
+          <div class="faq-head">
+            <h2 id="faq-title" data-split>
+              {t.faq.h2}
+            </h2>
+          </div>
+          <div class="faq-list">
+            {t.faq.items.map(([q, a], i) => (
+              <details>
+                <summary>
+                  <span class="faq-num" aria-hidden="true">
+                    {pad(i + 1)}
+                  </span>
+                  <span class="faq-q">{q}</span>
+                  <span aria-hidden="true" class="faq-icon"></span>
+                </summary>
+                <p>{a}</p>
+              </details>
+            ))}
+          </div>
+        </div>
       </div>
     </section>
 
     <!-- 9 · Aviso de la próxima hornada -->
     <section id="avisame" class="waitlist" aria-labelledby="waitlist-title">
+      <div class="wrap">
+        <div class="mono-bar" data-bar>
+          <span>Nº 07 · {t.status.UPCOMING}</span>
+          <span>{t.ed.waitBar}</span>
+        </div>
+      </div>
       <div class="wrap waitlist-grid">
-        <figure class="poster" data-reveal>
+        <figure class="poster" data-wipe>
           <Photo
             name="crumb"
             alt={t.waitlist.poster}
-            sizes="(max-width: 860px) calc(100vw - 40px), 44vw"
+            sizes="(max-width: 960px) calc(100vw - 40px), 44vw"
           />
+          <span class="poster-star" aria-hidden="true">
+            ✷
+          </span>
         </figure>
         <div class="waitlist-body" data-reveal>
           <h2 id="waitlist-title">{t.waitlist.h2}</h2>
