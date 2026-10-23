@@ -204,24 +204,45 @@ const addCalendarDays = (date: string, days: number) =>
     .toISOString()
     .slice(0, 10);
 
-// The weekly cycle follows Madrid's calendar, not the cron server's UTC day.
-// Orders for a Saturday close on Thursday at 20:00; from that moment on the
-// plan points at the following Saturday, so there is always a bake to order.
+// Two bakes a week. Wednesday's closes on Sunday at 20:00 and Saturday's on
+// Thursday at 20:00; each opens the moment the other one closes, so there is
+// always exactly one bake taking orders. Only Saturday's has pastries.
+export const bakeDays = [
+  { weekday: 3, closesDaysBefore: 3 },
+  { weekday: 6, closesDaysBefore: 2 },
+] as const;
+// Madrid weekday (0 = Sunday) of an instant.
+export const madridWeekday = (iso: string) =>
+  new Date(`${madridDate(new Date(iso))}T12:00:00Z`).getUTCDay();
+// Croissants and pains au chocolat are baked for Saturday only.
+export const pastryBake = (pickupIso: string) => madridWeekday(pickupIso) === 6;
+// The cycle follows Madrid's calendar, not the cron server's UTC day: the
+// plan is the earliest bake day whose orders are still open.
 export function weeklyCyclePlan(now = new Date(), pickupTime = '12:00') {
   const today = madridDate(now);
   const weekday = new Date(`${today}T12:00:00Z`).getUTCDay();
-  let pickupDate = addCalendarDays(today, (6 - weekday + 7) % 7);
-  let deadline = madridIso(addCalendarDays(pickupDate, -2), '20:00');
-  if (now.getTime() >= Date.parse(deadline)) {
-    pickupDate = addCalendarDays(pickupDate, 7);
-    deadline = madridIso(addCalendarDays(pickupDate, -2), '20:00');
-  }
+  const [next] = bakeDays
+    .flatMap(({ weekday: day, closesDaysBefore }) =>
+      [0, 7].map((week) => {
+        const pickupDate = addCalendarDays(
+          today,
+          ((day - weekday + 7) % 7) + week,
+        );
+        const deadline = madridIso(
+          addCalendarDays(pickupDate, -closesDaysBefore),
+          '20:00',
+        );
+        return { pickupDate, deadline };
+      }),
+    )
+    .filter((b) => now.getTime() < Date.parse(b.deadline))
+    .sort((a, b) => a.pickupDate.localeCompare(b.pickupDate));
   return {
     today,
     weekday,
-    pickupDate,
-    pickupAt: madridIso(pickupDate, pickupTime),
-    deadline,
+    pickupDate: next!.pickupDate,
+    pickupAt: madridIso(next!.pickupDate, pickupTime),
+    deadline: next!.deadline,
   };
 }
 export function assertCapacity(

@@ -539,10 +539,54 @@ test('banana bread is ordered by halves, alone or with bread, within its quota',
   );
 });
 
+test('pastries only on Saturday: the Wednesday bake shows them but refuses them', async ({
+  page,
+  request,
+}) => {
+  await writeFile(
+    dataPath,
+    JSON.stringify({ orders: [], waitlist: [], limits: {}, bakeDay: 3 }),
+  );
+  const bake = await (await request.get('/api/bake')).json();
+  expect(bake.pastries).toBe(false);
+  expect(bake.pastryLeft).toBe(0);
+  const post = (data: Record<string, unknown>) =>
+    request.post('/api/reservations', {
+      headers: origin,
+      data: {
+        requestId: crypto.randomUUID(),
+        bakeId: 'hornada-001',
+        name: 'Nil',
+        email: 'nil@example.com',
+        phone: '612345678',
+        quantity: 0,
+        pickup: 'yes',
+        privacy: 'yes',
+        ...data,
+      },
+    });
+  const croissant = await post({ croissant: 2 });
+  expect(croissant.status()).toBe(409);
+  expect((await croissant.json()).error).toContain('sábados');
+  // Bread and banana bread are delivered on Wednesday too.
+  expect((await post({ quantity: 1, banana: 1 })).status()).toBe(201);
+  await page.goto('/es/');
+  await expect(page.locator('.pastry-later').first()).toContainText(
+    'Solo para la hornada del sábado',
+  );
+  await expect(page.locator('[data-buy="croissant"]')).toHaveCount(0);
+  await expect(page.locator('#croissant')).toHaveCount(0);
+  await expect(page.locator('#hornada .stub-day')).toContainText('miércoles');
+});
+
 test('croissants and pains au chocolat share 48 pieces per bake, by the unit', async ({
   page,
   request,
 }) => {
+  await writeFile(
+    dataPath,
+    JSON.stringify({ orders: [], waitlist: [], limits: {}, bakeDay: 6 }),
+  );
   const order = (croissant: number, pain: number, email = 'nil@example.com') =>
     request.post('/api/reservations', {
       headers: origin,
@@ -596,7 +640,7 @@ test('croissants and pains au chocolat share 48 pieces per bake, by the unit', a
   // In the page, the two steppers share what is left of the pool.
   await writeFile(
     dataPath,
-    JSON.stringify({ orders: [], waitlist: [], limits: {} }),
+    JSON.stringify({ orders: [], waitlist: [], limits: {}, bakeDay: 6 }),
   );
   for (const [c, p] of [
     [12, 12],
@@ -893,7 +937,7 @@ test('first order gets the welcome gift; the second one does not', async ({
     'un cuarto de banana bread',
   );
   await expect(page.locator('.form-footnote').first()).toContainText(
-    'Cancelas con un clic hasta el jueves',
+    'Cancelas con un clic hasta el cierre de la hornada',
   );
   const book = (email: string) =>
     request.post('/api/reservations', {

@@ -86,7 +86,7 @@ const copy = {
       'Si quieres enterarte de la próxima hornada, sigue el canal de WhatsApp.',
     channelButton: 'Seguir el canal →',
     cancelNote:
-      '¿No vas a poder recibirlo? Cancela el pedido con un clic hasta el cierre de pedidos (el jueves a las 20:00), sin dar explicaciones.',
+      '¿No vas a poder recibirlo? Cancela el pedido con un clic hasta el cierre de pedidos de la hornada, a las 20:00, sin dar explicaciones.',
     cancelLink: 'Cancelar el pedido →',
     giftLabel: 'Regalo',
     giftText:
@@ -166,7 +166,7 @@ const copy = {
       'Si vols assabentar-te de la propera fornada, segueix el canal de WhatsApp.',
     channelButton: 'Segueix el canal →',
     cancelNote:
-      'No el podràs rebre? Cancel·la la comanda amb un clic fins al tancament de comandes (dijous a les 20:00), sense donar explicacions.',
+      'No el podràs rebre? Cancel·la la comanda amb un clic fins al tancament de comandes de la fornada, a les 20:00, sense donar explicacions.',
     cancelLink: 'Cancel·lar la comanda →',
     giftLabel: 'Regal',
     giftText:

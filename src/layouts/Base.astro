@@ -48,7 +48,8 @@ const sameAs = [
   brand.whatsappChannel,
   brand.googleProfile,
 ].filter(Boolean);
-// A service-area bakery: no public address, Saturday delivery in its towns.
+// A service-area bakery: no public address, delivery on Wednesdays and
+// Saturdays in its towns.
 const organization = {
   '@context': 'https://schema.org',
   '@type': 'Bakery',
@@ -78,7 +79,7 @@ const organization = {
   ],
   openingHoursSpecification: {
     '@type': 'OpeningHoursSpecification',
-    dayOfWeek: 'https://schema.org/Saturday',
+    dayOfWeek: ['https://schema.org/Wednesday', 'https://schema.org/Saturday'],
     opens: deliveryWindow.split('–')[0],
     closes: deliveryWindow.split('–')[1],
   },

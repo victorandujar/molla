@@ -23,28 +23,30 @@ const hours = `${Number(from.split(':')[0])}\u00a0a\u00a0${Number(to.split(':')[
 const loaf = money(productById('clasica')!.price);
 const bananaWhole = money(productById('banana')!.price);
 const bananaHalf = money(productById('banana-mitad')!.price);
+const croissant = money(productById('croissant')!.price);
+const pain = money(productById('pain-au-chocolat')!.price);
 const text = {
   es: {
     crumb: 'Pan a domicilio',
     title: `Pan a domicilio en Sant Boi, Sant Just y Santa Coloma · ${brand.name}`,
-    description: `Pan artesano de fermentación lenta a domicilio los sábados de ${hours} en Sant Boi de Llobregat, Sant Just Desvern y Santa Coloma de Cervelló. Reserva online, sin coste de envío; pagas al recibirlo.`,
-    kicker: `A domicilio · sábados de ${hours}`,
-    h1: 'Pan artesano a domicilio, cada sábado.',
-    lede: `Reservas durante la semana y el sábado, entre las ${from} y las ${to}, te llevo a casa el pan horneado esa misma mañana. En Sant Boi de Llobregat, Sant Just Desvern y Santa Coloma de Cervelló.`,
+    description: `Pan artesano de fermentación lenta a domicilio los miércoles y los sábados de ${hours} en Sant Boi de Llobregat, Sant Just Desvern y Santa Coloma de Cervelló. Reserva online, sin coste de envío; pagas al recibirlo.`,
+    kicker: `A domicilio · miércoles y sábados de ${hours}`,
+    h1: 'Pan artesano a domicilio, miércoles y sábado.',
+    lede: `Reservas durante la semana y el miércoles o el sábado, entre las ${from} y las ${to}, te llevo a casa el pan horneado esa misma mañana. En Sant Boi de Llobregat, Sant Just Desvern y Santa Coloma de Cervelló.`,
     whenH: 'Cuándo',
     when: (day: string) =>
-      `Los sábados, de ${hours}. El próximo reparto es el ${day}.`,
+      `Los miércoles y los sábados, de ${hours}. El próximo reparto es el ${day}.`,
     whenClose: (weekday: string, d: string, time: string) =>
       ` Los pedidos se cierran el ${weekday} ${d} a las ${time} o cuando se completa la hornada.`,
-    whenFallback: `Los sábados, de ${hours}. Los pedidos se cierran el jueves a las 20:00 o cuando se completa la hornada.`,
+    whenFallback: `Los miércoles y los sábados, de ${hours}. Los pedidos se cierran a las 20:00 del domingo (para el miércoles) o del jueves (para el sábado), o cuando se completa la hornada.`,
     whereH: 'Dónde reparto',
     towns: {
       'sant-boi':
-        'Aquí horneo. Reparto a domicilio el sábado y, si lo prefieres, también puedes recogerlo en Sant Boi.',
+        'Aquí horneo. Reparto a domicilio el miércoles y el sábado y, si lo prefieres, también puedes recogerlo en Sant Boi.',
       'sant-just':
-        'Cada sábado hago la ruta hasta Sant Just Desvern. El pan llega horneado esa misma mañana, todavía con la corteza crujiente.',
+        'Cada miércoles y cada sábado hago la ruta hasta Sant Just Desvern. El pan llega horneado esa misma mañana, todavía con la corteza crujiente.',
       'santa-coloma':
-        'Reparto a domicilio en Santa Coloma de Cervelló dentro de la misma franja del sábado.',
+        'Reparto a domicilio en Santa Coloma de Cervelló dentro de la misma franja, miércoles y sábado.',
     } as Record<string, string>,
     otherH: '¿Vives en otro municipio del Baix Llobregat?',
     other:
@@ -54,11 +56,11 @@ const text = {
     how: [
       'Reservas en la web, eliges «A domicilio», tu municipio y tu dirección.',
       'Te llega la confirmación por email con tu código. El día antes, un recordatorio.',
-      `El sábado, entre las ${from} y las ${to}, te llevo el pedido a casa. Si necesito confirmar algo, te escribo por WhatsApp.`,
+      `El miércoles o el sábado, entre las ${from} y las ${to}, te llevo el pedido a casa. Si necesito confirmar algo, te escribo por WhatsApp.`,
       'Pagas al recibirlo. Sin tarjeta, sin cuenta y sin suscripciones.',
     ],
     priceH: 'Qué cuesta',
-    price: `La hogaza de poolish (750–850 g) cuesta ${loaf}; el banana bread, ${bananaWhole} entero o ${bananaHalf} la mitad. El reparto no tiene coste de envío.`,
+    price: `La hogaza de poolish (750–850 g) cuesta ${loaf}; el banana bread, ${bananaWhole} entero o ${bananaHalf} la mitad. Los sábados también hay croissants (${croissant}) y pains au chocolat (${pain}). El reparto no tiene coste de envío.`,
     absentH: '¿Y si no voy a estar?',
     absent:
       'Responde al email de confirmación cuanto antes con tu código. Si aún estamos a tiempo, libero el pan para otra persona; si no, buscamos juntos otra forma de dártelo.',
@@ -68,24 +70,24 @@ const text = {
   ca: {
     crumb: 'Pa a domicili',
     title: `Pa a domicili a Sant Boi, Sant Just i Santa Coloma · ${brand.name}`,
-    description: `Pa artesà de fermentació lenta a domicili els dissabtes de ${hours} a Sant Boi de Llobregat, Sant Just Desvern i Santa Coloma de Cervelló. Reserva en línia, sense cost d’enviament; pagues en rebre’l.`,
-    kicker: `A domicili · dissabtes de ${hours}`,
-    h1: 'Pa artesà a domicili, cada dissabte.',
-    lede: `Reserves durant la setmana i dissabte, entre les ${from} i les ${to}, et porto a casa el pa cuit aquell mateix matí. A Sant Boi de Llobregat, Sant Just Desvern i Santa Coloma de Cervelló.`,
+    description: `Pa artesà de fermentació lenta a domicili els dimecres i els dissabtes de ${hours} a Sant Boi de Llobregat, Sant Just Desvern i Santa Coloma de Cervelló. Reserva en línia, sense cost d’enviament; pagues en rebre’l.`,
+    kicker: `A domicili · dimecres i dissabtes de ${hours}`,
+    h1: 'Pa artesà a domicili, dimecres i dissabte.',
+    lede: `Reserves durant la setmana i dimecres o dissabte, entre les ${from} i les ${to}, et porto a casa el pa cuit aquell mateix matí. A Sant Boi de Llobregat, Sant Just Desvern i Santa Coloma de Cervelló.`,
     whenH: 'Quan',
     when: (day: string) =>
-      `Els dissabtes, de ${hours}. El proper repartiment és ${day}.`,
+      `Els dimecres i els dissabtes, de ${hours}. El proper repartiment és ${day}.`,
     whenClose: (weekday: string, d: string, time: string) =>
       ` Les comandes es tanquen ${weekday} ${d} a les ${time} o quan s’acaba la fornada.`,
-    whenFallback: `Els dissabtes, de ${hours}. Les comandes es tanquen dijous a les 20:00 o quan s’acaba la fornada.`,
+    whenFallback: `Els dimecres i els dissabtes, de ${hours}. Les comandes es tanquen a les 20:00 de diumenge (per a dimecres) o de dijous (per a dissabte), o quan s’acaba la fornada.`,
     whereH: 'On reparteixo',
     towns: {
       'sant-boi':
-        'Aquí és on faig el pa. Reparteixo a domicili dissabte i, si ho prefereixes, també el pots recollir a Sant Boi.',
+        'Aquí és on faig el pa. Reparteixo a domicili dimecres i dissabte i, si ho prefereixes, també el pots recollir a Sant Boi.',
       'sant-just':
-        'Cada dissabte faig la ruta fins a Sant Just Desvern. El pa arriba cuit aquell mateix matí, encara amb la crosta cruixent.',
+        'Cada dimecres i cada dissabte faig la ruta fins a Sant Just Desvern. El pa arriba cuit aquell mateix matí, encara amb la crosta cruixent.',
       'santa-coloma':
-        'Reparteixo a domicili a Santa Coloma de Cervelló dins de la mateixa franja de dissabte.',
+        'Reparteixo a domicili a Santa Coloma de Cervelló dins de la mateixa franja, dimecres i dissabte.',
     } as Record<string, string>,
     otherH: 'Vius en un altre municipi del Baix Llobregat?',
     other:
@@ -95,11 +97,11 @@ const text = {
     how: [
       'Reserves al web, tries «A domicili», el teu municipi i la teva adreça.',
       'T’arriba la confirmació per correu amb el teu codi. El dia abans, un recordatori.',
-      `Dissabte, entre les ${from} i les ${to}, et porto la comanda a casa. Si he de confirmar alguna cosa, t’escric per WhatsApp.`,
+      `Dimecres o dissabte, entre les ${from} i les ${to}, et porto la comanda a casa. Si he de confirmar alguna cosa, t’escric per WhatsApp.`,
       'Pagues en rebre’l. Sense targeta, sense compte i sense subscripcions.',
     ],
     priceH: 'Què costa',
-    price: `El pa de poolish (750–850 g) costa ${loaf}; el banana bread, ${bananaWhole} sencer o ${bananaHalf} la meitat. El repartiment no té cost d’enviament.`,
+    price: `El pa de poolish (750–850 g) costa ${loaf}; el banana bread, ${bananaWhole} sencer o ${bananaHalf} la meitat. Els dissabtes també hi ha croissants (${croissant}) i pains au chocolat (${pain}). El repartiment no té cost d’enviament.`,
     absentH: 'I si no hi seré?',
     absent:
       'Respon el correu de confirmació com més aviat millor amb el teu codi. Si encara som a temps, allibero el pa per a una altra persona; si no, busquem junts una altra manera de fer-te’l arribar.',
@@ -122,7 +124,7 @@ const service = {
   })),
   hoursAvailable: {
     '@type': 'OpeningHoursSpecification',
-    dayOfWeek: 'https://schema.org/Saturday',
+    dayOfWeek: ['https://schema.org/Wednesday', 'https://schema.org/Saturday'],
     opens: from,
     closes: to,
   },

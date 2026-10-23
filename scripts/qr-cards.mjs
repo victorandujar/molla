@@ -57,7 +57,7 @@ const webUrl = (campaign) =>
 const card = async (campaign) => `
 <section class="card">
   <p class="mark">molla<span>.</span></p>
-  <h1>Pa artesà a domicili, cada dissabte.</h1>
+  <h1>Pa artesà a domicili, dimecres i dissabte.</h1>
   <p class="when">De 12 a 14 h · Sant Boi, Sant Just Desvern i Santa Coloma de Cervelló</p>
   <div class="codes">
     <figure><div class="qr">${await qr(webUrl(campaign))}</div>

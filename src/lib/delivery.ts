@@ -1,4 +1,4 @@
-// Saturday home delivery. The rest of the Baix Llobregat picks up in Sant Boi.
+// Home delivery on Wednesdays and Saturdays, same window and towns. The rest of the Baix Llobregat picks up in Sant Boi.
 // Shared by the page, the schemas and the emails: change zones only here.
 export const deliveryWindow = '12:00–14:00';
 export const deliveryTowns = [
