@@ -37,6 +37,9 @@ export const reservationSchema = z
     quantity: z.coerce.number().int().min(0).max(4),
     // Banana bread counted in halves: 1 = half, 2 = whole, 3 = whole + half…
     banana: z.coerce.number().int().min(0).max(4).default(0),
+    // Pastries by the unit; both share the bake's pastry quota.
+    croissant: z.coerce.number().int().min(0).max(12).default(0),
+    pain: z.coerce.number().int().min(0).max(12).default(0),
     product: z.literal('clasica').default('clasica'),
     pickup: z.literal('yes', { error: 'pickup' }),
     privacy: z.literal('yes', { error: 'privacy' }),
@@ -45,7 +48,7 @@ export const reservationSchema = z
     ...deliveryFields,
     lang,
   })
-  .refine((o) => o.quantity + o.banana > 0, {
+  .refine((o) => o.quantity + o.banana + o.croissant + o.pain > 0, {
     message: 'empty',
     path: ['quantity'],
   })

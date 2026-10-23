@@ -7,6 +7,7 @@ import {
   productById,
   welcomeGift,
   BANANA_HALVES_PER_BAKE,
+  PASTRY_UNITS_PER_BAKE,
 } from './config';
 import { ui } from './i18n';
 import { deliveryWindow, townById } from './delivery';
@@ -80,11 +81,13 @@ export const useDemo = () => !sql || isDemo;
 const madridDay = (at = new Date()) =>
   new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Madrid' }).format(at);
 // `reserved` counts loaves (the bake's capacity); banana bread has its own
-// smaller quota, counted in halves.
+// smaller quota, counted in halves, and pastries share one quota of pieces.
 export type ActiveBake = typeof bake & {
   reserved: number;
   bananaReserved: number;
+  pastryReserved: number;
 };
+const pastryIds = ['croissant', 'pain-au-chocolat'];
 const halvesOf = (i: Pick<OrderItem, 'product' | 'quantity'>) =>
   i.product === 'banana'
     ? i.quantity * 2
@@ -98,6 +101,15 @@ const reservedIn = (d: Demo, bakeId: string) =>
 const bananaIn = (d: Demo, bakeId: string) =>
   liveOrders(d, bakeId).reduce(
     (n, o) => n + (o.items || []).reduce((m, i) => m + halvesOf(i), 0),
+    0,
+  );
+const pastryIn = (d: Demo, bakeId: string) =>
+  liveOrders(d, bakeId).reduce(
+    (n, o) =>
+      n +
+      (o.items || [])
+        .filter((i) => pastryIds.includes(i.product))
+        .reduce((m, i) => m + i.quantity, 0),
     0,
   );
 // The local demo always shows the next bake still taking orders.
@@ -115,10 +127,12 @@ const demoBake = (d: Demo): ActiveBake => ({
   status: d.bakeStatus || bake.status,
   reserved: reservedIn(d, bake.id),
   bananaReserved: bananaIn(d, bake.id),
+  pastryReserved: pastryIn(d, bake.id),
 });
 const reservedSql = sql
   ? sql`COALESCE((SELECT SUM(i.quantity) FROM orders o JOIN order_items i ON i.order_id=o.id WHERE o.bake_id=b.id AND o.status!='CANCELLED' AND i.product_id='clasica'),0)::int AS reserved,
-        COALESCE((SELECT SUM(CASE i.product_id WHEN 'banana' THEN i.quantity*2 WHEN 'banana-mitad' THEN i.quantity ELSE 0 END) FROM orders o JOIN order_items i ON i.order_id=o.id WHERE o.bake_id=b.id AND o.status!='CANCELLED'),0)::int AS banana_reserved`
+        COALESCE((SELECT SUM(CASE i.product_id WHEN 'banana' THEN i.quantity*2 WHEN 'banana-mitad' THEN i.quantity ELSE 0 END) FROM orders o JOIN order_items i ON i.order_id=o.id WHERE o.bake_id=b.id AND o.status!='CANCELLED'),0)::int AS banana_reserved,
+        COALESCE((SELECT SUM(i.quantity) FROM orders o JOIN order_items i ON i.order_id=o.id WHERE o.bake_id=b.id AND o.status!='CANCELLED' AND i.product_id IN ('croissant','pain-au-chocolat')),0)::int AS pastry_reserved`
   : null;
 // The database decides the active bake: the next pickup still taking orders
 // (once Thursday's close passes, that is the following week's), else the next
@@ -140,6 +154,7 @@ const toBake = (b: postgres.Row): ActiveBake => ({
   pickupWindow: (b.pickup_window as string | null) || brand.pickupWindow,
   reserved: b.reserved as number,
   bananaReserved: (b.banana_reserved as number) || 0,
+  pastryReserved: (b.pastry_reserved as number) || 0,
 });
 export async function currentBake(): Promise<ActiveBake> {
   if (useDemo()) return demo(demoBake);
@@ -174,6 +189,8 @@ function itemsFor(input: ReservationInput, lang: Lang): OrderItem[] {
     ['clasica', input.quantity, names.loaf],
     ['banana', whole, names.bananaWhole],
     ['banana-mitad', half, names.bananaHalf],
+    ['croissant', input.croissant, names.croissant],
+    ['pain-au-chocolat', input.pain, names.pain],
   ];
   return lines
     .filter(([, quantity]) => quantity > 0)
@@ -187,6 +204,10 @@ function itemsFor(input: ReservationInput, lang: Lang): OrderItem[] {
 const assertBanana = (reserved: number, halves: number) => {
   if (halves > 0 && reserved + halves > BANANA_HALVES_PER_BAKE)
     throw new AppError('bananaCapacity');
+};
+const assertPastry = (reserved: number, units: number) => {
+  if (units > 0 && reserved + units > PASTRY_UNITS_PER_BAKE)
+    throw new AppError('pastryCapacity');
 };
 export async function reserve(
   input: ReservationInput & { lang: Lang },
@@ -237,6 +258,7 @@ export async function reserve(
         input.quantity,
       );
       assertBanana(bananaIn(d, bake.id), input.banana);
+      assertPastry(pastryIn(d, bake.id), input.croissant + input.pain);
       order.firstOrder =
         welcomeGift.active &&
         !d.orders.some(
@@ -263,7 +285,8 @@ export async function reserve(
     if (active?.id !== b.id) throw new AppError('bakeChanged');
     const [count] =
       await tx`SELECT COALESCE(SUM(i.quantity) FILTER (WHERE i.product_id='clasica'),0)::int AS n,
-        COALESCE(SUM(CASE i.product_id WHEN 'banana' THEN i.quantity*2 WHEN 'banana-mitad' THEN i.quantity ELSE 0 END),0)::int AS banana
+        COALESCE(SUM(CASE i.product_id WHEN 'banana' THEN i.quantity*2 WHEN 'banana-mitad' THEN i.quantity ELSE 0 END),0)::int AS banana,
+        COALESCE(SUM(i.quantity) FILTER (WHERE i.product_id IN ('croissant','pain-au-chocolat')),0)::int AS pastry
         FROM orders o JOIN order_items i ON i.order_id=o.id WHERE o.bake_id=${input.bakeId} AND o.status!='CANCELLED'`;
     assertCapacity(
       {
@@ -276,6 +299,7 @@ export async function reserve(
       input.quantity,
     );
     assertBanana(count?.banana || 0, input.banana);
+    assertPastry(count?.pastry || 0, input.croissant + input.pain);
     const [seen] =
       await tx`SELECT 1 FROM orders o JOIN customers c ON c.id=o.customer_id WHERE c.email=${input.email} AND o.status!='CANCELLED' LIMIT 1`;
     order.firstOrder = welcomeGift.active && !seen;

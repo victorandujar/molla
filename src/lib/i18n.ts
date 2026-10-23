@@ -209,6 +209,17 @@ export const ui = {
       loaves: (n: number) => `${n} ${n === 1 ? 'hogaza' : 'hogazas'}`,
       banana: (halves: number) =>
         halves === 1 ? '½ banana bread' : `${halves / 2} banana bread`,
+      croissant: 'Croissant',
+      pain: 'Pain au chocolat',
+      croissants: (n: number) => `${n} ${n === 1 ? 'croissant' : 'croissants'}`,
+      pains: (n: number) =>
+        `${n} ${n === 1 ? 'pain au chocolat' : 'pains au chocolat'}`,
+      pastryLeft: (n: number) =>
+        n <= 0
+          ? 'Bollería agotada esta semana'
+          : n === 1
+            ? 'Queda 1 pieza de bollería esta semana'
+            : `Quedan ${n} piezas de bollería esta semana`,
     },
     bake: {
       number: 'Hornada',
@@ -265,6 +276,39 @@ export const ui = {
       altDetail:
         'Detalle de la corteza del banana bread con pepitas de chocolate',
       ask: 'Pedir banana bread',
+      notify: 'Avísame cuando haya',
+    },
+    pastry: {
+      kicker: 'Bollería',
+      bar: 'Mantequilla, en capas',
+      h2a: 'Capas.',
+      h2b: 'Siete pasos, ningún atajo.',
+      intro:
+        'Mantequilla, plegar, estirar, cortar, enrollar, pintar y horno. Croissants y pains au chocolat de masa laminada, hechos a mano para el sábado. Por unidades.',
+      unit: 'La unidad',
+      steps: [
+        'Mantequilla',
+        'Plegar',
+        'Estirar',
+        'Cortar',
+        'Enrollar',
+        'Pintar',
+        'Horno',
+      ],
+      croissantText: 'Capas que crujen y miga de panal.',
+      painText: 'La misma masa, con dos barritas de chocolate dentro.',
+      ingredients:
+        'Masa laminada con mantequilla. El pain au chocolat lleva chocolate.',
+      allergens:
+        'Contiene trigo (gluten), leche y huevo. Pregúntame por trazas antes de reservar.',
+      quota: (n: number) => `${n} piezas por hornada, entre los dos`,
+      figSide: '(Fig. 5) Las capas, a contraluz',
+      alt: 'Un pain au chocolat y un croissant dorados sobre una tabla de madera, con luz de tarde',
+      altSide:
+        'Croissant de lado a contraluz, con las capas de la masa a la vista',
+      add: 'Añadir',
+      less: (name: string) => `Quitar un ${name}`,
+      more: (name: string) => `Añadir un ${name}`,
       notify: 'Avísame cuando haya',
     },
     organic: {
@@ -485,7 +529,8 @@ export const ui = {
       waitBar: 'Un correo por hornada',
       fig2: '(Fig. 2) La de cada semana, recién salida del horno',
       fig3: '(Fig. 3) Banana bread de pepitas de chocolate',
-      fig4: '(Fig. 4) Quien hace el pan',
+      fig4: '(Fig. 6) Quien hace el pan',
+      fig5: '(Fig. 4) Croissant y pain au chocolat',
       defWord: 'molla',
       defGram: 'f. (cat.)',
       defText: 'La miga: la parte tierna de dentro del pan.',
@@ -638,6 +683,17 @@ export const ui = {
       loaves: (n: number) => `${n} ${n === 1 ? 'pa' : 'pans'}`,
       banana: (halves: number) =>
         halves === 1 ? '½ banana bread' : `${halves / 2} banana bread`,
+      croissant: 'Croissant',
+      pain: 'Pain au chocolat',
+      croissants: (n: number) => `${n} ${n === 1 ? 'croissant' : 'croissants'}`,
+      pains: (n: number) =>
+        `${n} ${n === 1 ? 'pain au chocolat' : 'pains au chocolat'}`,
+      pastryLeft: (n: number) =>
+        n <= 0
+          ? 'Brioixeria exhaurida aquesta setmana'
+          : n === 1
+            ? 'Queda 1 peça de brioixeria aquesta setmana'
+            : `Queden ${n} peces de brioixeria aquesta setmana`,
     },
     bake: {
       number: 'Fornada',
@@ -692,6 +748,39 @@ export const ui = {
       alt: 'Banana bread amb xips de xocolata sobre una taula de fusta',
       altDetail: 'Detall de la crosta del banana bread amb xips de xocolata',
       ask: 'Demanar banana bread',
+      notify: 'Avisa’m quan n’hi hagi',
+    },
+    pastry: {
+      kicker: 'Brioixeria',
+      bar: 'Mantega, en capes',
+      h2a: 'Capes.',
+      h2b: 'Set passos, cap drecera.',
+      intro:
+        'Mantega, plegar, estirar, tallar, enrotllar, pintar i forn. Croissants i pains au chocolat de massa fullada, fets a mà per a dissabte. Per unitats.',
+      unit: 'La unitat',
+      steps: [
+        'Mantega',
+        'Plegar',
+        'Estirar',
+        'Tallar',
+        'Enrotllar',
+        'Pintar',
+        'Forn',
+      ],
+      croissantText: 'Capes que cruixen i molla de bresca.',
+      painText: 'La mateixa massa, amb dues barretes de xocolata a dins.',
+      ingredients:
+        'Massa fullada amb mantega. El pain au chocolat porta xocolata.',
+      allergens:
+        'Conté blat (gluten), llet i ou. Pregunta’m per traces abans de reservar.',
+      quota: (n: number) => `${n} peces per fornada, entre els dos`,
+      figSide: '(Fig. 5) Les capes, a contrallum',
+      alt: 'Un pain au chocolat i un croissant daurats sobre una taula de fusta, amb llum de tarda',
+      altSide:
+        'Croissant de costat a contrallum, amb les capes de la massa a la vista',
+      add: 'Afegir',
+      less: (name: string) => `Treure un ${name}`,
+      more: (name: string) => `Afegir un ${name}`,
       notify: 'Avisa’m quan n’hi hagi',
     },
     organic: {
@@ -913,7 +1002,8 @@ export const ui = {
       waitBar: 'Un correu per fornada',
       fig2: '(Fig. 2) El de cada setmana, acabat de sortir del forn',
       fig3: '(Fig. 3) Banana bread de gotes de xocolata',
-      fig4: '(Fig. 4) Qui fa el pa',
+      fig4: '(Fig. 6) Qui fa el pa',
+      fig5: '(Fig. 4) Croissant i pain au chocolat',
       defWord: 'molla',
       defGram: 'f.',
       defText: 'La part tova de dins del pa.',

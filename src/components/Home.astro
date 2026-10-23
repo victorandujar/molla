@@ -10,6 +10,8 @@ import {
   launchReady,
   productById,
   BANANA_HALVES_PER_BAKE,
+  PASTRY_UNITS_PER_BAKE,
+  PASTRY_MAX_PER_ORDER,
   welcomeGift,
 } from '../lib/config';
 import { ui, routes, dayFormat, type Lang } from '../lib/i18n';
@@ -21,7 +23,7 @@ interface Props {
 }
 const { lang } = Astro.props;
 const t = ui[lang];
-let current = { ...bake, reserved: 0, bananaReserved: 0 };
+let current = { ...bake, reserved: 0, bananaReserved: 0, pastryReserved: 0 };
 let unavailable = false;
 if (isDemo || launchReady) {
   try {
@@ -43,6 +45,24 @@ const bananaWhole = productById('banana')!;
 const bananaHalf = productById('banana-mitad')!;
 const left = Math.max(0, current.capacity - current.reserved);
 const bananaLeft = Math.max(0, BANANA_HALVES_PER_BAKE - current.bananaReserved);
+const croissant = productById('croissant')!;
+const pain = productById('pain-au-chocolat')!;
+const pastryLeft = Math.max(0, PASTRY_UNITS_PER_BAKE - current.pastryReserved);
+const pastryMax = Math.min(PASTRY_MAX_PER_ORDER, pastryLeft);
+const pastries = [
+  {
+    key: 'croissant',
+    product: croissant,
+    name: t.catalog.croissant,
+    text: t.pastry.croissantText,
+  },
+  {
+    key: 'pain',
+    product: pain,
+    name: t.catalog.pain,
+    text: t.pastry.painText,
+  },
+] as const;
 // Without the database the configured bake is only a placeholder: never show its date.
 const pickupDay = unavailable
   ? t.bake.dateSoon
@@ -123,6 +143,15 @@ const jsonLd = [
       },
     ],
   },
+  ...pastries.map((p) => ({
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: p.name,
+    description: `${p.text} ${t.pastry.ingredients}`,
+    image: [abs('/images/pastries-1100.webp')],
+    brand: { '@type': 'Brand', name: brand.name },
+    offers: offer(p.product.price, open && pastryLeft > 0),
+  })),
   {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
@@ -576,11 +605,158 @@ const jsonLd = [
       </div>
     </section>
 
+    <!-- 3b · Brioixeria: el reel del laminat. Per unitats, amb cupo compartit -->
+    <section
+      id="bolleria"
+      class="pastry"
+      aria-labelledby="pastry-title"
+      data-event-view="view_product"
+    >
+      <div class="wrap">
+        <div class="mono-bar" data-bar>
+          <span>Nº 02 · {t.pastry.kicker}</span>
+          <span>{t.pastry.bar}</span>
+        </div>
+        <header class="section-head">
+          <h2 id="pastry-title" data-split>
+            {t.pastry.h2a} <em>{t.pastry.h2b}</em>
+          </h2>
+          <p class="section-intro" data-reveal>
+            {t.pastry.intro}
+          </p>
+        </header>
+        <ol class="pastry-steps" aria-hidden="true">
+          {t.pastry.steps.map((step, i) => (
+            <li style={`--i:${i}`}>
+              <span>{i + 1}</span>
+              {step}
+            </li>
+          ))}
+        </ol>
+        <div class="pastry-grid">
+          <div class="pastry-media">
+            <figure class="pastry-photo" data-wipe>
+              <Photo
+                name="pastries"
+                alt={t.pastry.alt}
+                sizes="(max-width: 960px) calc(100vw - 40px), 50vw"
+              />
+            </figure>
+            <figure class="pastry-side" data-parallax="-0.12">
+              <Photo
+                name="croissant"
+                alt={t.pastry.altSide}
+                sizes="(max-width: 960px) 44vw, 20vw"
+              />
+            </figure>
+            <p class="fig-bar">
+              <span>{t.ed.fig5}</span>
+              <span>{t.pastry.figSide}</span>
+            </p>
+          </div>
+          <div class="pastry-info" data-reveal>
+            <ul class="pastry-list">
+              {pastries.map((p, i) => (
+                <li class="pastry-item">
+                  <span class="pastry-num" aria-hidden="true">
+                    {pad(i + 1)}
+                  </span>
+                  <div class="pastry-name">
+                    <h3>{p.name}</h3>
+                    <p>{p.text}</p>
+                  </div>
+                  <p class="pastry-price">
+                    <span class="outline-price" aria-hidden="true">
+                      {short(p.product.price)}
+                    </span>
+                    <span class="visually-hidden">
+                      {money(p.product.price)}
+                    </span>
+                    <span class="pastry-unit">{t.pastry.unit}</span>
+                  </p>
+                  {open ? (
+                    <div class="dish-buy pastry-buy" data-buy={p.key}>
+                      <button
+                        type="button"
+                        class="button button-orange"
+                        data-add={p.key}
+                        disabled={pastryMax === 0}
+                        aria-label={`${t.pastry.add}: ${p.name}`}
+                      >
+                        {t.pastry.add}
+                        <span class="button-plus" aria-hidden="true">
+                          +
+                        </span>
+                      </button>
+                      <div class="mini-stepper" data-mini={p.key} hidden>
+                        <button
+                          type="button"
+                          data-sub={p.key}
+                          aria-label={t.pastry.less(p.name)}
+                        >
+                          −
+                        </button>
+                        <output data-count={p.key} aria-live="polite"></output>
+                        <button
+                          type="button"
+                          data-add={p.key}
+                          aria-label={t.pastry.more(p.name)}
+                        >
+                          +
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <a class="button button-light pastry-buy" href="#avisame">
+                      {t.pastry.notify}
+                    </a>
+                  )}
+                </li>
+              ))}
+            </ul>
+            <div class="pastry-quota">
+              <p>
+                <span>{t.pastry.quota(PASTRY_UNITS_PER_BAKE)}</span>
+                <span data-pastry-left={pastryLeft}>
+                  {open ? t.catalog.pastryLeft(pastryLeft) : t.catalog.closed}
+                </span>
+              </p>
+              <div
+                class="pastry-meter"
+                aria-hidden="true"
+                data-pastry-meter
+                style={`--n:${PASTRY_UNITS_PER_BAKE}`}
+              >
+                {Array.from({ length: PASTRY_UNITS_PER_BAKE }, (_, i) => (
+                  <span
+                    class:list={{
+                      taken:
+                        i >= PASTRY_UNITS_PER_BAKE - current.pastryReserved,
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
+            <dl class="spec">
+              <div>
+                <dt>{t.loaf.ingredients}</dt>
+                <dd>{t.pastry.ingredients}</dd>
+              </div>
+              <div>
+                <dt>{t.loaf.allergens}</dt>
+                <dd>{t.pastry.allergens}</dd>
+              </div>
+            </dl>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- 4 · 35 horas: la foto de cada paso y el contador avanzan con el scroll -->
     <section id="proceso" class="process" aria-labelledby="process-title">
       <div class="wrap">
         <div class="mono-bar" data-bar>
-          <span>Nº 02 · {t.nav.process}</span>
+          <span>Nº 03 · {t.nav.process}</span>
           <span>{t.ed.processBar}</span>
         </div>
         <header class="section-head">
@@ -639,7 +815,7 @@ const jsonLd = [
       </figure>
       <div class="wrap manifesto-inner">
         <div class="mono-bar" data-bar>
-          <span>Nº 03 · {t.organic.kicker}</span>
+          <span>Nº 04 · {t.organic.kicker}</span>
           <span>{t.ed.flourBar}</span>
         </div>
         <h2 id="organic-title" data-split>
@@ -663,7 +839,7 @@ const jsonLd = [
     <section class="maker" aria-labelledby="maker-title">
       <div class="wrap">
         <div class="mono-bar" data-bar>
-          <span>Nº 04 · {t.maker.kicker}</span>
+          <span>Nº 05 · {t.maker.kicker}</span>
           <span>{t.ed.makerBar}</span>
         </div>
         <p class="definition" data-reveal>
@@ -695,7 +871,7 @@ const jsonLd = [
     <section id="reserva" class="reserve" aria-labelledby="reserve-title">
       <div class="wrap">
         <div class="mono-bar" data-bar>
-          <span>Nº 05 · {t.reserve.kicker}</span>
+          <span>Nº 06 · {t.reserve.kicker}</span>
           <span>{t.ed.reserveBar}</span>
         </div>
       </div>
@@ -763,6 +939,9 @@ const jsonLd = [
               data-price={loaf.price}
               data-banana-whole={bananaWhole.price}
               data-banana-half={bananaHalf.price}
+              data-croissant={croissant.price}
+              data-pain={pain.price}
+              data-pastry-pool={pastryLeft}
             >
               <div class="ticket-head" aria-hidden="true">
                 <span>molla.</span>
@@ -851,6 +1030,93 @@ const jsonLd = [
                       data-target="banana"
                       aria-label={t.reserve.bananaMore}
                       disabled={bananaLeft === 0}
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+                <div class="order-line">
+                  <label for="croissant-view">
+                    <span class="line-name">{t.catalog.croissant}</span>
+                    <small>
+                      {money(croissant.price)} · {t.pastry.unit}
+                    </small>
+                  </label>
+                  <div class="stepper">
+                    <button
+                      type="button"
+                      data-step="-1"
+                      data-target="croissant"
+                      aria-label={t.pastry.less(t.catalog.croissant)}
+                    >
+                      −
+                    </button>
+                    <output
+                      id="croissant-view"
+                      class="stepper-view"
+                      aria-live="polite"
+                    >
+                      0
+                    </output>
+                    <input
+                      id="croissant"
+                      name="croissant"
+                      type="hidden"
+                      value="0"
+                      data-max={pastryMax}
+                      data-pool="pastry"
+                    />
+                    <button
+                      type="button"
+                      data-step="1"
+                      data-target="croissant"
+                      aria-label={t.pastry.more(t.catalog.croissant)}
+                      disabled={pastryMax === 0}
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+                <div class="order-line">
+                  <label for="pain-view">
+                    <span class="line-name">{t.catalog.pain}</span>
+                    <small>
+                      {money(pain.price)} · {t.pastry.unit}
+                    </small>
+                    <small data-pastry-left={pastryLeft}>
+                      {t.catalog.pastryLeft(pastryLeft)}
+                    </small>
+                  </label>
+                  <div class="stepper">
+                    <button
+                      type="button"
+                      data-step="-1"
+                      data-target="pain"
+                      aria-label={t.pastry.less(t.catalog.pain)}
+                    >
+                      −
+                    </button>
+                    <output
+                      id="pain-view"
+                      class="stepper-view"
+                      aria-live="polite"
+                    >
+                      0
+                    </output>
+                    <input
+                      id="pain"
+                      name="pain"
+                      type="hidden"
+                      value="0"
+                      data-max={pastryMax}
+                      data-pool="pastry"
+                    />
+                    <button
+                      type="button"
+                      data-step="1"
+                      data-target="pain"
+                      aria-label={t.pastry.more(t.catalog.pain)}
+                      disabled={pastryMax === 0}
                     >
                       +
                     </button>
@@ -1017,7 +1283,7 @@ const jsonLd = [
     <section id="preguntas" class="faq" aria-labelledby="faq-title">
       <div class="wrap">
         <div class="mono-bar" data-bar>
-          <span>Nº 06 · {t.nav.faq}</span>
+          <span>Nº 07 · {t.nav.faq}</span>
           <span>{t.ed.faqBar}</span>
         </div>
         <div class="faq-grid">
@@ -1048,7 +1314,7 @@ const jsonLd = [
     <section id="avisame" class="waitlist" aria-labelledby="waitlist-title">
       <div class="wrap">
         <div class="mono-bar" data-bar>
-          <span>Nº 07 · {t.status.UPCOMING}</span>
+          <span>Nº 08 · {t.status.UPCOMING}</span>
           <span>{t.ed.waitBar}</span>
         </div>
       </div>

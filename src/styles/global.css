@@ -1663,6 +1663,190 @@ figure picture {
   color: var(--orange);
 }
 
+/* 3b · Brioixeria: el reel del laminat. Fondo de obrador, pasos numerados
+   como en el vídeo y las dos piezas por unidades, con su cupo compartido. */
+.pastry {
+  padding-block: clamp(72px, 8vw, 120px) var(--section);
+  background: var(--night);
+  color: var(--paper);
+}
+.pastry .section-head h2 {
+  color: var(--paper);
+}
+.pastry .section-head h2 em {
+  color: var(--orange);
+}
+.pastry .section-intro {
+  color: var(--on-night);
+}
+.pastry-steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 0;
+  margin: 0 0 clamp(40px, 5vw, 72px);
+  padding: 0;
+  list-style: none;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.pastry-steps li {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  padding-right: 18px;
+  margin-right: 18px;
+  border-right: 1px solid var(--on-night-line);
+}
+.pastry-steps li:last-child {
+  border-right: 0;
+}
+.pastry-steps span {
+  font-family: var(--sans);
+  font-weight: 800;
+  font-stretch: 112%;
+  font-size: 22px;
+  letter-spacing: -0.04em;
+  color: var(--orange);
+}
+.pastry-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
+  align-items: start;
+  gap: clamp(40px, 6vw, 104px);
+}
+.pastry-media {
+  position: relative;
+  padding-right: 12%;
+}
+.pastry-photo {
+  aspect-ratio: 4 / 5;
+  overflow: clip;
+  background: #24252b;
+}
+.pastry-photo img {
+  object-position: 50% 55%;
+  transition: transform 1.6s var(--ease-out);
+}
+.pastry-media:hover .pastry-photo img {
+  transform: scale(1.04);
+}
+.pastry-side {
+  position: absolute;
+  z-index: 2;
+  right: 0;
+  bottom: 14%;
+  width: 38%;
+  aspect-ratio: 3 / 4;
+  border: 6px solid var(--night);
+  overflow: clip;
+  box-shadow: 0 30px 60px -30px rgba(0, 0, 0, 0.8);
+}
+.pastry-media .fig-bar {
+  margin-right: -14%;
+}
+.pastry-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1.5px solid var(--paper);
+}
+.pastry-item {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: start;
+  gap: 8px 20px;
+  padding: 26px 0 28px;
+  border-bottom: 1px solid var(--on-night-line);
+}
+.pastry-num {
+  padding-top: 6px;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--orange);
+}
+.pastry-name h3 {
+  font-size: clamp(30px, 2.8vw, 46px);
+  text-transform: uppercase;
+  line-height: 0.92;
+}
+.pastry-name p {
+  margin-top: 10px;
+  max-width: 32ch;
+  font-size: 15.5px;
+  line-height: 1.55;
+  color: var(--on-night);
+}
+.pastry-price {
+  display: grid;
+  justify-items: end;
+  gap: 6px;
+  text-align: right;
+}
+.pastry-price .outline-price {
+  --stroke: var(--paper);
+  font-size: clamp(48px, 4.4vw, 76px);
+}
+.pastry-unit {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--on-night);
+}
+.pastry-buy {
+  grid-column: 2 / -1;
+  margin-top: 16px;
+}
+.pastry .mini-stepper button:hover {
+  background: rgba(246, 239, 229, 0.12);
+}
+.pastry-quota {
+  margin-top: 26px;
+}
+.pastry-quota p {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 6px 20px;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.pastry-quota p span:last-child {
+  color: var(--orange);
+}
+/* 48 piezas, una raya cada una: las reservadas se apagan desde el final. */
+.pastry-meter {
+  display: grid;
+  grid-template-columns: repeat(var(--n), 1fr);
+  gap: 3px;
+  margin-top: 12px;
+}
+.pastry-meter span {
+  height: 22px;
+  background: var(--orange);
+  transition:
+    background-color 0.5s ease,
+    transform 0.5s var(--ease-spring);
+}
+.pastry-meter span.taken {
+  background: var(--on-night-line);
+  transform: scaleY(0.45);
+}
+.pastry .spec {
+  margin-top: 30px;
+}
+.pastry .spec div {
+  border-bottom-color: var(--on-night-line);
+}
+.pastry .spec dd {
+  color: var(--paper);
+}
+
 /* 4 · Proceso: «AIXÍ DE FÀCIL.» — la tabla del flyer, con su foto fija. */
 .process {
   padding-block: clamp(72px, 8vw, 120px) var(--section);
@@ -2088,7 +2272,8 @@ figure picture {
   font-size: 13.5px;
   color: var(--muted);
 }
-.order-line small[data-banana-left] {
+.order-line small[data-banana-left],
+.order-line small[data-pastry-left] {
   font-family: var(--mono);
   font-size: 11.5px;
   letter-spacing: 0.06em;
@@ -2987,6 +3172,7 @@ details[open] p {
     padding-left: 0;
   }
   .section-head,
+  .pastry-grid,
   .process-grid,
   .maker-grid,
   .reserve-grid,
@@ -3085,6 +3271,17 @@ details[open] p {
     padding: 22px 0;
     border-left: 0;
     border-bottom: 1px solid var(--on-cobalt-line);
+  }
+  .pastry-item {
+    grid-template-columns: auto 1fr;
+  }
+  .pastry-price {
+    grid-column: 2;
+    justify-items: start;
+    text-align: left;
+  }
+  .pastry-meter {
+    gap: 2px;
   }
   .step {
     grid-template-columns: 56px 1fr;

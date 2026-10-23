@@ -8,6 +8,13 @@ export const BANANA_WHOLE_PRICE_CENTS = 1500;
 export const BANANA_HALF_PRICE_CENTS = 800;
 // Cupo por hornada, contado en mitades: 4 mitades = 2 moldes enteros.
 export const BANANA_HALVES_PER_BAKE = 4;
+// Bollería por unidades. Croissants y pains au chocolat comparten un cupo de
+// piezas por hornada: el reparto entre los dos es libre.
+export const CROISSANT_PRICE_CENTS = 220;
+export const PAIN_AU_CHOCOLAT_PRICE_CENTS = 250;
+export const PASTRY_UNITS_PER_BAKE = 48;
+// Máximo de cada pieza en un mismo pedido.
+export const PASTRY_MAX_PER_ORDER = 12;
 export const brand = {
   name: 'Molla',
   locale: 'es-ES',
@@ -86,6 +93,28 @@ export const products = [
       'Plátano maduro, harina de trigo ecológica, yogur y pepitas de chocolate.',
     allergens: 'Contiene trigo (gluten) y leche.',
     image: 'banana',
+    available: true,
+  },
+  {
+    id: 'croissant',
+    name: 'Croissant',
+    subtitle: 'Por unidades',
+    price: CROISSANT_PRICE_CENTS,
+    weight: 'Unidad',
+    ingredients: 'Masa laminada con mantequilla.',
+    allergens: 'Contiene trigo (gluten), leche y huevo.',
+    image: 'pastries',
+    available: true,
+  },
+  {
+    id: 'pain-au-chocolat',
+    name: 'Pain au chocolat',
+    subtitle: 'Por unidades',
+    price: PAIN_AU_CHOCOLAT_PRICE_CENTS,
+    weight: 'Unidad',
+    ingredients: 'Masa laminada con mantequilla y barritas de chocolate.',
+    allergens: 'Contiene trigo (gluten), leche y huevo.',
+    image: 'pastries',
     available: true,
   },
   {

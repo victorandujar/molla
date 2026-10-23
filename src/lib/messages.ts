@@ -19,9 +19,12 @@ export const messages = {
     capacity:
       'Esta hornada ya no admite esa cantidad. Puedes apuntarte a la próxima.',
     bakeChanged: 'La hornada ha cambiado. Recarga la página.',
-    empty: 'Añade al menos una hogaza o un banana bread.',
+    empty:
+      'Añade al menos una hogaza, un banana bread o una pieza de bollería.',
     bananaCapacity:
       'Ya no queda tanto banana bread en esta hornada. Prueba con menos.',
+    pastryCapacity:
+      'Ya no quedan tantas piezas de bollería en esta hornada. Prueba con menos.',
     productUnavailable: 'Este pan no está disponible.',
     priceChanged: 'Este pan ha cambiado de precio. Contacta antes de reservar.',
     reservationFailed:
@@ -48,9 +51,12 @@ export const messages = {
     capacity:
       'Aquesta fornada ja no admet aquesta quantitat. Pots apuntar-te a la propera.',
     bakeChanged: 'La fornada ha canviat. Recarrega la pàgina.',
-    empty: 'Afegeix com a mínim un pa o un banana bread.',
+    empty:
+      'Afegeix com a mínim un pa, un banana bread o una peça de brioixeria.',
     bananaCapacity:
       'Ja no queda tant banana bread en aquesta fornada. Prova-ho amb menys.',
+    pastryCapacity:
+      'Ja no queden tantes peces de brioixeria en aquesta fornada. Prova-ho amb menys.',
     productUnavailable: 'Aquest pa no està disponible.',
     priceChanged: 'Aquest pa ha canviat de preu. Contacta abans de reservar.',
     reservationFailed:

@@ -1,6 +1,11 @@
 import postgres from 'postgres';
 import { readFile, writeFile } from 'node:fs/promises';
-import { csvCell, pickupCodePattern, type Order } from '../src/lib/domain';
+import {
+  csvCell,
+  orderSummary,
+  pickupCodePattern,
+  type Order,
+} from '../src/lib/domain';
 const [command = 'summary', ...rest] = process.argv.slice(2);
 const flags = Object.fromEntries(
   rest
@@ -125,9 +130,15 @@ try {
       await writeFile(
         arg,
         [
-          [...fields, 'deliveryTown', 'deliveryAddress'].join(','),
+          [...fields, 'items', 'deliveryTown', 'deliveryAddress'].join(','),
           ...orders.map((o) =>
-            [...fields.map((f) => o[f]), o.delivery?.town, o.delivery?.address]
+            [
+              ...fields.map((f) => o[f]),
+              // Every line, e.g. "1 × La de cada semana · 3 × Croissant".
+              orderSummary(o),
+              o.delivery?.town,
+              o.delivery?.address,
+            ]
               .map(csvCell)
               .join(','),
           ),
