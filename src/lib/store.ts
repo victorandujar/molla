@@ -16,6 +16,8 @@ import {
   assertCapacity,
   bananaSplit,
   madridIso,
+  madridWeekday,
+  pastryBake,
   pickupCode,
   reminderDue,
   reminderWindowHours,
@@ -38,6 +40,9 @@ export const sql = process.env.DATABASE_URL
   : null;
 export type Demo = {
   bakeStatus?: BakeState;
+  // Tests only: the weekday of the demo bake (3 = Wednesday, 6 = Saturday)
+  // instead of whichever is open now.
+  bakeDay?: number;
   orders: (Order & { reminderSentAt?: string | null })[];
   waitlist: {
     email: string;
@@ -112,18 +117,22 @@ const pastryIn = (d: Demo, bakeId: string) =>
         .reduce((m, i) => m + i.quantity, 0),
     0,
   );
-// The local demo always shows the next bake still taking orders.
-const demoDates = (now = new Date()) => {
-  const plan = weeklyCyclePlan(now);
+// The local demo always shows the next bake still taking orders (of the
+// requested weekday, when a test asks for one).
+const demoDates = (d: Pick<Demo, 'bakeDay'>) => {
+  let plan = weeklyCyclePlan();
+  while (d.bakeDay !== undefined && madridWeekday(plan.pickupAt) !== d.bakeDay)
+    plan = weeklyCyclePlan(new Date(Date.parse(plan.deadline) + 60000));
   return {
     pickupDate: plan.pickupAt,
     deadline: plan.deadline,
-    opensAt: madridIso(plan.today, '00:00'),
+    // Open since today, even when a test asks for a later bake day.
+    opensAt: madridIso(weeklyCyclePlan().today, '00:00'),
   };
 };
 const demoBake = (d: Demo): ActiveBake => ({
   ...bake,
-  ...demoDates(),
+  ...demoDates(d),
   status: d.bakeStatus || bake.status,
   reserved: reservedIn(d, bake.id),
   bananaReserved: bananaIn(d, bake.id),
@@ -159,9 +168,15 @@ const toBake = (b: postgres.Row): ActiveBake => ({
 export async function currentBake(): Promise<ActiveBake> {
   if (useDemo()) return demo(demoBake);
   let [b] = await activeBakeRow(sql!);
-  // Past Thursday's close with no next bake yet (the cron has not run, or
-  // failed): open it now so nobody lands on a closed shop.
-  if (!b || new Date(b.deadline).getTime() <= Date.now()) {
+  // Past a close with no next bake yet (the cron has not run, or failed), or
+  // an earlier bake day due that does not exist yet: open it now so nobody
+  // lands on a closed shop or on the wrong day.
+  const due = weeklyCyclePlan().pickupDate;
+  if (
+    !b ||
+    new Date(b.deadline).getTime() <= Date.now() ||
+    madridDay(new Date(b.pickup_date)) > due
+  ) {
     try {
       await runWeeklyBakeCycle();
       [b] = await activeBakeRow(sql!);
@@ -205,7 +220,8 @@ const assertBanana = (reserved: number, halves: number) => {
   if (halves > 0 && reserved + halves > BANANA_HALVES_PER_BAKE)
     throw new AppError('bananaCapacity');
 };
-const assertPastry = (reserved: number, units: number) => {
+const assertPastry = (pickupIso: string, reserved: number, units: number) => {
+  if (units > 0 && !pastryBake(pickupIso)) throw new AppError('pastryDay');
   if (units > 0 && reserved + units > PASTRY_UNITS_PER_BAKE)
     throw new AppError('pastryCapacity');
 };
@@ -251,14 +267,18 @@ export async function reserve(
         return prior;
       }
       if (input.bakeId !== bake.id) throw new AppError('bakeChanged');
-      order.pickupDate = demoDates().pickupDate;
+      order.pickupDate = demoDates(d).pickupDate;
       assertCapacity(
-        { ...bake, ...demoDates(), status: d.bakeStatus || bake.status },
+        { ...bake, ...demoDates(d), status: d.bakeStatus || bake.status },
         reservedIn(d, bake.id),
         input.quantity,
       );
       assertBanana(bananaIn(d, bake.id), input.banana);
-      assertPastry(pastryIn(d, bake.id), input.croissant + input.pain);
+      assertPastry(
+        order.pickupDate,
+        pastryIn(d, bake.id),
+        input.croissant + input.pain,
+      );
       order.firstOrder =
         welcomeGift.active &&
         !d.orders.some(
@@ -299,7 +319,11 @@ export async function reserve(
       input.quantity,
     );
     assertBanana(count?.banana || 0, input.banana);
-    assertPastry(count?.pastry || 0, input.croissant + input.pain);
+    assertPastry(
+      new Date(b.pickup_date).toISOString(),
+      count?.pastry || 0,
+      input.croissant + input.pain,
+    );
     const [seen] =
       await tx`SELECT 1 FROM orders o JOIN customers c ON c.id=o.customer_id WHERE c.email=${input.email} AND o.status!='CANCELLED' LIMIT 1`;
     order.firstOrder = welcomeGift.active && !seen;

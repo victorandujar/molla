@@ -20,7 +20,7 @@ export const brand = {
   locale: 'es-ES',
   town: 'Sant Boi de Llobregat',
   region: 'Baix Llobregat',
-  tagline: 'Pan de aquí. Para el sábado.',
+  tagline: 'Pan de aquí. Para el miércoles y el sábado.',
   contact: process.env.CONTACT_EMAIL || '',
   whatsapp: (process.env.WHATSAPP_NUMBER || '').replace(/\D/g, ''),
   instagram: process.env.INSTAGRAM_URL || '',

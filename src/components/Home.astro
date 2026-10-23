@@ -16,7 +16,7 @@ import {
 } from '../lib/config';
 import { ui, routes, dayFormat, type Lang } from '../lib/i18n';
 import { currentBake } from '../lib/store';
-import { bakeState } from '../lib/domain';
+import { bakeState, pastryBake } from '../lib/domain';
 import { deliveryTowns } from '../lib/delivery';
 interface Props {
   lang: Lang;
@@ -47,7 +47,12 @@ const left = Math.max(0, current.capacity - current.reserved);
 const bananaLeft = Math.max(0, BANANA_HALVES_PER_BAKE - current.bananaReserved);
 const croissant = productById('croissant')!;
 const pain = productById('pain-au-chocolat')!;
-const pastryLeft = Math.max(0, PASTRY_UNITS_PER_BAKE - current.pastryReserved);
+// Pastries are baked for Saturday only: the Wednesday bake shows them, but
+// they cannot be added until Saturday's bake opens.
+const pastryDay = unavailable || pastryBake(current.pickupDate);
+const pastryLeft = pastryDay
+  ? Math.max(0, PASTRY_UNITS_PER_BAKE - current.pastryReserved)
+  : 0;
 const pastryMax = Math.min(PASTRY_MAX_PER_ORDER, pastryLeft);
 const pastries = [
   {
@@ -153,7 +158,7 @@ const jsonLd = [
     description: `${p.text} ${t.pastry.ingredients}`,
     image: [abs('/images/pastries-1100.webp')],
     brand: { '@type': 'Brand', name: brand.name },
-    offers: offer(p.product.price, open && pastryLeft > 0),
+    offers: offer(p.product.price, open && pastryDay && pastryLeft > 0),
   })),
   {
     '@context': 'https://schema.org',
@@ -671,7 +676,7 @@ const jsonLd = [
                     </span>
                     <span class="pastry-unit">{t.pastry.unit}</span>
                   </p>
-                  {open ? (
+                  {open && pastryDay ? (
                     <div class="dish-buy pastry-buy" data-buy={p.key}>
                       <button
                         type="button"
@@ -703,6 +708,10 @@ const jsonLd = [
                         </button>
                       </div>
                     </div>
+                  ) : open ? (
+                    <p class="pastry-buy pastry-later">
+                      {t.pastry.saturdayOnly}
+                    </p>
                   ) : (
                     <a class="button button-light pastry-buy" href="#avisame">
                       {t.pastry.notify}
@@ -715,7 +724,11 @@ const jsonLd = [
               <p>
                 <span>{t.pastry.quota(PASTRY_UNITS_PER_BAKE)}</span>
                 <span data-pastry-left={pastryLeft}>
-                  {open ? t.catalog.pastryLeft(pastryLeft) : t.catalog.closed}
+                  {!open
+                    ? t.catalog.closed
+                    : pastryDay
+                      ? t.catalog.pastryLeft(pastryLeft)
+                      : t.pastry.saturdayOnly}
                 </span>
               </p>
               <div
@@ -727,8 +740,7 @@ const jsonLd = [
                 {Array.from({ length: PASTRY_UNITS_PER_BAKE }, (_, i) => (
                   <span
                     class:list={{
-                      taken:
-                        i >= PASTRY_UNITS_PER_BAKE - current.pastryReserved,
+                      taken: i >= pastryLeft,
                     }}
                   />
                 ))}
@@ -1032,93 +1044,97 @@ const jsonLd = [
                     </button>
                   </div>
                 </div>
-                <div class="order-line">
-                  <label for="croissant-view">
-                    <span class="line-name">{t.catalog.croissant}</span>
-                    <small>
-                      {money(croissant.price)} · {t.pastry.unit}
-                    </small>
-                  </label>
-                  <div class="stepper">
-                    <button
-                      type="button"
-                      data-step="-1"
-                      data-target="croissant"
-                      aria-label={t.pastry.less(t.catalog.croissant)}
-                    >
-                      −
-                    </button>
-                    <output
-                      id="croissant-view"
-                      class="stepper-view"
-                      aria-live="polite"
-                    >
-                      0
-                    </output>
-                    <input
-                      id="croissant"
-                      name="croissant"
-                      type="hidden"
-                      value="0"
-                      data-max={pastryMax}
-                      data-pool="pastry"
-                    />
-                    <button
-                      type="button"
-                      data-step="1"
-                      data-target="croissant"
-                      aria-label={t.pastry.more(t.catalog.croissant)}
-                      disabled={pastryMax === 0}
-                    >
-                      +
-                    </button>
-                  </div>
-                </div>
-                <div class="order-line">
-                  <label for="pain-view">
-                    <span class="line-name">{t.catalog.pain}</span>
-                    <small>
-                      {money(pain.price)} · {t.pastry.unit}
-                    </small>
-                    <small data-pastry-left={pastryLeft}>
-                      {t.catalog.pastryLeft(pastryLeft)}
-                    </small>
-                  </label>
-                  <div class="stepper">
-                    <button
-                      type="button"
-                      data-step="-1"
-                      data-target="pain"
-                      aria-label={t.pastry.less(t.catalog.pain)}
-                    >
-                      −
-                    </button>
-                    <output
-                      id="pain-view"
-                      class="stepper-view"
-                      aria-live="polite"
-                    >
-                      0
-                    </output>
-                    <input
-                      id="pain"
-                      name="pain"
-                      type="hidden"
-                      value="0"
-                      data-max={pastryMax}
-                      data-pool="pastry"
-                    />
-                    <button
-                      type="button"
-                      data-step="1"
-                      data-target="pain"
-                      aria-label={t.pastry.more(t.catalog.pain)}
-                      disabled={pastryMax === 0}
-                    >
-                      +
-                    </button>
-                  </div>
-                </div>
+                {pastryDay && (
+                  <>
+                    <div class="order-line">
+                      <label for="croissant-view">
+                        <span class="line-name">{t.catalog.croissant}</span>
+                        <small>
+                          {money(croissant.price)} · {t.pastry.unit}
+                        </small>
+                      </label>
+                      <div class="stepper">
+                        <button
+                          type="button"
+                          data-step="-1"
+                          data-target="croissant"
+                          aria-label={t.pastry.less(t.catalog.croissant)}
+                        >
+                          −
+                        </button>
+                        <output
+                          id="croissant-view"
+                          class="stepper-view"
+                          aria-live="polite"
+                        >
+                          0
+                        </output>
+                        <input
+                          id="croissant"
+                          name="croissant"
+                          type="hidden"
+                          value="0"
+                          data-max={pastryMax}
+                          data-pool="pastry"
+                        />
+                        <button
+                          type="button"
+                          data-step="1"
+                          data-target="croissant"
+                          aria-label={t.pastry.more(t.catalog.croissant)}
+                          disabled={pastryMax === 0}
+                        >
+                          +
+                        </button>
+                      </div>
+                    </div>
+                    <div class="order-line">
+                      <label for="pain-view">
+                        <span class="line-name">{t.catalog.pain}</span>
+                        <small>
+                          {money(pain.price)} · {t.pastry.unit}
+                        </small>
+                        <small data-pastry-left={pastryLeft}>
+                          {t.catalog.pastryLeft(pastryLeft)}
+                        </small>
+                      </label>
+                      <div class="stepper">
+                        <button
+                          type="button"
+                          data-step="-1"
+                          data-target="pain"
+                          aria-label={t.pastry.less(t.catalog.pain)}
+                        >
+                          −
+                        </button>
+                        <output
+                          id="pain-view"
+                          class="stepper-view"
+                          aria-live="polite"
+                        >
+                          0
+                        </output>
+                        <input
+                          id="pain"
+                          name="pain"
+                          type="hidden"
+                          value="0"
+                          data-max={pastryMax}
+                          data-pool="pastry"
+                        />
+                        <button
+                          type="button"
+                          data-step="1"
+                          data-target="pain"
+                          aria-label={t.pastry.more(t.catalog.pain)}
+                          disabled={pastryMax === 0}
+                        >
+                          +
+                        </button>
+                      </div>
+                    </div>
+                  </>
+                )}
                 <div class="order-total">
                   <span>{t.reserve.totalLabel}</span>
                   <output id="total" aria-live="polite">

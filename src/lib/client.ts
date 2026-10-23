@@ -480,8 +480,8 @@ form?.addEventListener('submit', async (event) => {
       date,
       order.pickupWindow ||
         (isCa
-          ? 'Dissabte · horari de recollida confirmat amb la comanda'
-          : 'Sábado · horario de recogida confirmado con el pedido'),
+          ? 'Horari de recollida confirmat amb la comanda'
+          : 'Horario de recogida confirmado con el pedido'),
       home
         ? `${order.pickupAddress} · ${home.address}`
         : order.pickupAddress ||
@@ -532,8 +532,8 @@ form?.addEventListener('submit', async (event) => {
       share.rel = 'noopener noreferrer';
       share.href = `https://wa.me/?text=${encodeURIComponent(
         (isCa
-          ? 'Acabo d’encarregar pa artesà de fermentació lenta per a dissabte. Te’l porten a casa a Sant Boi, Sant Just i Santa Coloma: '
-          : 'Acabo de encargar pan artesano de fermentación lenta para el sábado. Te lo llevan a casa en Sant Boi, Sant Just y Santa Coloma: ') +
+          ? 'Acabo d’encarregar pa artesà de fermentació lenta per a aquesta setmana. Te’l porten a casa dimecres o dissabte a Sant Boi, Sant Just i Santa Coloma: '
+          : 'Acabo de encargar pan artesano de fermentación lenta para esta semana. Te lo llevan a casa el miércoles o el sábado en Sant Boi, Sant Just y Santa Coloma: ') +
           invite.href,
       )}`;
       share.textContent = isCa
@@ -618,7 +618,12 @@ async function refreshBake() {
         .querySelectorAll<HTMLElement>('[data-pastry-left]')
         .forEach((el) => {
           el.dataset.pastryLeft = String(b.pastryLeft);
-          el.textContent = words.pastryLeft(b.pastryLeft);
+          el.textContent =
+            b.pastries === false
+              ? isCa
+                ? 'Només per a la fornada de dissabte'
+                : 'Solo para la hornada del sábado'
+              : words.pastryLeft(b.pastryLeft);
         });
       const ticks = document.querySelectorAll('[data-pastry-meter] span');
       ticks.forEach((tick, i) =>
