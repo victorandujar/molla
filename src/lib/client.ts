@@ -781,8 +781,10 @@ if (reviewsSection) {
       tab.setAttribute('aria-selected', String(on));
       tab.tabIndex = on ? 0 : -1;
     });
+    // Hidden with visibility (not `hidden`): every page keeps its place in
+    // the grid, so the tallest one sets the height and nothing jumps.
     posters.forEach((poster, k) => {
-      poster.hidden = k !== active;
+      poster.classList.toggle('is-off', k !== active);
       poster.classList.toggle('is-in', k === active);
     });
     if (focus) tabs[active]!.focus();
