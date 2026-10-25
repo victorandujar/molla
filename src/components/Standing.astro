@@ -1,7 +1,14 @@
 ---
 import Article from '../layouts/Article.astro';
 import Photo from './Photo.astro';
-import { brand, isDemo, launchReady, money, productById } from '../lib/config';
+import {
+  brand,
+  isDemo,
+  launchReady,
+  money,
+  productById,
+  welcomeGift,
+} from '../lib/config';
 import { deliveryTowns, deliveryWindow } from '../lib/delivery';
 import { routes, type Lang } from '../lib/i18n';
 interface Props {
@@ -38,6 +45,10 @@ const text = {
     ],
     priceH: 'Qué cuesta',
     price: `La hogaza de poolish cuesta ${money(loaf)}; el banana bread, ${money(bananaWhole)} entero o ${money(bananaHalf)} la mitad. Sin coste de envío. Si algún día cambian los precios te aviso con 14 días de antelación y puedes darte de baja.`,
+    voucherH: 'Con el vale de tu primer pedido',
+    voucher:
+      'Tu primer pedido llega con un vale en la tarjeta: si te apuntas al pan fijo, el 4.º pan corre de mi cuenta.',
+    jump: 'Apuntarme',
     capacityH: 'Hornadas pequeñas',
     capacity:
       'Horneo en tandas pequeñas y los suscriptores tienen su pan reservado antes que nadie. Si una semana la hornada está completa, te lo digo, no te cobro nada y sigues con tu pan fijo la semana siguiente.',
@@ -101,6 +112,10 @@ const text = {
     ],
     priceH: 'Què costa',
     price: `El pa de poolish costa ${money(loaf)}; el banana bread, ${money(bananaWhole)} sencer o ${money(bananaHalf)} la meitat. Sense cost d’enviament. Si algun dia canvien els preus t’aviso amb 14 dies d’antelació i pots donar-te de baixa.`,
+    voucherH: 'Amb el val de la primera comanda',
+    voucher:
+      'La teva primera comanda arriba amb un val a la targeta: si t’apuntes al pa fix, el 4t pa va de part meva.',
+    jump: 'Apuntar-me',
     capacityH: 'Fornades petites',
     capacity:
       'Cuino en tandes petites i els subscriptors tenen el pa reservat abans que ningú. Si una setmana la fornada és plena, t’ho dic, no et cobro res i continues amb el teu pa fix la setmana següent.',
@@ -178,6 +193,14 @@ const service = {
 >
   <div class="article-grid">
     <div class="prose">
+      <p class="article-links">
+        <a class="button" href="#alta-pa-fix">
+          {text.jump}
+          <span class="button-arrow" aria-hidden="true">
+            ↓
+          </span>
+        </a>
+      </p>
       <h2>{text.howH}</h2>
       <ol>
         {text.how.map((step) => (
@@ -194,6 +217,13 @@ const service = {
 
       <h2>{text.priceH}</h2>
       <p>{text.price}</p>
+
+      {welcomeGift.active && (
+        <>
+          <h2>{text.voucherH}</h2>
+          <p>{text.voucher}</p>
+        </>
+      )}
 
       <h2>{text.capacityH}</h2>
       <p>{text.capacity}</p>

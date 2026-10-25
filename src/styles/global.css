@@ -683,7 +683,7 @@ figure picture {
   align-self: end;
   font-weight: 800;
   font-stretch: 62%;
-  font-size: clamp(56px, 7.2vw, 124px);
+  font-size: clamp(40px, 4.6vw, 80px);
   line-height: 0.86;
   text-transform: uppercase;
 }
@@ -693,8 +693,8 @@ figure picture {
   margin-top: 0.06em;
   font-stretch: 125%;
   font-weight: 800;
-  font-size: min(10.2vw, 140px);
-  line-height: 0.86;
+  font-size: min(5.2vw, 72px);
+  line-height: 0.9;
   letter-spacing: -0.045em;
   text-wrap: initial;
 }
@@ -866,6 +866,28 @@ figure picture {
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--on-cobalt);
+}
+/* El regalo de la primera comanda, a la vista: la caja naranja del flyer. */
+.hero-gift {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-top: 16px;
+  padding: 12px 16px;
+  box-shadow: inset 0 0 0 2px var(--orange);
+  font-size: 15px;
+  line-height: 1.5;
+}
+.hero-gift .star {
+  font-size: 18px;
+}
+.hero-gift a {
+  color: var(--paper);
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
 }
 /* La hornada: el resguardo del flyer, recuadro de línea fina. */
 .hero-bake {
@@ -1069,6 +1091,67 @@ figure picture {
   to {
     transform: rotate(360deg);
   }
+}
+
+/* Per què jo i no el forn: una resposta curta i honesta. */
+.why {
+  padding-block: clamp(64px, 7vw, 104px);
+  color: var(--cobalt);
+}
+.why-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
+  align-items: end;
+  gap: 24px clamp(32px, 5vw, 96px);
+  margin-top: clamp(28px, 3.6vw, 52px);
+}
+.why h2 {
+  font-size: clamp(54px, 7vw, 120px);
+}
+.why-copy p {
+  max-width: 48ch;
+  font-size: clamp(16.5px, 1.25vw, 18.5px);
+  line-height: 1.6;
+  color: var(--ink-2);
+}
+.why-copy .why-honest {
+  margin-bottom: 14px;
+  font-family: var(--serif-it);
+  font-style: italic;
+  font-size: clamp(26px, 2.4vw, 36px);
+  line-height: 1.1;
+  color: var(--cobalt);
+}
+.why-facts {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  margin: clamp(40px, 5vw, 72px) 0 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1.5px solid currentColor;
+}
+.why-facts li {
+  display: grid;
+  gap: 8px;
+  padding: 22px clamp(16px, 2vw, 32px) 0;
+  border-left: 1px solid var(--line-strong);
+}
+.why-facts li:first-child {
+  padding-left: 0;
+  border-left: 0;
+}
+.why-facts strong {
+  font-weight: 800;
+  font-stretch: 125%;
+  font-size: clamp(44px, 5vw, 84px);
+  line-height: 0.85;
+  letter-spacing: -0.05em;
+}
+.why-facts span {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
 }
 
 /* 2 · Diari de l'obrador: las fotos de la cocina, como los reels.
@@ -1839,6 +1922,68 @@ figure picture {
 }
 .pastry .spec dd {
   color: var(--paper);
+}
+
+/* Pa fix: la targeta cobalt que porta de la primera compra a la subscripció. */
+.fix {
+  padding-block: clamp(64px, 7vw, 104px);
+  background: var(--paper);
+}
+.fix-card {
+  padding: clamp(24px, 4vw, 64px);
+  background: var(--cobalt);
+  color: var(--paper);
+}
+.fix-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+  align-items: end;
+  gap: 32px clamp(32px, 5vw, 96px);
+  margin-top: clamp(28px, 3.6vw, 52px);
+}
+.fix h2 {
+  font-size: clamp(52px, 6.6vw, 112px);
+}
+.fix h2 em {
+  color: var(--orange);
+}
+.fix-text {
+  margin-top: 24px;
+  max-width: 46ch;
+  font-size: clamp(16.5px, 1.25vw, 18.5px);
+  line-height: 1.6;
+  color: var(--on-cobalt);
+}
+.fix-voucher {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  padding: 14px 16px;
+  box-shadow: inset 0 0 0 2px var(--orange);
+  font-family: var(--serif-it);
+  font-style: italic;
+  font-size: clamp(22px, 1.9vw, 28px);
+  line-height: 1.15;
+}
+.fix-voucher .star {
+  font-family: var(--sans);
+  font-style: normal;
+  font-size: 20px;
+}
+.fix-facts {
+  display: grid;
+  margin: 22px 0 26px;
+  padding: 0;
+  list-style: none;
+  border-top: 1.5px solid var(--paper);
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.fix-facts li {
+  padding: 11px 0;
+  border-bottom: 1px solid var(--on-cobalt-line);
 }
 
 /* 4 · Proceso: «AIXÍ DE FÀCIL.» — la tabla del flyer, con su foto fija. */
@@ -3164,7 +3309,7 @@ details[open] p {
     aspect-ratio: 4 / 3.4;
   }
   .hero-title {
-    font-size: clamp(38px, 10.6vw, 96px);
+    font-size: clamp(30px, 8.2vw, 72px);
   }
   .hero-price {
     justify-self: start;
@@ -3175,6 +3320,8 @@ details[open] p {
     padding-left: 0;
   }
   .section-head,
+  .why-grid,
+  .fix-grid,
   .pastry-grid,
   .process-grid,
   .maker-grid,
@@ -3242,7 +3389,7 @@ details[open] p {
     display: none;
   }
   .hero-made {
-    font-size: clamp(48px, 15vw, 72px);
+    font-size: clamp(34px, 10vw, 56px);
   }
   .hero-bake {
     grid-template-columns: 1fr;
@@ -3267,8 +3414,14 @@ details[open] p {
     grid-template-columns: 1fr;
     gap: 4px;
   }
-  .manifesto-stats {
+  .manifesto-stats,
+  .why-facts {
     grid-template-columns: 1fr;
+  }
+  .why-facts li {
+    padding: 18px 0;
+    border-left: 0;
+    border-bottom: 1px solid var(--line-strong);
   }
   .manifesto-stats li {
     padding: 22px 0;
@@ -3607,6 +3760,21 @@ details[open] p {
 }
 .gift-box p + p {
   margin-top: 6px;
+}
+.gift-list {
+  display: grid;
+  gap: 6px;
+  margin: 10px 0 10px;
+  padding: 0 0 0 1.2em;
+  color: var(--paper);
+}
+.gift-list li::marker {
+  content: '✷  ';
+  color: var(--orange);
+}
+.gift-fix {
+  margin-top: 12px;
+  color: var(--paper);
 }
 .gift-title {
   font-family: var(--mono);

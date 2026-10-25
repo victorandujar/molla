@@ -467,8 +467,8 @@ form?.addEventListener('submit', async (event) => {
       lines.join(' · '),
       order.firstOrder
         ? isCa
-          ? 'Regal de benvinguda: un quart de banana bread i un chutney de pebrot vermell i tomàquet.'
-          : 'Regalo de bienvenida: un cuarto de banana bread y un chutney de pimiento rojo y tomate.'
+          ? 'Regal de la primera comanda: un quart de banana bread per a tu, un altre per a qui vulguis i un val: si t’apuntes al Pa fix, el 4t pa va de part meva.'
+          : 'Regalo del primer pedido: un cuarto de banana bread para ti, otro para quien quieras y un vale: si te apuntas al Pan fijo, el 4.º pan corre de mi cuenta.'
         : '',
       home
         ? isCa

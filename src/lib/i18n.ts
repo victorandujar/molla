@@ -99,8 +99,8 @@ export const ui = {
       COMPLETED: 'Esta hornada ya salió del horno',
     },
     hero: {
-      h1a: 'Pan artesanal',
-      h1b: 'por encargo',
+      h1a: 'Pan que solo se hornea',
+      h1b: 'si lo has reservado',
       sub: `Cada miércoles y cada sábado ${hours.es}, a domicilio en Sant Boi, Sant Just Desvern y Santa Coloma.`,
       lede: 'Amaso a mano dos hornadas pequeñas cada semana, con harinas ecológicas, poolish y hasta 35 horas de fermentación lenta. Tú lo reservas aquí y el miércoles o el sábado te lo llevo a casa, o lo recoges en Sant Boi.',
       kicker: 'Panadería de barrio · Baix Llobregat',
@@ -136,7 +136,8 @@ export const ui = {
         'Baix Llobregat',
       ],
       trust: 'Pagas al recibirlo · Cancelas con un clic · Sin cuenta',
-      gift: 'Tu primera comanda lleva un regalo de bienvenida.',
+      gift: 'Primer pedido: un cuarto de banana bread para ti y otro para quien quieras.',
+      giftMore: 'Qué incluye',
       scroll: 'Desliza',
       hands: 'Las manos de mi madre',
       sealTop: 'hasta',
@@ -310,6 +311,34 @@ export const ui = {
       saturdayOnly:
         'Solo para la hornada del sábado: se reserva desde el domingo a las 20 h.',
     },
+    why: {
+      kicker: 'Por qué yo',
+      bar: 'Y no el horno de al lado',
+      h2a: 'Por qué yo',
+      h2b: 'y no el horno.',
+      honest: 'Si tienes un buen horno a dos minutos, cómprale a él.',
+      p: 'molla. es para quien quiere el pan en casa. Hornadas pequeñas que solo se hornean con lo reservado, hasta 35 horas de fermentación con poolish y entrega en una franja fija. Pagas al recibirlo.',
+      facts: (n: number) => [
+        [`${n}`, 'hogazas por hornada'],
+        ['35 h', 'de fermentación, como máximo'],
+        ['12–14 h', 'a tu puerta, miércoles o sábado'],
+      ],
+    },
+    fix: {
+      kicker: 'Pan fijo',
+      bar: 'Cada sábado, sin pensarlo',
+      h2a: 'Tu pan cada sábado.',
+      h2b: 'Sin pensarlo.',
+      p: 'Eliges una vez cuánto quieres. Cada sábado te lo llevo a casa. Saltas una semana, lo pausas o te das de baja con un clic. Pagas al recibirlo.',
+      voucher:
+        'Con el vale de tu primer pedido, el 4.º pan corre de mi cuenta.',
+      cta: 'Apúntate al Pan fijo',
+      facts: (price: string) => [
+        `Sábado ${hours.es}`,
+        `${price} la hogaza · sin envío`,
+        'Saltas o cancelas con un clic',
+      ],
+    },
     organic: {
       kicker: 'Harina',
       h2a: 'Harinas ecológicas,',
@@ -421,10 +450,16 @@ export const ui = {
       submit: 'Confirmar reserva',
       footnote:
         'Pagas al recibirlo. Cancelas con un clic hasta el cierre de la hornada. Sin cuenta ni suscripciones.',
-      giftH: 'Regalo de bienvenida',
-      gift: 'Si es tu primera comanda, te regalo un cuarto de banana bread y un chutney de pimiento rojo y tomate.',
-      giftAllergens:
-        'El banana bread contiene gluten y leche. Pregúntame por los ingredientes del chutney.',
+      giftH: 'Regalo del primer pedido',
+      gift: [
+        'Un cuarto de banana bread para ti.',
+        'Otro cuarto para quien quieras.',
+        'Un vale en la tarjeta del pedido: si te apuntas al Pan fijo, el 4.º pan corre de mi cuenta.',
+      ],
+      giftAllergens: 'El banana bread contiene trigo (gluten) y leche.',
+      // Only shown when WELCOME_GIFT_CHUTNEY=true (an occasional extra).
+      giftChutney:
+        'Esta semana, también un chutney de pimiento rojo y tomate. Pregúntame por sus ingredientes.',
       whatsappCta: 'Reservar por WhatsApp',
       whatsappText: (day: string) =>
         `¡Hola! Quiero reservar pan para el ${day}. Me gustaría: `,
@@ -510,6 +545,7 @@ export const ui = {
     ed: {
       bar: 'Pan artesano por encargo',
       made: 'Hecho a mano.',
+      batch: (n: number) => `Hornadas de ${n} hogazas.`,
       fig: '(Fig. 1) Pan de miga, partido por la mitad',
       ferment: 'Fermentado hasta 35 h',
       steps: [
@@ -572,8 +608,8 @@ export const ui = {
       COMPLETED: 'Aquesta fornada ja ha sortit del forn',
     },
     hero: {
-      h1a: 'Pa artesà',
-      h1b: 'per encàrrec',
+      h1a: 'Pa que només es cou',
+      h1b: 'si l’has reservat',
       sub: `Cada dimecres i cada dissabte ${hours.ca}, a domicili a Sant Boi, Sant Just Desvern i Santa Coloma.`,
       lede: 'Pasto a mà dues fornades petites cada setmana, amb farines ecològiques, poolish i fins a 35 hores de fermentació lenta. Tu el reserves aquí i dimecres o dissabte te’l porto a casa, o el reculls a Sant Boi.',
       kicker: 'Fleca de barri · Baix Llobregat',
@@ -609,7 +645,8 @@ export const ui = {
         'Baix Llobregat',
       ],
       trust: 'Pagues en rebre’l · Cancel·les amb un clic · Sense compte',
-      gift: 'La teva primera comanda porta un regal de benvinguda.',
+      gift: 'Primera comanda: un quart de banana bread per a tu i un altre per a qui vulguis.',
+      giftMore: 'Què inclou',
       scroll: 'Llisca',
       hands: 'Les mans de la meva mare',
       sealTop: 'fins a',
@@ -781,6 +818,33 @@ export const ui = {
       saturdayOnly:
         'Només per a la fornada de dissabte: es reserva des de diumenge a les 20 h.',
     },
+    why: {
+      kicker: 'Per què jo',
+      bar: 'I no el forn del costat',
+      h2a: 'Per què jo',
+      h2b: 'i no el forn.',
+      honest: 'Si tens un bon forn a dos minuts, compra-li a ell.',
+      p: 'molla. és per a qui vol el pa a casa. Fornades petites que només es couen amb el que s’ha reservat, fins a 35 hores de fermentació amb poolish i entrega en una franja fixa. Pagues quan el reps.',
+      facts: (n: number) => [
+        [`${n}`, 'pans per fornada'],
+        ['35 h', 'de fermentació, com a màxim'],
+        ['12–14 h', 'a la teva porta, dimecres o dissabte'],
+      ],
+    },
+    fix: {
+      kicker: 'Pa fix',
+      bar: 'Cada dissabte, sense pensar-hi',
+      h2a: 'El teu pa cada dissabte.',
+      h2b: 'Sense pensar-hi.',
+      p: 'Tries una vegada quant en vols. Cada dissabte te’l porto a casa. Saltes una setmana, el pauses o et dones de baixa amb un clic. Pagues en rebre’l.',
+      voucher: 'Amb el val de la primera comanda, el 4t pa va de part meva.',
+      cta: 'Apunta’t al Pa fix',
+      facts: (price: string) => [
+        `Dissabte ${hours.ca}`,
+        `${price} el pa · sense enviament`,
+        'Saltes o cancel·les amb un clic',
+      ],
+    },
     organic: {
       kicker: 'Farina',
       h2a: 'Farines ecològiques,',
@@ -893,10 +957,16 @@ export const ui = {
       submit: 'Confirmar la reserva',
       footnote:
         'Pagues en rebre’l. Cancel·les amb un clic fins al tancament de la fornada. Sense compte ni subscripcions.',
-      giftH: 'Regal de benvinguda',
-      gift: 'Si és la teva primera comanda, et regalo un quart de banana bread i un chutney de pebrot vermell i tomàquet.',
-      giftAllergens:
-        'El banana bread conté gluten i llet. Pregunta’m pels ingredients del chutney.',
+      giftH: 'Regal de la primera comanda',
+      gift: [
+        'Un quart de banana bread per a tu.',
+        'Un altre quart per a qui vulguis.',
+        'Un val a la targeta de la comanda: si t’apuntes al Pa fix, el 4t pa va de part meva.',
+      ],
+      giftAllergens: 'El banana bread conté blat (gluten) i llet.',
+      // Only shown when WELCOME_GIFT_CHUTNEY=true (an occasional extra).
+      giftChutney:
+        'Aquesta setmana, també un chutney de pebrot vermell i tomàquet. Pregunta’m pels ingredients.',
       whatsappCta: 'Reservar per WhatsApp',
       whatsappText: (day: string) =>
         `Hola! Voldria reservar pa per al ${day}. M’agradaria: `,
@@ -982,6 +1052,7 @@ export const ui = {
     ed: {
       bar: 'Pa artesà per encàrrec',
       made: 'Fet a mà.',
+      batch: (n: number) => `Fornades de ${n} pans.`,
       fig: '(Fig. 1) Pa de molla, tallat per la meitat',
       ferment: 'Fermentat fins a 35 h',
       steps: [

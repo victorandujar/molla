@@ -22,7 +22,7 @@ test('real photos, keyboard access, responsive layout and accessibility', async 
     await page.goto('/es/');
     await page.evaluate(() => document.fonts.ready);
     await expect(page.getByRole('heading', { level: 1 })).toContainText(
-      'Pan artesanal por encargo',
+      'Pan que solo se hornea si lo has reservado',
     );
     // The packaging crumb, traced into one path per alveolus, wraps the footer.
     expect(
@@ -451,7 +451,7 @@ test('Catalan is the main language, Spanish lives under /es/', async ({
   await page.goto('/');
   await expect(page.locator('html')).toHaveAttribute('lang', 'ca');
   await expect(page.getByRole('heading', { level: 1 })).toContainText(
-    'Pa artesà per encàrrec',
+    'Pa que només es cou si l’has reservat',
   );
   for (const path of [
     '/pa-a-domicili',
@@ -933,9 +933,17 @@ test('first order gets the welcome gift; the second one does not', async ({
   await expect(page.locator('.hero-trust')).toContainText(
     'Cancelas con un clic',
   );
-  await expect(page.locator('.gift-box')).toContainText(
-    'un cuarto de banana bread',
+  await expect(page.locator('.hero-gift')).toContainText(
+    'un cuarto de banana bread para ti y otro para quien quieras',
   );
+  await expect(page.locator('.gift-box')).toContainText(
+    'si te apuntas al Pan fijo, el 4.º pan corre de mi cuenta',
+  );
+  await expect(page.locator('body')).not.toContainText('chutney');
+  // The pa fix block leads to the sign-up page.
+  await expect(
+    page.locator('.fix').getByRole('link', { name: /Pan fijo/ }),
+  ).toHaveAttribute('href', '/es/pan-fijo');
   await expect(page.locator('.form-footnote').first()).toContainText(
     'Cancelas con un clic hasta el cierre de la hornada',
   );
@@ -978,7 +986,7 @@ test('first order gets the welcome gift; the second one does not', async ({
   await page.locator('input[name=privacy]').check();
   await page.locator('#reservation-form button[type=submit]').click();
   await expect(page.locator('#confirmation')).toContainText(
-    'Regalo de bienvenida',
+    'Regalo del primer pedido',
   );
   await expect(
     page.locator('#confirmation').getByRole('link', { name: /Pan fijo/ }),
