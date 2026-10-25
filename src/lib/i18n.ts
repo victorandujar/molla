@@ -319,15 +319,22 @@ export const ui = {
       honest:
         'Si tienes un buen horno a dos minutos, cómprale a él. Yo soy para otra cosa.',
       points: [
-        'Una sola persona. Me escribes por WhatsApp y te respondo yo.',
-        'Hecho la mañana que lo recibes. No es el pan de ayer.',
-        'Sin letra pequeña. Sin cuenta ni tarjeta. Pagas al recibirlo y cancelas con un clic.',
+        'Nunca llegas tarde. Tu pan se hornea reservado, sin colas ni “ya se ha acabado”.',
+        'No tienes que bajar. Llega a tu puerta miércoles y sábado, de 12 a 14 h.',
+        'Banana bread de chocolate, hecho por encargo.',
       ],
-      facts: [
-        ['1', 'persona'],
-        ['0', 'cuentas ni tarjetas'],
-        ['1 clic', 'para cancelar'],
-      ],
+    },
+    reviews: {
+      kicker: 'Nº — Reseñas',
+      fig: '(Fig. 7)',
+      count: (n: number) => `${n} reseñas en Google`,
+      verbatim: 'Tal como las han escrito, en su idioma.',
+      source: 'Reseña de Google',
+      label: 'Más reseñas',
+      swipe: 'Desliza',
+      all: (n: number) => `Ver las ${n} reseñas en Google`,
+      leave: 'Deja la tuya',
+      newTab: '(se abre en una pestaña nueva)',
     },
     fix: {
       kicker: 'Pan fijo',
@@ -831,15 +838,22 @@ export const ui = {
       honest:
         'Si tens un bon forn a dos minuts, compra-li a ell. Jo sóc per a una altra cosa.',
       points: [
-        'Una sola persona. M’escrius per WhatsApp i et responc jo.',
-        'Cuit el matí que el reps. No és el pa d’ahir.',
-        'Sense lletra petita. Sense compte ni targeta. Pagues en rebre’l i cancel·les amb un clic.',
+        'Mai arribes tard. El teu pa es cou reservat, sense cues ni “ja s’ha acabat”.',
+        'No has de baixar. Arriba a la porta dimecres i dissabte, de 12 a 14 h.',
+        'Banana bread de xocolata, fet per encàrrec.',
       ],
-      facts: [
-        ['1', 'persona'],
-        ['0', 'comptes ni targetes'],
-        ['1 clic', 'per cancel·lar'],
-      ],
+    },
+    reviews: {
+      kicker: 'Nº — Ressenyes',
+      fig: '(Fig. 7)',
+      count: (n: number) => `${n} ressenyes a Google`,
+      verbatim: 'Tal com les han escrit, en el seu idioma.',
+      source: 'Ressenya de Google',
+      label: 'Més ressenyes',
+      swipe: 'Llisca',
+      all: (n: number) => `Veure les ${n} ressenyes a Google`,
+      leave: 'Deixa’n una',
+      newTab: '(s’obre en una pestanya nova)',
     },
     fix: {
       kicker: 'Pa fix',

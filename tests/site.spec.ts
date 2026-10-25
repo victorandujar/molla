@@ -579,6 +579,52 @@ test('pastries only on Saturday: the Wednesday bake shows them but refuses them'
   await expect(page.locator('#hornada .stub-day')).toContainText('miércoles');
 });
 
+test('Google reviews: verbatim quotes in both languages and exact links', async ({
+  page,
+}) => {
+  for (const [path, count, all, leave] of [
+    [
+      '/',
+      '7 ressenyes a Google',
+      'Veure les 7 ressenyes a Google',
+      'Deixa’n una',
+    ],
+    [
+      '/es/',
+      '7 reseñas en Google',
+      'Ver las 7 reseñas en Google',
+      'Deja la tuya',
+    ],
+  ] as const) {
+    await page.goto(path);
+    const reviews = page.locator('section.reviews');
+    await expect(reviews.getByRole('heading', { level: 2 })).toContainText(
+      `5/5 ${count}`,
+    );
+    // Same quotes, untranslated, on both pages.
+    await expect(reviews.locator('blockquote')).toHaveCount(5);
+    await expect(reviews.locator('blockquote').first()).toContainText(
+      'TOTALMENTE ESPECTACULAR',
+    );
+    await expect(reviews.locator('blockquote').last()).toHaveAttribute(
+      'lang',
+      'es',
+    );
+    await expect(
+      reviews.getByRole('link', { name: new RegExp(all) }),
+    ).toHaveAttribute('href', 'https://share.google/OwE1uCFKRkCMsFFOa');
+    const review = reviews.getByRole('link', { name: new RegExp(leave) });
+    await expect(review).toHaveAttribute(
+      'href',
+      'https://g.page/r/CYMY0tZs2YLiEBM/review',
+    );
+    await expect(review).toHaveAttribute('rel', 'noopener noreferrer');
+    await expect(review).toHaveAttribute('target', '_blank');
+  }
+  // The card row is reachable with the keyboard.
+  await expect(page.locator('.reviews-track')).toHaveAttribute('tabindex', '0');
+});
+
 test('croissants and pains au chocolat share 48 pieces per bake, by the unit', async ({
   page,
   request,
