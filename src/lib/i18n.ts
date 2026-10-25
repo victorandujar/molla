@@ -102,8 +102,8 @@ export const ui = {
       h1a: 'Pan que solo se hornea',
       h1b: 'si lo has reservado',
       sub: `Cada miércoles y cada sábado ${hours.es}, a domicilio en Sant Boi, Sant Just Desvern y Santa Coloma.`,
-      short: (n: number) =>
-        `Hornadas de ${n} hogazas. Miércoles y sábado en tu puerta. Pagas al recibirlo.`,
+      short:
+        'Pan por encargo. Miércoles y sábado en tu puerta. Pagas al recibirlo.',
       kicker: 'Panadería de barrio · Baix Llobregat',
       keywords: [
         'Harinas ecológicas',
@@ -194,17 +194,21 @@ export const ui = {
       half: 'Mitad',
       size: 'Tamaño',
       each: 'cada una',
-      bananaLeft: (halves: number) =>
-        halves <= 0
-          ? 'Agotado esta semana'
-          : halves === 1
-            ? 'Queda medio molde esta semana'
-            : halves === 2
-              ? 'Queda un molde esta semana'
-              : halves === 3
-                ? 'Queda un molde y medio esta semana'
-                : `Quedan ${halves % 2 ? `${Math.floor(halves / 2)} moldes y medio` : `${halves / 2} moldes`} esta semana`,
       closed: 'Se reserva cuando abra la hornada',
+      // Never a count: nothing while there is plenty, then «few left», then «sold out».
+      stock: {
+        bread: { ok: '', low: 'Quedan pocas hogazas', out: 'Hornada agotada' },
+        banana: {
+          ok: '',
+          low: 'Queda poco banana bread',
+          out: 'Agotado esta semana',
+        },
+        pastry: {
+          ok: '',
+          low: 'Queda poca bollería',
+          out: 'Bollería agotada esta semana',
+        },
+      },
       pill: 'Tu pedido',
       pillCta: 'Reservar',
       loaves: (n: number) => `${n} ${n === 1 ? 'hogaza' : 'hogazas'}`,
@@ -215,19 +219,9 @@ export const ui = {
       croissants: (n: number) => `${n} ${n === 1 ? 'croissant' : 'croissants'}`,
       pains: (n: number) =>
         `${n} ${n === 1 ? 'pain au chocolat' : 'pains au chocolat'}`,
-      pastryLeft: (n: number) =>
-        n <= 0
-          ? 'Bollería agotada esta semana'
-          : n === 1
-            ? 'Queda 1 pieza de bollería esta semana'
-            : `Quedan ${n} piezas de bollería esta semana`,
     },
     bake: {
       number: 'Hornada',
-      of: 'de',
-      reserved: 'hogazas reservadas',
-      small: (n: number) => `Hornada pequeña · ${n} hogazas`,
-      leftOf: (n: number) => `hogazas libres de ${n}`,
       test: ' (prueba)',
       open: (deadline: string) => {
         const d = madridParts('es', deadline);
@@ -302,7 +296,6 @@ export const ui = {
         'Masa laminada con mantequilla. El pain au chocolat lleva chocolate.',
       allergens:
         'Contiene trigo (gluten), leche y huevo. Pregúntame por trazas antes de reservar.',
-      quota: (n: number) => `${n} piezas por hornada, entre los dos`,
       alt: 'Un pain au chocolat y un croissant dorados sobre una tabla de madera, con luz de tarde',
       add: 'Añadir',
       less: (name: string) => `Quitar un ${name}`,
@@ -440,8 +433,6 @@ export const ui = {
       deliveryLabel: (town: string) => `Entrega a domicilio en ${town}`,
       pay: 'Pago',
       payValue: 'Al recibirlo o recogerlo. Sin tarjeta ni cuenta.',
-      left: 'Quedan',
-      loaves: 'hogazas',
       question: 'Tengo una pregunta ↗',
       yourOrder: 'Tu pedido',
       demoIntro:
@@ -617,8 +608,8 @@ export const ui = {
       h1a: 'Pa que només es cou',
       h1b: 'si l’has reservat',
       sub: `Cada dimecres i cada dissabte ${hours.ca}, a domicili a Sant Boi, Sant Just Desvern i Santa Coloma.`,
-      short: (n: number) =>
-        `Fornades de ${n} pans. Dimecres i dissabte a la teva porta. Pagues en rebre’l.`,
+      short:
+        'Pa per encàrrec. Dimecres i dissabte a la teva porta. Pagues en rebre’l.',
       kicker: 'Fleca de barri · Baix Llobregat',
       keywords: [
         'Farines ecològiques',
@@ -709,17 +700,20 @@ export const ui = {
       half: 'Meitat',
       size: 'Mida',
       each: 'cadascun',
-      bananaLeft: (halves: number) =>
-        halves <= 0
-          ? 'Exhaurit aquesta setmana'
-          : halves === 1
-            ? 'Queda mig motlle aquesta setmana'
-            : halves === 2
-              ? 'Queda un motlle aquesta setmana'
-              : halves === 3
-                ? 'Queda un motlle i mig aquesta setmana'
-                : `Queden ${halves % 2 ? `${Math.floor(halves / 2)} motlles i mig` : `${halves / 2} motlles`} aquesta setmana`,
       closed: 'Es reserva quan obri la fornada',
+      stock: {
+        bread: { ok: '', low: 'Queden pocs pans', out: 'Fornada exhaurida' },
+        banana: {
+          ok: '',
+          low: 'Queda poc banana bread',
+          out: 'Exhaurit aquesta setmana',
+        },
+        pastry: {
+          ok: '',
+          low: 'Queda poca brioixeria',
+          out: 'Brioixeria exhaurida aquesta setmana',
+        },
+      },
       pill: 'La teva comanda',
       pillCta: 'Reservar',
       loaves: (n: number) => `${n} ${n === 1 ? 'pa' : 'pans'}`,
@@ -730,19 +724,9 @@ export const ui = {
       croissants: (n: number) => `${n} ${n === 1 ? 'croissant' : 'croissants'}`,
       pains: (n: number) =>
         `${n} ${n === 1 ? 'pain au chocolat' : 'pains au chocolat'}`,
-      pastryLeft: (n: number) =>
-        n <= 0
-          ? 'Brioixeria exhaurida aquesta setmana'
-          : n === 1
-            ? 'Queda 1 peça de brioixeria aquesta setmana'
-            : `Queden ${n} peces de brioixeria aquesta setmana`,
     },
     bake: {
       number: 'Fornada',
-      of: 'de',
-      reserved: 'pans reservats',
-      small: (n: number) => `Fornada petita · ${n} pans`,
-      leftOf: (n: number) => `pans lliures de ${n}`,
       test: ' (prova)',
       open: (deadline: string) => {
         const d = madridParts('ca', deadline);
@@ -815,7 +799,6 @@ export const ui = {
         'Massa fullada amb mantega. El pain au chocolat porta xocolata.',
       allergens:
         'Conté blat (gluten), llet i ou. Pregunta’m per traces abans de reservar.',
-      quota: (n: number) => `${n} peces per fornada, entre els dos`,
       alt: 'Un pain au chocolat i un croissant daurats sobre una taula de fusta, amb llum de tarda',
       add: 'Afegir',
       less: (name: string) => `Treure un ${name}`,
@@ -954,8 +937,6 @@ export const ui = {
       deliveryLabel: (town: string) => `Entrega a domicili a ${town}`,
       pay: 'Pagament',
       payValue: 'En rebre’l o recollir-lo. Sense targeta ni compte.',
-      left: 'En queden',
-      loaves: 'pans',
       question: 'Tinc una pregunta ↗',
       yourOrder: 'La teva comanda',
       demoIntro:

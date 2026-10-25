@@ -835,9 +835,7 @@ figure picture {
 /* La hornada: el resguardo del flyer, recuadro de línea fina. */
 .hero-bake {
   display: grid;
-  grid-template-columns: 1fr auto;
-  align-items: end;
-  gap: 4px 20px;
+  gap: 4px;
   margin-top: 32px;
   padding: 16px 18px 18px;
   box-shadow: inset 0 0 0 1.5px var(--on-cobalt-line);
@@ -845,24 +843,6 @@ figure picture {
 }
 .hero-bake:hover {
   box-shadow: inset 0 0 0 1.5px var(--orange);
-}
-.hero-bake .stub-row {
-  grid-column: 1 / -1;
-}
-.hero-bake .stub-day {
-  grid-column: 1;
-}
-.hero-bake .stub-deadline {
-  grid-column: 1;
-}
-.hero-bake .stub-stock {
-  grid-column: 2;
-  grid-row: 2 / span 2;
-  width: 150px;
-  margin: 0;
-}
-.hero-bake .stub-cta {
-  grid-column: 1 / -1;
 }
 .stub-row {
   display: flex;
@@ -925,37 +905,13 @@ figure picture {
   font-size: 13.5px;
   color: var(--on-cobalt);
 }
-.stub-stock {
-  display: grid;
-  gap: 10px;
-}
 .stub-count {
+  margin-top: 8px;
   font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 0.06em;
+  font-size: 11.5px;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--on-cobalt);
-}
-.stub-count strong {
-  font-family: var(--sans);
-  font-stretch: 125%;
-  font-weight: 800;
-  font-size: 20px;
-  color: var(--paper);
-}
-.loaf-meter {
-  display: grid;
-  grid-template-columns: repeat(var(--n), 1fr);
-  gap: 3px;
-}
-.loaf-meter span {
-  height: 12px;
-  box-shadow: inset 0 0 0 1px var(--on-cobalt-line);
-  transition: background-color 0.4s ease;
-}
-.loaf-meter span.taken {
-  background: var(--orange);
-  box-shadow: none;
+  color: var(--orange);
 }
 .stub-cta {
   justify-self: start;
@@ -2064,35 +2020,11 @@ figure picture {
   margin-top: 26px;
 }
 .pastry-quota p {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: 6px 20px;
+  color: var(--orange);
   font-family: var(--mono);
   font-size: 11.5px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-}
-.pastry-quota p span:last-child {
-  color: var(--orange);
-}
-/* 48 piezas, una raya cada una: las reservadas se apagan desde el final. */
-.pastry-meter {
-  display: grid;
-  grid-template-columns: repeat(var(--n), 1fr);
-  gap: 3px;
-  margin-top: 12px;
-}
-.pastry-meter span {
-  height: 22px;
-  background: var(--orange);
-  transition:
-    background-color 0.5s ease,
-    transform 0.5s var(--ease-spring);
-}
-.pastry-meter span.taken {
-  background: var(--on-night-line);
-  transform: scaleY(0.45);
 }
 .pastry .spec {
   margin-top: 30px;
@@ -3599,15 +3531,6 @@ details[open] p {
   .hero-bar span:last-child {
     display: none;
   }
-  .hero-bake {
-    grid-template-columns: 1fr;
-  }
-  .hero-bake .stub-stock {
-    grid-column: 1;
-    grid-row: auto;
-    width: auto;
-    margin-top: 10px;
-  }
   .outline-price {
     font-size: clamp(76px, 24vw, 110px);
   }
@@ -3637,9 +3560,6 @@ details[open] p {
     grid-column: 2;
     justify-items: start;
     text-align: left;
-  }
-  .pastry-meter {
-    gap: 2px;
   }
   .step {
     grid-template-columns: 56px 1fr;

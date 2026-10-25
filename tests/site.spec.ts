@@ -527,8 +527,11 @@ test('banana bread is ordered by halves, alone or with bread, within its quota',
   ).toEqual(['banana', 'banana-mitad']);
   // Loaves stay untouched by banana orders.
   const bake = await (await request.get('/api/bake')).json();
-  expect(bake.reserved).toBe(0);
-  expect(bake.bananaLeft).toBe(1);
+  expect(bake.bread).toEqual({ level: 'ok', max: 4 });
+  expect(bake.banana).toEqual({ level: 'low', max: 1 });
+  // Counts never leave the server.
+  expect(bake).not.toHaveProperty('reserved');
+  expect(bake).not.toHaveProperty('capacity');
   // The product card adds to the same order as the ticket.
   await page.goto('/es/');
   await page.locator('[data-buy="loaf"] > [data-add]').click();
@@ -549,7 +552,7 @@ test('pastries only on Saturday: the Wednesday bake shows them but refuses them'
   );
   const bake = await (await request.get('/api/bake')).json();
   expect(bake.pastries).toBe(false);
-  expect(bake.pastryLeft).toBe(0);
+  expect(bake.pastry.max).toBe(0);
   const post = (data: Record<string, unknown>) =>
     request.post('/api/reservations', {
       headers: origin,
@@ -677,10 +680,10 @@ test('croissants and pains au chocolat share 48 pieces per bake, by the unit', a
   expect((await tooMuch.json()).error).toContain('bollería');
   expect((await order(4, 3)).status()).toBe(201);
   let bake = await (await request.get('/api/bake')).json();
-  expect(bake.pastryLeft).toBe(0);
+  expect(bake.pastry).toEqual({ level: 'out', max: 0 });
   // Loaves and banana bread keep their own quotas.
-  expect(bake.reserved).toBe(0);
-  expect(bake.bananaLeft).toBe(4);
+  expect(bake.bread.level).toBe('ok');
+  expect(bake.banana).toEqual({ level: 'ok', max: 4 });
   expect((await order(1, 0)).status()).toBe(409);
   const d = await readData();
   expect(d.orders[0].items).toEqual([
@@ -704,9 +707,11 @@ test('croissants and pains au chocolat share 48 pieces per bake, by the unit', a
   ] as const)
     expect((await order(c, p, 'ona@example.com')).status()).toBe(201);
   await page.goto('/es/');
-  await expect(page.locator('[data-pastry-left]').first()).toContainText(
-    'Quedan 6 piezas',
+  // Six pieces left: the page says «few left», never the number.
+  await expect(page.locator('[data-stock="pastry"]').first()).toHaveText(
+    'Queda poca bollería',
   );
+  await expect(page.locator('body')).not.toContainText(/Quedan \d|libres de/);
   await page.locator('[data-buy="croissant"] > [data-add]').click();
   await expect(page.locator('#croissant')).toHaveValue('1');
   await expect(page.locator('[data-count="croissant"]')).toHaveText(
@@ -922,7 +927,7 @@ test('cancel an order with one click from its private link', async ({
   expect(forged.status()).toBe(403);
   // The freed loaves can be booked again.
   const left = await request.get('/api/bake');
-  expect((await left.json()).reserved).toBe(0);
+  expect((await left.json()).bread).toEqual({ level: 'ok', max: 4 });
 });
 
 test('owner panel lists pa fix subscribers and can pause, resume and cancel them', async ({
