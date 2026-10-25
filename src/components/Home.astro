@@ -187,7 +187,7 @@ const jsonLd = [
         <p class="hero-made">
           <span class="hero-mask">
             <span class="hero-line" style="--i:0">
-              {t.ed.made}
+              {t.ed.batch(current.capacity)}
             </span>
           </span>
         </p>
@@ -251,8 +251,17 @@ const jsonLd = [
           </ol>
           <p class="hero-trust hero-in" style="--i:5">
             {t.hero.trust}
-            {welcomeGift.active && <> · {t.hero.gift}</>}
           </p>
+          {welcomeGift.active && (
+            <p class="hero-gift hero-in" style="--i:5">
+              <span class="star" aria-hidden="true">
+                ✷
+              </span>
+              <span>
+                {t.hero.gift} <a href="#regal">{t.hero.giftMore}</a>
+              </span>
+            </p>
+          )}
           <div
             id="hornada"
             class="hero-bake hero-in"
@@ -340,6 +349,33 @@ const jsonLd = [
         </div>
       ))}
     </div>
+
+    <!-- Per què jo i no el forn: la resposta honesta, just després de la portada -->
+    <section class="why" aria-labelledby="why-title">
+      <div class="wrap">
+        <div class="mono-bar" data-bar>
+          <span>{t.why.kicker}</span>
+          <span>{t.why.bar}</span>
+        </div>
+        <div class="why-grid">
+          <h2 id="why-title" data-split>
+            {t.why.h2a} <em>{t.why.h2b}</em>
+          </h2>
+          <div class="why-copy" data-reveal>
+            <p class="why-honest">{t.why.honest}</p>
+            <p>{t.why.p}</p>
+          </div>
+        </div>
+        <ul class="why-facts">
+          {t.why.facts(current.capacity).map(([n, label], i) => (
+            <li data-reveal style={`--i:${i}`}>
+              <strong>{n}</strong>
+              <span>{label}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
 
     <!-- 2 · Diari de l'obrador: las fotos de la cocina, como un reel -->
     <section class="diary" aria-label={t.film.label} data-diary>
@@ -761,6 +797,47 @@ const jsonLd = [
       </div>
     </section>
 
+    <!-- Pa fix: la primera compra porta a la subscripció -->
+    <section class="fix" aria-labelledby="fix-title">
+      <div class="wrap fix-card">
+        <div class="mono-bar fix-bar" data-bar>
+          <span>{t.fix.kicker}</span>
+          <span>{t.fix.bar}</span>
+        </div>
+        <div class="fix-grid">
+          <div>
+            <h2 id="fix-title" data-split>
+              {t.fix.h2a} <em>{t.fix.h2b}</em>
+            </h2>
+            <p class="fix-text" data-reveal>
+              {t.fix.p}
+            </p>
+          </div>
+          <div class="fix-side" data-reveal>
+            {welcomeGift.active && (
+              <p class="fix-voucher">
+                <span class="star" aria-hidden="true">
+                  ✷
+                </span>
+                {t.fix.voucher}
+              </p>
+            )}
+            <ul class="fix-facts">
+              {t.fix.facts(money(loaf.price)).map((fact) => (
+                <li>{fact}</li>
+              ))}
+            </ul>
+            <a class="button button-orange" href={routes.standing[lang]}>
+              {t.fix.cta}
+              <span class="button-arrow" aria-hidden="true">
+                →
+              </span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- 4 · 35 horas: la foto de cada paso y el contador avanzan con el scroll -->
     <section id="proceso" class="process" aria-labelledby="process-title">
       <div class="wrap">
@@ -921,10 +998,18 @@ const jsonLd = [
             )}
           </dl>
           {welcomeGift.active && (
-            <div class="gift-box">
+            <div class="gift-box" id="regal">
               <p class="gift-title">{t.reserve.giftH}</p>
-              <p>{t.reserve.gift}</p>
+              <ul class="gift-list">
+                {t.reserve.gift.map((line) => (
+                  <li>{line}</li>
+                ))}
+                {welcomeGift.chutney && <li>{t.reserve.giftChutney}</li>}
+              </ul>
               <p class="gift-small">{t.reserve.giftAllergens}</p>
+              <a class="text-link gift-fix" href={routes.standing[lang]}>
+                {t.fix.cta} <span aria-hidden="true">→</span>
+              </a>
             </div>
           )}
           {brand.whatsapp && (

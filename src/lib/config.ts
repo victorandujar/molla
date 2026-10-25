@@ -56,9 +56,14 @@ export const privacy = {
   retention: privacyText('PRIVACY_RETENTION'),
   transfers: privacyText('PRIVACY_TRANSFERS'),
 };
-// Gift for a customer's first order (¼ banana bread + red pepper and tomato
-// chutney). The baker adds it by hand; WELCOME_GIFT=false turns the offer off.
-export const welcomeGift = { active: process.env.WELCOME_GIFT !== 'false' };
+// Gift for a customer's first order: ¼ banana bread for them, another ¼ to
+// share, and the card voucher (4th "pa fix" loaf on the house). The baker adds
+// it by hand; WELCOME_GIFT=false turns the offer off. The chutney is an
+// occasional extra, hidden unless WELCOME_GIFT_CHUTNEY=true.
+export const welcomeGift = {
+  active: process.env.WELCOME_GIFT !== 'false',
+  chutney: process.env.WELCOME_GIFT_CHUTNEY === 'true',
+};
 export const products = [
   {
     id: 'clasica',

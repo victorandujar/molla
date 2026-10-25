@@ -1,4 +1,4 @@
-import { brand, money } from './config';
+import { brand, money, welcomeGift } from './config';
 import {
   bananaSplit,
   orderSummary,
@@ -89,9 +89,10 @@ const copy = {
       '¿No vas a poder recibirlo? Cancela el pedido con un clic hasta el cierre de pedidos de la hornada, a las 20:00, sin dar explicaciones.',
     cancelLink: 'Cancelar el pedido →',
     giftLabel: 'Regalo',
-    giftText:
-      'Por ser tu primera comanda: un cuarto de banana bread (gluten y leche) y un chutney de pimiento rojo y tomate.',
+    giftText: `Por ser tu primer pedido: un cuarto de banana bread para ti y otro para quien quieras (trigo y leche)${welcomeGift.chutney ? ', y esta semana un chutney de pimiento rojo y tomate' : ''}. En la tarjeta va un vale: si te apuntas al Pan fijo, el 4.º pan corre de mi cuenta.`,
     fixCta: '¿Lo quieres cada semana? Pan fijo:',
+    fixCtaFirst:
+      'Con el vale de tu primer pedido, el 4.º pan del Pan fijo corre de mi cuenta:',
     standingKicker: 'Pan fijo',
     standingHeading: (name: string) => `${name}, esta semana te toca pan.`,
     standingIntro:
@@ -169,9 +170,10 @@ const copy = {
       'No el podràs rebre? Cancel·la la comanda amb un clic fins al tancament de comandes de la fornada, a les 20:00, sense donar explicacions.',
     cancelLink: 'Cancel·lar la comanda →',
     giftLabel: 'Regal',
-    giftText:
-      'Per ser la teva primera comanda: un quart de banana bread (gluten i llet) i un chutney de pebrot vermell i tomàquet.',
+    giftText: `Per ser la teva primera comanda: un quart de banana bread per a tu i un altre per a qui vulguis (blat i llet)${welcomeGift.chutney ? ', i aquesta setmana un chutney de pebrot vermell i tomàquet' : ''}. A la targeta hi va un val: si t’apuntes al Pa fix, el 4t pa va de part meva.`,
     fixCta: 'El vols cada setmana? Pa fix:',
+    fixCtaFirst:
+      'Amb el val de la primera comanda, el 4t pa del Pa fix va de part meva:',
     standingKicker: 'Pa fix',
     standingHeading: (name: string) => `${name}, aquesta setmana et toca pa.`,
     standingIntro:
@@ -310,7 +312,7 @@ ${
     : o.cancelToken
       ? `${t.cancelNote}\n${cancelUrl(o)}`
       : t.changesText(brand.contact)
-}${o.subscription ? '' : `\n${t.fixCta} ${asset(routes.standing[langOf(o)])}`}
+}${o.subscription ? '' : `\n${o.firstOrder ? t.fixCtaFirst : t.fixCta} ${asset(routes.standing[langOf(o)])}`}
 ${brand.whatsappChannel ? `\n${t.channel} ${brand.whatsappChannel}\n` : ''}
 ${t.thanks}
 ${brand.name}`;
@@ -386,7 +388,7 @@ export function confirmationHtml(o: Order) {
       )
     : closing(
         channel,
-        `${o.cancelToken ? `${esc(t.cancelNote)}<br>${link(cancelUrl(o), t.cancelLink)}` : t.changes}<br><br>${esc(t.fixCta)} ${link(asset(routes.standing[lang]), asset(routes.standing[lang]).replace(/^https?:\/\//, ''))}${
+        `${o.cancelToken ? `${esc(t.cancelNote)}<br>${link(cancelUrl(o), t.cancelLink)}` : t.changes}<br><br>${esc(o.firstOrder ? t.fixCtaFirst : t.fixCta)} ${link(asset(routes.standing[lang]), asset(routes.standing[lang]).replace(/^https?:\/\//, ''))}${
           brand.whatsappChannel ? `<br><br>${esc(t.channel)}` : ''
         }`,
       );
@@ -490,9 +492,14 @@ ${o.delivery ? 'Entrega a domicilio' : 'Recogida'}: ${pickupDay(o.pickupDate)}, 
 Dirección: ${where(o)}`
       : ''
   }
-Canal: ${o.source}${o.firstOrder ? '\nPrimera comanda: añade el regalo (¼ de banana bread + chutney de pimiento rojo y tomate)' : ''}
+Canal: ${o.source}${o.firstOrder ? `\n${ownerGift()}` : ''}
 Referencia interna: ${o.id}`;
 }
+
+// What the baker adds to a first order: two quarters of banana bread (one to
+// share), the card with the "pa fix" voucher and, when on, the chutney.
+const ownerGift = () =>
+  `Primera comanda: añade 2 cuartos de banana bread (uno para compartir)${welcomeGift.chutney ? ', el chutney' : ''} y la tarjeta con el vale del pan fijo (4.º pan de regalo)`;
 
 export function ownerHtml(o: Order) {
   const tel = o.phone.replace(/[^\d+]/g, '');
@@ -513,12 +520,7 @@ export function ownerHtml(o: Order) {
         : []),
       ['Canal', esc(o.source)],
       ...(o.firstOrder
-        ? ([
-            [
-              'Regalo',
-              'Primera comanda: añade ¼ de banana bread + chutney de pimiento rojo y tomate',
-            ],
-          ] as [string, string][])
+        ? ([['Regalo', esc(ownerGift())]] as [string, string][])
         : []),
       ['Código', `<strong>${esc(o.code)}</strong>`],
     ])}
