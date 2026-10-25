@@ -1178,49 +1178,166 @@ figure picture {
   text-transform: uppercase;
   color: var(--on-cobalt);
 }
-/* L'índex a l'esquerra i el cartell a la dreta: una ressenya a la vegada. */
+/* Cada ressenya, una pàgina de revista: la seva frase més forta en gran
+   (literal), la ressenya sencera a sota i l'índex al peu. */
 .reviews-board {
-  display: grid;
-  grid-template-columns: minmax(0, 4fr) minmax(0, 7fr);
-  align-items: start;
-  gap: clamp(24px, 4vw, 72px);
   margin-top: clamp(36px, 4.4vw, 64px);
+  border-top: 1.5px solid var(--paper);
+}
+.reviews-stage {
+  position: relative;
+}
+/* All pages share one grid cell, so the tallest sets the height and
+   nothing jumps; the hidden ones stay out of view and of the a11y tree. */
+.reviews-stage[data-live] {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+}
+.reviews-stage[data-live] .review-slide {
+  grid-area: 1 / 1;
+}
+.reviews-stage[data-live] .review-slide.is-off {
+  visibility: hidden;
+}
+.review-slide {
+  padding-top: clamp(20px, 2.4vw, 32px);
+}
+.review-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--on-cobalt);
+}
+.review-headline {
+  position: relative;
+  margin-top: clamp(20px, 3vw, 44px);
+  padding-left: clamp(0px, 4vw, 72px);
+  overflow: clip;
+  padding-bottom: 0.08em;
+}
+.review-mark {
+  position: absolute;
+  left: 0;
+  top: -0.04em;
+  font-weight: 800;
+  font-stretch: 125%;
+  font-size: clamp(64px, 7vw, 120px);
+  line-height: 1;
+  color: var(--orange);
+}
+.review-line {
+  display: block;
+  max-width: 18ch;
+  font-weight: 800;
+  font-stretch: 125%;
+  font-size: clamp(40px, 6.2vw, 104px);
+  line-height: 0.92;
+  letter-spacing: -0.045em;
+  text-wrap: balance;
+}
+.review-line em {
+  font-style: normal;
+  color: var(--orange);
+}
+.review-body {
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) minmax(0, 4fr);
+  align-items: end;
+  gap: 16px clamp(24px, 5vw, 96px);
+  margin-top: clamp(28px, 3.6vw, 52px);
+  padding-left: clamp(0px, 4vw, 72px);
+}
+.review-slide blockquote {
+  margin: 0;
+}
+.review-slide blockquote p {
+  max-width: 58ch;
+  font-size: clamp(16.5px, 1.3vw, 19px);
+  line-height: 1.55;
+  color: var(--on-cobalt);
+}
+.review-by {
+  display: grid;
+  gap: 4px;
+  justify-items: end;
+  text-align: right;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--on-cobalt);
+}
+.review-by cite {
+  font-style: normal;
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--paper);
+}
+/* With JS: one page at a time; the headline rises, the rest follows. */
+.reviews-stage[data-live] .review-slide.is-in .review-line {
+  animation: line-up 0.9s var(--ease-out) both;
+}
+.reviews-stage[data-live] .review-slide.is-in .review-mark {
+  animation: seal-in 0.7s var(--ease-spring) 0.15s both;
+}
+.reviews-stage[data-live] .review-slide.is-in .review-body {
+  animation: rise 0.8s var(--ease-out) 0.25s both;
+}
+@keyframes seal-in {
+  from {
+    opacity: 0;
+    scale: 0.4;
+    rotate: -30deg;
+  }
+}
+.review-slide + .review-slide {
+  margin-top: 48px;
+}
+.reviews-stage[data-live] .review-slide + .review-slide {
+  margin-top: 0;
+}
+/* The index at the foot: five names, the active one with an orange bar. */
+.reviews-nav {
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+  margin-top: clamp(28px, 3.4vw, 48px);
 }
 .reviews-index {
   display: grid;
-  border-top: 1.5px solid var(--paper);
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  flex: 1;
+  gap: 8px;
 }
 .reviews-index button {
-  position: relative;
   display: grid;
-  grid-template-columns: 3.2em 1fr;
-  align-items: baseline;
-  padding: 18px 0;
+  gap: 6px;
+  padding: 12px 0 0;
   border: 0;
-  border-bottom: 1px solid var(--on-cobalt-line);
+  border-top: 3px solid var(--on-cobalt-line);
   background: transparent;
   color: var(--on-cobalt);
   text-align: left;
-  transition:
-    color 0.3s ease,
-    padding 0.4s var(--ease-out);
+  position: relative;
+  transition: color 0.3s ease;
 }
 .reviews-index button::before {
   content: '';
   position: absolute;
   left: 0;
-  bottom: -1px;
-  width: 100%;
+  right: 0;
+  top: -3px;
   height: 3px;
   background: var(--orange);
   transform: scaleX(0);
   transform-origin: left;
   transition: transform 0.6s var(--ease-out);
 }
-.reviews-index button:hover {
-  color: var(--paper);
-  padding-left: 8px;
-}
+.reviews-index button:hover,
 .reviews-index button[aria-selected='true'] {
   color: var(--paper);
 }
@@ -1229,128 +1346,21 @@ figure picture {
 }
 .review-tab-num {
   font-family: var(--mono);
-  font-size: 12px;
-  letter-spacing: 0.08em;
-}
-.review-tab-name {
-  font-weight: 800;
-  font-stretch: 62%;
-  font-size: clamp(26px, 2.6vw, 40px);
-  line-height: 1;
-  text-transform: uppercase;
-}
-.reviews-index button[aria-selected='true'] .review-tab-num {
-  color: var(--orange);
-}
-/* El cartell: les tres superfícies del flyer, una per ressenya. */
-.reviews-stage {
-  position: relative;
-}
-.review-poster {
-  --card-bg: var(--paper);
-  --card-fg: var(--ink);
-  --card-mark: var(--orange);
-  --card-line: var(--line-strong);
-  display: flex;
-  flex-direction: column;
-  min-height: clamp(400px, 36vw, 520px);
-  padding: clamp(22px, 2.8vw, 40px);
-  background: var(--card-bg);
-  color: var(--card-fg);
-}
-.review-poster > figure {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-}
-.review-poster + .review-poster {
-  margin-top: 16px;
-}
-.review-tone-1 {
-  --card-bg: var(--orange);
-  --card-fg: var(--night);
-  --card-mark: var(--night);
-  --card-line: rgba(20, 21, 25, 0.3);
-}
-.review-tone-2 {
-  --card-bg: var(--night);
-  --card-fg: var(--paper);
-  --card-mark: var(--orange);
-  --card-line: var(--on-night-line);
-}
-/* With JS only one poster shows; the new one wipes in from below. */
-.reviews-stage[data-live] .review-poster + .review-poster {
-  margin-top: 0;
-}
-.reviews-stage[data-live] .review-poster.is-in {
-  animation: poster-in 0.8s var(--ease-in-out) both;
-}
-@keyframes poster-in {
-  from {
-    clip-path: inset(100% 0 0 0);
-  }
-  to {
-    clip-path: inset(0 0 0 0);
-  }
-}
-.reviews-stage[data-live] .review-poster.is-in blockquote {
-  animation: rise 0.8s var(--ease-out) 0.25s both;
-}
-.review-top {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  padding-bottom: 12px;
-  border-bottom: 1.5px solid currentColor;
-  font-family: var(--mono);
-  font-size: 11.5px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-.review-mark {
-  display: block;
-  height: 0.6em;
-  margin-top: 18px;
-  font-weight: 800;
-  font-stretch: 125%;
-  font-size: clamp(120px, 12vw, 190px);
-  line-height: 1;
-  color: var(--card-mark);
-}
-.review-poster blockquote {
-  flex: 1;
-  margin: 0;
-}
-.review-poster blockquote p {
-  max-width: 30ch;
-  font-weight: 700;
-  font-size: clamp(22px, 2.3vw, 34px);
-  line-height: 1.18;
-  letter-spacing: -0.025em;
-  text-wrap: pretty;
-}
-.review-by {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: 4px 16px;
-  margin-top: 26px;
-  padding-top: 12px;
-  border-top: 1px solid var(--card-line);
-  font-family: var(--mono);
   font-size: 11.5px;
   letter-spacing: 0.1em;
-  text-transform: uppercase;
 }
-.review-by cite {
-  font-style: normal;
-  font-weight: 700;
+.review-tab-name {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .reviews-arrows {
   display: flex;
-  justify-content: flex-end;
   gap: 10px;
-  margin-top: 14px;
 }
 .reviews-arrow {
   display: grid;
@@ -3604,24 +3614,32 @@ details[open] p {
   :root {
     --header-h: 60px;
   }
-  .reviews-board {
+  .review-body {
     grid-template-columns: 1fr;
-  }
-  .reviews-index {
-    grid-template-columns: repeat(5, 1fr);
-    border-top: 0;
-  }
-  .reviews-index button {
-    grid-template-columns: 1fr;
-    justify-items: center;
-    padding: 12px 0;
-    border-bottom: 1.5px solid var(--on-cobalt-line);
-  }
-  .reviews-index button:hover {
     padding-left: 0;
   }
-  .review-tab-num {
-    font-size: 13px;
+  .review-headline {
+    padding-left: 0;
+  }
+  .review-line {
+    font-size: clamp(28px, 8.2vw, 48px);
+  }
+  .review-mark {
+    position: static;
+    display: block;
+    height: 0.55em;
+    font-size: 72px;
+  }
+  .review-by {
+    justify-items: start;
+    text-align: left;
+  }
+  .reviews-nav {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .reviews-arrows {
+    justify-content: flex-end;
   }
   .review-tab-name {
     display: none;

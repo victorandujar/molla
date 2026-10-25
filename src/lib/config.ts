@@ -72,31 +72,42 @@ export const googleReviews = {
   count: 7,
   profileUrl: 'https://share.google/OwE1uCFKRkCMsFFOa',
   reviewUrl: 'https://g.page/r/CYMY0tZs2YLiEBM/review',
-  // The first one is shown large.
+  // Shown one at a time, in this order.
   quotes: [
     {
       text: 'He probado tanto el pan como el banana bread y TOTALMENTE ESPECTACULAR, toda una suerte poder contar con estos productos hoy en día en un mundo tan artificial!!! Mil gracias Victor :)',
       author: 'Carlos M.',
+      // Verbatim fragment shown as the headline; `accent` goes orange.
+      highlight: 'TOTALMENTE ESPECTACULAR',
+      accent: 'ESPECTACULAR',
       lang: 'es',
     },
     {
       text: 'Hacen el pan espectacular, crujiente por fuera y una buena molla por dentro. Muy recomendable!!',
       author: 'David L.',
+      highlight: 'crujiente por fuera y una buena molla por dentro',
+      accent: 'molla',
       lang: 'es',
     },
     {
       text: 'Un pan increíble, con un sabor espectacular y una textura especial que lo hace único. Se nota la calidad en cada bocado. ¡De esos panes que dan ganas de repetir!',
       author: 'Ramiro R.',
+      highlight: 'De esos panes que dan ganas de repetir',
+      accent: 'repetir',
       lang: 'es',
     },
     {
       text: 'Muy recomendable! El Banana bread, de otra galaxia! Top top!',
       author: 'Guille M.',
+      highlight: 'de otra galaxia',
+      accent: 'galaxia',
       lang: 'es',
     },
     {
       text: 'Amé molla. Y obvio ya entra en mis favoritos para repetir. Es demasiado versátil y la compañía perfecta para muchas comidas!! […]',
       author: 'Maria Alejandra A.',
+      highlight: 'la compañía perfecta para muchas comidas',
+      accent: 'perfecta',
       lang: 'es',
     },
   ],

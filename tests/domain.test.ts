@@ -13,7 +13,7 @@ import {
   waitlistConfirmation,
 } from '../src/lib/email-templates';
 import { madridParts, ui } from '../src/lib/i18n';
-import { WEEKLY_LOAF_PRICE_CENTS } from '../src/lib/config';
+import { WEEKLY_LOAF_PRICE_CENTS, googleReviews } from '../src/lib/config';
 import { isMessageKey } from '../src/lib/messages';
 import {
   bakeState,
@@ -540,4 +540,11 @@ test('first-order emails carry the welcome gift and the pa fix invitation', () =
   );
   assert.doesNotMatch(ownerText({ ...order, firstOrder: true }), /chutney/);
   assert.doesNotMatch(ownerText(order), /Primera comanda/);
+});
+
+test('review headlines are verbatim fragments of their own quote', () => {
+  for (const r of googleReviews.quotes) {
+    assert.ok(r.text.includes(r.highlight), r.author);
+    assert.ok(r.highlight.includes(r.accent), r.author);
+  }
 });
