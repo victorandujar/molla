@@ -33,6 +33,8 @@ import {
   csvCell,
   bananaSplit,
   orderSummary,
+  stockLevel,
+  publicStock,
   type Order,
 } from '../src/lib/domain';
 const b = {
@@ -547,4 +549,38 @@ test('review headlines are verbatim fragments of their own quote', () => {
     assert.ok(r.text.includes(r.highlight), r.author);
     assert.ok(r.highlight.includes(r.accent), r.author);
   }
+});
+
+test('stock is shown as a level, never as a count', () => {
+  // Bread: 10 per bake, «few left» from 2.
+  assert.equal(stockLevel(3, 10), 'ok');
+  assert.equal(stockLevel(2, 10), 'low');
+  assert.equal(stockLevel(0, 10), 'out');
+  // Pastries: 48 per bake, «few left» from 10.
+  assert.equal(stockLevel(11, 48), 'ok');
+  assert.equal(stockLevel(10, 48), 'low');
+  const saturday = publicStock({
+    capacity: 10,
+    reserved: 9,
+    bananaReserved: 0,
+    pastryReserved: 40,
+    pickupDate: '2026-10-31',
+  });
+  assert.deepEqual(saturday, {
+    bread: { level: 'low', max: 1 },
+    banana: { level: 'ok', max: 4 },
+    pastries: true,
+    pastry: { level: 'low', max: 8 },
+  });
+  // Wednesday: no pastries to order.
+  const wednesday = publicStock({
+    capacity: 10,
+    reserved: 0,
+    bananaReserved: 4,
+    pastryReserved: 0,
+    pickupDate: '2026-10-28',
+  });
+  assert.equal(wednesday.pastries, false);
+  assert.equal(wednesday.pastry.max, 0);
+  assert.deepEqual(wednesday.banana, { level: 'out', max: 0 });
 });

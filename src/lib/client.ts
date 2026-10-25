@@ -129,43 +129,37 @@ const words = isCa
       inOrder: (n: string) => `${n} a la comanda`,
       loaves: (n: number) => `${n} ${n === 1 ? 'pa' : 'pans'}`,
       empty: 'Afegeix un pa, un banana bread o brioixeria per reservar.',
-      pastryLeft: (n: number) =>
-        n <= 0
-          ? 'Brioixeria exhaurida aquesta setmana'
-          : n === 1
-            ? 'Queda 1 peça de brioixeria aquesta setmana'
-            : `Queden ${n} peces de brioixeria aquesta setmana`,
-      left: (h: number) =>
-        h <= 0
-          ? 'Exhaurit aquesta setmana'
-          : h === 1
-            ? 'Queda mig motlle aquesta setmana'
-            : h === 2
-              ? 'Queda un motlle aquesta setmana'
-              : h === 3
-                ? 'Queda un motlle i mig aquesta setmana'
-                : `Queden ${h % 2 ? `${Math.floor(h / 2)} motlles i mig` : `${h / 2} motlles`} aquesta setmana`,
+      stock: {
+        bread: { ok: '', low: 'Queden pocs pans', out: 'Fornada exhaurida' },
+        banana: {
+          ok: '',
+          low: 'Queda poc banana bread',
+          out: 'Exhaurit aquesta setmana',
+        },
+        pastry: {
+          ok: '',
+          low: 'Queda poca brioixeria',
+          out: 'Brioixeria exhaurida aquesta setmana',
+        },
+      },
     }
   : {
       inOrder: (n: string) => `${n} en tu pedido`,
       loaves: (n: number) => `${n} ${n === 1 ? 'hogaza' : 'hogazas'}`,
       empty: 'Añade una hogaza, un banana bread o bollería para reservar.',
-      pastryLeft: (n: number) =>
-        n <= 0
-          ? 'Bollería agotada esta semana'
-          : n === 1
-            ? 'Queda 1 pieza de bollería esta semana'
-            : `Quedan ${n} piezas de bollería esta semana`,
-      left: (h: number) =>
-        h <= 0
-          ? 'Agotado esta semana'
-          : h === 1
-            ? 'Queda medio molde esta semana'
-            : h === 2
-              ? 'Queda un molde esta semana'
-              : h === 3
-                ? 'Queda un molde y medio esta semana'
-                : `Quedan ${h % 2 ? `${Math.floor(h / 2)} moldes y medio` : `${h / 2} moldes`} esta semana`,
+      stock: {
+        bread: { ok: '', low: 'Quedan pocas hogazas', out: 'Hornada agotada' },
+        banana: {
+          ok: '',
+          low: 'Queda poco banana bread',
+          out: 'Agotado esta semana',
+        },
+        pastry: {
+          ok: '',
+          low: 'Queda poca bollería',
+          out: 'Bollería agotada esta semana',
+        },
+      },
     };
 // Halves shown the way people say them: ½, 1, 1½, 2.
 const halvesLabel = (h: number) =>
@@ -596,58 +590,27 @@ async function refreshBake() {
     const response = await fetch('/api/bake', { cache: 'no-store' });
     if (!response.ok) return;
     const b = await response.json();
-    if (b.capacity)
-      document
-        .querySelectorAll('[data-left]')
-        .forEach((n) => (n.textContent = String(b.capacity - b.reserved)));
-    document
-      .querySelectorAll('.loaf-meter span')
-      .forEach((dot, i) => dot.classList.toggle('taken', i < b.reserved));
-    if (typeof b.bananaLeft === 'number') {
-      document
-        .querySelectorAll<HTMLElement>('[data-banana-left]')
-        .forEach((el) => {
-          el.dataset.bananaLeft = String(b.bananaLeft);
-          el.textContent = words.left(b.bananaLeft);
-        });
-      if (banana) banana.dataset.max = String(Math.min(4, b.bananaLeft));
-    }
-    if (typeof b.pastryLeft === 'number') {
-      if (form) form.dataset.pastryPool = String(b.pastryLeft);
-      document
-        .querySelectorAll<HTMLElement>('[data-pastry-left]')
-        .forEach((el) => {
-          el.dataset.pastryLeft = String(b.pastryLeft);
-          el.textContent =
-            b.pastries === false
-              ? isCa
-                ? 'Només per a la fornada de dissabte'
-                : 'Solo para la hornada del sábado'
-              : words.pastryLeft(b.pastryLeft);
-        });
-      const ticks = document.querySelectorAll('[data-pastry-meter] span');
-      ticks.forEach((tick, i) =>
-        tick.classList.toggle('taken', i >= b.pastryLeft),
-      );
-    }
-    // At zero reservations the card shows the small batch, never an empty counter.
-    document
-      .querySelector<HTMLElement>('[data-count-small]')
-      ?.toggleAttribute('hidden', b.reserved > 0);
-    document
-      .querySelector<HTMLElement>('[data-count-left]')
-      ?.toggleAttribute('hidden', b.reserved === 0);
-    const progress = document.querySelector('progress');
-    if (progress) {
-      progress.hidden = b.reserved === 0;
-      progress.value = b.reserved;
-      progress.setAttribute(
-        'aria-label',
-        isCa
-          ? `${b.reserved} de ${progress.max} pans reservats`
-          : `${b.reserved} de ${progress.max} hogazas reservadas`,
-      );
-    }
+    // Levels only: «few left» or «sold out», never a count.
+    type Kind = 'bread' | 'banana' | 'pastry';
+    if (b.state === 'OPEN')
+      for (const kind of ['bread', 'banana', 'pastry'] as Kind[]) {
+        const level = b[kind]?.level as 'ok' | 'low' | 'out' | undefined;
+        if (!level) continue;
+        document
+          .querySelectorAll<HTMLElement>(`[data-stock="${kind}"]`)
+          .forEach((el) => {
+            el.dataset.level = level;
+            if (kind === 'pastry' && b.pastries === false) return;
+            if (kind === 'bread') {
+              el.hidden = level !== 'low';
+              return;
+            }
+            el.textContent = words.stock[kind][level];
+            el.hidden = !el.textContent;
+          });
+      }
+    if (b.banana && banana) banana.dataset.max = String(b.banana.max);
+    if (b.pastry && form) form.dataset.pastryPool = String(b.pastry.max);
     if (b.state !== 'OPEN') {
       const label = document.querySelector('[data-bake-label]');
       if (label)
@@ -682,8 +645,8 @@ async function refreshBake() {
           ),
         );
       }
-    } else if (quantity && b.capacity) {
-      quantity.max = String(Math.min(4, b.capacity - b.reserved));
+    } else if (quantity && b.bread) {
+      quantity.max = String(b.bread.max);
     }
     // Keep the order within what is left after other people's reservations.
     for (const input of [quantity, banana, croissant, pain])
@@ -696,7 +659,7 @@ async function refreshBake() {
 }
 // The page may come from the CDN cache: refresh on load and when returning to
 // it. The transaction remains the final authority.
-if (form || document.querySelector('[data-left]')) void refreshBake();
+if (form || document.querySelector('[data-stock]')) void refreshBake();
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible') void refreshBake();
 });

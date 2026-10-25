@@ -2,6 +2,11 @@ import { z } from 'zod';
 import { AppError, type Lang } from './messages';
 import { sources } from './sources';
 import { townById } from './delivery';
+import {
+  BANANA_HALVES_PER_BAKE,
+  PASTRY_MAX_PER_ORDER,
+  PASTRY_UNITS_PER_BAKE,
+} from './config';
 export type { Lang };
 const lang = z.enum(['es', 'ca']).default('es');
 // Who orders and where it goes: shared by one-off orders and "pa fix".
@@ -216,6 +221,40 @@ export const madridWeekday = (iso: string) =>
   new Date(`${madridDate(new Date(iso))}T12:00:00Z`).getUTCDay();
 // Croissants and pains au chocolat are baked for Saturday only.
 export const pastryBake = (pickupIso: string) => madridWeekday(pickupIso) === 6;
+export type StockLevel = 'ok' | 'low' | 'out';
+// The web says how a product is going, never how many are left: «few left»
+// from the last fifth of the batch, «sold out» at zero.
+export const stockLevel = (left: number, total: number): StockLevel =>
+  left <= 0 ? 'out' : left <= Math.ceil(total * 0.2) ? 'low' : 'ok';
+// What the page may know about a bake: a level per product and how much one
+// order can still take. The counts stay on the server and in /gestio.
+export function publicStock(b: {
+  capacity: number;
+  reserved: number;
+  bananaReserved: number;
+  pastryReserved: number;
+  pickupDate: string;
+}) {
+  const loaves = Math.max(0, b.capacity - b.reserved);
+  const halves = Math.max(0, BANANA_HALVES_PER_BAKE - b.bananaReserved);
+  const pastries = pastryBake(b.pickupDate);
+  const pieces = pastries
+    ? Math.max(0, PASTRY_UNITS_PER_BAKE - b.pastryReserved)
+    : 0;
+  return {
+    bread: { level: stockLevel(loaves, b.capacity), max: Math.min(4, loaves) },
+    banana: {
+      level: stockLevel(halves, BANANA_HALVES_PER_BAKE),
+      max: Math.min(4, halves),
+    },
+    pastries,
+    // Croissants and pains au chocolat share this pool within one order.
+    pastry: {
+      level: stockLevel(pieces, PASTRY_UNITS_PER_BAKE),
+      max: Math.min(2 * PASTRY_MAX_PER_ORDER, pieces),
+    },
+  };
+}
 // The cycle follows Madrid's calendar, not the cron server's UTC day: the
 // plan is the earliest bake day whose orders are still open.
 export function weeklyCyclePlan(now = new Date(), pickupTime = '12:00') {
