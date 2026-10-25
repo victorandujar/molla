@@ -514,11 +514,11 @@ test('first-order emails carry the welcome gift and the pa fix invitation', () =
   assert.match(html, /Regal/);
   assert.match(
     html,
-    /un quart de banana bread per a tu i un altre per a qui vulguis/,
+    /dos trossos de banana bread de dos dits de gruix, un per a tu i un per a qui vulguis/,
   );
   assert.match(
     html,
-    /Val: després de 3 pans entregats del Pa fix, el 4t va de part meva/,
+    /Només per al Pa fix: quan t’hagi entregat 3 pans, el 4t va de part meva/,
   );
   // The chutney is an occasional extra, off by default.
   assert.doesNotMatch(html, /chutney/);
@@ -532,11 +532,11 @@ test('first-order emails carry the welcome gift and the pa fix invitation', () =
     /chutney/,
   );
   const es = confirmationHtml({ ...order, firstOrder: true });
-  assert.match(es, /un cuarto de banana bread/);
+  assert.match(es, /dos trozos de banana bread de dos dedos/);
   assert.match(es, /\/es\/pan-fijo/);
   assert.match(
     ownerText({ ...order, firstOrder: true }),
-    /Primera comanda: añade 2 cuartos de banana bread .*tras 3 panes entregados .*lo aplicas tú al cobrar/,
+    /Primera comanda: añade 2 trozos de banana bread .*3 panes.*con 2 por entrega cae en la segunda.*lo aplicas tú al cobrar/,
   );
   assert.doesNotMatch(ownerText({ ...order, firstOrder: true }), /chutney/);
   assert.doesNotMatch(ownerText(order), /Primera comanda/);
