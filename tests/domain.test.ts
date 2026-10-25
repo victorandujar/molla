@@ -516,7 +516,10 @@ test('first-order emails carry the welcome gift and the pa fix invitation', () =
     html,
     /un quart de banana bread per a tu i un altre per a qui vulguis/,
   );
-  assert.match(html, /el 4t pa va de part meva/);
+  assert.match(
+    html,
+    /Val: després de 3 pans entregats del Pa fix, el 4t va de part meva/,
+  );
   // The chutney is an occasional extra, off by default.
   assert.doesNotMatch(html, /chutney/);
   assert.match(html, /\/pa-fix/);
@@ -533,7 +536,7 @@ test('first-order emails carry the welcome gift and the pa fix invitation', () =
   assert.match(es, /\/es\/pan-fijo/);
   assert.match(
     ownerText({ ...order, firstOrder: true }),
-    /Primera comanda: añade 2 cuartos de banana bread .*vale del pan fijo/,
+    /Primera comanda: añade 2 cuartos de banana bread .*tras 3 panes entregados .*lo aplicas tú al cobrar/,
   );
   assert.doesNotMatch(ownerText({ ...order, firstOrder: true }), /chutney/);
   assert.doesNotMatch(ownerText(order), /Primera comanda/);

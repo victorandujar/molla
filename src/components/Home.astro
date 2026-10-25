@@ -363,11 +363,15 @@ const jsonLd = [
           </h2>
           <div class="why-copy" data-reveal>
             <p class="why-honest">{t.why.honest}</p>
-            <p>{t.why.p}</p>
+            <ul class="why-points">
+              {t.why.points.map((point) => (
+                <li>{point}</li>
+              ))}
+            </ul>
           </div>
         </div>
         <ul class="why-facts">
-          {t.why.facts(current.capacity).map(([n, label], i) => (
+          {t.why.facts.map(([n, label], i) => (
             <li data-reveal style={`--i:${i}`}>
               <strong>{n}</strong>
               <span>{label}</span>
