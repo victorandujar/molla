@@ -9,15 +9,13 @@ import {
   isDemo,
   launchReady,
   productById,
-  BANANA_HALVES_PER_BAKE,
-  PASTRY_UNITS_PER_BAKE,
   PASTRY_MAX_PER_ORDER,
   welcomeGift,
   googleReviews,
 } from '../lib/config';
 import { ui, routes, dayFormat, type Lang } from '../lib/i18n';
 import { currentBake } from '../lib/store';
-import { bakeState, pastryBake } from '../lib/domain';
+import { bakeState, pastryBake, publicStock } from '../lib/domain';
 import { deliveryTowns } from '../lib/delivery';
 interface Props {
   lang: Lang;
@@ -44,17 +42,18 @@ const canSubmit = isDemo || launchReady;
 const loaf = productById('clasica')!;
 const bananaWhole = productById('banana')!;
 const bananaHalf = productById('banana-mitad')!;
-const left = Math.max(0, current.capacity - current.reserved);
-const bananaLeft = Math.max(0, BANANA_HALVES_PER_BAKE - current.bananaReserved);
+// Levels, not counts: the page never says how many are left.
+const stock = publicStock(current);
+const stockText = (k: 'bread' | 'banana' | 'pastry') =>
+  t.catalog.stock[k][stock[k].level];
+const bananaMax = stock.banana.max;
 const croissant = productById('croissant')!;
 const pain = productById('pain-au-chocolat')!;
 // Pastries are baked for Saturday only: the Wednesday bake shows them, but
 // they cannot be added until Saturday's bake opens.
 const pastryDay = unavailable || pastryBake(current.pickupDate);
-const pastryLeft = pastryDay
-  ? Math.max(0, PASTRY_UNITS_PER_BAKE - current.pastryReserved)
-  : 0;
-const pastryMax = Math.min(PASTRY_MAX_PER_ORDER, pastryLeft);
+const pastryPool = pastryDay ? stock.pastry.max : 0;
+const pastryMax = Math.min(PASTRY_MAX_PER_ORDER, pastryPool);
 const pastries = [
   {
     key: 'croissant',
@@ -131,11 +130,11 @@ const jsonLd = [
     brand: { '@type': 'Brand', name: brand.name },
     offers: [
       {
-        ...offer(bananaWhole.price, open && bananaLeft >= 2),
+        ...offer(bananaWhole.price, open && bananaMax >= 2),
         name: t.catalog.bananaWhole,
       },
       {
-        ...offer(bananaHalf.price, open && bananaLeft >= 1),
+        ...offer(bananaHalf.price, open && bananaMax >= 1),
         name: t.catalog.bananaHalf,
       },
     ],
@@ -147,7 +146,7 @@ const jsonLd = [
     description: `${p.text} ${t.pastry.ingredients}`,
     image: [abs('/images/pastries-1100.webp')],
     brand: { '@type': 'Brand', name: brand.name },
-    offers: offer(p.product.price, open && pastryDay && pastryLeft > 0),
+    offers: offer(p.product.price, open && pastryDay && pastryPool > 0),
   })),
   {
     '@context': 'https://schema.org',
@@ -204,7 +203,7 @@ const jsonLd = [
         </figure>
         <div class="hero-info">
           <p class="hero-lede hero-in" style="--i:3">
-            {t.hero.short(current.capacity)}
+            {t.hero.short}
           </p>
           <div class="hero-actions hero-in" style="--i:4">
             <a class="button button-light" href={open ? '#carta' : '#avisame'}>
@@ -260,34 +259,14 @@ const jsonLd = [
                 {t.bake.unavailable}
               </p>
             )}
-            <div class="stub-stock">
-              <p class="stub-count" data-bake-count>
-                <span data-count-small hidden={current.reserved > 0}>
-                  {t.bake.small(current.capacity)}
-                  {isDemo ? t.bake.test : ''}
-                </span>
-                <span data-count-left hidden={current.reserved === 0}>
-                  <strong data-left>{left}</strong>
-                  {` ${t.bake.leftOf(current.capacity)}${isDemo ? t.bake.test : ''}`}
-                </span>
-              </p>
-              <div
-                class="loaf-meter"
-                aria-hidden="true"
-                style={`--n:${current.capacity}`}
-              >
-                {Array.from({ length: current.capacity }, (_, i) => (
-                  <span class:list={{ taken: i < current.reserved }} />
-                ))}
-              </div>
-              <progress
-                class="visually-hidden"
-                value={current.reserved}
-                max={current.capacity}
-                hidden={current.reserved === 0}
-                aria-label={`${current.reserved} ${t.bake.of} ${current.capacity} ${t.bake.reserved}`}
-              ></progress>
-            </div>
+            <p
+              class="stub-count"
+              data-stock="bread"
+              data-level={stock.bread.level}
+              hidden={!open || stock.bread.level !== 'low'}
+            >
+              {t.catalog.stock.bread.low}
+            </p>
             <a class="stub-cta" href={orderHref} data-bake-cta>
               {open ? t.bake.ctaOpen : t.bake.ctaClosed}
               <span aria-hidden="true">↓</span>
@@ -487,8 +466,13 @@ const jsonLd = [
                 <dd>{t.banana.allergensValue}</dd>
               </div>
             </dl>
-            <p class="dish-stock" data-banana-left={bananaLeft}>
-              {open ? t.catalog.bananaLeft(bananaLeft) : t.catalog.closed}
+            <p
+              class="dish-stock"
+              data-stock="banana"
+              data-level={stock.banana.level}
+              hidden={open && !stockText('banana')}
+            >
+              {open ? stockText('banana') : t.catalog.closed}
             </p>
             {open ? (
               <div class="dish-buy" data-buy="banana">
@@ -496,7 +480,7 @@ const jsonLd = [
                   type="button"
                   class="button button-orange"
                   data-add="banana"
-                  disabled={bananaLeft === 0}
+                  disabled={bananaMax === 0}
                 >
                   {t.catalog.add}
                   <span class="button-plus" aria-hidden="true">
@@ -640,30 +624,17 @@ const jsonLd = [
               ))}
             </ul>
             <div class="pastry-quota">
-              <p>
-                <span>{t.pastry.quota(PASTRY_UNITS_PER_BAKE)}</span>
-                <span data-pastry-left={pastryLeft}>
-                  {!open
-                    ? t.catalog.closed
-                    : pastryDay
-                      ? t.catalog.pastryLeft(pastryLeft)
-                      : t.pastry.saturdayOnly}
-                </span>
-              </p>
-              <div
-                class="pastry-meter"
-                aria-hidden="true"
-                data-pastry-meter
-                style={`--n:${PASTRY_UNITS_PER_BAKE}`}
+              <p
+                data-stock="pastry"
+                data-level={stock.pastry.level}
+                hidden={open && pastryDay && !stockText('pastry')}
               >
-                {Array.from({ length: PASTRY_UNITS_PER_BAKE }, (_, i) => (
-                  <span
-                    class:list={{
-                      taken: i >= pastryLeft,
-                    }}
-                  />
-                ))}
-              </div>
+                {!open
+                  ? t.catalog.closed
+                  : pastryDay
+                    ? stockText('pastry')
+                    : t.pastry.saturdayOnly}
+              </p>
             </div>
             <dl class="spec">
               <div>
@@ -951,17 +922,6 @@ const jsonLd = [
               <dt>{t.reserve.pay}</dt>
               <dd>{t.reserve.payValue}</dd>
             </div>
-            {open && (
-              <div>
-                <dt>{t.reserve.left}</dt>
-                <dd>
-                  <span>
-                    <span data-left>{left}</span> {t.bake.of} {current.capacity}{' '}
-                    {t.reserve.loaves}
-                  </span>
-                </dd>
-              </div>
-            )}
           </dl>
           {welcomeGift.active && (
             <div class="gift-box" id="regal">
@@ -1001,7 +961,7 @@ const jsonLd = [
               data-banana-half={bananaHalf.price}
               data-croissant={croissant.price}
               data-pain={pain.price}
-              data-pastry-pool={pastryLeft}
+              data-pastry-pool={pastryPool}
             >
               <div class="ticket-head" aria-hidden="true">
                 <span>molla.</span>
@@ -1036,7 +996,7 @@ const jsonLd = [
                       type="number"
                       inputmode="numeric"
                       min="0"
-                      max={Math.min(4, left)}
+                      max={stock.bread.max}
                       value="0"
                       required
                     />
@@ -1057,8 +1017,12 @@ const jsonLd = [
                       {t.catalog.whole} {money(bananaWhole.price)} ·{' '}
                       {t.catalog.half} {money(bananaHalf.price)}
                     </small>
-                    <small data-banana-left={bananaLeft}>
-                      {t.catalog.bananaLeft(bananaLeft)}
+                    <small
+                      data-stock="banana"
+                      data-level={stock.banana.level}
+                      hidden={!stockText('banana')}
+                    >
+                      {stockText('banana')}
                     </small>
                   </label>
                   <div class="stepper">
@@ -1082,14 +1046,14 @@ const jsonLd = [
                       name="banana"
                       type="hidden"
                       value="0"
-                      data-max={Math.min(4, bananaLeft)}
+                      data-max={bananaMax}
                     />
                     <button
                       type="button"
                       data-step="1"
                       data-target="banana"
                       aria-label={t.reserve.bananaMore}
-                      disabled={bananaLeft === 0}
+                      disabled={bananaMax === 0}
                     >
                       +
                     </button>
@@ -1145,8 +1109,12 @@ const jsonLd = [
                         <small>
                           {money(pain.price)} · {t.pastry.unit}
                         </small>
-                        <small data-pastry-left={pastryLeft}>
-                          {t.catalog.pastryLeft(pastryLeft)}
+                        <small
+                          data-stock="pastry"
+                          data-level={stock.pastry.level}
+                          hidden={!stockText('pastry')}
+                        >
+                          {stockText('pastry')}
                         </small>
                       </label>
                       <div class="stepper">

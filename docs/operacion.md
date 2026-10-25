@@ -38,6 +38,8 @@ El cierre se aplica en el servidor a la hora exacta. Las reservas bloquean la fi
 
 Hornada actual: `hornada-001`, recogida el sábado 26/09/2026, cierre el jueves 24/09 a las 20:00, 10 hogazas, máximo 4 por pedido.
 
+La web no enseña cuántos quedan: ni de pan, ni de banana bread, ni de bollería. Cada producto sale disponible sin cifras, con «Quedan pocas/pocos» cuando queda la última quinta parte del tope (2 hogazas de 10, 1 mitad de banana bread, 10 piezas de bollería) y «Agotado» a cero. Los topes siguen en el servidor y las cifras las ves en `/gestio`. `/api/bake` solo devuelve el nivel y el máximo que admite un pedido.
+
 ## Consultar y preparar
 
 Los comandos siguientes aparecen sin sufijo; para producción usa `orders:prod`.
