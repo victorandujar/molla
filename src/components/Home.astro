@@ -13,6 +13,7 @@ import {
   PASTRY_UNITS_PER_BAKE,
   PASTRY_MAX_PER_ORDER,
   welcomeGift,
+  googleReviews,
 } from '../lib/config';
 import { ui, routes, dayFormat, type Lang } from '../lib/i18n';
 import { currentBake } from '../lib/store';
@@ -370,14 +371,77 @@ const jsonLd = [
             </ul>
           </div>
         </div>
-        <ul class="why-facts">
-          {t.why.facts.map(([n, label], i) => (
-            <li data-reveal style={`--i:${i}`}>
-              <strong>{n}</strong>
-              <span>{label}</span>
-            </li>
-          ))}
-        </ul>
+      </div>
+    </section>
+
+    <!-- Ressenyes de Google: cites textuals, en el seu idioma -->
+    <section class="reviews" aria-labelledby="reviews-title">
+      <div class="wrap">
+        <div class="mono-bar" data-bar>
+          <span>{t.reviews.kicker}</span>
+          <span>{t.reviews.fig}</span>
+        </div>
+        <h2 id="reviews-title" class="reviews-score">
+          <span class="reviews-big">{googleReviews.score}</span>{' '}
+          <span class="reviews-count">
+            {t.reviews.count(googleReviews.count)}
+          </span>
+        </h2>
+        <p class="reviews-verbatim">{t.reviews.verbatim}</p>
+        {googleReviews.quotes.slice(0, 1).map((r) => (
+          <figure class="review-lead" data-reveal>
+            <blockquote lang={r.lang}>
+              <p>{r.text}</p>
+            </blockquote>
+            <figcaption class="review-by">
+              — <cite>{r.author}</cite> · {t.reviews.source}
+            </figcaption>
+          </figure>
+        ))}
+      </div>
+      <div
+        class="reviews-track"
+        role="region"
+        aria-label={t.reviews.label}
+        tabindex="0"
+      >
+        {googleReviews.quotes.slice(1).map((r) => (
+          <figure class="review-card">
+            <blockquote lang={r.lang}>
+              <p>{r.text}</p>
+            </blockquote>
+            <figcaption class="review-by">
+              — <cite>{r.author}</cite> · {t.reviews.source}
+            </figcaption>
+          </figure>
+        ))}
+      </div>
+      <div class="wrap">
+        <p class="reviews-hint" aria-hidden="true">
+          {t.reviews.swipe} →
+        </p>
+        <div class="reviews-actions">
+          <a
+            class="button button-light"
+            href={googleReviews.profileUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {t.reviews.all(googleReviews.count)}
+            <span aria-hidden="true">↗</span>
+            <span class="visually-hidden">{t.reviews.newTab}</span>
+          </a>
+          <a
+            class="button button-ghost reviews-leave"
+            href={googleReviews.reviewUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {t.reviews.leave}
+            <span aria-hidden="true">↗</span>
+            <span class="visually-hidden">{t.reviews.newTab}</span>
+          </a>
+        </div>
       </div>
     </section>
 
