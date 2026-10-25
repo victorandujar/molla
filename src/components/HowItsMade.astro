@@ -1,0 +1,124 @@
+---
+// Com el faig: les 35 hores, la farina i qui fa el pa. Abans eren a la
+// portada; ara viuen a la pàgina del poolish, després de l'article.
+import Photo from './Photo.astro';
+import { ui, type Lang } from '../lib/i18n';
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = ui[lang];
+// Generic steps: this page does not depend on the bake that is open.
+const steps = t.process.steps;
+// Hours on the counter when each step reaches the middle of the screen.
+const stepHours = [0, 12, 35, 35];
+const stepPhotos = ['maker', 'dough', 'tiles', 'hero'];
+---
+
+<!-- 4 · 35 horas: la foto de cada paso y el contador avanzan con el scroll -->
+<section id="proceso" class="process" aria-labelledby="process-title">
+  <div class="wrap">
+    <div class="mono-bar" data-bar>
+      <span>Nº 01 · {t.nav.process}</span>
+      <span>{t.ed.processBar}</span>
+    </div>
+    <header class="section-head">
+      <h2 id="process-title" data-split>
+        {t.process.h2a} <em>{t.process.h2b}</em>
+      </h2>
+      <p class="section-intro" data-reveal>
+        {t.process.intro}
+      </p>
+    </header>
+    <div class="process-grid" data-process>
+      <div class="process-aside">
+        <div class="process-window">
+          {stepPhotos.map((name, i) => (
+            <figure class="process-photo" data-step-photo={i}>
+              <Photo name={name} alt="" sizes="(max-width: 960px) 80vw, 36vw" />
+            </figure>
+          ))}
+          <div class="hours" aria-hidden="true">
+            <span class="hours-num" data-hours>
+              35
+            </span>
+            <span class="hours-unit">h</span>
+          </div>
+        </div>
+        <p class="hours-label">{t.process.hours}</p>
+      </div>
+      <ol class="steps">
+        {steps.map((step, i) => (
+          <li class="step" data-step-hours={stepHours[i]}>
+            <span class="step-num" aria-hidden="true">
+              {i + 1}
+            </span>
+            <span class="when">{step.when}</span>
+            <h3>{step.title}</h3>
+            {'time' in step && <span class="step-time">{step.time}</span>}
+            <p>{step.text}</p>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </div>
+</section>
+
+<!-- 5 · Farina: la cocina de azulejos, teñida de cobalto -->
+<section class="manifesto" aria-labelledby="organic-title">
+  <figure class="manifesto-photo" aria-hidden="true" data-drift>
+    <Photo name="kitchen" alt="" sizes="100vw" />
+  </figure>
+  <div class="wrap manifesto-inner">
+    <div class="mono-bar" data-bar>
+      <span>Nº 02 · {t.organic.kicker}</span>
+      <span>{t.ed.flourBar}</span>
+    </div>
+    <h2 id="organic-title" data-split>
+      {t.organic.h2a} <em>{t.organic.h2b}</em>
+    </h2>
+    <p class="manifesto-text" data-reveal>
+      {t.organic.p}
+    </p>
+    <ul class="manifesto-stats">
+      {t.organic.items.map(([n, label], i) => (
+        <li data-reveal style={`--i:${i}`}>
+          <strong data-countup>{n}</strong>
+          <span>{label}</span>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<!-- 6 · Quién: «molla», en el diccionario -->
+<section class="maker" aria-labelledby="maker-title">
+  <div class="wrap">
+    <div class="mono-bar" data-bar>
+      <span>Nº 03 · {t.maker.kicker}</span>
+      <span>{t.ed.makerBar}</span>
+    </div>
+    <p class="definition" data-reveal>
+      <span class="def-word">{t.ed.defWord}</span>
+      <span class="def-gram">{t.ed.defGram}</span>
+      <span class="def-text">{t.ed.defText}</span>
+    </p>
+    <div class="maker-grid">
+      <figure class="maker-main" data-wipe>
+        <Photo
+          name="person"
+          alt={t.maker.altPerson}
+          sizes="(max-width: 960px) 80vw, 34vw"
+        />
+        <figcaption class="fig-bar fig-bar-ink">
+          <span>{t.ed.fig4}</span>
+        </figcaption>
+      </figure>
+      <div class="maker-copy" data-reveal>
+        <h2 id="maker-title">{t.maker.h2}</h2>
+        <p>{t.maker.p1}</p>
+        <p>{t.maker.p2}</p>
+      </div>
+    </div>
+  </div>
+</section>

@@ -73,18 +73,6 @@ const pastries = [
 const pickupDay = unavailable
   ? t.bake.dateSoon
   : dayFormat(lang, current.pickupDate);
-const steps = t.process.steps.map((step, i) =>
-  unavailable
-    ? step
-    : i === 0
-      ? { ...step, when: t.process.closeWhen(current.deadline) }
-      : i === t.process.steps.length - 1
-        ? { ...step, when: t.process.pickupWhen(current.pickupDate) }
-        : step,
-);
-// Hours on the counter when each step reaches the middle of the screen.
-const stepHours = [0, 12, 35, 35];
-const stepPhotos = ['maker', 'dough', 'tiles', 'hero'];
 const orderHref = open ? '#reserva' : '#avisame';
 // Prices in the flyer's shorthand: "5€", "8€".
 const short = (cents: number) =>
@@ -185,32 +173,18 @@ const jsonLd = [
         </span>
       </div>
       <div class="wrap hero-grid">
-        <p class="hero-made">
-          <span class="hero-mask">
-            <span class="hero-line" style="--i:0">
-              {t.ed.batch(current.capacity)}
-            </span>
-          </span>
-        </p>
         <h1 id="hero-title" class="hero-title">
           <span class="hero-mask">
-            <span class="hero-line" style="--i:1">
+            <span class="hero-line" style="--i:0">
               {t.hero.h1a}
             </span>
           </span>{' '}
           <span class="hero-mask">
-            <span class="hero-line hero-orange" style="--i:2">
+            <span class="hero-line hero-orange" style="--i:1">
               {t.hero.h1b}.
             </span>
           </span>
         </h1>
-        <p class="hero-price">
-          <span class="outline-price" aria-hidden="true">
-            {short(loaf.price)}
-          </span>
-          <span class="visually-hidden">{money(loaf.price)}</span>
-          <span class="hero-weight">{loaf.weight}</span>
-        </p>
         <figure class="hero-photo" data-hero-photo>
           <div class="hero-photo-frame">
             <Photo
@@ -230,7 +204,7 @@ const jsonLd = [
         </figure>
         <div class="hero-info">
           <p class="hero-lede hero-in" style="--i:3">
-            {t.hero.lede}
+            {t.hero.short(current.capacity)}
           </p>
           <div class="hero-actions hero-in" style="--i:4">
             <a class="button button-light" href={open ? '#carta' : '#avisame'}>
@@ -239,20 +213,10 @@ const jsonLd = [
                 →
               </span>
             </a>
-            <a class="link-arrow" href="#proceso">
+            <a class="link-arrow" href={`${routes.poolish[lang]}#proceso`}>
               {t.hero.how} <span aria-hidden="true">↓</span>
             </a>
           </div>
-          <ol class="hero-steps hero-in" style="--i:5">
-            {t.ed.steps.map((step, i) => (
-              <li>
-                <span aria-hidden="true">{pad(i + 1)} ·</span> {step}
-              </li>
-            ))}
-          </ol>
-          <p class="hero-trust hero-in" style="--i:5">
-            {t.hero.trust}
-          </p>
           {welcomeGift.active && (
             <p class="hero-gift hero-in" style="--i:5">
               <span class="star" aria-hidden="true">
@@ -350,204 +314,6 @@ const jsonLd = [
         </div>
       ))}
     </div>
-
-    <!-- Per què jo i no el forn: la resposta honesta, just després de la portada -->
-    <section class="why" aria-labelledby="why-title">
-      <div class="wrap">
-        <div class="mono-bar" data-bar>
-          <span>{t.why.kicker}</span>
-          <span>{t.why.bar}</span>
-        </div>
-        <div class="why-grid">
-          <h2 id="why-title" data-split>
-            {t.why.h2a} <em>{t.why.h2b}</em>
-          </h2>
-          <div class="why-copy" data-reveal>
-            <p class="why-honest">{t.why.honest}</p>
-            <ul class="why-points">
-              {t.why.points.map((point) => (
-                <li>{point}</li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Ressenyes de Google: un cartell amb l'índex al costat, com la taula
-         del flyer. Una ressenya a la vegada. Cites textuals, en el seu idioma. -->
-    <section class="reviews" aria-labelledby="reviews-title" data-reviews>
-      <div class="wrap">
-        <div class="mono-bar" data-bar>
-          <span>{t.reviews.kicker}</span>
-          <span>{t.reviews.fig}</span>
-        </div>
-        <h2 id="reviews-title" class="reviews-score">
-          <span class="reviews-big">{googleReviews.score}</span>{' '}
-          <span class="reviews-count">
-            {t.reviews.count(googleReviews.count)}
-          </span>
-        </h2>
-        <p class="reviews-verbatim">{t.reviews.verbatim}</p>
-        <div class="reviews-board">
-          <div class="reviews-stage" data-reviews-stage>
-            {googleReviews.quotes.map((r, i) => {
-              const [before, after] = r.highlight.split(r.accent);
-              return (
-                <div
-                  class="review-slide"
-                  id={`review-${i}`}
-                  role="tabpanel"
-                  aria-labelledby={`review-tab-${i}`}
-                  data-review={i}
-                >
-                  <figure>
-                    <p class="review-top" aria-hidden="true">
-                      <span>(Fig. 7.{i + 1})</span>
-                      <span>Google · {googleReviews.score}</span>
-                    </p>
-                    <p class="review-headline" aria-hidden="true">
-                      <span class="review-mark">“</span>
-                      <span class="review-line">
-                        {before}
-                        <em>{r.accent}</em>
-                        {after}
-                      </span>
-                    </p>
-                    <div class="review-body">
-                      <blockquote lang={r.lang}>
-                        <p>{r.text}</p>
-                      </blockquote>
-                      <figcaption class="review-by">
-                        <cite>{r.author}</cite>
-                        <span>{t.reviews.source}</span>
-                      </figcaption>
-                    </div>
-                  </figure>
-                </div>
-              );
-            })}
-          </div>
-          <div class="reviews-nav">
-            <div
-              class="reviews-index"
-              role="tablist"
-              aria-label={t.reviews.label}
-            >
-              {googleReviews.quotes.map((r, i) => (
-                <button
-                  type="button"
-                  role="tab"
-                  id={`review-tab-${i}`}
-                  aria-controls={`review-${i}`}
-                  aria-selected={i === 0 ? 'true' : 'false'}
-                  tabindex={i === 0 ? 0 : -1}
-                  data-review-tab={i}
-                >
-                  <span class="review-tab-num">{pad(i + 1)}</span>
-                  <span class="review-tab-name">{r.author}</span>
-                </button>
-              ))}
-            </div>
-            <div class="reviews-arrows" data-reviews-arrows hidden>
-              <button
-                type="button"
-                class="reviews-arrow"
-                data-reviews-prev
-                aria-label={t.reviews.prev}
-              >
-                ←
-              </button>
-              <button
-                type="button"
-                class="reviews-arrow"
-                data-reviews-next
-                aria-label={t.reviews.next}
-              >
-                →
-              </button>
-            </div>
-          </div>
-        </div>
-        <div class="reviews-actions">
-          <a
-            class="button button-light"
-            href={googleReviews.profileUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            {t.reviews.all(googleReviews.count)}
-            <span aria-hidden="true">↗</span>
-            <span class="visually-hidden">{t.reviews.newTab}</span>
-          </a>
-          <a
-            class="button button-ghost reviews-leave"
-            href={googleReviews.reviewUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            {t.reviews.leave}
-            <span aria-hidden="true">↗</span>
-            <span class="visually-hidden">{t.reviews.newTab}</span>
-          </a>
-        </div>
-      </div>
-    </section>
-
-    <!-- 2 · Diari de l'obrador: las fotos de la cocina, como un reel -->
-    <section class="diary" aria-label={t.film.label} data-diary>
-      <div class="diary-pin">
-        <div class="wrap mono-bar diary-bar">
-          <span>{t.ed.diary}</span>
-          <span>
-            (Fig. <span data-diary-index>1</span> / {t.film.items.length})
-          </span>
-        </div>
-        <div class="wrap diary-progress" aria-hidden="true">
-          {t.film.items.map(() => (
-            <span>
-              <i />
-            </span>
-          ))}
-        </div>
-        <div
-          class="diary-track"
-          data-film
-          tabindex="0"
-          role="group"
-          aria-label={t.film.label}
-        >
-          {t.film.items.map(([name, title, text, alt], i) => (
-            <figure class:list={['story', { 'story-outline': i % 2 }]}>
-              <div class="story-photo">
-                <Photo
-                  name={name}
-                  alt={alt}
-                  sizes="(max-width: 720px) 78vw, 34vh"
-                />
-              </div>
-              <span class="story-word" aria-hidden="true">
-                {title}
-              </span>
-              <span class="story-num" aria-hidden="true">
-                {i + 1}
-              </span>
-              <figcaption>
-                <strong>{title}</strong>
-                <span>{text}</span>
-              </figcaption>
-              <span class="story-foot" aria-hidden="true">
-                <b>molla.</b>
-                <span>Baix Llobregat</span>
-              </span>
-            </figure>
-          ))}
-        </div>
-        <p class="wrap diary-hint" aria-hidden="true">
-          {t.ed.swipe} →
-        </p>
-      </div>
-    </section>
 
     <!-- 3 · La carta -->
     <section
@@ -914,6 +680,204 @@ const jsonLd = [
       </div>
     </section>
 
+    <!-- Per què jo i no el forn: la resposta honesta, després de la carta -->
+    <section class="why" aria-labelledby="why-title">
+      <div class="wrap">
+        <div class="mono-bar" data-bar>
+          <span>{t.why.kicker}</span>
+          <span>{t.why.bar}</span>
+        </div>
+        <div class="why-grid">
+          <h2 id="why-title" data-split>
+            {t.why.h2a} <em>{t.why.h2b}</em>
+          </h2>
+          <div class="why-copy" data-reveal>
+            <p class="why-honest">{t.why.honest}</p>
+            <ul class="why-points">
+              {t.why.points.map((point) => (
+                <li>{point}</li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Ressenyes de Google: un cartell amb l'índex al costat, com la taula
+         del flyer. Una ressenya a la vegada. Cites textuals, en el seu idioma. -->
+    <section class="reviews" aria-labelledby="reviews-title" data-reviews>
+      <div class="wrap">
+        <div class="mono-bar" data-bar>
+          <span>{t.reviews.kicker}</span>
+          <span>{t.reviews.fig}</span>
+        </div>
+        <h2 id="reviews-title" class="reviews-score">
+          <span class="reviews-big">{googleReviews.score}</span>{' '}
+          <span class="reviews-count">
+            {t.reviews.count(googleReviews.count)}
+          </span>
+        </h2>
+        <p class="reviews-verbatim">{t.reviews.verbatim}</p>
+        <div class="reviews-board">
+          <div class="reviews-stage" data-reviews-stage>
+            {googleReviews.quotes.map((r, i) => {
+              const [before, after] = r.highlight.split(r.accent);
+              return (
+                <div
+                  class="review-slide"
+                  id={`review-${i}`}
+                  role="tabpanel"
+                  aria-labelledby={`review-tab-${i}`}
+                  data-review={i}
+                >
+                  <figure>
+                    <p class="review-top" aria-hidden="true">
+                      <span>(Fig. 7.{i + 1})</span>
+                      <span>Google · {googleReviews.score}</span>
+                    </p>
+                    <p class="review-headline" aria-hidden="true">
+                      <span class="review-mark">“</span>
+                      <span class="review-line">
+                        {before}
+                        <em>{r.accent}</em>
+                        {after}
+                      </span>
+                    </p>
+                    <div class="review-body">
+                      <blockquote lang={r.lang}>
+                        <p>{r.text}</p>
+                      </blockquote>
+                      <figcaption class="review-by">
+                        <cite>{r.author}</cite>
+                        <span>{t.reviews.source}</span>
+                      </figcaption>
+                    </div>
+                  </figure>
+                </div>
+              );
+            })}
+          </div>
+          <div class="reviews-nav">
+            <div
+              class="reviews-index"
+              role="tablist"
+              aria-label={t.reviews.label}
+            >
+              {googleReviews.quotes.map((r, i) => (
+                <button
+                  type="button"
+                  role="tab"
+                  id={`review-tab-${i}`}
+                  aria-controls={`review-${i}`}
+                  aria-selected={i === 0 ? 'true' : 'false'}
+                  tabindex={i === 0 ? 0 : -1}
+                  data-review-tab={i}
+                >
+                  <span class="review-tab-num">{pad(i + 1)}</span>
+                  <span class="review-tab-name">{r.author}</span>
+                </button>
+              ))}
+            </div>
+            <div class="reviews-arrows" data-reviews-arrows hidden>
+              <button
+                type="button"
+                class="reviews-arrow"
+                data-reviews-prev
+                aria-label={t.reviews.prev}
+              >
+                ←
+              </button>
+              <button
+                type="button"
+                class="reviews-arrow"
+                data-reviews-next
+                aria-label={t.reviews.next}
+              >
+                →
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="reviews-actions">
+          <a
+            class="button button-light"
+            href={googleReviews.profileUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {t.reviews.all(googleReviews.count)}
+            <span aria-hidden="true">↗</span>
+            <span class="visually-hidden">{t.reviews.newTab}</span>
+          </a>
+          <a
+            class="button button-ghost reviews-leave"
+            href={googleReviews.reviewUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {t.reviews.leave}
+            <span aria-hidden="true">↗</span>
+            <span class="visually-hidden">{t.reviews.newTab}</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2 · Diari de l'obrador: las fotos de la cocina, como un reel -->
+    <section class="diary" aria-label={t.film.label} data-diary>
+      <div class="diary-pin">
+        <div class="wrap mono-bar diary-bar">
+          <span>{t.ed.diary}</span>
+          <span>
+            (Fig. <span data-diary-index>1</span> / {t.film.items.length})
+          </span>
+        </div>
+        <div class="wrap diary-progress" aria-hidden="true">
+          {t.film.items.map(() => (
+            <span>
+              <i />
+            </span>
+          ))}
+        </div>
+        <div
+          class="diary-track"
+          data-film
+          tabindex="0"
+          role="group"
+          aria-label={t.film.label}
+        >
+          {t.film.items.map(([name, title, text, alt], i) => (
+            <figure class:list={['story', { 'story-outline': i % 2 }]}>
+              <div class="story-photo">
+                <Photo
+                  name={name}
+                  alt={alt}
+                  sizes="(max-width: 720px) 78vw, 34vh"
+                />
+              </div>
+              <span class="story-word" aria-hidden="true">
+                {title}
+              </span>
+              <span class="story-num" aria-hidden="true">
+                {i + 1}
+              </span>
+              <figcaption>
+                <strong>{title}</strong>
+                <span>{text}</span>
+              </figcaption>
+              <span class="story-foot" aria-hidden="true">
+                <b>molla.</b>
+                <span>Baix Llobregat</span>
+              </span>
+            </figure>
+          ))}
+        </div>
+        <p class="wrap diary-hint" aria-hidden="true">
+          {t.ed.swipe} →
+        </p>
+      </div>
+    </section>
+
     <!-- Pa fix: la primera compra porta a la subscripció -->
     <section class="fix" aria-labelledby="fix-title">
       <div class="wrap fix-card">
@@ -955,126 +919,11 @@ const jsonLd = [
       </div>
     </section>
 
-    <!-- 4 · 35 horas: la foto de cada paso y el contador avanzan con el scroll -->
-    <section id="proceso" class="process" aria-labelledby="process-title">
-      <div class="wrap">
-        <div class="mono-bar" data-bar>
-          <span>Nº 03 · {t.nav.process}</span>
-          <span>{t.ed.processBar}</span>
-        </div>
-        <header class="section-head">
-          <h2 id="process-title" data-split>
-            {t.process.h2a} <em>{t.process.h2b}</em>
-          </h2>
-          <div data-reveal>
-            <p class="section-intro">{t.process.intro}</p>
-            <a class="link-arrow" href={routes.poolish[lang]}>
-              {t.process.more} <span aria-hidden="true">→</span>
-            </a>
-          </div>
-        </header>
-        <div class="process-grid" data-process>
-          <div class="process-aside">
-            <div class="process-window">
-              {stepPhotos.map((name, i) => (
-                <figure class="process-photo" data-step-photo={i}>
-                  <Photo
-                    name={name}
-                    alt=""
-                    sizes="(max-width: 960px) 80vw, 36vw"
-                  />
-                </figure>
-              ))}
-              <div class="hours" aria-hidden="true">
-                <span class="hours-num" data-hours>
-                  35
-                </span>
-                <span class="hours-unit">h</span>
-              </div>
-            </div>
-            <p class="hours-label">{t.process.hours}</p>
-          </div>
-          <ol class="steps">
-            {steps.map((step, i) => (
-              <li class="step" data-step-hours={stepHours[i]}>
-                <span class="step-num" aria-hidden="true">
-                  {i + 1}
-                </span>
-                <span class="when">{step.when}</span>
-                <h3>{step.title}</h3>
-                {'time' in step && <span class="step-time">{step.time}</span>}
-                <p>{step.text}</p>
-              </li>
-            ))}
-          </ol>
-        </div>
-      </div>
-    </section>
-
-    <!-- 5 · Farina: la cocina de azulejos, teñida de cobalto -->
-    <section class="manifesto" aria-labelledby="organic-title">
-      <figure class="manifesto-photo" aria-hidden="true" data-drift>
-        <Photo name="kitchen" alt="" sizes="100vw" />
-      </figure>
-      <div class="wrap manifesto-inner">
-        <div class="mono-bar" data-bar>
-          <span>Nº 04 · {t.organic.kicker}</span>
-          <span>{t.ed.flourBar}</span>
-        </div>
-        <h2 id="organic-title" data-split>
-          {t.organic.h2a} <em>{t.organic.h2b}</em>
-        </h2>
-        <p class="manifesto-text" data-reveal>
-          {t.organic.p}
-        </p>
-        <ul class="manifesto-stats">
-          {t.organic.items.map(([n, label], i) => (
-            <li data-reveal style={`--i:${i}`}>
-              <strong data-countup>{n}</strong>
-              <span>{label}</span>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </section>
-
-    <!-- 6 · Quién: «molla», en el diccionario -->
-    <section class="maker" aria-labelledby="maker-title">
-      <div class="wrap">
-        <div class="mono-bar" data-bar>
-          <span>Nº 05 · {t.maker.kicker}</span>
-          <span>{t.ed.makerBar}</span>
-        </div>
-        <p class="definition" data-reveal>
-          <span class="def-word">{t.ed.defWord}</span>
-          <span class="def-gram">{t.ed.defGram}</span>
-          <span class="def-text">{t.ed.defText}</span>
-        </p>
-        <div class="maker-grid">
-          <figure class="maker-main" data-wipe>
-            <Photo
-              name="person"
-              alt={t.maker.altPerson}
-              sizes="(max-width: 960px) 80vw, 34vw"
-            />
-            <figcaption class="fig-bar fig-bar-ink">
-              <span>{t.ed.fig4}</span>
-            </figcaption>
-          </figure>
-          <div class="maker-copy" data-reveal>
-            <h2 id="maker-title">{t.maker.h2}</h2>
-            <p>{t.maker.p1}</p>
-            <p>{t.maker.p2}</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
     <!-- 7 · Reserva: el tiquet, sobre el azul del flyer -->
     <section id="reserva" class="reserve" aria-labelledby="reserve-title">
       <div class="wrap">
         <div class="mono-bar" data-bar>
-          <span>Nº 06 · {t.reserve.kicker}</span>
+          <span>Nº 03 · {t.reserve.kicker}</span>
           <span>{t.ed.reserveBar}</span>
         </div>
       </div>
@@ -1498,7 +1347,7 @@ const jsonLd = [
     <section id="preguntas" class="faq" aria-labelledby="faq-title">
       <div class="wrap">
         <div class="mono-bar" data-bar>
-          <span>Nº 07 · {t.nav.faq}</span>
+          <span>Nº 04 · {t.nav.faq}</span>
           <span>{t.ed.faqBar}</span>
         </div>
         <div class="faq-grid">
@@ -1529,7 +1378,7 @@ const jsonLd = [
     <section id="avisame" class="waitlist" aria-labelledby="waitlist-title">
       <div class="wrap">
         <div class="mono-bar" data-bar>
-          <span>Nº 08 · {t.status.UPCOMING}</span>
+          <span>Nº 05 · {t.status.UPCOMING}</span>
           <span>{t.ed.waitBar}</span>
         </div>
       </div>

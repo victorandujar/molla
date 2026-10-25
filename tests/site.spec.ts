@@ -986,14 +986,16 @@ test('first order gets the welcome gift; the second one does not', async ({
   request,
 }) => {
   await page.goto('/es/');
-  await expect(page.locator('.hero-trust')).toContainText(
-    'Cancelas con un clic',
+  await expect(page.locator('.hero-lede')).toContainText(
+    'Miércoles y sábado en tu puerta. Pagas al recibirlo.',
   );
+  // The hero announces the gift; the voucher lives with the pa fix.
   await expect(page.locator('.hero-gift')).toContainText(
-    'un cuarto de banana bread para ti y otro para quien quieras',
+    'dos trozos de banana bread de dos dedos de grosor, uno para ti y otro para quien quieras',
   );
-  await expect(page.locator('.gift-box')).toContainText(
-    'Vale: tras 3 panes entregados del Pan fijo, el 4.º corre de mi cuenta',
+  await expect(page.locator('.hero-gift')).not.toContainText('Vale');
+  await expect(page.locator('.fix')).toContainText(
+    'Solo para el Pan fijo: cuando te haya entregado 3 panes, el 4.º corre de mi cuenta.',
   );
   await expect(page.locator('body')).not.toContainText('chutney');
   await expect(page.locator('body')).not.toContainText('suscripciones');
