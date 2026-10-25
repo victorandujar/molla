@@ -1135,36 +1135,121 @@ figure picture {
   line-height: 1.1;
   color: var(--cobalt);
 }
-.why-facts {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  margin: clamp(40px, 5vw, 72px) 0 0;
-  padding: 0;
-  list-style: none;
-  border-top: 1.5px solid currentColor;
+/* Ressenyes de Google: franja cobalt, cites textuals en targetes crema.
+   Al mòbil, carrusel amb scroll-snap; a l'escriptori, dues columnes. */
+.reviews {
+  --navy: #14246b;
+  padding-block: clamp(64px, 7vw, 104px);
+  background: var(--cobalt);
+  color: var(--paper);
 }
-.why-facts li {
-  display: grid;
-  gap: 8px;
-  padding: 22px clamp(16px, 2vw, 32px) 0;
-  border-left: 1px solid var(--line-strong);
+.reviews-score {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 8px clamp(16px, 2.4vw, 36px);
+  margin-top: clamp(28px, 3.6vw, 52px);
+  font-size: inherit;
+  text-transform: none;
 }
-.why-facts li:first-child {
-  padding-left: 0;
-  border-left: 0;
-}
-.why-facts strong {
+.reviews-big {
+  font-family: var(--sans);
   font-weight: 800;
   font-stretch: 125%;
-  font-size: clamp(44px, 5vw, 84px);
-  line-height: 0.85;
-  letter-spacing: -0.05em;
+  font-size: clamp(96px, 13vw, 220px);
+  line-height: 0.8;
+  letter-spacing: -0.06em;
+  text-transform: uppercase;
+  color: var(--orange);
 }
-.why-facts span {
+.reviews-count {
+  padding-bottom: 0.3em;
+  font-family: var(--sans);
+  font-weight: 800;
+  font-stretch: 62%;
+  font-size: clamp(30px, 3.2vw, 52px);
+  line-height: 0.95;
+  text-transform: uppercase;
+}
+.reviews-verbatim {
+  margin-top: 18px;
   font-family: var(--mono);
   font-size: 11.5px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
+  color: var(--on-cobalt);
+}
+.review-lead {
+  margin-top: clamp(36px, 4.4vw, 64px);
+  padding-top: 24px;
+  border-top: 1.5px solid var(--paper);
+}
+.review-lead blockquote,
+.review-card blockquote {
+  margin: 0;
+}
+.review-lead p {
+  max-width: 34ch;
+  font-family: var(--serif-it);
+  font-style: italic;
+  font-size: clamp(28px, 3vw, 36px);
+  line-height: 1.15;
+}
+.review-by {
+  margin-top: 14px;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.review-by cite {
+  font-style: normal;
+}
+.reviews-track {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(14px, 1.6vw, 24px);
+  width: min(1320px, 100% - var(--gutter) * 2);
+  margin: clamp(32px, 4vw, 56px) auto 0;
+}
+.review-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 18px;
+  padding: clamp(20px, 2.2vw, 32px);
+  background: var(--paper);
+  color: var(--navy);
+}
+.review-card p {
+  font-size: clamp(16.5px, 1.3vw, 19px);
+  line-height: 1.55;
+}
+.review-card .review-by {
+  margin-top: 0;
+  padding-top: 12px;
+  border-top: 1px solid rgba(20, 36, 107, 0.25);
+}
+.reviews-hint {
+  display: none;
+  margin-top: 16px;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--on-cobalt);
+}
+.reviews-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 16px;
+  margin-top: clamp(32px, 4vw, 52px);
+}
+.reviews .button-ghost {
+  --fg: var(--paper);
+}
+.reviews-track:focus-visible {
+  outline-offset: 4px;
 }
 
 /* 2 · Diari de l'obrador: las fotos de la cocina, como los reels.
@@ -3390,6 +3475,33 @@ details[open] p {
   :root {
     --header-h: 60px;
   }
+  /* Reviews: a swipeable row, like the workshop diary. */
+  .reviews-track {
+    display: flex;
+    width: auto;
+    padding-inline: var(--gutter);
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: var(--gutter);
+    scrollbar-width: none;
+    overscroll-behavior-x: contain;
+  }
+  .reviews-track::-webkit-scrollbar {
+    display: none;
+  }
+  .review-card {
+    flex: none;
+    width: 82%;
+    scroll-snap-align: start;
+  }
+  .reviews-hint {
+    display: block;
+  }
+  .reviews-actions .button {
+    width: 100%;
+    white-space: normal;
+    text-align: center;
+  }
   .wordmark {
     font-size: 28px;
   }
@@ -3427,14 +3539,8 @@ details[open] p {
     grid-template-columns: 1fr;
     gap: 4px;
   }
-  .manifesto-stats,
-  .why-facts {
+  .manifesto-stats {
     grid-template-columns: 1fr;
-  }
-  .why-facts li {
-    padding: 18px 0;
-    border-left: 0;
-    border-bottom: 1px solid var(--line-strong);
   }
   .manifesto-stats li {
     padding: 22px 0;

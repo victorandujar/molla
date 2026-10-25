@@ -64,6 +64,43 @@ export const welcomeGift = {
   active: process.env.WELCOME_GIFT !== 'false',
   chutney: process.env.WELCOME_GIFT_CHUTNEY === 'true',
 };
+// Google reviews shown on the home page. Update the score, the count, the
+// links and the quotes here only. Quotes are verbatim from Google, in the
+// language they were written (`lang`): never translate or correct them.
+export const googleReviews = {
+  score: '5/5',
+  count: 7,
+  profileUrl: 'https://share.google/OwE1uCFKRkCMsFFOa',
+  reviewUrl: 'https://g.page/r/CYMY0tZs2YLiEBM/review',
+  // The first one is shown large.
+  quotes: [
+    {
+      text: 'He probado tanto el pan como el banana bread y TOTALMENTE ESPECTACULAR, toda una suerte poder contar con estos productos hoy en día en un mundo tan artificial!!! Mil gracias Victor :)',
+      author: 'Carlos M.',
+      lang: 'es',
+    },
+    {
+      text: 'Hacen el pan espectacular, crujiente por fuera y una buena molla por dentro. Muy recomendable!!',
+      author: 'David L.',
+      lang: 'es',
+    },
+    {
+      text: 'Un pan increíble, con un sabor espectacular y una textura especial que lo hace único. Se nota la calidad en cada bocado. ¡De esos panes que dan ganas de repetir!',
+      author: 'Ramiro R.',
+      lang: 'es',
+    },
+    {
+      text: 'Muy recomendable! El Banana bread, de otra galaxia! Top top!',
+      author: 'Guille M.',
+      lang: 'es',
+    },
+    {
+      text: 'Amé molla. Y obvio ya entra en mis favoritos para repetir. Es demasiado versátil y la compañía perfecta para muchas comidas!! […]',
+      author: 'Maria Alejandra A.',
+      lang: 'es',
+    },
+  ],
+} as const;
 export const products = [
   {
     id: 'clasica',
