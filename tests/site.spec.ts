@@ -621,8 +621,8 @@ test('Google reviews: verbatim quotes in both languages and exact links', async 
     await expect(review).toHaveAttribute('rel', 'noopener noreferrer');
     await expect(review).toHaveAttribute('target', '_blank');
   }
-  // The card row is reachable with the keyboard.
-  await expect(page.locator('.reviews-track')).toHaveAttribute('tabindex', '0');
+  // Plain list, no carousel: nothing hidden off-screen.
+  await expect(page.locator('.reviews-list > li')).toHaveCount(5);
 });
 
 test('croissants and pains au chocolat share 48 pieces per bake, by the unit', async ({

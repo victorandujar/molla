@@ -1138,7 +1138,6 @@ figure picture {
 /* Ressenyes de Google: franja cobalt, cites textuals en targetes crema.
    Al mòbil, carrusel amb scroll-snap; a l'escriptori, dues columnes. */
 .reviews {
-  --navy: #14246b;
   padding-block: clamp(64px, 7vw, 104px);
   background: var(--cobalt);
   color: var(--paper);
@@ -1179,65 +1178,56 @@ figure picture {
   text-transform: uppercase;
   color: var(--on-cobalt);
 }
-.review-lead {
-  margin-top: clamp(36px, 4.4vw, 64px);
-  padding-top: 24px;
+/* Les ressenyes, com la taula «AIXÍ DE FÀCIL» del flyer: número en mono,
+   la cita en la lletra de la web i l'autor a sota, entre regles fines. */
+.reviews-list {
+  margin: clamp(36px, 4.4vw, 64px) 0 0;
+  padding: 0;
+  list-style: none;
   border-top: 1.5px solid var(--paper);
 }
-.review-lead blockquote,
-.review-card blockquote {
+.review {
+  display: grid;
+  grid-template-columns: clamp(48px, 7vw, 112px) minmax(0, 1fr);
+  gap: 0 20px;
+  padding-block: clamp(22px, 2.6vw, 34px);
+  border-bottom: 1px solid var(--on-cobalt-line);
+}
+.review-num {
+  padding-top: 0.35em;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--on-cobalt);
+}
+.review blockquote {
   margin: 0;
 }
-.review-lead p {
-  max-width: 34ch;
-  font-family: var(--serif-it);
-  font-style: italic;
-  font-size: clamp(28px, 3vw, 36px);
-  line-height: 1.15;
+.review blockquote p {
+  max-width: 62ch;
+  font-size: clamp(17px, 1.45vw, 21px);
+  line-height: 1.5;
+  text-wrap: pretty;
+}
+.review-lead blockquote p {
+  max-width: 30ch;
+  font-weight: 700;
+  font-stretch: 100%;
+  font-size: clamp(26px, 3vw, 44px);
+  line-height: 1.12;
+  letter-spacing: -0.025em;
 }
 .review-by {
-  margin-top: 14px;
+  margin-top: 12px;
   font-family: var(--mono);
   font-size: 11.5px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
+  color: var(--on-cobalt);
 }
 .review-by cite {
   font-style: normal;
-}
-.reviews-track {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: clamp(14px, 1.6vw, 24px);
-  width: min(1320px, 100% - var(--gutter) * 2);
-  margin: clamp(32px, 4vw, 56px) auto 0;
-}
-.review-card {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  gap: 18px;
-  padding: clamp(20px, 2.2vw, 32px);
-  background: var(--paper);
-  color: var(--navy);
-}
-.review-card p {
-  font-size: clamp(16.5px, 1.3vw, 19px);
-  line-height: 1.55;
-}
-.review-card .review-by {
-  margin-top: 0;
-  padding-top: 12px;
-  border-top: 1px solid rgba(20, 36, 107, 0.25);
-}
-.reviews-hint {
-  display: none;
-  margin-top: 16px;
-  font-family: var(--mono);
-  font-size: 11.5px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--on-cobalt);
+  color: var(--paper);
 }
 .reviews-actions {
   display: flex;
@@ -1247,9 +1237,6 @@ figure picture {
 }
 .reviews .button-ghost {
   --fg: var(--paper);
-}
-.reviews-track:focus-visible {
-  outline-offset: 4px;
 }
 
 /* 2 · Diari de l'obrador: las fotos de la cocina, como los reels.
@@ -3475,27 +3462,9 @@ details[open] p {
   :root {
     --header-h: 60px;
   }
-  /* Reviews: a swipeable row, like the workshop diary. */
-  .reviews-track {
-    display: flex;
-    width: auto;
-    padding-inline: var(--gutter);
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    scroll-padding-inline: var(--gutter);
-    scrollbar-width: none;
-    overscroll-behavior-x: contain;
-  }
-  .reviews-track::-webkit-scrollbar {
-    display: none;
-  }
-  .review-card {
-    flex: none;
-    width: 82%;
-    scroll-snap-align: start;
-  }
-  .reviews-hint {
-    display: block;
+  .review {
+    grid-template-columns: 36px minmax(0, 1fr);
+    gap: 0 12px;
   }
   .reviews-actions .button {
     width: 100%;
