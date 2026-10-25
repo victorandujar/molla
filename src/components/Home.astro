@@ -388,38 +388,23 @@ const jsonLd = [
           </span>
         </h2>
         <p class="reviews-verbatim">{t.reviews.verbatim}</p>
-        {googleReviews.quotes.slice(0, 1).map((r) => (
-          <figure class="review-lead" data-reveal>
-            <blockquote lang={r.lang}>
-              <p>{r.text}</p>
-            </blockquote>
-            <figcaption class="review-by">
-              — <cite>{r.author}</cite> · {t.reviews.source}
-            </figcaption>
-          </figure>
-        ))}
-      </div>
-      <div
-        class="reviews-track"
-        role="region"
-        aria-label={t.reviews.label}
-        tabindex="0"
-      >
-        {googleReviews.quotes.slice(1).map((r) => (
-          <figure class="review-card">
-            <blockquote lang={r.lang}>
-              <p>{r.text}</p>
-            </blockquote>
-            <figcaption class="review-by">
-              — <cite>{r.author}</cite> · {t.reviews.source}
-            </figcaption>
-          </figure>
-        ))}
-      </div>
-      <div class="wrap">
-        <p class="reviews-hint" aria-hidden="true">
-          {t.reviews.swipe} →
-        </p>
+        <ol class="reviews-list">
+          {googleReviews.quotes.map((r, i) => (
+            <li class:list={['review', { 'review-lead': i === 0 }]}>
+              <span class="review-num" aria-hidden="true">
+                {pad(i + 1)}
+              </span>
+              <figure>
+                <blockquote lang={r.lang}>
+                  <p>{r.text}</p>
+                </blockquote>
+                <figcaption class="review-by">
+                  <cite>{r.author}</cite> · {t.reviews.source}
+                </figcaption>
+              </figure>
+            </li>
+          ))}
+        </ol>
         <div class="reviews-actions">
           <a
             class="button button-light"
