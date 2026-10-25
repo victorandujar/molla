@@ -136,7 +136,7 @@ export const ui = {
         'Baix Llobregat',
       ],
       trust: 'Pagas al recibirlo · Cancelas con un clic · Sin cuenta',
-      gift: 'Primer pedido: un cuarto de banana bread para ti y otro para quien quieras.',
+      gift: 'Primer pedido: un cuarto de banana bread para ti y otro para quien quieras. Vale: tras 3 panes entregados del Pan fijo, el 4.º corre de mi cuenta.',
       giftMore: 'Qué incluye',
       scroll: 'Desliza',
       hands: 'Las manos de mi madre',
@@ -316,12 +316,17 @@ export const ui = {
       bar: 'Y no el horno de al lado',
       h2a: 'Por qué yo',
       h2b: 'y no el horno.',
-      honest: 'Si tienes un buen horno a dos minutos, cómprale a él.',
-      p: 'molla. es para quien quiere el pan en casa. Hornadas pequeñas que solo se hornean con lo reservado, hasta 35 horas de fermentación con poolish y entrega en una franja fija. Pagas al recibirlo.',
-      facts: (n: number) => [
-        [`${n}`, 'hogazas por hornada'],
-        ['35 h', 'de fermentación, como máximo'],
-        ['12–14 h', 'a tu puerta, miércoles o sábado'],
+      honest:
+        'Si tienes un buen horno a dos minutos, cómprale a él. Yo soy para otra cosa.',
+      points: [
+        'Una sola persona. Me escribes por WhatsApp y te respondo yo.',
+        'Hecho la mañana que lo recibes. No es el pan de ayer.',
+        'Sin letra pequeña. Sin cuenta ni tarjeta. Pagas al recibirlo y cancelas con un clic.',
+      ],
+      facts: [
+        ['1', 'persona'],
+        ['0', 'cuentas ni tarjetas'],
+        ['1 clic', 'para cancelar'],
       ],
     },
     fix: {
@@ -331,7 +336,7 @@ export const ui = {
       h2b: 'Sin pensarlo.',
       p: 'Eliges una vez cuánto quieres. Cada sábado te lo llevo a casa. Saltas una semana, lo pausas o te das de baja con un clic. Pagas al recibirlo.',
       voucher:
-        'Con el vale de tu primer pedido, el 4.º pan corre de mi cuenta.',
+        'Vale: tras 3 panes entregados del Pan fijo, el 4.º corre de mi cuenta.',
       cta: 'Apúntate al Pan fijo',
       facts: (price: string) => [
         `Sábado ${hours.es}`,
@@ -449,12 +454,12 @@ export const ui = {
       submitDemo: 'Probar reserva',
       submit: 'Confirmar reserva',
       footnote:
-        'Pagas al recibirlo. Cancelas con un clic hasta el cierre de la hornada. Sin cuenta ni suscripciones.',
+        'Pagas al recibirlo. Cancelas con un clic hasta el cierre de la hornada. Reservar una vez no te obliga a nada. El Pan fijo es opcional.',
       giftH: 'Regalo del primer pedido',
       gift: [
         'Un cuarto de banana bread para ti.',
         'Otro cuarto para quien quieras.',
-        'Un vale en la tarjeta del pedido: si te apuntas al Pan fijo, el 4.º pan corre de mi cuenta.',
+        'Un vale en la tarjeta del pedido. Vale: tras 3 panes entregados del Pan fijo, el 4.º corre de mi cuenta.',
       ],
       giftAllergens: 'El banana bread contiene trigo (gluten) y leche.',
       // Only shown when WELCOME_GIFT_CHUTNEY=true (an occasional extra).
@@ -645,7 +650,7 @@ export const ui = {
         'Baix Llobregat',
       ],
       trust: 'Pagues en rebre’l · Cancel·les amb un clic · Sense compte',
-      gift: 'Primera comanda: un quart de banana bread per a tu i un altre per a qui vulguis.',
+      gift: 'Primera comanda: un quart de banana bread per a tu i un altre per a qui vulguis. Val: després de 3 pans entregats del Pa fix, el 4t va de part meva.',
       giftMore: 'Què inclou',
       scroll: 'Llisca',
       hands: 'Les mans de la meva mare',
@@ -823,12 +828,17 @@ export const ui = {
       bar: 'I no el forn del costat',
       h2a: 'Per què jo',
       h2b: 'i no el forn.',
-      honest: 'Si tens un bon forn a dos minuts, compra-li a ell.',
-      p: 'molla. és per a qui vol el pa a casa. Fornades petites que només es couen amb el que s’ha reservat, fins a 35 hores de fermentació amb poolish i entrega en una franja fixa. Pagues quan el reps.',
-      facts: (n: number) => [
-        [`${n}`, 'pans per fornada'],
-        ['35 h', 'de fermentació, com a màxim'],
-        ['12–14 h', 'a la teva porta, dimecres o dissabte'],
+      honest:
+        'Si tens un bon forn a dos minuts, compra-li a ell. Jo sóc per a una altra cosa.',
+      points: [
+        'Una sola persona. M’escrius per WhatsApp i et responc jo.',
+        'Cuit el matí que el reps. No és el pa d’ahir.',
+        'Sense lletra petita. Sense compte ni targeta. Pagues en rebre’l i cancel·les amb un clic.',
+      ],
+      facts: [
+        ['1', 'persona'],
+        ['0', 'comptes ni targetes'],
+        ['1 clic', 'per cancel·lar'],
       ],
     },
     fix: {
@@ -837,7 +847,8 @@ export const ui = {
       h2a: 'El teu pa cada dissabte.',
       h2b: 'Sense pensar-hi.',
       p: 'Tries una vegada quant en vols. Cada dissabte te’l porto a casa. Saltes una setmana, el pauses o et dones de baixa amb un clic. Pagues en rebre’l.',
-      voucher: 'Amb el val de la primera comanda, el 4t pa va de part meva.',
+      voucher:
+        'Val: després de 3 pans entregats del Pa fix, el 4t va de part meva.',
       cta: 'Apunta’t al Pa fix',
       facts: (price: string) => [
         `Dissabte ${hours.ca}`,
@@ -956,12 +967,12 @@ export const ui = {
       submitDemo: 'Provar la reserva',
       submit: 'Confirmar la reserva',
       footnote:
-        'Pagues en rebre’l. Cancel·les amb un clic fins al tancament de la fornada. Sense compte ni subscripcions.',
+        'Pagues en rebre’l. Cancel·les amb un clic fins al tancament de la fornada. Reservar una vegada no t’obliga a res. El Pa fix és opcional.',
       giftH: 'Regal de la primera comanda',
       gift: [
         'Un quart de banana bread per a tu.',
         'Un altre quart per a qui vulguis.',
-        'Un val a la targeta de la comanda: si t’apuntes al Pa fix, el 4t pa va de part meva.',
+        'Un val a la targeta de la comanda. Val: després de 3 pans entregats del Pa fix, el 4t va de part meva.',
       ],
       giftAllergens: 'El banana bread conté blat (gluten) i llet.',
       // Only shown when WELCOME_GIFT_CHUTNEY=true (an occasional extra).

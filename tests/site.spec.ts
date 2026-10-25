@@ -937,9 +937,13 @@ test('first order gets the welcome gift; the second one does not', async ({
     'un cuarto de banana bread para ti y otro para quien quieras',
   );
   await expect(page.locator('.gift-box')).toContainText(
-    'si te apuntas al Pan fijo, el 4.º pan corre de mi cuenta',
+    'Vale: tras 3 panes entregados del Pan fijo, el 4.º corre de mi cuenta',
   );
   await expect(page.locator('body')).not.toContainText('chutney');
+  await expect(page.locator('body')).not.toContainText('suscripciones');
+  await expect(page.locator('.why')).toContainText(
+    'Si tienes un buen horno a dos minutos, cómprale a él. Yo soy para otra cosa.',
+  );
   // The pa fix block leads to the sign-up page.
   await expect(
     page.locator('.fix').getByRole('link', { name: /Pan fijo/ }),

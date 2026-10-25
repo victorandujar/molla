@@ -89,10 +89,10 @@ const copy = {
       '¿No vas a poder recibirlo? Cancela el pedido con un clic hasta el cierre de pedidos de la hornada, a las 20:00, sin dar explicaciones.',
     cancelLink: 'Cancelar el pedido →',
     giftLabel: 'Regalo',
-    giftText: `Por ser tu primer pedido: un cuarto de banana bread para ti y otro para quien quieras (trigo y leche)${welcomeGift.chutney ? ', y esta semana un chutney de pimiento rojo y tomate' : ''}. En la tarjeta va un vale: si te apuntas al Pan fijo, el 4.º pan corre de mi cuenta.`,
+    giftText: `Por ser tu primer pedido: un cuarto de banana bread para ti y otro para quien quieras (trigo y leche)${welcomeGift.chutney ? ', y esta semana un chutney de pimiento rojo y tomate' : ''}. En la tarjeta va un vale. Vale: tras 3 panes entregados del Pan fijo, el 4.º corre de mi cuenta.`,
     fixCta: '¿Lo quieres cada semana? Pan fijo:',
     fixCtaFirst:
-      'Con el vale de tu primer pedido, el 4.º pan del Pan fijo corre de mi cuenta:',
+      'Vale: tras 3 panes entregados del Pan fijo, el 4.º corre de mi cuenta. Apúntate:',
     standingKicker: 'Pan fijo',
     standingHeading: (name: string) => `${name}, esta semana te toca pan.`,
     standingIntro:
@@ -170,10 +170,10 @@ const copy = {
       'No el podràs rebre? Cancel·la la comanda amb un clic fins al tancament de comandes de la fornada, a les 20:00, sense donar explicacions.',
     cancelLink: 'Cancel·lar la comanda →',
     giftLabel: 'Regal',
-    giftText: `Per ser la teva primera comanda: un quart de banana bread per a tu i un altre per a qui vulguis (blat i llet)${welcomeGift.chutney ? ', i aquesta setmana un chutney de pebrot vermell i tomàquet' : ''}. A la targeta hi va un val: si t’apuntes al Pa fix, el 4t pa va de part meva.`,
+    giftText: `Per ser la teva primera comanda: un quart de banana bread per a tu i un altre per a qui vulguis (blat i llet)${welcomeGift.chutney ? ', i aquesta setmana un chutney de pebrot vermell i tomàquet' : ''}. A la targeta hi va un val. Val: després de 3 pans entregats del Pa fix, el 4t va de part meva.`,
     fixCta: 'El vols cada setmana? Pa fix:',
     fixCtaFirst:
-      'Amb el val de la primera comanda, el 4t pa del Pa fix va de part meva:',
+      'Val: després de 3 pans entregats del Pa fix, el 4t va de part meva. Apunta’t:',
     standingKicker: 'Pa fix',
     standingHeading: (name: string) => `${name}, aquesta setmana et toca pa.`,
     standingIntro:
@@ -499,7 +499,7 @@ Referencia interna: ${o.id}`;
 // What the baker adds to a first order: two quarters of banana bread (one to
 // share), the card with the "pa fix" voucher and, when on, the chutney.
 const ownerGift = () =>
-  `Primera comanda: añade 2 cuartos de banana bread (uno para compartir)${welcomeGift.chutney ? ', el chutney' : ''} y la tarjeta con el vale del pan fijo (4.º pan de regalo)`;
+  `Primera comanda: añade 2 cuartos de banana bread (uno para compartir)${welcomeGift.chutney ? ', el chutney' : ''} y la tarjeta con el vale del pan fijo. Vale: tras 3 panes entregados del pan fijo, el 4.º corre de tu cuenta; el descuento lo aplicas tú al cobrar ese 4.º pan`;
 
 export function ownerHtml(o: Order) {
   const tel = o.phone.replace(/[^\d+]/g, '');
