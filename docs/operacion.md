@@ -136,7 +136,7 @@ Un cliente elige cantidad, frecuencia (cada semana o cada dos) y entrega en `/pa
 - `/gestio`, sección «Pan fijo»: lista de quién está suscrito (nombre, teléfono con WhatsApp, email, pedido, frecuencia y entrega), con botones **Pausar / Reanudar** y **Dar de baja** (pide confirmar). Pausar o dar de baja cancela también el pedido abierto de esa semana. Además muestra los totales y una etiqueta «Pan fijo» en sus pedidos. Revisa que la suma de hogazas fijas quepa en el cupo de la hornada.
 - `npm run orders:prod -- subs` lista los suscriptores.
 - `npm run orders:prod -- subpause|subresume|subcancel ana@example.com --yes` cambia un pan fijo si el cliente te lo pide por WhatsApp (pausar o cancelar también cancela su pedido abierto).
-- `purge` anonimiza además las suscripciones canceladas hace más de N meses.
+- `purge` anonimiza además las altas de pan fijo canceladas hace más de N meses.
 
 **Antes de publicar este cambio** hay una migración nueva (`006_standing_orders.sql`): ejecuta `npm run db:migrate:prod` **antes** de desplegar `main`, porque el código nuevo escribe columnas que no existen todavía. La migración es compatible con la versión anterior.
 
@@ -157,4 +157,4 @@ Se configuran en Vercel → proyecto → Settings → Environment Variables, mar
 
 ## Regalo de bienvenida
 
-La primera comanda de cada cliente (por email, sin contar las canceladas) lleva de regalo **un cuarto de banana bread para él y otro para quien quiera**, más **la tarjeta con el vale del pan fijo** (si se apunta, el 4.º pan va de tu parte; la tarjeta la preparas tú). La web lo anuncia en la portada, en el bloque de reserva y en `/pa-fix`; el email de confirmación lo menciona y a ti te llega en el aviso «Nueva reserva» y como etiqueta «Primera · regalo» en `/gestio`: el regalo lo añades tú al preparar el pedido. El chutney queda como extra puntual: `WELCOME_GIFT_CHUTNEY=true` lo añade a los textos y al aviso; por defecto no se muestra (confirma ingredientes y alérgenos antes de activarlo). La web no lleva la cuenta del 4.º pan: el descuento lo aplicas tú al cobrar.
+La primera comanda de cada cliente (por email, sin contar las canceladas) lleva de regalo **un cuarto de banana bread para él y otro para quien quiera**, más **la tarjeta con el vale del pan fijo**. Vale: tras 3 panes entregados del Pan fijo, el 4.º corre de tu cuenta. Saltar una semana no lo hace perder: cuentan los panes entregados. La tarjeta la preparas tú. La web lo anuncia en la portada, en el bloque de reserva y en `/pa-fix`; el email de confirmación lo menciona y a ti te llega en el aviso «Nueva reserva» y como etiqueta «Primera · regalo» en `/gestio`: el regalo lo añades tú al preparar el pedido. El chutney queda como extra puntual: `WELCOME_GIFT_CHUTNEY=true` lo añade a los textos y al aviso; por defecto no se muestra (confirma ingredientes y alérgenos antes de activarlo). La web no lleva la cuenta del vale: el descuento lo aplicas tú, a mano, al cobrar el 4.º pan entregado.

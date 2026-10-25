@@ -467,8 +467,8 @@ form?.addEventListener('submit', async (event) => {
       lines.join(' · '),
       order.firstOrder
         ? isCa
-          ? 'Regal de la primera comanda: un quart de banana bread per a tu, un altre per a qui vulguis i un val: si t’apuntes al Pa fix, el 4t pa va de part meva.'
-          : 'Regalo del primer pedido: un cuarto de banana bread para ti, otro para quien quieras y un vale: si te apuntas al Pan fijo, el 4.º pan corre de mi cuenta.'
+          ? 'Regal de la primera comanda: un quart de banana bread per a tu, un altre per a qui vulguis i un val a la targeta. Val: després de 3 pans entregats del Pa fix, el 4t va de part meva.'
+          : 'Regalo del primer pedido: un cuarto de banana bread para ti, otro para quien quieras y un vale en la tarjeta. Vale: tras 3 panes entregados del Pan fijo, el 4.º corre de mi cuenta.'
         : '',
       home
         ? isCa

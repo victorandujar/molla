@@ -63,7 +63,7 @@ try {
       const subs =
         await tx`UPDATE subscriptions SET name='—', email='anonimo-' || id, phone='', address='' WHERE status='CANCELLED' AND cancelled_at < now() - make_interval(months => ${months}) AND email NOT LIKE 'anonimo-%' RETURNING id`;
       console.log(
-        `Anonimizados ${orders.length} pedidos, ${customers.length} clientes y ${subs.length} suscripciones.`,
+        `Anonimizados ${orders.length} pedidos, ${customers.length} clientes y ${subs.length} altas de pan fijo.`,
       );
     });
   } else if (command === 'subs') {
@@ -91,7 +91,7 @@ try {
           ? []
           : await tx`UPDATE orders o SET status='CANCELLED', snapshot=jsonb_set(o.snapshot,'{status}','"CANCELLED"') FROM bakes b WHERE o.bake_id=b.id AND b.deadline > now() AND o.status='CONFIRMED' AND o.subscription_id IN ${tx(subs.map((x) => x.id))} RETURNING o.id`;
       console.log(
-        `${subs.length} suscripciones → ${to}; ${orders.length} pedidos abiertos cancelados.`,
+        `${subs.length} altas de pan fijo → ${to}; ${orders.length} pedidos abiertos cancelados.`,
       );
     });
   } else {

@@ -1114,6 +1114,19 @@ figure picture {
   line-height: 1.6;
   color: var(--ink-2);
 }
+.why-points {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0 0 0 1.3em;
+  font-size: clamp(16px, 1.2vw, 18px);
+  line-height: 1.55;
+  color: var(--ink-2);
+}
+.why-points li::marker {
+  content: '✷  ';
+  color: var(--orange);
+}
 .why-copy .why-honest {
   margin-bottom: 14px;
   font-family: var(--serif-it);
