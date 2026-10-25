@@ -390,55 +390,65 @@ const jsonLd = [
         </h2>
         <p class="reviews-verbatim">{t.reviews.verbatim}</p>
         <div class="reviews-board">
-          <div
-            class="reviews-index"
-            role="tablist"
-            aria-label={t.reviews.label}
-          >
-            {googleReviews.quotes.map((r, i) => (
-              <button
-                type="button"
-                role="tab"
-                id={`review-tab-${i}`}
-                aria-controls={`review-${i}`}
-                aria-selected={i === 0 ? 'true' : 'false'}
-                tabindex={i === 0 ? 0 : -1}
-                data-review-tab={i}
-              >
-                <span class="review-tab-num">{pad(i + 1)}</span>
-                <span class="review-tab-name">{r.author}</span>
-              </button>
-            ))}
-          </div>
           <div class="reviews-stage" data-reviews-stage>
-            {googleReviews.quotes.map((r, i) => (
-              <div
-                class:list={['review-poster', `review-tone-${i % 3}`]}
-                id={`review-${i}`}
-                role="tabpanel"
-                aria-labelledby={`review-tab-${i}`}
-                data-review={i}
-              >
-                <figure>
-                  <p class="review-top" aria-hidden="true">
-                    <span>
-                      Nº {pad(i + 1)} / {pad(googleReviews.quotes.length)}
-                    </span>
-                    <span>Google · {googleReviews.score}</span>
-                  </p>
-                  <span class="review-mark" aria-hidden="true">
-                    “
-                  </span>
-                  <blockquote lang={r.lang}>
-                    <p>{r.text}</p>
-                  </blockquote>
-                  <figcaption class="review-by">
-                    <cite>{r.author}</cite>
-                    <span>{t.reviews.source}</span>
-                  </figcaption>
-                </figure>
-              </div>
-            ))}
+            {googleReviews.quotes.map((r, i) => {
+              const [before, after] = r.highlight.split(r.accent);
+              return (
+                <div
+                  class="review-slide"
+                  id={`review-${i}`}
+                  role="tabpanel"
+                  aria-labelledby={`review-tab-${i}`}
+                  data-review={i}
+                >
+                  <figure>
+                    <p class="review-top" aria-hidden="true">
+                      <span>(Fig. 7.{i + 1})</span>
+                      <span>Google · {googleReviews.score}</span>
+                    </p>
+                    <p class="review-headline" aria-hidden="true">
+                      <span class="review-mark">“</span>
+                      <span class="review-line">
+                        {before}
+                        <em>{r.accent}</em>
+                        {after}
+                      </span>
+                    </p>
+                    <div class="review-body">
+                      <blockquote lang={r.lang}>
+                        <p>{r.text}</p>
+                      </blockquote>
+                      <figcaption class="review-by">
+                        <cite>{r.author}</cite>
+                        <span>{t.reviews.source}</span>
+                      </figcaption>
+                    </div>
+                  </figure>
+                </div>
+              );
+            })}
+          </div>
+          <div class="reviews-nav">
+            <div
+              class="reviews-index"
+              role="tablist"
+              aria-label={t.reviews.label}
+            >
+              {googleReviews.quotes.map((r, i) => (
+                <button
+                  type="button"
+                  role="tab"
+                  id={`review-tab-${i}`}
+                  aria-controls={`review-${i}`}
+                  aria-selected={i === 0 ? 'true' : 'false'}
+                  tabindex={i === 0 ? 0 : -1}
+                  data-review-tab={i}
+                >
+                  <span class="review-tab-num">{pad(i + 1)}</span>
+                  <span class="review-tab-name">{r.author}</span>
+                </button>
+              ))}
+            </div>
             <div class="reviews-arrows" data-reviews-arrows hidden>
               <button
                 type="button"
