@@ -333,6 +333,9 @@ export const ui = {
       all: (n: number) => `Ver las ${n} reseñas en Google`,
       leave: 'Deja la tuya',
       newTab: '(se abre en una pestaña nueva)',
+      label: 'Reseñas de Google',
+      prev: 'Reseña anterior',
+      next: 'Reseña siguiente',
     },
     fix: {
       kicker: 'Pan fijo',
@@ -850,6 +853,9 @@ export const ui = {
       all: (n: number) => `Veure les ${n} ressenyes a Google`,
       leave: 'Deixa’n una',
       newTab: '(s’obre en una pestanya nova)',
+      label: 'Ressenyes de Google',
+      prev: 'Ressenya anterior',
+      next: 'Ressenya següent',
     },
     fix: {
       kicker: 'Pa fix',

@@ -374,8 +374,9 @@ const jsonLd = [
       </div>
     </section>
 
-    <!-- Ressenyes de Google: cites textuals, en el seu idioma -->
-    <section class="reviews" aria-labelledby="reviews-title">
+    <!-- Ressenyes de Google: un cartell amb l'índex al costat, com la taula
+         del flyer. Una ressenya a la vegada. Cites textuals, en el seu idioma. -->
+    <section class="reviews" aria-labelledby="reviews-title" data-reviews>
       <div class="wrap">
         <div class="mono-bar" data-bar>
           <span>{t.reviews.kicker}</span>
@@ -388,23 +389,76 @@ const jsonLd = [
           </span>
         </h2>
         <p class="reviews-verbatim">{t.reviews.verbatim}</p>
-        <ol class="reviews-list">
-          {googleReviews.quotes.map((r, i) => (
-            <li class:list={['review', { 'review-lead': i === 0 }]}>
-              <span class="review-num" aria-hidden="true">
-                {pad(i + 1)}
-              </span>
-              <figure>
-                <blockquote lang={r.lang}>
-                  <p>{r.text}</p>
-                </blockquote>
-                <figcaption class="review-by">
-                  <cite>{r.author}</cite> · {t.reviews.source}
-                </figcaption>
-              </figure>
-            </li>
-          ))}
-        </ol>
+        <div class="reviews-board">
+          <div
+            class="reviews-index"
+            role="tablist"
+            aria-label={t.reviews.label}
+          >
+            {googleReviews.quotes.map((r, i) => (
+              <button
+                type="button"
+                role="tab"
+                id={`review-tab-${i}`}
+                aria-controls={`review-${i}`}
+                aria-selected={i === 0 ? 'true' : 'false'}
+                tabindex={i === 0 ? 0 : -1}
+                data-review-tab={i}
+              >
+                <span class="review-tab-num">{pad(i + 1)}</span>
+                <span class="review-tab-name">{r.author}</span>
+              </button>
+            ))}
+          </div>
+          <div class="reviews-stage" data-reviews-stage>
+            {googleReviews.quotes.map((r, i) => (
+              <div
+                class:list={['review-poster', `review-tone-${i % 3}`]}
+                id={`review-${i}`}
+                role="tabpanel"
+                aria-labelledby={`review-tab-${i}`}
+                data-review={i}
+              >
+                <figure>
+                  <p class="review-top" aria-hidden="true">
+                    <span>
+                      Nº {pad(i + 1)} / {pad(googleReviews.quotes.length)}
+                    </span>
+                    <span>Google · {googleReviews.score}</span>
+                  </p>
+                  <span class="review-mark" aria-hidden="true">
+                    “
+                  </span>
+                  <blockquote lang={r.lang}>
+                    <p>{r.text}</p>
+                  </blockquote>
+                  <figcaption class="review-by">
+                    <cite>{r.author}</cite>
+                    <span>{t.reviews.source}</span>
+                  </figcaption>
+                </figure>
+              </div>
+            ))}
+            <div class="reviews-arrows" data-reviews-arrows hidden>
+              <button
+                type="button"
+                class="reviews-arrow"
+                data-reviews-prev
+                aria-label={t.reviews.prev}
+              >
+                ←
+              </button>
+              <button
+                type="button"
+                class="reviews-arrow"
+                data-reviews-next
+                aria-label={t.reviews.next}
+              >
+                →
+              </button>
+            </div>
+          </div>
+        </div>
         <div class="reviews-actions">
           <a
             class="button button-light"

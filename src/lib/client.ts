@@ -756,3 +756,75 @@ if (subscriptionForm) {
     }
   });
 }
+
+/* ---- Ressenyes: un cartell a la vegada, triat des de l'índex (pestanyes
+   accessibles), amb les fletxes o lliscant. Sense JS es veuen totes. ---- */
+const reviewsSection = document.querySelector<HTMLElement>('[data-reviews]');
+if (reviewsSection) {
+  const stage = reviewsSection.querySelector<HTMLElement>(
+    '[data-reviews-stage]',
+  )!;
+  const tabs = [
+    ...reviewsSection.querySelectorAll<HTMLButtonElement>('[data-review-tab]'),
+  ];
+  const posters = [
+    ...reviewsSection.querySelectorAll<HTMLElement>('[data-review]'),
+  ];
+  const arrows = reviewsSection.querySelector<HTMLElement>(
+    '[data-reviews-arrows]',
+  );
+  let active = 0;
+  const show = (i: number, focus = false) => {
+    active = (i + posters.length) % posters.length;
+    tabs.forEach((tab, k) => {
+      const on = k === active;
+      tab.setAttribute('aria-selected', String(on));
+      tab.tabIndex = on ? 0 : -1;
+    });
+    posters.forEach((poster, k) => {
+      poster.hidden = k !== active;
+      poster.classList.toggle('is-in', k === active);
+    });
+    if (focus) tabs[active]!.focus();
+  };
+  stage.setAttribute('data-live', '');
+  tabs.forEach((tab, k) => {
+    tab.addEventListener('click', () => show(k));
+    tab.addEventListener('keydown', (e) => {
+      const step =
+        e.key === 'ArrowRight' || e.key === 'ArrowDown'
+          ? 1
+          : e.key === 'ArrowLeft' || e.key === 'ArrowUp'
+            ? -1
+            : 0;
+      if (e.key === 'Home') show(0, true);
+      else if (e.key === 'End') show(posters.length - 1, true);
+      else if (step) show(active + step, true);
+      else return;
+      e.preventDefault();
+    });
+  });
+  reviewsSection
+    .querySelector('[data-reviews-prev]')
+    ?.addEventListener('click', () => show(active - 1));
+  reviewsSection
+    .querySelector('[data-reviews-next]')
+    ?.addEventListener('click', () => show(active + 1));
+  // A horizontal swipe on the poster changes review.
+  let startX: number | null = null;
+  stage.addEventListener(
+    'touchstart',
+    (e) => (startX = e.touches[0]?.clientX ?? null),
+    { passive: true },
+  );
+  stage.addEventListener('touchend', (e) => {
+    const endX = e.changedTouches[0]?.clientX;
+    if (startX !== null && endX !== undefined && Math.abs(endX - startX) > 50)
+      show(active + (endX < startX ? 1 : -1));
+    startX = null;
+  });
+  if (arrows) arrows.hidden = false;
+  show(0);
+  // The first poster should not replay its entrance on load.
+  posters[0]?.classList.remove('is-in');
+}
