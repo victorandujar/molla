@@ -621,8 +621,18 @@ test('Google reviews: verbatim quotes in both languages and exact links', async 
     await expect(review).toHaveAttribute('rel', 'noopener noreferrer');
     await expect(review).toHaveAttribute('target', '_blank');
   }
-  // Plain list, no carousel: nothing hidden off-screen.
-  await expect(page.locator('.reviews-list > li')).toHaveCount(5);
+  // One poster at a time, chosen from the index (tabs) or with the keys.
+  const tabs = page.getByRole('tab');
+  await expect(tabs).toHaveCount(5);
+  await expect(page.getByRole('tabpanel')).toHaveCount(1);
+  await expect(page.getByRole('tabpanel')).toContainText('Carlos M.');
+  await tabs.nth(1).click();
+  await expect(page.getByRole('tabpanel')).toContainText('David L.');
+  await page.keyboard.press('ArrowRight');
+  await expect(tabs.nth(2)).toBeFocused();
+  await expect(page.getByRole('tabpanel')).toContainText('Ramiro R.');
+  await page.getByRole('button', { name: 'Reseña siguiente' }).click();
+  await expect(page.getByRole('tabpanel')).toContainText('Guille M.');
 });
 
 test('croissants and pains au chocolat share 48 pieces per bake, by the unit', async ({
