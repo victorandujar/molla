@@ -677,19 +677,9 @@ figure picture {
   column-gap: clamp(16px, 2vw, 32px);
   align-items: start;
 }
-.hero-made {
-  grid-column: 1 / 9;
-  grid-row: 1;
-  align-self: end;
-  font-weight: 800;
-  font-stretch: 62%;
-  font-size: clamp(40px, 4.6vw, 80px);
-  line-height: 0.86;
-  text-transform: uppercase;
-}
 .hero-title {
   grid-column: 1 / -1;
-  grid-row: 2;
+  grid-row: 1;
   margin-top: 0.06em;
   font-stretch: 125%;
   font-weight: 800;
@@ -717,16 +707,6 @@ figure picture {
     transform: translateY(110%) skewY(4deg);
   }
 }
-.hero-price {
-  grid-column: 9 / -1;
-  grid-row: 1;
-  justify-self: end;
-  align-self: end;
-  display: flex;
-  align-items: flex-end;
-  gap: 16px;
-  margin-bottom: -0.1em;
-}
 /* El precio del flyer, solo contorno; se dibuja al cargar. */
 .outline-price {
   display: inline-block;
@@ -740,10 +720,6 @@ figure picture {
   -webkit-text-stroke: 1.5px var(--stroke, var(--cobalt));
   white-space: nowrap;
 }
-.hero-price .outline-price {
-  --stroke: var(--paper);
-  animation: draw-in 1.6s var(--ease-out) 0.7s both;
-}
 @keyframes draw-in {
   from {
     clip-path: inset(0 100% 0 0);
@@ -752,16 +728,9 @@ figure picture {
     clip-path: inset(0 -10% 0 0);
   }
 }
-.hero-weight {
-  font-family: var(--mono);
-  font-size: 13px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
 .hero-photo {
   grid-column: 1 / 8;
-  grid-row: 3;
+  grid-row: 2;
   margin-top: clamp(36px, 4vw, 64px);
 }
 .hero-photo-frame {
@@ -812,7 +781,7 @@ figure picture {
 }
 .hero-info {
   grid-column: 8 / -1;
-  grid-row: 3;
+  grid-row: 2;
   margin-top: clamp(36px, 4vw, 64px);
   padding-left: clamp(0px, 1.6vw, 24px);
 }
@@ -840,32 +809,6 @@ figure picture {
 }
 .hero .link-arrow {
   color: var(--paper);
-}
-.hero-steps {
-  display: grid;
-  gap: 6px;
-  margin: 32px 0 0;
-  padding: 16px 0 0;
-  list-style: none;
-  border-top: 1.5px solid var(--on-cobalt-line);
-  font-family: var(--mono);
-  font-size: 12px;
-  line-height: 1.55;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-.hero-steps li {
-  display: grid;
-  grid-template-columns: 4.2em 1fr;
-}
-.hero-trust {
-  margin-top: 14px;
-  font-family: var(--mono);
-  font-size: 12px;
-  line-height: 1.55;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--on-cobalt);
 }
 /* El regalo de la primera comanda, a la vista: la caja naranja del flyer. */
 .hero-gift {
@@ -3548,10 +3491,6 @@ details[open] p {
   .hero-title {
     font-size: clamp(30px, 8.2vw, 72px);
   }
-  .hero-price {
-    justify-self: start;
-    margin-top: 22px;
-  }
   .hero-info {
     margin-top: 28px;
     padding-left: 0;
@@ -3659,9 +3598,6 @@ details[open] p {
   }
   .hero-bar span:last-child {
     display: none;
-  }
-  .hero-made {
-    font-size: clamp(34px, 10vw, 56px);
   }
   .hero-bake {
     grid-template-columns: 1fr;

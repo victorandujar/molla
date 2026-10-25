@@ -102,7 +102,8 @@ export const ui = {
       h1a: 'Pan que solo se hornea',
       h1b: 'si lo has reservado',
       sub: `Cada miércoles y cada sábado ${hours.es}, a domicilio en Sant Boi, Sant Just Desvern y Santa Coloma.`,
-      lede: 'Amaso a mano dos hornadas pequeñas cada semana, con harinas ecológicas, poolish y hasta 35 horas de fermentación lenta. Tú lo reservas aquí y el miércoles o el sábado te lo llevo a casa, o lo recoges en Sant Boi.',
+      short: (n: number) =>
+        `Hornadas de ${n} hogazas. Miércoles y sábado en tu puerta. Pagas al recibirlo.`,
       kicker: 'Panadería de barrio · Baix Llobregat',
       keywords: [
         'Harinas ecológicas',
@@ -135,8 +136,7 @@ export const ui = {
         'Fins a 35 h de fermentació',
         'Baix Llobregat',
       ],
-      trust: 'Pagas al recibirlo · Cancelas con un clic · Sin cuenta',
-      gift: 'Primer pedido: un cuarto de banana bread para ti y otro para quien quieras. Vale: tras 3 panes entregados del Pan fijo, el 4.º corre de mi cuenta.',
+      gift: 'Primer pedido: dos trozos de banana bread de dos dedos de grosor, uno para ti y otro para quien quieras.',
       giftMore: 'Qué incluye',
       scroll: 'Desliza',
       hands: 'Las manos de mi madre',
@@ -344,7 +344,7 @@ export const ui = {
       h2b: 'Sin pensarlo.',
       p: 'Eliges una vez cuánto quieres. Cada sábado te lo llevo a casa. Saltas una semana, lo pausas o te das de baja con un clic. Pagas al recibirlo.',
       voucher:
-        'Vale: tras 3 panes entregados del Pan fijo, el 4.º corre de mi cuenta.',
+        'Solo para el Pan fijo: cuando te haya entregado 3 panes, el 4.º corre de mi cuenta.',
       cta: 'Apúntate al Pan fijo',
       facts: (price: string) => [
         `Sábado ${hours.es}`,
@@ -465,9 +465,9 @@ export const ui = {
         'Pagas al recibirlo. Cancelas con un clic hasta el cierre de la hornada. Reservar una vez no te obliga a nada. El Pan fijo es opcional.',
       giftH: 'Regalo del primer pedido',
       gift: [
-        'Un cuarto de banana bread para ti.',
-        'Otro cuarto para quien quieras.',
-        'Un vale en la tarjeta del pedido. Vale: tras 3 panes entregados del Pan fijo, el 4.º corre de mi cuenta.',
+        'Un trozo de banana bread de dos dedos de grosor para ti.',
+        'Otro igual para quien quieras.',
+        'Una tarjeta con el vale del Pan fijo (no vale para pedidos sueltos). Solo para el Pan fijo: cuando te haya entregado 3 panes, el 4.º corre de mi cuenta.',
       ],
       giftAllergens: 'El banana bread contiene trigo (gluten) y leche.',
       // Only shown when WELCOME_GIFT_CHUTNEY=true (an occasional extra).
@@ -557,15 +557,8 @@ export const ui = {
     },
     ed: {
       bar: 'Pan artesano por encargo',
-      made: 'Hecho a mano.',
-      batch: (n: number) => `Hornadas de ${n} hogazas.`,
       fig: '(Fig. 1) Pan de miga, partido por la mitad',
       ferment: 'Fermentado hasta 35 h',
-      steps: [
-        'Para el miércoles, hasta el domingo a las 20 h · para el sábado, hasta el jueves a las 20 h',
-        `Entrega gratuita miércoles y sábado ${hours.es} · Sant Boi, Sant Just Desvern y Santa Coloma de Cervelló`,
-        'Pagas al recibirlo',
-      ],
       diary: 'Diario del obrador',
       swipe: 'Desliza',
       menuBar: 'Del horno a tu mesa',
@@ -624,7 +617,8 @@ export const ui = {
       h1a: 'Pa que només es cou',
       h1b: 'si l’has reservat',
       sub: `Cada dimecres i cada dissabte ${hours.ca}, a domicili a Sant Boi, Sant Just Desvern i Santa Coloma.`,
-      lede: 'Pasto a mà dues fornades petites cada setmana, amb farines ecològiques, poolish i fins a 35 hores de fermentació lenta. Tu el reserves aquí i dimecres o dissabte te’l porto a casa, o el reculls a Sant Boi.',
+      short: (n: number) =>
+        `Fornades de ${n} pans. Dimecres i dissabte a la teva porta. Pagues en rebre’l.`,
       kicker: 'Fleca de barri · Baix Llobregat',
       keywords: [
         'Farines ecològiques',
@@ -657,8 +651,7 @@ export const ui = {
         'Fins a 35 h de fermentació',
         'Baix Llobregat',
       ],
-      trust: 'Pagues en rebre’l · Cancel·les amb un clic · Sense compte',
-      gift: 'Primera comanda: un quart de banana bread per a tu i un altre per a qui vulguis. Val: després de 3 pans entregats del Pa fix, el 4t va de part meva.',
+      gift: 'Primera comanda: dos trossos de banana bread de dos dits de gruix, un per a tu i un per a qui vulguis.',
       giftMore: 'Què inclou',
       scroll: 'Llisca',
       hands: 'Les mans de la meva mare',
@@ -864,7 +857,7 @@ export const ui = {
       h2b: 'Sense pensar-hi.',
       p: 'Tries una vegada quant en vols. Cada dissabte te’l porto a casa. Saltes una setmana, el pauses o et dones de baixa amb un clic. Pagues en rebre’l.',
       voucher:
-        'Val: després de 3 pans entregats del Pa fix, el 4t va de part meva.',
+        'Només per al Pa fix: quan t’hagi entregat 3 pans, el 4t va de part meva.',
       cta: 'Apunta’t al Pa fix',
       facts: (price: string) => [
         `Dissabte ${hours.ca}`,
@@ -986,9 +979,9 @@ export const ui = {
         'Pagues en rebre’l. Cancel·les amb un clic fins al tancament de la fornada. Reservar una vegada no t’obliga a res. El Pa fix és opcional.',
       giftH: 'Regal de la primera comanda',
       gift: [
-        'Un quart de banana bread per a tu.',
-        'Un altre quart per a qui vulguis.',
-        'Un val a la targeta de la comanda. Val: després de 3 pans entregats del Pa fix, el 4t va de part meva.',
+        'Un tros de banana bread de dos dits de gruix per a tu.',
+        'Un altre d’igual per a qui vulguis.',
+        'Una targeta amb el val del Pa fix (no val per a comandes soltes). Només per al Pa fix: quan t’hagi entregat 3 pans, el 4t va de part meva.',
       ],
       giftAllergens: 'El banana bread conté blat (gluten) i llet.',
       // Only shown when WELCOME_GIFT_CHUTNEY=true (an occasional extra).
@@ -1078,15 +1071,8 @@ export const ui = {
     },
     ed: {
       bar: 'Pa artesà per encàrrec',
-      made: 'Fet a mà.',
-      batch: (n: number) => `Fornades de ${n} pans.`,
       fig: '(Fig. 1) Pa de molla, tallat per la meitat',
       ferment: 'Fermentat fins a 35 h',
-      steps: [
-        'Per a dimecres, fins diumenge a les 20 h · per a dissabte, fins dijous a les 20 h',
-        `Entrega gratuïta dimecres i dissabte ${hours.ca} · Sant Boi, Sant Just Desvern i Santa Coloma de Cervelló`,
-        'Pagues quan el reps',
-      ],
       diary: 'Diari de l’obrador',
       swipe: 'Llisca',
       menuBar: 'Del forn a la taula',

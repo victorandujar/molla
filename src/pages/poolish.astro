@@ -1,6 +1,7 @@
 ---
 import Article from '../layouts/Article.astro';
 import Photo from '../components/Photo.astro';
+import HowItsMade from '../components/HowItsMade.astro';
 import { brand } from '../lib/config';
 export const prerender = true;
 const article = {
@@ -122,4 +123,5 @@ const article = {
       </figure>
     </div>
   </div>
+  <HowItsMade lang="ca" slot="after" />
 </Article>
