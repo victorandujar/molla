@@ -800,37 +800,43 @@ figure picture {
   line-height: 1.6;
   color: var(--on-cobalt);
 }
-.hero-actions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 16px 28px;
-  margin-top: 28px;
-}
 .hero .link-arrow {
   color: var(--paper);
 }
-/* El regalo de la primera comanda, a la vista: la caja naranja del flyer. */
+/* El regalo de la primera comanda: una etiqueta naranja pegada a la foto. */
+.hero-photo {
+  position: relative;
+}
 .hero-gift {
-  display: flex;
-  align-items: baseline;
-  gap: 12px;
-  margin-top: 16px;
+  position: absolute;
+  z-index: 2;
+  top: clamp(14px, 2vw, 24px);
+  right: clamp(14px, 2vw, 24px);
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 15ch;
   padding: 12px 16px;
-  box-shadow: inset 0 0 0 2px var(--orange);
-  font-size: 15px;
-  line-height: 1.5;
+  background: var(--orange);
+  color: var(--night);
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 12px;
+  line-height: 1.35;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  rotate: 4deg;
+  box-shadow: 0 18px 34px -18px rgba(0, 0, 0, 0.55);
+  animation: rise 0.9s var(--ease-out) 1.1s both;
+  transition: rotate 0.5s var(--ease-spring);
+}
+.hero-gift:hover {
+  rotate: 0deg;
 }
 .hero-gift .star {
-  font-size: 18px;
-}
-.hero-gift a {
-  color: var(--paper);
-  font-family: var(--mono);
-  font-size: 12px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  white-space: nowrap;
+  color: var(--night);
+  font-size: 20px;
 }
 /* La hornada: el resguardo del flyer, recuadro de línea fina. */
 .hero-bake {
@@ -913,21 +919,63 @@ figure picture {
   text-transform: uppercase;
   color: var(--orange);
 }
-.stub-cta {
+.stub-countdown {
   justify-self: start;
-  display: inline-flex;
-  gap: 8px;
-  margin-top: 14px;
+  margin-top: 12px;
+  padding: 6px 10px;
+  background: var(--paper);
+  color: var(--cobalt);
   font-family: var(--mono);
   font-weight: 700;
   font-size: 12px;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
+}
+.stub-countdown b {
+  color: var(--rust);
+}
+.stub-cta {
+  margin-top: 18px;
+  min-height: 60px;
+  font-size: 14px;
+}
+/* Prova social sota el botó: les estrelles i el que treu la por. */
+.hero-proof {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 22px;
+  margin: 20px 0 0;
+  padding: 0;
+  list-style: none;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--on-cobalt);
+}
+.hero-proof li {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.hero-proof li + li::before {
+  content: '✷';
+  color: var(--orange);
+}
+.hero-proof a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   color: var(--paper);
   text-decoration: none;
 }
-.stub-cta:hover {
+.hero-proof a:hover {
   text-decoration: underline;
+}
+.hero-stars {
+  color: var(--orange);
+  letter-spacing: 0.04em;
+  font-size: 14px;
 }
 
 /* La cinta: las palabras del obrador, enormes, alternando contorno. */
@@ -992,47 +1040,59 @@ figure picture {
   }
 }
 
-/* Per què jo i no el forn: una resposta curta i honesta. */
+/* Per què jo i no el forn: tres xifres grosses, sense discurs. */
 .why {
   padding-block: clamp(64px, 7vw, 104px);
   color: var(--cobalt);
 }
 .why-grid {
   display: grid;
-  grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
   align-items: end;
-  gap: 24px clamp(32px, 5vw, 96px);
+  gap: 32px clamp(32px, 5vw, 96px);
   margin-top: clamp(28px, 3.6vw, 52px);
 }
 .why h2 {
-  font-size: clamp(54px, 7vw, 120px);
+  font-size: clamp(54px, 6.4vw, 112px);
 }
-.why-copy p {
-  max-width: 48ch;
-  font-size: clamp(16.5px, 1.25vw, 18.5px);
-  line-height: 1.6;
-  color: var(--ink-2);
+.why h2 em {
+  display: block;
 }
-.why-points {
+.why-stats {
   display: grid;
-  gap: 10px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   margin: 0;
-  padding: 0 0 0 1.3em;
-  font-size: clamp(16px, 1.2vw, 18px);
-  line-height: 1.55;
+  padding: 0;
+  list-style: none;
+  border-top: 1.5px solid currentColor;
+}
+.why-stats li {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  padding: 22px 18px 4px 0;
+}
+.why-stats li + li {
+  padding-left: 18px;
+  border-left: 1px solid var(--line-strong);
+}
+.why-stats strong {
+  font-family: var(--sans);
+  font-weight: 800;
+  font-stretch: 125%;
+  font-size: clamp(48px, 5vw, 84px);
+  line-height: 0.9;
+  letter-spacing: -0.05em;
+  color: var(--rust);
+}
+.why-stats span {
+  max-width: 18ch;
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.5;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   color: var(--ink-2);
-}
-.why-points li::marker {
-  content: '✷  ';
-  color: var(--orange);
-}
-.why-copy .why-honest {
-  margin-bottom: 14px;
-  font-family: var(--serif-it);
-  font-style: italic;
-  font-size: clamp(26px, 2.4vw, 36px);
-  line-height: 1.1;
-  color: var(--cobalt);
 }
 /* Ressenyes de Google: franja cobalt, cites textuals en targetes crema.
    Al mòbil, carrusel amb scroll-snap; a l'escriptori, dues columnes. */
@@ -1499,16 +1559,29 @@ figure picture {
   margin-top: 20px;
 }
 
-/* 3 · La carta */
+/* 3 · La carta: el pa a tot l'ample; a sota, banana bread i brioixeria. */
 .catalog {
-  padding-block: clamp(72px, 8vw, 120px) var(--section);
+  padding-block: clamp(64px, 7vw, 104px) var(--section);
   color: var(--cobalt);
+}
+.catalog-title {
+  margin: clamp(24px, 3vw, 44px) 0 clamp(36px, 4.4vw, 64px);
+  color: var(--cobalt);
+}
+.menu {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(20px, 2.4vw, 36px);
 }
 .dish {
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
   align-items: center;
   gap: clamp(24px, 3vw, 48px);
+}
+.dish-loaf {
+  grid-column: 1 / -1;
+  margin-bottom: clamp(32px, 5vw, 72px);
 }
 .dish-loaf .dish-media {
   grid-column: 1 / span 7;
@@ -1613,22 +1686,6 @@ figure picture {
   font-size: 15px;
   line-height: 1.5;
   color: var(--ink);
-}
-.tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin: 22px 0 0;
-  padding: 0;
-  list-style: none;
-}
-.tags li {
-  padding: 6px 12px;
-  box-shadow: inset 0 0 0 1.5px currentColor;
-  font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
 }
 .size-choice {
   display: flex;
@@ -1742,51 +1799,73 @@ figure picture {
   text-transform: uppercase;
 }
 
-/* El banana bread, como su reel: fondo oscuro, cursiva y naranja. */
-.dish-banana {
-  margin-top: clamp(112px, 13vw, 200px);
-  padding: clamp(24px, 4vw, 64px);
+/* El banana bread i la brioixeria: dues targetes, una al costat de l'altra.
+   La foto a dalt, el preu i el botó a la vista, la resta plegada. */
+.card {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  overflow: clip;
   background: var(--night);
   color: var(--paper);
 }
-.dish-banana .dish-info {
-  grid-column: 1 / span 5;
-  grid-row: 1;
-}
-.dish-banana .dish-media {
-  grid-column: 7 / span 6;
-  grid-row: 1;
-}
-.dish-banana .dish-photo {
-  aspect-ratio: 5 / 6;
-  margin-left: 14%;
+.card-photo {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  overflow: clip;
   background: #24252b;
 }
-.dish-banana .dish-inset {
-  right: auto;
-  left: 0;
-  top: auto;
-  bottom: 18%;
-  width: 40%;
-  aspect-ratio: 4 / 3;
-  border-color: var(--night);
+.card-photo img {
+  transition: transform 1.6s var(--ease-out);
 }
-.dish-banana .fig-bar {
-  margin-left: 14%;
+.card:hover .card-photo img {
+  transform: scale(1.04);
 }
-.dish-banana .dish-index span {
+.card-body {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: clamp(22px, 2.6vw, 40px);
+}
+.card .dish-index span {
   background: var(--orange);
   color: var(--night);
 }
-.dish-banana h3 {
-  text-transform: none;
+.card h3 {
+  margin-top: 18px;
+  font-size: clamp(34px, 3vw, 52px);
+  line-height: 0.92;
 }
-.dish-banana h3 .serif-it {
+.card-desc {
+  margin-top: 12px;
+  max-width: 40ch;
+  font-size: 16px;
+  line-height: 1.55;
+  color: var(--on-night);
+}
+.card .dish-buy {
+  margin-top: 22px;
+}
+.card > .card-body > .button {
+  margin-top: 22px;
+}
+.card .mini-stepper button:hover {
+  background: rgba(246, 239, 229, 0.12);
+}
+.card .dish-stock {
+  color: var(--orange);
+}
+.card .spec div {
+  border-bottom-color: var(--on-night-line);
+}
+.card .spec dd {
+  color: var(--paper);
+}
+.card-banana h3 .serif-it {
   display: block;
   font-size: 1.32em;
   line-height: 0.9;
 }
-.dish-banana h3 em {
+.card-banana h3 em {
   display: block;
   margin-top: 0.08em;
   font-family: var(--sans);
@@ -1797,21 +1876,147 @@ figure picture {
   text-transform: uppercase;
   color: var(--orange);
 }
-.dish-banana .dish-desc {
-  color: var(--on-night);
+.card-banana .size-choice {
+  align-self: stretch;
+  margin-top: 18px;
 }
-.dish-banana .spec div {
-  border-bottom-color: var(--on-night-line);
+.card-banana .size-choice legend + label {
+  margin-top: 0;
 }
-.dish-banana .spec dd {
-  color: var(--paper);
+.card-tag {
+  position: absolute;
+  left: 16px;
+  top: 16px;
+  padding: 7px 12px;
+  background: var(--orange);
+  color: var(--night);
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 11.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
 }
-.dish-banana .dish-stock {
-  color: var(--orange);
+.card-pastry {
+  background: var(--cobalt);
 }
-.dish-banana .mini-stepper button:hover {
-  background: rgba(246, 239, 229, 0.12);
+.card-pastry .card-photo {
+  background: var(--cobalt-deep);
 }
+.card-pastry .card-photo img {
+  object-position: 50% 58%;
+}
+.card-pastry .card-desc {
+  color: var(--on-cobalt);
+}
+.card-pastry .spec div {
+  border-bottom-color: var(--on-cobalt-line);
+}
+.pastry-list {
+  align-self: stretch;
+  margin: 18px 0 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1.5px solid var(--paper);
+}
+.pastry-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 4px 16px;
+  padding: 18px 0;
+  border-bottom: 1px solid var(--on-cobalt-line);
+}
+.pastry-name h4 {
+  font-weight: 800;
+  font-stretch: 112%;
+  font-size: clamp(22px, 1.9vw, 28px);
+  letter-spacing: -0.02em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+.pastry-name p {
+  margin-top: 6px;
+  font-size: 14.5px;
+  line-height: 1.5;
+  color: var(--on-cobalt);
+}
+.pastry-price {
+  font-family: var(--sans);
+  font-weight: 800;
+  font-stretch: 125%;
+  font-size: clamp(26px, 2.2vw, 34px);
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+.pastry-buy {
+  grid-column: 1 / -1;
+  margin-top: 12px;
+}
+.pastry-buy.dish-buy {
+  margin-top: 12px;
+}
+.pastry-buy .button {
+  min-height: 46px;
+}
+.pastry-buy .mini-stepper {
+  min-height: 46px;
+}
+.pastry-buy .mini-stepper button {
+  height: 38px;
+}
+.pastry-later {
+  margin-top: 16px;
+  padding: 10px 14px;
+  box-shadow: inset 0 0 0 1.5px var(--on-cobalt-line);
+  font-family: var(--mono);
+  font-size: 11.5px;
+  line-height: 1.5;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--on-cobalt);
+}
+.card-pastry .mini-stepper button:hover {
+  background: rgba(246, 239, 229, 0.14);
+}
+/* Ingredients i al·lèrgens: a un clic, no a la cara. */
+details.dish-more {
+  align-self: stretch;
+  margin-top: auto;
+  padding-top: 22px;
+  border-bottom: 0;
+}
+.dish-more summary {
+  display: inline-flex;
+  gap: 10px;
+  padding: 6px 0;
+  font-family: var(--mono);
+  font-weight: 400;
+  font-stretch: 100%;
+  font-size: 11.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  opacity: 0.85;
+}
+.dish-more summary::after {
+  content: '+';
+  font-size: 15px;
+  line-height: 1;
+  transition: rotate 0.4s var(--ease-spring);
+}
+.dish-more[open] summary::after {
+  rotate: 45deg;
+}
+.dish-more summary:hover {
+  padding-left: 0;
+  opacity: 1;
+}
+.dish-more .spec {
+  margin-top: 10px;
+}
+.dish-more[open] .spec {
+  animation: rise 0.5s var(--ease-out);
+}
+
 /* Precios en carta: «Sencer ........ 15€». */
 .menu-choice {
   display: grid;
@@ -1880,160 +2085,6 @@ figure picture {
 }
 .menu-choice input:checked + span em {
   color: var(--orange);
-}
-
-/* 3b · Brioixeria: el reel del laminat. Fondo de obrador, pasos numerados
-   como en el vídeo y las dos piezas por unidades, con su cupo compartido. */
-.pastry {
-  padding-block: clamp(72px, 8vw, 120px) var(--section);
-  background: var(--night);
-  color: var(--paper);
-}
-.pastry .section-head h2 {
-  color: var(--paper);
-}
-.pastry .section-head h2 em {
-  color: var(--orange);
-}
-.pastry .section-intro {
-  color: var(--on-night);
-}
-.pastry-steps {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px 0;
-  margin: 0 0 clamp(40px, 5vw, 72px);
-  padding: 0;
-  list-style: none;
-  font-family: var(--mono);
-  font-size: 11.5px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-}
-.pastry-steps li {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 8px;
-  padding-right: 18px;
-  margin-right: 18px;
-  border-right: 1px solid var(--on-night-line);
-}
-.pastry-steps li:last-child {
-  border-right: 0;
-}
-.pastry-steps span {
-  font-family: var(--sans);
-  font-weight: 800;
-  font-stretch: 112%;
-  font-size: 22px;
-  letter-spacing: -0.04em;
-  color: var(--orange);
-}
-.pastry-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
-  align-items: start;
-  gap: clamp(40px, 6vw, 104px);
-}
-.pastry-frame {
-  aspect-ratio: 4 / 5;
-  overflow: clip;
-  background: #24252b;
-}
-.pastry-photo img {
-  object-position: 50% 58%;
-  transition: transform 1.6s var(--ease-out);
-}
-.pastry-frame:hover img {
-  transform: scale(1.04);
-}
-.pastry-list {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  border-top: 1.5px solid var(--paper);
-}
-.pastry-item {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  align-items: start;
-  gap: 8px 20px;
-  padding: 26px 0 28px;
-  border-bottom: 1px solid var(--on-night-line);
-}
-.pastry-num {
-  padding-top: 6px;
-  font-family: var(--mono);
-  font-size: 12px;
-  letter-spacing: 0.08em;
-  color: var(--orange);
-}
-.pastry-name h3 {
-  font-size: clamp(30px, 2.8vw, 46px);
-  text-transform: uppercase;
-  line-height: 0.92;
-}
-.pastry-name p {
-  margin-top: 10px;
-  max-width: 32ch;
-  font-size: 15.5px;
-  line-height: 1.55;
-  color: var(--on-night);
-}
-.pastry-price {
-  display: grid;
-  justify-items: end;
-  gap: 6px;
-  text-align: right;
-}
-.pastry-price .outline-price {
-  --stroke: var(--paper);
-  font-size: clamp(44px, 3.6vw, 64px);
-  letter-spacing: 0;
-}
-.pastry-unit {
-  font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--on-night);
-}
-.pastry-buy {
-  grid-column: 2 / -1;
-  margin-top: 16px;
-}
-.pastry-later {
-  justify-self: start;
-  padding: 10px 14px;
-  box-shadow: inset 0 0 0 1.5px var(--on-night-line);
-  font-family: var(--mono);
-  font-size: 11.5px;
-  line-height: 1.5;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--on-night);
-}
-.pastry .mini-stepper button:hover {
-  background: rgba(246, 239, 229, 0.12);
-}
-.pastry-quota {
-  margin-top: 26px;
-}
-.pastry-quota p {
-  color: var(--orange);
-  font-family: var(--mono);
-  font-size: 11.5px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-.pastry .spec {
-  margin-top: 30px;
-}
-.pastry .spec div {
-  border-bottom-color: var(--on-night-line);
-}
-.pastry .spec dd {
-  color: var(--paper);
 }
 
 /* Pa fix: la targeta cobalt que porta de la primera compra a la subscripció. */
@@ -2944,6 +2995,16 @@ details[open] p {
 .waitlist .form-footnote {
   text-align: left;
 }
+.waitlist.is-compact {
+  padding-block: clamp(56px, 6vw, 88px);
+}
+.waitlist.is-compact .waitlist-grid {
+  grid-template-columns: minmax(0, 1fr);
+  max-width: 760px;
+}
+.waitlist.is-compact h2 {
+  font-size: clamp(40px, 4.4vw, 72px);
+}
 .waitlist-success {
   margin-top: 18px;
   padding: 14px 16px;
@@ -3380,23 +3441,11 @@ details[open] p {
   .nav-hide:nth-child(n + 3) {
     display: none;
   }
-  /* Narrow info column: the price goes under the name instead of beside it. */
-  .pastry-item {
-    grid-template-columns: auto minmax(0, 1fr);
-  }
-  .pastry-price {
-    grid-column: 2;
-    justify-items: start;
-    text-align: left;
-  }
   .dish-loaf .dish-info {
     grid-column: 8 / span 5;
   }
-  .dish-banana .dish-info {
-    grid-column: 1 / span 6;
-  }
-  .dish-banana .dish-media {
-    grid-column: 7 / span 6;
+  .why-grid {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -3418,7 +3467,10 @@ details[open] p {
     margin-bottom: 28px;
   }
   .hero-photo-frame {
-    aspect-ratio: 4 / 3.4;
+    aspect-ratio: 16 / 11;
+  }
+  .hero-photo .fig-bar {
+    display: none;
   }
   .hero-title {
     font-size: clamp(30px, 8.2vw, 72px);
@@ -3428,9 +3480,8 @@ details[open] p {
     padding-left: 0;
   }
   .section-head,
-  .why-grid,
   .fix-grid,
-  .pastry-grid,
+  .menu,
   .process-grid,
   .maker-grid,
   .reserve-grid,
@@ -3448,12 +3499,8 @@ details[open] p {
     grid-column: 1 / -1;
     grid-row: auto;
   }
-  .dish-banana .dish-media {
-    order: -1;
-  }
-  .dish-banana .dish-photo,
-  .dish-banana .fig-bar {
-    margin-left: 18%;
+  .dish-loaf {
+    margin-bottom: 24px;
   }
   .dish-inset {
     right: -2%;
@@ -3553,13 +3600,23 @@ details[open] p {
     border-left: 0;
     border-bottom: 1px solid var(--on-cobalt-line);
   }
-  .pastry-item {
-    grid-template-columns: auto 1fr;
+  .why-stats {
+    grid-template-columns: 1fr;
   }
-  .pastry-price {
-    grid-column: 2;
-    justify-items: start;
-    text-align: left;
+  .why-stats li,
+  .why-stats li + li {
+    grid-template-columns: 112px 1fr;
+    align-items: baseline;
+    padding: 16px 0;
+    border-left: 0;
+    border-bottom: 1px solid var(--line-strong);
+  }
+  .why-stats strong {
+    font-size: 44px;
+  }
+  .hero-gift {
+    font-size: 11px;
+    padding: 10px 12px;
   }
   .step {
     grid-template-columns: 56px 1fr;

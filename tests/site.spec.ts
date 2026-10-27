@@ -994,9 +994,12 @@ test('first order gets the welcome gift; the second one does not', async ({
   await expect(page.locator('.hero-lede')).toContainText(
     'Miércoles y sábado en tu puerta. Pagas al recibirlo.',
   );
-  // The hero announces the gift; the voucher lives with the pa fix.
+  // The hero announces the gift in a tag; the details live by the ticket.
   await expect(page.locator('.hero-gift')).toContainText(
-    'dos trozos de banana bread de dos dedos de grosor, uno para ti y otro para quien quieras',
+    'Regalo en tu primer pedido',
+  );
+  await expect(page.locator('#regal')).toContainText(
+    'Dos trozos de banana bread: uno para ti y otro para regalar.',
   );
   await expect(page.locator('.hero-gift')).not.toContainText('Vale');
   await expect(page.locator('.fix')).toContainText(
@@ -1004,15 +1007,13 @@ test('first order gets the welcome gift; the second one does not', async ({
   );
   await expect(page.locator('body')).not.toContainText('chutney');
   await expect(page.locator('body')).not.toContainText('suscripciones');
-  await expect(page.locator('.why')).toContainText(
-    'Si tienes un buen horno a dos minutos, cómprale a él. Yo soy para otra cosa.',
-  );
+  await expect(page.locator('.why')).toContainText('de fermentación lenta');
   // The pa fix block leads to the sign-up page.
   await expect(
     page.locator('.fix').getByRole('link', { name: /Pan fijo/ }),
   ).toHaveAttribute('href', '/es/pan-fijo');
   await expect(page.locator('.form-footnote').first()).toContainText(
-    'Cancelas con un clic hasta el cierre de la hornada',
+    'Cancelas con un clic hasta el cierre.',
   );
   const book = (email: string) =>
     request.post('/api/reservations', {
