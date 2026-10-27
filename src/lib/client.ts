@@ -353,6 +353,30 @@ if (pill) {
   if (hero) watch.observe(hero);
   if (reserve) watch.observe(reserve);
 }
+/* ---- Cuenta atrás hasta el cierre: «Cierra en 2 d 5 h». ---- */
+const countdown = document.querySelector<HTMLElement>('[data-countdown]');
+function tick() {
+  if (!countdown) return;
+  const left = Date.parse(countdown.dataset.countdown!) - Date.now();
+  if (!(left > 0)) {
+    countdown.hidden = true;
+    return;
+  }
+  const min = Math.floor(left / 60000);
+  const d = Math.floor(min / 1440);
+  const h = Math.floor((min % 1440) / 60);
+  const m = min % 60;
+  const text = d ? `${d} d ${h} h` : h ? `${h} h ${m} min` : `${m} min`;
+  countdown.textContent = `${countdown.dataset.countdownLabel} `;
+  const strong = document.createElement('b');
+  strong.textContent = text;
+  countdown.append(strong);
+  countdown.hidden = false;
+}
+if (countdown) {
+  tick();
+  setInterval(tick, 30000);
+}
 render();
 form?.addEventListener('focusin', startOnce, { once: true });
 async function submit(target: HTMLFormElement) {

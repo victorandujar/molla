@@ -196,6 +196,14 @@ const jsonLd = [
               molla<span>.</span>
             </span>
           </div>
+          {welcomeGift.active && (
+            <a class="hero-gift" href="#regal">
+              <span class="star" aria-hidden="true">
+                ✷
+              </span>
+              {t.hero.giftBadge}
+            </a>
+          )}
           <figcaption class="fig-bar">
             <span>{t.ed.fig}</span>
             <span>{t.ed.ferment}</span>
@@ -205,31 +213,10 @@ const jsonLd = [
           <p class="hero-lede hero-in" style="--i:3">
             {t.hero.short}
           </p>
-          <div class="hero-actions hero-in" style="--i:4">
-            <a class="button button-light" href={open ? '#carta' : '#avisame'}>
-              {open ? t.hero.order : t.hero.notify}
-              <span class="button-arrow" aria-hidden="true">
-                →
-              </span>
-            </a>
-            <a class="link-arrow" href={`${routes.poolish[lang]}#proceso`}>
-              {t.hero.how} <span aria-hidden="true">↓</span>
-            </a>
-          </div>
-          {welcomeGift.active && (
-            <p class="hero-gift hero-in" style="--i:5">
-              <span class="star" aria-hidden="true">
-                ✷
-              </span>
-              <span>
-                {t.hero.gift} <a href="#regal">{t.hero.giftMore}</a>
-              </span>
-            </p>
-          )}
           <div
             id="hornada"
             class="hero-bake hero-in"
-            style="--i:6"
+            style="--i:4"
             data-state={state}
             data-event-view="view_current_bake"
             aria-labelledby="bake-title"
@@ -254,6 +241,14 @@ const jsonLd = [
                   ? t.bake.upcoming
                   : t.bake.closed}
             </p>
+            {open && (
+              <p
+                class="stub-countdown"
+                data-countdown={current.deadline}
+                data-countdown-label={t.bake.closesIn}
+                hidden
+              ></p>
+            )}
             {unavailable && (
               <p role="status" class="stub-deadline">
                 {t.bake.unavailable}
@@ -267,11 +262,30 @@ const jsonLd = [
             >
               {t.catalog.stock.bread.low}
             </p>
-            <a class="stub-cta" href={orderHref} data-bake-cta>
+            <a
+              class="button button-orange full stub-cta"
+              href={open ? '#carta' : '#avisame'}
+              data-bake-cta
+            >
               {open ? t.bake.ctaOpen : t.bake.ctaClosed}
-              <span aria-hidden="true">↓</span>
+              <span class="button-arrow" aria-hidden="true">
+                →
+              </span>
             </a>
           </div>
+          <ul class="hero-proof hero-in" style="--i:5">
+            <li>
+              <a href="#resenas">
+                <span class="hero-stars" aria-hidden="true">
+                  ★★★★★
+                </span>
+                {googleReviews.score} · {t.reviews.count(googleReviews.count)}
+              </a>
+            </li>
+            {t.hero.proof.map((p) => (
+              <li>{p}</li>
+            ))}
+          </ul>
         </div>
       </div>
     </section>
@@ -294,7 +308,7 @@ const jsonLd = [
       ))}
     </div>
 
-    <!-- 3 · La carta -->
+    <!-- 3 · La carta: tres piezas, la foto manda y el botón está a mano -->
     <section
       id="carta"
       class="catalog"
@@ -306,377 +320,310 @@ const jsonLd = [
           <span>Nº 01 · {t.catalog.kicker}</span>
           <span>{t.ed.menuBar}</span>
         </div>
-        <header class="section-head">
-          <h2 id="catalog-title" data-split>
-            {t.catalog.h2a} <em>{t.catalog.h2b}</em>
-          </h2>
-          <p class="section-intro" data-reveal>
-            {t.catalog.intro}
-          </p>
-        </header>
+        <h2 id="catalog-title" class="catalog-title" data-split>
+          {t.catalog.h2a} <em>{t.catalog.h2b}</em>
+        </h2>
 
-        <article class="dish dish-loaf" aria-labelledby="loaf-title">
-          <div class="dish-media">
-            <figure class="dish-photo" data-wipe>
-              <Photo
-                name="loaves"
-                alt={t.loaf.alt}
-                sizes="(max-width: 960px) calc(100vw - 40px), 56vw"
-              />
-            </figure>
-            <figure class="dish-inset" data-parallax="-0.08">
-              <Photo
-                name="slice"
-                alt={t.loaf.altSlice}
-                sizes="(max-width: 960px) 50vw, 22vw"
-              />
-            </figure>
-            <p class="fig-bar fig-bar-ink">
-              <span>{t.ed.fig2}</span>
-              <span>{loaf.weight}</span>
-            </p>
-          </div>
-          <div class="dish-info" data-reveal>
-            <p class="dish-index">
-              <span>01</span>
-              {t.loaf.kicker}
-            </p>
-            <h3 id="loaf-title">{t.loaf.name}</h3>
-            <p class="dish-desc">{t.loaf.fermentationValue}.</p>
-            <p class="dish-price">
-              <span class="outline-price" aria-hidden="true">
-                {short(loaf.price)}
-              </span>
-              <strong class="visually-hidden">{money(loaf.price)}</strong>
-              <span>{loaf.weight}</span>
-            </p>
-            <dl class="spec">
-              <div>
-                <dt>{t.loaf.ingredients}</dt>
-                <dd>{t.loaf.ingredientsValue}</dd>
-              </div>
-              <div>
-                <dt>{t.loaf.allergens}</dt>
-                <dd>{t.loaf.allergensValue}</dd>
-              </div>
-              <div>
-                <dt>{t.loaf.keeps}</dt>
-                <dd>{t.loaf.keepsValue}</dd>
-              </div>
-            </dl>
-            {open ? (
-              <div class="dish-buy" data-buy="loaf">
-                <button type="button" class="button" data-add="loaf">
-                  {t.catalog.add}
-                  <span class="button-plus" aria-hidden="true">
-                    +
-                  </span>
-                </button>
-                <div class="mini-stepper" data-mini="loaf" hidden>
-                  <button
-                    type="button"
-                    data-sub="loaf"
-                    aria-label={t.reserve.less}
-                  >
-                    −
+        <div class="menu">
+          <article class="dish dish-loaf" aria-labelledby="loaf-title">
+            <div class="dish-media">
+              <figure class="dish-photo" data-wipe>
+                <Photo
+                  name="loaves"
+                  alt={t.loaf.alt}
+                  sizes="(max-width: 960px) calc(100vw - 40px), 56vw"
+                />
+              </figure>
+              <figure class="dish-inset" data-parallax="-0.08">
+                <Photo
+                  name="slice"
+                  alt={t.loaf.altSlice}
+                  sizes="(max-width: 960px) 50vw, 22vw"
+                />
+              </figure>
+            </div>
+            <div class="dish-info" data-reveal>
+              <p class="dish-index">
+                <span>01</span>
+                {t.loaf.kicker}
+              </p>
+              <h3 id="loaf-title">{t.loaf.name}</h3>
+              <p class="dish-desc">{t.loaf.fermentationValue}.</p>
+              <p class="dish-price">
+                <span class="outline-price" aria-hidden="true">
+                  {short(loaf.price)}
+                </span>
+                <strong class="visually-hidden">{money(loaf.price)}</strong>
+                <span>{loaf.weight}</span>
+              </p>
+              {open ? (
+                <div class="dish-buy" data-buy="loaf">
+                  <button type="button" class="button" data-add="loaf">
+                    {t.catalog.add}
+                    <span class="button-plus" aria-hidden="true">
+                      +
+                    </span>
                   </button>
-                  <output data-count="loaf" aria-live="polite"></output>
-                  <button
-                    type="button"
-                    data-add="loaf"
-                    aria-label={t.reserve.more}
-                  >
-                    +
-                  </button>
+                  <div class="mini-stepper" data-mini="loaf" hidden>
+                    <button
+                      type="button"
+                      data-sub="loaf"
+                      aria-label={t.reserve.less}
+                    >
+                      −
+                    </button>
+                    <output data-count="loaf" aria-live="polite"></output>
+                    <button
+                      type="button"
+                      data-add="loaf"
+                      aria-label={t.reserve.more}
+                    >
+                      +
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ) : (
-              <a class="button button-ghost" href="#avisame">
-                {t.loaf.notify}
-              </a>
-            )}
-          </div>
-        </article>
+              ) : (
+                <a class="button button-ghost" href="#avisame">
+                  {t.loaf.notify}
+                </a>
+              )}
+              <details class="dish-more">
+                <summary>{t.catalog.details}</summary>
+                <dl class="spec">
+                  <div>
+                    <dt>{t.loaf.ingredients}</dt>
+                    <dd>{t.loaf.ingredientsValue}</dd>
+                  </div>
+                  <div>
+                    <dt>{t.loaf.allergens}</dt>
+                    <dd>{t.loaf.allergensValue}</dd>
+                  </div>
+                  <div>
+                    <dt>{t.loaf.keeps}</dt>
+                    <dd>{t.loaf.keepsValue}</dd>
+                  </div>
+                </dl>
+              </details>
+            </div>
+          </article>
 
-        <!-- El banana bread, como el reel: luz de tarde y precios en cursiva -->
-        <article class="dish dish-banana" aria-labelledby="banana-title">
-          <div class="dish-media">
-            <figure class="dish-photo" data-wipe>
+          <!-- El banana bread, como el reel: fondo oscuro y precios en cursiva -->
+          <article class="card card-banana" aria-labelledby="banana-title">
+            <figure class="card-photo" data-wipe>
               <Photo
                 name="banana"
                 alt={t.banana.alt}
                 sizes="(max-width: 960px) calc(100vw - 40px), 44vw"
               />
             </figure>
-            <figure class="dish-inset" data-parallax="-0.1">
-              <Photo
-                name="bananaDetail"
-                alt={t.banana.altDetail}
-                sizes="(max-width: 960px) 50vw, 22vw"
-              />
-            </figure>
-            <p class="fig-bar">
-              <span>{t.ed.fig3}</span>
-              <span>
-                {short(bananaWhole.price)} · {short(bananaHalf.price)}
-              </span>
-            </p>
-          </div>
-          <div class="dish-info" data-reveal>
-            <p class="dish-index">
-              <span>02</span>
-              {t.banana.kicker}
-            </p>
-            <h3 id="banana-title">
-              <span class="serif-it">{t.banana.h2a}</span>{' '}
-              <em>{t.banana.h2b}</em>
-            </h3>
-            <p class="dish-desc">{t.banana.p}</p>
-            <ul class="tags">
-              <li>{t.banana.point1}</li>
-              <li>{t.banana.point2}</li>
-              <li>{t.banana.point3}</li>
-            </ul>
-            <fieldset class="size-choice menu-choice" disabled={!open}>
-              <legend>{t.catalog.size}</legend>
-              <label>
-                <input type="radio" name="banana-size" value="2" checked />
-                <span>
-                  <strong>{t.ed.whole}</strong>
-                  <i class="leader" aria-hidden="true"></i>
-                  <em>{short(bananaWhole.price)}</em>
-                </span>
-              </label>
-              <label>
-                <input type="radio" name="banana-size" value="1" />
-                <span>
-                  <strong>{t.ed.half}</strong>
-                  <i class="leader" aria-hidden="true"></i>
-                  <em>{short(bananaHalf.price)}</em>
-                </span>
-              </label>
-            </fieldset>
-            <dl class="spec">
-              <div>
-                <dt>{t.loaf.ingredients}</dt>
-                <dd>{t.banana.ingredientsValue}</dd>
-              </div>
-              <div>
-                <dt>{t.loaf.allergens}</dt>
-                <dd>{t.banana.allergensValue}</dd>
-              </div>
-            </dl>
-            <p
-              class="dish-stock"
-              data-stock="banana"
-              data-level={stock.banana.level}
-              hidden={open && !stockText('banana')}
-            >
-              {open ? stockText('banana') : t.catalog.closed}
-            </p>
-            {open ? (
-              <div class="dish-buy" data-buy="banana">
-                <button
-                  type="button"
-                  class="button button-orange"
-                  data-add="banana"
-                  disabled={bananaMax === 0}
-                >
-                  {t.catalog.add}
-                  <span class="button-plus" aria-hidden="true">
-                    +
+            <div class="card-body" data-reveal>
+              <p class="dish-index">
+                <span>02</span>
+                {t.banana.kicker}
+              </p>
+              <h3 id="banana-title">
+                <span class="serif-it">{t.banana.h2a}</span>{' '}
+                <em>{t.banana.h2b}</em>
+              </h3>
+              <p class="card-desc">{t.banana.short}</p>
+              <fieldset class="size-choice menu-choice" disabled={!open}>
+                <legend class="visually-hidden">{t.catalog.size}</legend>
+                <label>
+                  <input type="radio" name="banana-size" value="2" checked />
+                  <span>
+                    <strong>{t.ed.whole}</strong>
+                    <i class="leader" aria-hidden="true"></i>
+                    <em>{short(bananaWhole.price)}</em>
                   </span>
-                </button>
-                <div class="mini-stepper" data-mini="banana" hidden>
-                  <button
-                    type="button"
-                    data-sub="banana"
-                    aria-label={t.reserve.bananaLess}
-                  >
-                    −
-                  </button>
-                  <output data-count="banana" aria-live="polite"></output>
-                  <button
-                    type="button"
-                    data-add="banana"
-                    data-halves="1"
-                    aria-label={t.reserve.bananaMore}
-                  >
-                    +
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <a class="button button-light" href="#avisame">
-                {t.banana.notify}
-              </a>
-            )}
-          </div>
-        </article>
-      </div>
-    </section>
-
-    <!-- 3b · Brioixeria: el reel del laminat. Per unitats, amb cupo compartit -->
-    <section
-      id="bolleria"
-      class="pastry"
-      aria-labelledby="pastry-title"
-      data-event-view="view_product"
-    >
-      <div class="wrap">
-        <div class="mono-bar" data-bar>
-          <span>Nº 02 · {t.pastry.kicker}</span>
-          <span>{t.pastry.bar}</span>
-        </div>
-        <header class="section-head">
-          <h2 id="pastry-title" data-split>
-            {t.pastry.h2a} <em>{t.pastry.h2b}</em>
-          </h2>
-          <p class="section-intro" data-reveal>
-            {t.pastry.intro}
-          </p>
-        </header>
-        <ol class="pastry-steps" aria-hidden="true">
-          {t.pastry.steps.map((step, i) => (
-            <li style={`--i:${i}`}>
-              <span>{i + 1}</span>
-              {step}
-            </li>
-          ))}
-        </ol>
-        <div class="pastry-grid">
-          <div class="pastry-media">
-            <figure class="pastry-photo">
-              <div class="pastry-frame" data-wipe>
-                <Photo
-                  name="pastries"
-                  alt={t.pastry.alt}
-                  sizes="(max-width: 960px) calc(100vw - 40px), 50vw"
-                />
-              </div>
-              <figcaption class="fig-bar">
-                <span>{t.ed.fig5}</span>
-              </figcaption>
-            </figure>
-          </div>
-          <div class="pastry-info" data-reveal>
-            <ul class="pastry-list">
-              {pastries.map((p, i) => (
-                <li class="pastry-item">
-                  <span class="pastry-num" aria-hidden="true">
-                    {pad(i + 1)}
+                </label>
+                <label>
+                  <input type="radio" name="banana-size" value="1" />
+                  <span>
+                    <strong>{t.ed.half}</strong>
+                    <i class="leader" aria-hidden="true"></i>
+                    <em>{short(bananaHalf.price)}</em>
                   </span>
-                  <div class="pastry-name">
-                    <h3>{p.name}</h3>
-                    <p>{p.text}</p>
-                  </div>
-                  <p class="pastry-price">
-                    <span class="outline-price" aria-hidden="true">
-                      {tight(p.product.price)}
-                    </span>
-                    <span class="visually-hidden">
-                      {money(p.product.price)}
-                    </span>
-                    <span class="pastry-unit">{t.pastry.unit}</span>
-                  </p>
-                  {open && pastryDay ? (
-                    <div class="dish-buy pastry-buy" data-buy={p.key}>
-                      <button
-                        type="button"
-                        class="button button-orange"
-                        data-add={p.key}
-                        disabled={pastryMax === 0}
-                        aria-label={`${t.pastry.add}: ${p.name}`}
-                      >
-                        {t.pastry.add}
-                        <span class="button-plus" aria-hidden="true">
-                          +
-                        </span>
-                      </button>
-                      <div class="mini-stepper" data-mini={p.key} hidden>
-                        <button
-                          type="button"
-                          data-sub={p.key}
-                          aria-label={t.pastry.less(p.name)}
-                        >
-                          −
-                        </button>
-                        <output data-count={p.key} aria-live="polite"></output>
-                        <button
-                          type="button"
-                          data-add={p.key}
-                          aria-label={t.pastry.more(p.name)}
-                        >
-                          +
-                        </button>
-                      </div>
-                    </div>
-                  ) : open ? (
-                    <p class="pastry-buy pastry-later">
-                      {t.pastry.saturdayOnly}
-                    </p>
-                  ) : (
-                    <a class="button button-light pastry-buy" href="#avisame">
-                      {t.pastry.notify}
-                    </a>
-                  )}
-                </li>
-              ))}
-            </ul>
-            <div class="pastry-quota">
+                </label>
+              </fieldset>
               <p
+                class="dish-stock"
+                data-stock="banana"
+                data-level={stock.banana.level}
+                hidden={open && !stockText('banana')}
+              >
+                {open ? stockText('banana') : t.catalog.closed}
+              </p>
+              {open ? (
+                <div class="dish-buy" data-buy="banana">
+                  <button
+                    type="button"
+                    class="button button-orange"
+                    data-add="banana"
+                    disabled={bananaMax === 0}
+                  >
+                    {t.catalog.add}
+                    <span class="button-plus" aria-hidden="true">
+                      +
+                    </span>
+                  </button>
+                  <div class="mini-stepper" data-mini="banana" hidden>
+                    <button
+                      type="button"
+                      data-sub="banana"
+                      aria-label={t.reserve.bananaLess}
+                    >
+                      −
+                    </button>
+                    <output data-count="banana" aria-live="polite"></output>
+                    <button
+                      type="button"
+                      data-add="banana"
+                      data-halves="1"
+                      aria-label={t.reserve.bananaMore}
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <a class="button button-light" href="#avisame">
+                  {t.banana.notify}
+                </a>
+              )}
+              <details class="dish-more">
+                <summary>{t.catalog.details}</summary>
+                <dl class="spec">
+                  <div>
+                    <dt>{t.loaf.ingredients}</dt>
+                    <dd>{t.banana.ingredientsValue}</dd>
+                  </div>
+                  <div>
+                    <dt>{t.loaf.allergens}</dt>
+                    <dd>{t.banana.allergensValue}</dd>
+                  </div>
+                </dl>
+              </details>
+            </div>
+          </article>
+
+          <!-- Brioixeria: per unitats, amb cupo compartit, només dissabte -->
+          <article
+            id="bolleria"
+            class="card card-pastry"
+            aria-labelledby="pastry-title"
+          >
+            <figure class="card-photo" data-wipe>
+              <Photo
+                name="pastries"
+                alt={t.pastry.alt}
+                sizes="(max-width: 960px) calc(100vw - 40px), 44vw"
+              />
+              <span class="card-tag">{t.pastry.tag}</span>
+            </figure>
+            <div class="card-body" data-reveal>
+              <p class="dish-index">
+                <span>03</span>
+                {t.pastry.kicker}
+              </p>
+              <h3 id="pastry-title" class="visually-hidden">
+                {t.pastry.kicker}
+              </h3>
+              <p class="card-desc">{t.pastry.short}</p>
+              <ul class="pastry-list">
+                {pastries.map((p) => (
+                  <li class="pastry-item">
+                    <div class="pastry-name">
+                      <h4>{p.name}</h4>
+                      <p>{p.text}</p>
+                    </div>
+                    <p class="pastry-price">
+                      <span aria-hidden="true">{tight(p.product.price)}</span>
+                      <span class="visually-hidden">
+                        {money(p.product.price)} · {t.pastry.unit}
+                      </span>
+                    </p>
+                    {open && pastryDay ? (
+                      <div class="dish-buy pastry-buy" data-buy={p.key}>
+                        <button
+                          type="button"
+                          class="button button-orange"
+                          data-add={p.key}
+                          disabled={pastryMax === 0}
+                          aria-label={`${t.pastry.add}: ${p.name}`}
+                        >
+                          {t.pastry.add}
+                          <span class="button-plus" aria-hidden="true">
+                            +
+                          </span>
+                        </button>
+                        <div class="mini-stepper" data-mini={p.key} hidden>
+                          <button
+                            type="button"
+                            data-sub={p.key}
+                            aria-label={t.pastry.less(p.name)}
+                          >
+                            −
+                          </button>
+                          <output
+                            data-count={p.key}
+                            aria-live="polite"
+                          ></output>
+                          <button
+                            type="button"
+                            data-add={p.key}
+                            aria-label={t.pastry.more(p.name)}
+                          >
+                            +
+                          </button>
+                        </div>
+                      </div>
+                    ) : null}
+                  </li>
+                ))}
+              </ul>
+              {open && !pastryDay && (
+                <p class="pastry-later">{t.pastry.saturdayOnly}</p>
+              )}
+              {!open && (
+                <a class="button button-light" href="#avisame">
+                  {t.pastry.notify}
+                </a>
+              )}
+              <p
+                class="dish-stock"
                 data-stock="pastry"
                 data-level={stock.pastry.level}
-                hidden={open && pastryDay && !stockText('pastry')}
+                hidden={open && (!pastryDay || !stockText('pastry'))}
               >
-                {!open
-                  ? t.catalog.closed
-                  : pastryDay
-                    ? stockText('pastry')
-                    : t.pastry.saturdayOnly}
+                {open ? stockText('pastry') : t.catalog.closed}
               </p>
+              <details class="dish-more">
+                <summary>{t.catalog.details}</summary>
+                <dl class="spec">
+                  <div>
+                    <dt>{t.loaf.ingredients}</dt>
+                    <dd>{t.pastry.ingredients}</dd>
+                  </div>
+                  <div>
+                    <dt>{t.loaf.allergens}</dt>
+                    <dd>{t.pastry.allergens}</dd>
+                  </div>
+                </dl>
+              </details>
             </div>
-            <dl class="spec">
-              <div>
-                <dt>{t.loaf.ingredients}</dt>
-                <dd>{t.pastry.ingredients}</dd>
-              </div>
-              <div>
-                <dt>{t.loaf.allergens}</dt>
-                <dd>{t.pastry.allergens}</dd>
-              </div>
-            </dl>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Per què jo i no el forn: la resposta honesta, després de la carta -->
-    <section class="why" aria-labelledby="why-title">
-      <div class="wrap">
-        <div class="mono-bar" data-bar>
-          <span>{t.why.kicker}</span>
-          <span>{t.why.bar}</span>
-        </div>
-        <div class="why-grid">
-          <h2 id="why-title" data-split>
-            {t.why.h2a} <em>{t.why.h2b}</em>
-          </h2>
-          <div class="why-copy" data-reveal>
-            <p class="why-honest">{t.why.honest}</p>
-            <ul class="why-points">
-              {t.why.points.map((point) => (
-                <li>{point}</li>
-              ))}
-            </ul>
-          </div>
+          </article>
         </div>
       </div>
     </section>
 
     <!-- Ressenyes de Google: un cartell amb l'índex al costat, com la taula
          del flyer. Una ressenya a la vegada. Cites textuals, en el seu idioma. -->
-    <section class="reviews" aria-labelledby="reviews-title" data-reviews>
+    <section
+      id="resenas"
+      class="reviews"
+      aria-labelledby="reviews-title"
+      data-reviews
+    >
       <div class="wrap">
         <div class="mono-bar" data-bar>
           <span>{t.reviews.kicker}</span>
@@ -688,7 +635,6 @@ const jsonLd = [
             {t.reviews.count(googleReviews.count)}
           </span>
         </h2>
-        <p class="reviews-verbatim">{t.reviews.verbatim}</p>
         <div class="reviews-board">
           <div class="reviews-stage" data-reviews-stage>
             {googleReviews.quotes.map((r, i) => {
@@ -794,6 +740,29 @@ const jsonLd = [
       </div>
     </section>
 
+    <!-- Per què jo i no el forn: tres xifres, sense discurs -->
+    <section class="why" aria-labelledby="why-title">
+      <div class="wrap">
+        <div class="mono-bar" data-bar>
+          <span>{t.why.kicker}</span>
+          <span>{t.why.bar}</span>
+        </div>
+        <div class="why-grid">
+          <h2 id="why-title" data-split>
+            {t.why.h2a} <em>{t.why.h2b}</em>
+          </h2>
+          <ul class="why-stats" data-reveal>
+            {t.why.stats.map(([value, label]) => (
+              <li>
+                <strong>{value}</strong>
+                <span>{label}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </section>
+
     <!-- 2 · Diari de l'obrador: las fotos de la cocina, como un reel -->
     <section class="diary" aria-label={t.film.label} data-diary>
       <div class="diary-pin">
@@ -849,47 +818,6 @@ const jsonLd = [
       </div>
     </section>
 
-    <!-- Pa fix: la primera compra porta a la subscripció -->
-    <section class="fix" aria-labelledby="fix-title">
-      <div class="wrap fix-card">
-        <div class="mono-bar fix-bar" data-bar>
-          <span>{t.fix.kicker}</span>
-          <span>{t.fix.bar}</span>
-        </div>
-        <div class="fix-grid">
-          <div>
-            <h2 id="fix-title" data-split>
-              {t.fix.h2a} <em>{t.fix.h2b}</em>
-            </h2>
-            <p class="fix-text" data-reveal>
-              {t.fix.p}
-            </p>
-          </div>
-          <div class="fix-side" data-reveal>
-            {welcomeGift.active && (
-              <p class="fix-voucher">
-                <span class="star" aria-hidden="true">
-                  ✷
-                </span>
-                {t.fix.voucher}
-              </p>
-            )}
-            <ul class="fix-facts">
-              {t.fix.facts(money(loaf.price)).map((fact) => (
-                <li>{fact}</li>
-              ))}
-            </ul>
-            <a class="button button-orange" href={routes.standing[lang]}>
-              {t.fix.cta}
-              <span class="button-arrow" aria-hidden="true">
-                →
-              </span>
-            </a>
-          </div>
-        </div>
-      </div>
-    </section>
-
     <!-- 7 · Reserva: el tiquet, sobre el azul del flyer -->
     <section id="reserva" class="reserve" aria-labelledby="reserve-title">
       <div class="wrap">
@@ -911,10 +839,9 @@ const jsonLd = [
               <dd id="recogida" data-event-view="pickup_info_view">
                 {t.reserve.pickupLocation}
                 <small>{t.reserve.pickupDetails}</small>
-                <small>{current.pickupWindow || t.reserve.windowPending}</small>
+                {current.pickupWindow && <small>{current.pickupWindow}</small>}
                 <span class="map-links">
                   <a href={routes.delivery[lang]}>{t.reserve.pickupInfo}</a>
-                  <a href={routes.standing[lang]}>{t.reserve.standingCta}</a>
                 </span>
               </dd>
             </div>
@@ -933,9 +860,6 @@ const jsonLd = [
                 {welcomeGift.chutney && <li>{t.reserve.giftChutney}</li>}
               </ul>
               <p class="gift-small">{t.reserve.giftAllergens}</p>
-              <a class="text-link gift-fix" href={routes.standing[lang]}>
-                {t.fix.cta} <span aria-hidden="true">→</span>
-              </a>
             </div>
           )}
           {brand.whatsapp && (
@@ -1311,6 +1235,44 @@ const jsonLd = [
       </div>
     </section>
 
+    <!-- Pa fix: després de la primera compra, la subscripció -->
+    <section class="fix" aria-labelledby="fix-title">
+      <div class="wrap fix-card">
+        <div class="mono-bar fix-bar" data-bar>
+          <span>{t.fix.kicker}</span>
+          <span>{t.fix.bar}</span>
+        </div>
+        <div class="fix-grid">
+          <div>
+            <h2 id="fix-title" data-split>
+              {t.fix.h2a} <em>{t.fix.h2b}</em>
+            </h2>
+          </div>
+          <div class="fix-side" data-reveal>
+            {welcomeGift.active && (
+              <p class="fix-voucher">
+                <span class="star" aria-hidden="true">
+                  ✷
+                </span>
+                {t.fix.voucher}
+              </p>
+            )}
+            <ul class="fix-facts">
+              {t.fix.facts(money(loaf.price)).map((fact) => (
+                <li>{fact}</li>
+              ))}
+            </ul>
+            <a class="button button-orange" href={routes.standing[lang]}>
+              {t.fix.cta}
+              <span class="button-arrow" aria-hidden="true">
+                →
+              </span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- 8 · Preguntas -->
     <section id="preguntas" class="faq" aria-labelledby="faq-title">
       <div class="wrap">
@@ -1342,8 +1304,12 @@ const jsonLd = [
       </div>
     </section>
 
-    <!-- 9 · Aviso de la próxima hornada -->
-    <section id="avisame" class="waitlist" aria-labelledby="waitlist-title">
+    <!-- Amb la fornada oberta, l'avís és una franja: no competeix amb la reserva -->
+    <section
+      id="avisame"
+      class:list={['waitlist', { 'is-compact': open }]}
+      aria-labelledby="waitlist-title"
+    >
       <div class="wrap">
         <div class="mono-bar" data-bar>
           <span>Nº 05 · {t.status.UPCOMING}</span>
@@ -1351,16 +1317,18 @@ const jsonLd = [
         </div>
       </div>
       <div class="wrap waitlist-grid">
-        <figure class="poster" data-wipe>
-          <Photo
-            name="crumb"
-            alt={t.waitlist.poster}
-            sizes="(max-width: 960px) calc(100vw - 40px), 44vw"
-          />
-          <span class="poster-star" aria-hidden="true">
-            ✷
-          </span>
-        </figure>
+        {!open && (
+          <figure class="poster" data-wipe>
+            <Photo
+              name="crumb"
+              alt={t.waitlist.poster}
+              sizes="(max-width: 960px) calc(100vw - 40px), 44vw"
+            />
+            <span class="poster-star" aria-hidden="true">
+              ✷
+            </span>
+          </figure>
+        )}
         <div class="waitlist-body" data-reveal>
           <h2 id="waitlist-title">{t.waitlist.h2}</h2>
           <p>{t.waitlist.p}</p>

@@ -136,8 +136,8 @@ export const ui = {
         'Fins a 35 h de fermentació',
         'Baix Llobregat',
       ],
-      gift: 'Primer pedido: dos trozos de banana bread de dos dedos de grosor, uno para ti y otro para quien quieras.',
-      giftMore: 'Qué incluye',
+      giftBadge: 'Regalo en tu primer pedido',
+      proof: ['Pagas al recibirlo', 'Envío gratis'],
       scroll: 'Desliza',
       hands: 'Las manos de mi madre',
       sealTop: 'hasta',
@@ -180,10 +180,9 @@ export const ui = {
     },
     catalog: {
       kicker: 'La carta',
-      h2a: 'Dos piezas,',
-      h2b: 'hechas sin prisa.',
-      intro:
-        'Cada semana horneo solo lo que se reserva. Añade lo que te apetezca a tu pedido y el día de entrega es tuyo.',
+      h2a: 'La carta,',
+      h2b: 'hecha sin prisa.',
+      details: 'Ingredientes y alérgenos',
       loaf: 'La de cada semana',
       bananaWhole: 'Banana bread entero',
       bananaHalf: 'Medio banana bread',
@@ -228,11 +227,12 @@ export const ui = {
         return `Pedidos hasta el ${d.weekday} ${d.day} a las ${d.time} o hasta completar la hornada.`;
       },
       dateSoon: 'Fecha por confirmar',
+      closesIn: 'Cierra en',
       upcoming: 'Anunciaré la fecha al abrir reservas.',
       closed: 'Esta semana ya no acepto pedidos. Te aviso de la próxima.',
       unavailable:
         'No puedo consultar el cupo ahora. Recarga la página antes de reservar.',
-      ctaOpen: 'Reservar mi hogaza',
+      ctaOpen: 'Hacer mi pedido',
       ctaClosed: 'Avísame de la próxima',
     },
     loaf: {
@@ -260,9 +260,7 @@ export const ui = {
       h2a: 'Banana bread',
       h2b: 'de chocolate.',
       p: 'Tres plátanos muy maduros por molde, harina ecológica, yogur y una bolsa entera de pepitas de chocolate. Corteza dorada, miga húmeda y tierna.',
-      point1: 'Harina ecológica',
-      point2: '3 plátanos por molde',
-      point3: '100 g de chocolate',
+      short: 'Tres plátanos maduros y 100 g de chocolate por molde.',
       ingredientsValue:
         'Plátano maduro, harina de trigo ecológica, yogur y pepitas de chocolate.',
       allergensValue: 'Contiene trigo (gluten) y leche. Pregúntame por trazas.',
@@ -275,21 +273,9 @@ export const ui = {
     },
     pastry: {
       kicker: 'Bollería',
-      bar: 'Mantequilla, en capas',
-      h2a: 'Capas.',
-      h2b: 'Siete pasos, ningún atajo.',
-      intro:
-        'Mantequilla, plegar, estirar, cortar, enrollar, pintar y horno. Croissants y pains au chocolat de masa laminada, hechos a mano solo para la hornada del sábado. Por unidades.',
+      tag: 'Solo sábados',
+      short: 'Masa laminada con mantequilla, a mano. Por unidades.',
       unit: 'La unidad',
-      steps: [
-        'Mantequilla',
-        'Plegar',
-        'Estirar',
-        'Cortar',
-        'Enrollar',
-        'Pintar',
-        'Horno',
-      ],
       croissantText: 'Capas que crujen y miga de panal.',
       painText: 'La misma masa, con dos barritas de chocolate dentro.',
       ingredients:
@@ -309,19 +295,16 @@ export const ui = {
       bar: 'Y no el horno de al lado',
       h2a: 'Por qué yo',
       h2b: 'y no el horno.',
-      honest:
-        'Si tienes un buen horno a dos minutos, cómprale a él. Yo soy para otra cosa.',
-      points: [
-        'Nunca llegas tarde. Tu pan se hornea reservado, sin colas ni “ya se ha acabado”.',
-        'No tienes que bajar. Llega a tu puerta miércoles y sábado, de 12 a 14 h.',
-        'Banana bread de chocolate, hecho por encargo.',
+      stats: [
+        ['35 h', 'de fermentación lenta'],
+        ['0 €', 'de envío, hasta tu puerta'],
+        ['0', 'colas ni “ya se ha acabado”'],
       ],
     },
     reviews: {
       kicker: 'Nº — Reseñas',
       fig: '(Fig. 7)',
       count: (n: number) => `${n} reseñas en Google`,
-      verbatim: 'Tal como las han escrito, en su idioma.',
       source: 'Reseña de Google',
       all: (n: number) => `Ver las ${n} reseñas en Google`,
       leave: 'Deja la tuya',
@@ -335,7 +318,6 @@ export const ui = {
       bar: 'Cada sábado, sin pensarlo',
       h2a: 'Tu pan cada sábado.',
       h2b: 'Sin pensarlo.',
-      p: 'Eliges una vez cuánto quieres. Cada sábado te lo llevo a casa. Saltas una semana, lo pausas o te das de baja con un clic. Pagas al recibirlo.',
       voucher:
         'Solo para el Pan fijo: cuando te haya entregado 3 panes, el 4.º corre de mi cuenta.',
       cta: 'Apúntate al Pan fijo',
@@ -415,10 +397,8 @@ export const ui = {
       where: 'Dónde',
       pickupLocation: `A domicilio, ${hours.es}`,
       pickupDetails:
-        'En Sant Boi de Llobregat, Sant Just Desvern y Santa Coloma de Cervelló. Si vives en otro municipio del Baix Llobregat, lo recoges en Sant Boi: te confirmo el punto exacto con tu pedido.',
-      windowPending: 'Recogida en Sant Boi · horario confirmado con el pedido',
+        'Sant Boi, Sant Just Desvern y Santa Coloma de Cervelló. ¿Otro municipio? Lo recoges en Sant Boi.',
       pickupInfo: 'Zonas y horario de reparto',
-      standingCta: '¿Lo quieres cada semana? Pan fijo',
       deliveryH: '¿Cómo lo quieres?',
       deliveryHome: `A domicilio · ${hours.es}`,
       deliveryHomeHint:
@@ -453,12 +433,11 @@ export const ui = {
       submitDemo: 'Probar reserva',
       submit: 'Confirmar reserva',
       footnote:
-        'Pagas al recibirlo. Cancelas con un clic hasta el cierre de la hornada. Reservar una vez no te obliga a nada. El Pan fijo es opcional.',
-      giftH: 'Regalo del primer pedido',
+        'Pagas al recibirlo. Cancelas con un clic hasta el cierre. Sin compromiso.',
+      giftH: 'Regalo de tu primer pedido',
       gift: [
-        'Un trozo de banana bread de dos dedos de grosor para ti.',
-        'Otro igual para quien quieras.',
-        'Una tarjeta con el vale del Pan fijo (no vale para pedidos sueltos). Solo para el Pan fijo: cuando te haya entregado 3 panes, el 4.º corre de mi cuenta.',
+        'Dos trozos de banana bread: uno para ti y otro para regalar.',
+        'Un vale del Pan fijo: tras 3 entregas, el 4.º pan va de mi cuenta.',
       ],
       giftAllergens: 'El banana bread contiene trigo (gluten) y leche.',
       // Only shown when WELCOME_GIFT_CHUTNEY=true (an occasional extra).
@@ -482,24 +461,12 @@ export const ui = {
           'No. Uso poolish: una masa previa de harina, agua y muy poca levadura que fermenta durante la noche. En total, cada hogaza lleva hasta 35 horas de fermentación. Como la masa madre, es una fermentación lenta que da sabor y una miga abierta, pero con un gusto más suave y menos ácido.',
         ],
         [
-          '¿Qué es un poolish?',
-          'Una masa previa líquida que se prepara la noche anterior. Aporta aroma, una corteza fina y crujiente y una miga más abierta, sin necesidad de aditivos.',
-        ],
-        [
           '¿Qué lleva la hogaza?',
           'Harina de trigo ecológica, agua, sal y levadura. Contiene gluten. Si tienes otra alergia, pregúntame antes de reservar: en el espacio de elaboración se trabaja con otras harinas.',
         ],
         [
           '¿Dónde se recoge?',
           `En un punto de recogida en Sant Boi de Llobregat; te confirmo el punto exacto con tu pedido. Es la opción si vives en otro municipio del Baix Llobregat, como ${areaTowns}.`,
-        ],
-        [
-          '¿Haces banana bread?',
-          'Sí, de chocolate y con harina ecológica, en tandas pequeñas. Se reserva aquí mismo, entero o la mitad, junto a tu hogaza o solo.',
-        ],
-        [
-          '¿Las harinas son ecológicas?',
-          'Sí. Trabajo con harinas de cultivo ecológico, tanto para el pan como para el banana bread.',
         ],
         [
           '¿Hacéis entrega a domicilio?',
@@ -510,16 +477,8 @@ export const ui = {
           `Sí. Cada miércoles y cada sábado reparto en Sant Just Desvern ${hours.es}, igual que en Sant Boi y Santa Coloma de Cervelló. Reserva antes del cierre de pedidos: el domingo para el miércoles y el jueves para el sábado, a las 20:00.`,
         ],
         [
-          '¿Cómo lo conservo?',
-          'Entero, en un lugar fresco y seco, envuelto en un paño limpio. Si no lo vas a comer pronto, córtalo en rebanadas y congélalo.',
-        ],
-        [
           '¿Y si no voy a estar?',
           'Responde al email de confirmación o escríbeme cuanto antes con el código de tu reserva. El día antes te llega un recordatorio. Si aún estamos a tiempo, libero tu hogaza para otra persona.',
-        ],
-        [
-          '¿Y si ya no quedan?',
-          'Apúntate al aviso de la próxima hornada. El aviso no reserva pan: tú decides si encargas.',
         ],
       ],
     },
@@ -642,8 +601,8 @@ export const ui = {
         'Fins a 35 h de fermentació',
         'Baix Llobregat',
       ],
-      gift: 'Primera comanda: dos trossos de banana bread de dos dits de gruix, un per a tu i un per a qui vulguis.',
-      giftMore: 'Què inclou',
+      giftBadge: 'Regal a la primera comanda',
+      proof: ['Pagues en rebre’l', 'Enviament gratis'],
       scroll: 'Llisca',
       hands: 'Les mans de la meva mare',
       sealTop: 'fins a',
@@ -686,10 +645,9 @@ export const ui = {
     },
     catalog: {
       kicker: 'La carta',
-      h2a: 'Dues peces,',
-      h2b: 'fetes sense pressa.',
-      intro:
-        'Cada setmana només cou el que es reserva. Afegeix el que et vingui de gust a la comanda i el dia d’entrega és teu.',
+      h2a: 'La carta,',
+      h2b: 'feta sense pressa.',
+      details: 'Ingredients i al·lèrgens',
       loaf: 'El de cada setmana',
       bananaWhole: 'Banana bread sencer',
       bananaHalf: 'Mig banana bread',
@@ -733,11 +691,12 @@ export const ui = {
         return `Comandes fins ${d.weekday} ${d.day} a les ${d.time} o fins que s’acabi la fornada.`;
       },
       dateSoon: 'Data per confirmar',
+      closesIn: 'Tanca en',
       upcoming: 'Anunciaré la data quan obri reserves.',
       closed: 'Aquesta setmana ja no accepto comandes. T’aviso de la propera.',
       unavailable:
         'Ara no puc consultar la disponibilitat. Recarrega la pàgina abans de reservar.',
-      ctaOpen: 'Reservar el meu pa',
+      ctaOpen: 'Fer la meva comanda',
       ctaClosed: 'Avisa’m de la propera',
     },
     loaf: {
@@ -764,9 +723,7 @@ export const ui = {
       h2a: 'Banana bread',
       h2b: 'de xocolata.',
       p: 'Tres plàtans ben madurs per motlle, farina ecològica, iogurt i una bossa sencera de xips de xocolata. Crosta daurada, molla humida i tendra.',
-      point1: 'Farina ecològica',
-      point2: '3 plàtans per motlle',
-      point3: '100 g de xocolata',
+      short: 'Tres plàtans madurs i 100 g de xocolata per motlle.',
       ingredientsValue:
         'Plàtan madur, farina de blat ecològica, iogurt i xips de xocolata.',
       allergensValue: 'Conté blat (gluten) i llet. Pregunta’m per traces.',
@@ -778,21 +735,9 @@ export const ui = {
     },
     pastry: {
       kicker: 'Brioixeria',
-      bar: 'Mantega, en capes',
-      h2a: 'Capes.',
-      h2b: 'Set passos, cap drecera.',
-      intro:
-        'Mantega, plegar, estirar, tallar, enrotllar, pintar i forn. Croissants i pains au chocolat de massa fullada, fets a mà només per a la fornada de dissabte. Per unitats.',
+      tag: 'Només dissabtes',
+      short: 'Massa fullada amb mantega, a mà. Per unitats.',
       unit: 'La unitat',
-      steps: [
-        'Mantega',
-        'Plegar',
-        'Estirar',
-        'Tallar',
-        'Enrotllar',
-        'Pintar',
-        'Forn',
-      ],
       croissantText: 'Capes que cruixen i molla de bresca.',
       painText: 'La mateixa massa, amb dues barretes de xocolata a dins.',
       ingredients:
@@ -812,19 +757,16 @@ export const ui = {
       bar: 'I no el forn del costat',
       h2a: 'Per què jo',
       h2b: 'i no el forn.',
-      honest:
-        'Si tens un bon forn a dos minuts, compra-li a ell. Jo sóc per a una altra cosa.',
-      points: [
-        'Mai arribes tard. El teu pa es cou reservat, sense cues ni “ja s’ha acabat”.',
-        'No has de baixar. Arriba a la porta dimecres i dissabte, de 12 a 14 h.',
-        'Banana bread de xocolata, fet per encàrrec.',
+      stats: [
+        ['35 h', 'de fermentació lenta'],
+        ['0 €', 'd’enviament, fins a la porta'],
+        ['0', 'cues ni “ja s’ha acabat”'],
       ],
     },
     reviews: {
       kicker: 'Nº — Ressenyes',
       fig: '(Fig. 7)',
       count: (n: number) => `${n} ressenyes a Google`,
-      verbatim: 'Tal com les han escrit, en el seu idioma.',
       source: 'Ressenya de Google',
       all: (n: number) => `Veure les ${n} ressenyes a Google`,
       leave: 'Deixa’n una',
@@ -838,7 +780,6 @@ export const ui = {
       bar: 'Cada dissabte, sense pensar-hi',
       h2a: 'El teu pa cada dissabte.',
       h2b: 'Sense pensar-hi.',
-      p: 'Tries una vegada quant en vols. Cada dissabte te’l porto a casa. Saltes una setmana, el pauses o et dones de baixa amb un clic. Pagues en rebre’l.',
       voucher:
         'Només per al Pa fix: quan t’hagi entregat 3 pans, el 4t va de part meva.',
       cta: 'Apunta’t al Pa fix',
@@ -919,10 +860,8 @@ export const ui = {
       where: 'On',
       pickupLocation: `A domicili, ${hours.ca}`,
       pickupDetails:
-        'A Sant Boi de Llobregat, Sant Just Desvern i Santa Coloma de Cervelló. Si vius en un altre municipi del Baix Llobregat, el reculls a Sant Boi: et confirmo el punt exacte amb la comanda.',
-      windowPending: 'Recollida a Sant Boi · horari confirmat amb la comanda',
+        'Sant Boi, Sant Just Desvern i Santa Coloma de Cervelló. Un altre municipi? El reculls a Sant Boi.',
       pickupInfo: 'Zones i horari de repartiment',
-      standingCta: 'El vols cada setmana? Pa fix',
       deliveryH: 'Com el vols?',
       deliveryHome: `A domicili · ${hours.ca}`,
       deliveryHomeHint:
@@ -957,12 +896,11 @@ export const ui = {
       submitDemo: 'Provar la reserva',
       submit: 'Confirmar la reserva',
       footnote:
-        'Pagues en rebre’l. Cancel·les amb un clic fins al tancament de la fornada. Reservar una vegada no t’obliga a res. El Pa fix és opcional.',
+        'Pagues en rebre’l. Cancel·les amb un clic fins al tancament. Sense compromís.',
       giftH: 'Regal de la primera comanda',
       gift: [
-        'Un tros de banana bread de dos dits de gruix per a tu.',
-        'Un altre d’igual per a qui vulguis.',
-        'Una targeta amb el val del Pa fix (no val per a comandes soltes). Només per al Pa fix: quan t’hagi entregat 3 pans, el 4t va de part meva.',
+        'Dos trossos de banana bread: un per a tu i un per regalar.',
+        'Un val del Pa fix: després de 3 entregues, el 4t pa va de part meva.',
       ],
       giftAllergens: 'El banana bread conté blat (gluten) i llet.',
       // Only shown when WELCOME_GIFT_CHUTNEY=true (an occasional extra).
@@ -985,24 +923,12 @@ export const ui = {
           'No. Faig servir poolish: una massa prèvia de farina, aigua i molt poc llevat que fermenta durant la nit. En total, cada pa porta fins a 35 hores de fermentació. Com la massa mare, és una fermentació lenta que dona gust i una molla oberta, però amb un sabor més suau i menys àcid.',
         ],
         [
-          'Què és un poolish?',
-          'Una massa prèvia líquida que es prepara la nit abans. Aporta aroma, una crosta fina i cruixent i una molla més oberta, sense additius.',
-        ],
-        [
           'Què porta el pa?',
           'Farina de blat ecològica, aigua, sal i llevat. Conté gluten. Si tens una altra al·lèrgia, pregunta’m abans de reservar: a l’espai d’elaboració es treballa amb altres farines.',
         ],
         [
           'On es recull?',
           `En un punt de recollida a Sant Boi de Llobregat; et confirmo el punt exacte amb la comanda. És l’opció si vius en un altre municipi del Baix Llobregat, com ${areaTowns}.`,
-        ],
-        [
-          'Fas banana bread?',
-          'Sí, de xocolata i amb farina ecològica, en tandes petites. Es reserva aquí mateix, sencer o la meitat, amb el teu pa o sol.',
-        ],
-        [
-          'Les farines són ecològiques?',
-          'Sí. Treballo amb farines de cultiu ecològic, tant per al pa com per al banana bread.',
         ],
         [
           'Feu entrega a domicili?',
@@ -1013,16 +939,8 @@ export const ui = {
           `Sí. Cada dimecres i cada dissabte reparteixo a Sant Just Desvern ${hours.ca}, igual que a Sant Boi i Santa Coloma de Cervelló. Reserva abans del tancament de comandes: diumenge per al dimecres i dijous per al dissabte, a les 20:00.`,
         ],
         [
-          'Com el conservo?',
-          'Sencer, en un lloc fresc i sec, embolicat amb un drap net. Si no te’l menjaràs aviat, talla’l a llesques i congela’l.',
-        ],
-        [
           'I si no hi seré?',
           'Respon el correu de confirmació o escriu-me com més aviat millor amb el codi de la reserva. El dia abans t’arriba un recordatori. Si encara som a temps, allibero el teu pa per a una altra persona.',
-        ],
-        [
-          'I si ja no en queden?',
-          'Apunta’t a l’avís de la propera fornada. L’avís no reserva pa: tu decideixes si l’encarregues.',
         ],
       ],
     },
