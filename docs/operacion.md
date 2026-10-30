@@ -164,7 +164,7 @@ Lo que sigue es el vale del pan fijo. Con la primera comanda de cada cliente (po
 
 ## Combina Molla (prueba de 3-4 semanas)
 
-Debajo de la carta, tres combinaciones: **El desayuno** (1 hogaza + 1 croissant, 7,20 €), **El capricho** (1 hogaza + 1 pain au chocolat, 7,50 €) y **Para compartir** (2 hogazas + 2 croissants, 14,40 €). No son ofertas: el precio es la suma de las piezas, sin descuento ni envío gratis, y las piezas siguen a la venta por separado. El botón solo rellena el mismo pedido de siempre; como todas llevan bollería, solo se pueden añadir en la hornada del sábado. Las combinaciones y sus piezas se definen en `src/components/Home.astro` (`combos`) y los textos en `src/lib/i18n.ts` (`combos`).
+Debajo de la carta, tres combinaciones: **El desayuno** (1 hogaza + 1 croissant, 7,20 €), **El capricho** (1 hogaza + 1 pain au chocolat, 7,50 €) y **Para compartir** (2 hogazas + 2 croissants, 14,40 €). No son ofertas: el precio es la suma de las piezas, sin descuento ni envío gratis, y las piezas siguen a la venta por separado. El botón solo rellena el mismo pedido de siempre; como todas llevan bollería, solo se pueden añadir en la hornada del sábado. Las combinaciones y sus piezas se definen en `src/components/Home.astro` (`combos`) y los textos en `src/lib/i18n.ts` (`combos`). Las fotos de El capricho y Para compartir son montajes de dos fotos reales lado a lado (solo recortes, sin retoque); `scripts/combo-photos.mjs` las genera y `npm run photos` las rehace.
 
 Para decidir si se quedan, compara al cabo de 3-4 semanas:
 
