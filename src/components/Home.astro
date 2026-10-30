@@ -73,9 +73,9 @@ const pastries = [
 // need Saturday's bake because each one carries pastries.
 const combos = (
   [
-    ['desayuno', 'croissant', { loaf: 1, croissant: 1 }],
-    ['capricho', 'pastries', { loaf: 1, pain: 1 }],
-    ['compartir', 'loaves', { loaf: 2, croissant: 2 }],
+    ['desayuno', 'pastries', { loaf: 1, croissant: 1 }],
+    ['capricho', 'combo-capricho', { loaf: 1, pain: 1 }],
+    ['compartir', 'combo-compartir', { loaf: 2, croissant: 2 }],
   ] as const
 ).map(([id, photo, items]) => {
   const n = { croissant: 0, pain: 0, ...items };
@@ -686,7 +686,7 @@ const jsonLd = [
                     disabled={!c.fits}
                     aria-label={t.combos.add(c.name)}
                   >
-                    {t.catalog.add}
+                    {t.pastry.add}
                     <span class="button-plus" aria-hidden="true">
                       +
                     </span>

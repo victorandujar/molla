@@ -10,7 +10,7 @@
     "check": "astro check",
     "test": "node --import tsx --test tests/*.test.ts",
     "test:e2e": "playwright test",
-    "photos": "node scripts/photos.mjs",
+    "photos": "node scripts/photos.mjs && node scripts/combo-photos.mjs",
     "brand": "node scripts/brand-assets.mjs",
     "brand:crumb": "node scripts/crumb-svg.mjs",
     "db:migrate": "node --env-file-if-exists=.env --import tsx scripts/migrate.ts",
