@@ -483,11 +483,6 @@ form?.addEventListener('submit', async (event) => {
     const home = order.delivery as { address: string } | undefined;
     for (const line of [
       lines.join(' · '),
-      order.firstOrder
-        ? isCa
-          ? 'Regal de la primera comanda: dos trossos de banana bread de dos dits de gruix, un per a tu i un per a qui vulguis. I una targeta amb el val del Pa fix.'
-          : 'Regalo del primer pedido: dos trozos de banana bread de dos dedos de grosor, uno para ti y otro para quien quieras. Y una tarjeta con el vale del Pan fijo.'
-        : '',
       home
         ? isCa
           ? `Total: ${money(order.total)} · Pagament en rebre’l`

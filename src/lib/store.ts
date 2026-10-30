@@ -5,7 +5,7 @@ import {
   brand,
   isDemo,
   productById,
-  welcomeGift,
+  standingVoucher,
   BANANA_HALVES_PER_BAKE,
   PASTRY_UNITS_PER_BAKE,
 } from './config';
@@ -280,7 +280,7 @@ export async function reserve(
         input.croissant + input.pain,
       );
       order.firstOrder =
-        welcomeGift.active &&
+        standingVoucher.active &&
         !d.orders.some(
           (o) => o.email === input.email && o.status !== 'CANCELLED',
         );
@@ -326,7 +326,7 @@ export async function reserve(
     );
     const [seen] =
       await tx`SELECT 1 FROM orders o JOIN customers c ON c.id=o.customer_id WHERE c.email=${input.email} AND o.status!='CANCELLED' LIMIT 1`;
-    order.firstOrder = welcomeGift.active && !seen;
+    order.firstOrder = standingVoucher.active && !seen;
     order.pickupDate = new Date(b.pickup_date).toISOString();
     if (!town) order.pickupWindow = b.pickup_window || brand.pickupWindow;
     // The bake row is locked, so no concurrent reservation can take the same code.

@@ -5,6 +5,7 @@ import {
   confirmationHtml,
   confirmationSubject,
   confirmationText,
+  ownerHtml,
   ownerText,
   reminderHtml,
   reminderSubject,
@@ -510,37 +511,31 @@ test('pa fix and cancellation emails carry one-click private links', () => {
   assert.match(subscriptionWelcome(sub, '').html, /empezarás con la próxima/);
   assert.match(subscriptionFull(sub).html, /no ha quedado sitio/);
 });
-test('first-order emails carry the welcome gift and the pa fix invitation', () => {
+test('first-order emails carry the pa fix voucher, never a banana bread gift', () => {
   const first = { ...order, firstOrder: true, lang: 'ca' as const };
   const html = confirmationHtml(first);
-  assert.match(html, /Regal/);
-  assert.match(
-    html,
-    /dos trossos de banana bread de dos dits de gruix, un per a tu i un per a qui vulguis/,
-  );
+  // The banana bread welcome gift is over.
+  assert.doesNotMatch(html, /Regal|dos trossos|dos dits/);
   assert.match(
     html,
     /Només per al Pa fix: quan t’hagi entregat 3 pans, el 4t va de part meva/,
   );
-  // The chutney is an occasional extra, off by default.
   assert.doesNotMatch(html, /chutney/);
   assert.match(html, /\/pa-fix/);
-  assert.match(
-    confirmationText(first),
-    /Regal: Per ser la teva primera comanda/,
-  );
-  assert.doesNotMatch(
-    confirmationHtml({ ...order, lang: 'ca' as const }),
-    /chutney/,
-  );
+  assert.doesNotMatch(confirmationText(first), /Regal|banana bread de/);
   const es = confirmationHtml({ ...order, firstOrder: true });
-  assert.match(es, /dos trozos de banana bread de dos dedos/);
+  assert.doesNotMatch(es, /Regalo|dos trozos|dos dedos/);
   assert.match(es, /\/es\/pan-fijo/);
+  const owner = ownerText({ ...order, firstOrder: true });
   assert.match(
-    ownerText({ ...order, firstOrder: true }),
-    /Primera comanda: añade 2 trozos de banana bread .*3 panes.*con 2 por entrega cae en la segunda.*lo aplicas tú al cobrar/,
+    owner,
+    /Primera comanda: añade la tarjeta con el vale del pan fijo.*3 panes.*con 2 por entrega cae en la segunda.*lo aplicas tú al cobrar/,
   );
-  assert.doesNotMatch(ownerText({ ...order, firstOrder: true }), /chutney/);
+  assert.doesNotMatch(owner, /trozos|chutney/);
+  assert.doesNotMatch(
+    ownerHtml({ ...order, firstOrder: true }),
+    /Regalo|trozos/,
+  );
   assert.doesNotMatch(ownerText(order), /Primera comanda/);
 });
 

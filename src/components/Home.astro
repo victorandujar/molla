@@ -10,7 +10,7 @@ import {
   launchReady,
   productById,
   PASTRY_MAX_PER_ORDER,
-  welcomeGift,
+  standingVoucher,
   googleReviews,
 } from '../lib/config';
 import { ui, routes, dayFormat, type Lang } from '../lib/i18n';
@@ -196,14 +196,6 @@ const jsonLd = [
               molla<span>.</span>
             </span>
           </div>
-          {welcomeGift.active && (
-            <a class="hero-gift" href="#regal">
-              <span class="star" aria-hidden="true">
-                ✷
-              </span>
-              {t.hero.giftBadge}
-            </a>
-          )}
           <figcaption class="fig-bar">
             <span>{t.ed.fig}</span>
             <span>{t.ed.ferment}</span>
@@ -850,18 +842,6 @@ const jsonLd = [
               <dd>{t.reserve.payValue}</dd>
             </div>
           </dl>
-          {welcomeGift.active && (
-            <div class="gift-box" id="regal">
-              <p class="gift-title">{t.reserve.giftH}</p>
-              <ul class="gift-list">
-                {t.reserve.gift.map((line) => (
-                  <li>{line}</li>
-                ))}
-                {welcomeGift.chutney && <li>{t.reserve.giftChutney}</li>}
-              </ul>
-              <p class="gift-small">{t.reserve.giftAllergens}</p>
-            </div>
-          )}
           {brand.whatsapp && (
             <a
               class="text-link"
@@ -1249,7 +1229,7 @@ const jsonLd = [
             </h2>
           </div>
           <div class="fix-side" data-reveal>
-            {welcomeGift.active && (
+            {standingVoucher.active && (
               <p class="fix-voucher">
                 <span class="star" aria-hidden="true">
                   ✷

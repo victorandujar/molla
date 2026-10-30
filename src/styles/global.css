@@ -803,41 +803,6 @@ figure picture {
 .hero .link-arrow {
   color: var(--paper);
 }
-/* El regalo de la primera comanda: una etiqueta naranja pegada a la foto. */
-.hero-photo {
-  position: relative;
-}
-.hero-gift {
-  position: absolute;
-  z-index: 2;
-  top: clamp(14px, 2vw, 24px);
-  right: clamp(14px, 2vw, 24px);
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  max-width: 15ch;
-  padding: 12px 16px;
-  background: var(--orange);
-  color: var(--night);
-  font-family: var(--mono);
-  font-weight: 700;
-  font-size: 12px;
-  line-height: 1.35;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  text-decoration: none;
-  rotate: 4deg;
-  box-shadow: 0 18px 34px -18px rgba(0, 0, 0, 0.55);
-  animation: rise 0.9s var(--ease-out) 1.1s both;
-  transition: rotate 0.5s var(--ease-spring);
-}
-.hero-gift:hover {
-  rotate: 0deg;
-}
-.hero-gift .star {
-  color: var(--night);
-  font-size: 20px;
-}
 /* La hornada: el resguardo del flyer, recuadro de línea fina. */
 .hero-bake {
   display: grid;
@@ -3614,10 +3579,6 @@ details[open] p {
   .why-stats strong {
     font-size: 44px;
   }
-  .hero-gift {
-    font-size: 11px;
-    padding: 10px 12px;
-  }
   .step {
     grid-template-columns: 56px 1fr;
     column-gap: 14px;
@@ -3928,43 +3889,7 @@ details[open] p {
   margin-top: 28px;
 }
 
-/* Conversion helpers: welcome gift (the flyer's orange box) and WhatsApp. */
-.gift-box {
-  margin-top: 26px;
-  padding: 16px 18px 18px;
-  box-shadow: inset 0 0 0 2px var(--orange);
-  color: var(--on-cobalt);
-  font-size: 15px;
-  line-height: 1.55;
-}
-.gift-box p + p {
-  margin-top: 6px;
-}
-.gift-list {
-  display: grid;
-  gap: 6px;
-  margin: 10px 0 10px;
-  padding: 0 0 0 1.2em;
-  color: var(--paper);
-}
-.gift-list li::marker {
-  content: '✷  ';
-  color: var(--orange);
-}
-.gift-fix {
-  margin-top: 12px;
-  color: var(--paper);
-}
-.gift-title {
-  font-family: var(--mono);
-  font-size: 12px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--paper);
-}
-.gift-small {
-  font-size: 13px;
-}
+/* Conversion helpers: WhatsApp. */
 .reservation-panel .button-ghost.full {
   margin-top: 14px;
 }

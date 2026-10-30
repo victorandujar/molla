@@ -986,7 +986,7 @@ test('owner panel lists pa fix subscribers and can pause, resume and cancel them
   expect(result.violations).toEqual([]);
 });
 
-test('first order gets the welcome gift; the second one does not', async ({
+test('no banana bread gift anywhere; the first order still gets the pa fix voucher', async ({
   page,
   request,
 }) => {
@@ -994,14 +994,10 @@ test('first order gets the welcome gift; the second one does not', async ({
   await expect(page.locator('.hero-lede')).toContainText(
     'Miércoles y sábado en tu puerta. Pagas al recibirlo.',
   );
-  // The hero announces the gift in a tag; the details live by the ticket.
-  await expect(page.locator('.hero-gift')).toContainText(
-    'Regalo en tu primer pedido',
-  );
-  await expect(page.locator('#regal')).toContainText(
-    'Dos trozos de banana bread: uno para ti y otro para regalar.',
-  );
-  await expect(page.locator('.hero-gift')).not.toContainText('Vale');
+  // The banana bread welcome gift is over: not in the hero nor by the ticket.
+  await expect(page.locator('.hero-gift')).toHaveCount(0);
+  await expect(page.locator('#regal')).toHaveCount(0);
+  await expect(page.locator('body')).not.toContainText(/regalo|dos trozos/i);
   await expect(page.locator('.fix')).toContainText(
     'Solo para el Pan fijo: cuando te haya entregado 3 panes, el 4.º corre de mi cuenta.',
   );
@@ -1039,7 +1035,7 @@ test('first order gets the welcome gift; the second one does not', async ({
     false,
     true,
   ]);
-  // The on-screen confirmation mentions the gift and offers the pa fix.
+  // The on-screen confirmation offers the pa fix, without any gift.
   await reset();
   await page.goto('/es/');
   await page
@@ -1053,9 +1049,8 @@ test('first order gets the welcome gift; the second one does not', async ({
   await page.locator('input[name=pickup]').check();
   await page.locator('input[name=privacy]').check();
   await page.locator('#reservation-form button[type=submit]').click();
-  await expect(page.locator('#confirmation')).toContainText(
-    'Regalo del primer pedido',
-  );
+  await expect(page.locator('#confirmation')).toBeVisible();
+  await expect(page.locator('#confirmation')).not.toContainText(/regalo/i);
   await expect(
     page.locator('#confirmation').getByRole('link', { name: /Pan fijo/ }),
   ).toHaveAttribute('href', '/es/pan-fijo');

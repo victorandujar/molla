@@ -1,4 +1,4 @@
-import { brand, money, welcomeGift } from './config';
+import { brand, money } from './config';
 import {
   bananaSplit,
   orderSummary,
@@ -88,8 +88,6 @@ const copy = {
     cancelNote:
       '¿No vas a poder recibirlo? Cancela el pedido con un clic hasta el cierre de pedidos de la hornada, a las 20:00, sin dar explicaciones.',
     cancelLink: 'Cancelar el pedido →',
-    giftLabel: 'Regalo',
-    giftText: `Por ser tu primer pedido: dos trozos de banana bread de dos dedos de grosor, uno para ti y otro para quien quieras (trigo y leche)${welcomeGift.chutney ? ', y esta semana un chutney de pimiento rojo y tomate' : ''}. Y una tarjeta con el vale del Pan fijo, que no vale para pedidos sueltos.`,
     fixCta: '¿Lo quieres cada semana? Pan fijo:',
     fixCtaFirst:
       'Solo para el Pan fijo: cuando te haya entregado 3 panes, el 4.º corre de mi cuenta. Apúntate:',
@@ -169,8 +167,6 @@ const copy = {
     cancelNote:
       'No el podràs rebre? Cancel·la la comanda amb un clic fins al tancament de comandes de la fornada, a les 20:00, sense donar explicacions.',
     cancelLink: 'Cancel·lar la comanda →',
-    giftLabel: 'Regal',
-    giftText: `Per ser la teva primera comanda: dos trossos de banana bread de dos dits de gruix, un per a tu i un per a qui vulguis (blat i llet)${welcomeGift.chutney ? ', i aquesta setmana un chutney de pebrot vermell i tomàquet' : ''}. I una targeta amb el val del Pa fix, que no val per a comandes soltes.`,
     fixCta: 'El vols cada setmana? Pa fix:',
     fixCtaFirst:
       'Només per al Pa fix: quan t’hagi entregat 3 pans, el 4t va de part meva. Apunta’t:',
@@ -304,7 +300,7 @@ ${orderSummary(o)} — ${money(o.total)} (${o.delivery ? t.payOnDelivery : t.pay
 ${t.when}: ${pickupDay(o.pickupDate, langOf(o))}, ${o.pickupWindow}
 ${t.where}: ${where(o)}
 ${o.delivery ? t.deliveryNote : t.pickupNote}
-${o.firstOrder ? `\n${t.giftLabel}: ${t.giftText}` : ''}
+
 
 ${
   o.subscription
@@ -345,9 +341,6 @@ function pickupBlock(o: Order, totalLabel: string) {
         t.where,
         `${esc(o.pickupAddress)}${o.delivery?.address ? `<br>${esc(o.delivery.address)}` : ''}<br><span style="font-size:13px;color:${c.muted};">${esc(o.delivery ? t.deliveryNote : t.pickupNote)}</span>`,
       ],
-      ...(o.firstOrder
-        ? ([[t.giftLabel, esc(t.giftText)]] as [string, string][])
-        : []),
     ])}
   </table>
 </td></tr>`;
@@ -492,14 +485,13 @@ ${o.delivery ? 'Entrega a domicilio' : 'Recogida'}: ${pickupDay(o.pickupDate)}, 
 Dirección: ${where(o)}`
       : ''
   }
-Canal: ${o.source}${o.firstOrder ? `\n${ownerGift()}` : ''}
+Canal: ${o.source}${o.firstOrder ? `\n${ownerVoucher()}` : ''}
 Referencia interna: ${o.id}`;
 }
 
-// What the baker adds to a first order: two quarters of banana bread (one to
-// share), the card with the "pa fix" voucher and, when on, the chutney.
-const ownerGift = () =>
-  `Primera comanda: añade 2 trozos de banana bread de dos dedos (uno para compartir)${welcomeGift.chutney ? ', el chutney' : ''} y la tarjeta con el vale del pan fijo. Vale solo para el pan fijo: cuando le hayas entregado 3 panes, el 4.º corre de tu cuenta (cuentan panes, no entregas: con 2 por entrega cae en la segunda); el descuento lo aplicas tú al cobrar ese 4.º pan`;
+// What the baker adds to a first order: the card with the "pa fix" voucher.
+const ownerVoucher = () =>
+  `Primera comanda: añade la tarjeta con el vale del pan fijo. Vale solo para el pan fijo: cuando le hayas entregado 3 panes, el 4.º corre de tu cuenta (cuentan panes, no entregas: con 2 por entrega cae en la segunda); el descuento lo aplicas tú al cobrar ese 4.º pan`;
 
 export function ownerHtml(o: Order) {
   const tel = o.phone.replace(/[^\d+]/g, '');
@@ -520,7 +512,7 @@ export function ownerHtml(o: Order) {
         : []),
       ['Canal', esc(o.source)],
       ...(o.firstOrder
-        ? ([['Regalo', esc(ownerGift())]] as [string, string][])
+        ? ([['Vale', esc(ownerVoucher())]] as [string, string][])
         : []),
       ['Código', `<strong>${esc(o.code)}</strong>`],
     ])}

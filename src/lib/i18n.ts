@@ -136,7 +136,6 @@ export const ui = {
         'Fins a 35 h de fermentació',
         'Baix Llobregat',
       ],
-      giftBadge: 'Regalo en tu primer pedido',
       proof: ['Pagas al recibirlo', 'Envío gratis'],
       scroll: 'Desliza',
       hands: 'Las manos de mi madre',
@@ -434,15 +433,6 @@ export const ui = {
       submit: 'Confirmar reserva',
       footnote:
         'Pagas al recibirlo. Cancelas con un clic hasta el cierre. Sin compromiso.',
-      giftH: 'Regalo de tu primer pedido',
-      gift: [
-        'Dos trozos de banana bread: uno para ti y otro para regalar.',
-        'Un vale del Pan fijo: tras 3 entregas, el 4.º pan va de mi cuenta.',
-      ],
-      giftAllergens: 'El banana bread contiene trigo (gluten) y leche.',
-      // Only shown when WELCOME_GIFT_CHUTNEY=true (an occasional extra).
-      giftChutney:
-        'Esta semana, también un chutney de pimiento rojo y tomate. Pregúntame por sus ingredientes.',
       whatsappCta: 'Reservar por WhatsApp',
       whatsappText: (day: string) =>
         `¡Hola! Quiero reservar pan para el ${day}. Me gustaría: `,
@@ -601,7 +591,6 @@ export const ui = {
         'Fins a 35 h de fermentació',
         'Baix Llobregat',
       ],
-      giftBadge: 'Regal a la primera comanda',
       proof: ['Pagues en rebre’l', 'Enviament gratis'],
       scroll: 'Llisca',
       hands: 'Les mans de la meva mare',
@@ -897,15 +886,6 @@ export const ui = {
       submit: 'Confirmar la reserva',
       footnote:
         'Pagues en rebre’l. Cancel·les amb un clic fins al tancament. Sense compromís.',
-      giftH: 'Regal de la primera comanda',
-      gift: [
-        'Dos trossos de banana bread: un per a tu i un per regalar.',
-        'Un val del Pa fix: després de 3 entregues, el 4t pa va de part meva.',
-      ],
-      giftAllergens: 'El banana bread conté blat (gluten) i llet.',
-      // Only shown when WELCOME_GIFT_CHUTNEY=true (an occasional extra).
-      giftChutney:
-        'Aquesta setmana, també un chutney de pebrot vermell i tomàquet. Pregunta’m pels ingredients.',
       whatsappCta: 'Reservar per WhatsApp',
       whatsappText: (day: string) =>
         `Hola! Voldria reservar pa per al ${day}. M’agradaria: `,
