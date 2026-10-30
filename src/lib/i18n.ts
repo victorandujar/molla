@@ -289,6 +289,21 @@ export const ui = {
       saturdayOnly:
         'Solo para la hornada del sábado: se reserva desde el domingo a las 20 h.',
     },
+    combos: {
+      kicker: 'Combina Molla',
+      bar: 'Tres ideas para empezar',
+      h2a: 'Combina',
+      h2b: 'Molla.',
+      intro: 'Pan artesano y bollería para disfrutar en casa.',
+      items: {
+        desayuno: 'El desayuno',
+        capricho: 'El capricho',
+        compartir: 'Para compartir',
+      },
+      note: 'Al precio de cada pieza, sumadas. Arriba las tienes también sueltas.',
+      add: (name: string) => `Añadir ${name} al pedido`,
+      added: 'En tu pedido ✓',
+    },
     why: {
       kicker: 'Por qué yo',
       bar: 'Y no el horno de al lado',
@@ -740,6 +755,21 @@ export const ui = {
       notify: 'Avisa’m quan n’hi hagi',
       saturdayOnly:
         'Només per a la fornada de dissabte: es reserva des de diumenge a les 20 h.',
+    },
+    combos: {
+      kicker: 'Combina Molla',
+      bar: 'Tres idees per començar',
+      h2a: 'Combina',
+      h2b: 'Molla.',
+      intro: 'Pa artesà i brioixeria per gaudir a casa.',
+      items: {
+        desayuno: 'L’esmorzar',
+        capricho: 'El caprici',
+        compartir: 'Per compartir',
+      },
+      note: 'Al preu de cada peça, sumades. A dalt les tens també soltes.',
+      add: (name: string) => `Afegir ${name} a la comanda`,
+      added: 'A la comanda ✓',
     },
     why: {
       kicker: 'Per què jo',

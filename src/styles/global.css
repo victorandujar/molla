@@ -1059,6 +1059,95 @@ figure picture {
   text-transform: uppercase;
   color: var(--ink-2);
 }
+/* Combina Molla: tres combinacions, al preu de les peces sumades. */
+.combos {
+  padding-block: 0 var(--section);
+  color: var(--cobalt);
+}
+.combos-head {
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+  align-items: end;
+  gap: 16px clamp(32px, 5vw, 96px);
+  margin: clamp(24px, 3vw, 44px) 0 clamp(32px, 4vw, 56px);
+}
+.combos-head h2 {
+  color: var(--cobalt);
+}
+.combos-head p {
+  max-width: 34ch;
+  font-size: clamp(16.5px, 1.25vw, 19px);
+  line-height: 1.5;
+  color: var(--ink-2);
+}
+.combo-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(16px, 2vw, 28px);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.combo {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  background: var(--card);
+  box-shadow: inset 0 0 0 1.5px var(--line);
+  transition: box-shadow 0.3s ease;
+}
+.combo:hover {
+  box-shadow: inset 0 0 0 1.5px var(--cobalt);
+}
+.combo-photo {
+  aspect-ratio: 4 / 3;
+  overflow: clip;
+  background: var(--paper-2);
+}
+.combo-photo img {
+  transition: transform 1.6s var(--ease-out);
+}
+.combo:hover .combo-photo img {
+  transform: scale(1.05);
+}
+.combo-body {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: clamp(18px, 2vw, 28px);
+}
+.combo h3 {
+  font-size: clamp(26px, 2.2vw, 36px);
+  line-height: 0.95;
+  text-transform: uppercase;
+}
+.combo-lines {
+  margin-top: 10px;
+  font-size: 16px;
+  color: var(--ink-2);
+}
+.combo-price {
+  margin-top: auto;
+  padding-top: 16px;
+  font-family: var(--sans);
+  font-weight: 800;
+  font-stretch: 125%;
+  font-size: clamp(34px, 3vw, 48px);
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+.combo-add {
+  margin-top: 16px;
+}
+.combos-note {
+  margin-top: 20px;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  line-height: 1.5;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
 /* Ressenyes de Google: franja cobalt, cites textuals en targetes crema.
    Al mòbil, carrusel amb scroll-snap; a l'escriptori, dues columnes. */
 .reviews {
@@ -3564,6 +3653,37 @@ details[open] p {
     padding: 22px 0;
     border-left: 0;
     border-bottom: 1px solid var(--on-cobalt-line);
+  }
+  .combos-head {
+    grid-template-columns: 1fr;
+  }
+  .combo-list {
+    grid-template-columns: 1fr;
+  }
+  .combo {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+    grid-template-rows: none;
+  }
+  .combo-photo {
+    aspect-ratio: auto;
+    min-height: 100%;
+  }
+  .combo-body {
+    padding: 16px;
+  }
+  .combo-price {
+    padding-top: 10px;
+  }
+  .combo-add {
+    min-height: 46px;
+    max-width: 100%;
+    gap: 8px;
+    padding-inline: 14px;
+    font-size: 11.5px;
+    letter-spacing: 0.06em;
+  }
+  .combo-add .button-plus {
+    margin-right: -6px;
   }
   .why-stats {
     grid-template-columns: 1fr;

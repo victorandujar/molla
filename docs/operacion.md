@@ -161,3 +161,14 @@ Se configuran en Vercel → proyecto → Settings → Environment Variables, mar
 La promoción del banana bread de regalo en la primera comanda terminó: la web, los emails y `/gestio` ya no la mencionan. Quien quiera banana bread lo añade a su pedido.
 
 Lo que sigue es el vale del pan fijo. Con la primera comanda de cada cliente (por email, sin contar las canceladas) entregas **la tarjeta con el vale**. El vale es solo para el Pan fijo, no para pedidos sueltos: cuando le hayas entregado 3 panes, el 4.º corre de tu cuenta. Cuentan panes, no entregas: con 2 panes por entrega, el 4.º cae en la segunda. Saltar una semana no lo hace perder. La web anuncia el vale en el bloque Pa fix y en `/pa-fix`; el email de confirmación de la primera comanda lo menciona y a ti te llega en el aviso «Nueva reserva» y como etiqueta «Primera · vale pan fijo» en `/gestio`. La web no lleva la cuenta del vale: el descuento lo aplicas tú, a mano, al cobrar el 4.º pan entregado. `PA_FIX_VOUCHER=false` lo quita.
+
+## Combina Molla (prueba de 3-4 semanas)
+
+Debajo de la carta, tres combinaciones: **El desayuno** (1 hogaza + 1 croissant, 7,20 €), **El capricho** (1 hogaza + 1 pain au chocolat, 7,50 €) y **Para compartir** (2 hogazas + 2 croissants, 14,40 €). No son ofertas: el precio es la suma de las piezas, sin descuento ni envío gratis, y las piezas siguen a la venta por separado. El botón solo rellena el mismo pedido de siempre; como todas llevan bollería, solo se pueden añadir en la hornada del sábado. Las combinaciones y sus piezas se definen en `src/components/Home.astro` (`combos`) y los textos en `src/lib/i18n.ts` (`combos`).
+
+Para decidir si se quedan, compara al cabo de 3-4 semanas:
+
+- En `/gestio`, «Últimos 28 días»: «Añaden …» cuenta cuántas veces se añade cada combinación y «Reservan con combinación» cuántas reservas confirmadas conservan todas las piezas de alguna. Compáralo con «Reservan».
+- Ticket medio: `npm run orders:prod` da `averageOrderCents`. Anota el valor antes de publicar y compáralo con el de las semanas de prueba, mejor por hornadas del sábado (las únicas con bollería).
+
+Si no se eligen o el ticket medio no sube, se quitan borrando la sección.

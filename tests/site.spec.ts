@@ -1056,3 +1056,49 @@ test('no banana bread gift anywhere; the first order still gets the pa fix vouch
   ).toHaveAttribute('href', '/es/pan-fijo');
   expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
 });
+
+test('Combina Molla: three pairings at the sum of their pieces, counted per pairing', async ({
+  page,
+}) => {
+  // Saturday's bake: the pairings carry pastries.
+  await writeFile(
+    dataPath,
+    JSON.stringify({ orders: [], waitlist: [], limits: {}, bakeDay: 6 }),
+  );
+  await page.goto('/es/');
+  const combos = page.locator('#combina .combo');
+  await expect(combos).toHaveCount(3);
+  // No discount: 5 + 2,20 · 5 + 2,50 · 2 × 5 + 2 × 2,20.
+  await expect(combos.nth(0)).toContainText('7,20€');
+  await expect(combos.nth(1)).toContainText('7,50€');
+  await expect(combos.nth(2)).toContainText('14,40€');
+  await expect(page.locator('#combina')).not.toContainText(
+    /descuento|gratis|oferta/i,
+  );
+  // The single products stay on the page.
+  await expect(page.locator('[data-buy="loaf"]')).toBeVisible();
+  await page
+    .getByRole('button', { name: 'Añadir Para compartir al pedido' })
+    .click();
+  await expect(page.locator('#quantity')).toHaveValue('2');
+  await expect(page.locator('#croissant')).toHaveValue('2');
+  await expect(page.locator('#total')).toContainText('14,40');
+  // The trial is measured in /gestio: adds per pairing.
+  await expect
+    .poll(async () =>
+      Object.keys((await readData()).events || {}).some((k) =>
+        k.includes('|combo_compartir|'),
+      ),
+    )
+    .toBe(true);
+  // On Wednesday there are no pastries: the pairings say so, without a button.
+  await writeFile(
+    dataPath,
+    JSON.stringify({ orders: [], waitlist: [], limits: {}, bakeDay: 3 }),
+  );
+  await page.goto('/es/');
+  await expect(page.locator('[data-combo]')).toHaveCount(0);
+  await expect(page.locator('.combos-note')).toContainText(
+    'Solo para la hornada del sábado',
+  );
+});

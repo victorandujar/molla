@@ -11,7 +11,11 @@ type EventName =
   | 'click_whatsapp'
   | 'click_channel'
   | 'subscription_completed'
-  | 'pickup_info_view';
+  | 'pickup_info_view'
+  | 'combo_desayuno'
+  | 'combo_capricho'
+  | 'combo_compartir'
+  | 'reservation_with_combo';
 function source(): Source {
   const q = new URLSearchParams(location.search)
     .get('utm_source')
@@ -175,6 +179,15 @@ const maxOf = (el: HTMLInputElement | null) => {
   const other = el === croissant ? pain : croissant;
   return Math.max(0, Math.min(own, pastryLeft() - read(other)));
 };
+const combos = document.querySelectorAll<HTMLButtonElement>('[data-combo]');
+const comboItems = (b: HTMLElement) => ({
+  loaf: Number(b.dataset.comboLoaf || 0),
+  croissant: Number(b.dataset.comboCroissant || 0),
+  pain: Number(b.dataset.comboPain || 0),
+});
+// Pairings added in this visit: a booking counts as «with a combo» only if
+// it still holds every piece of one of them.
+const chosenCombos = new Set<string>();
 type Cart = {
   loaves: number;
   halves: number;
@@ -244,6 +257,15 @@ function render(origin?: Element | null) {
       const step = up ? addStep(b) : 1;
       b.disabled = up ? n + step > maxOf(input) : n <= 0;
     });
+  // A pairing fits only if all its pieces still fit in what is left.
+  combos.forEach((b) => {
+    const want = comboItems(b);
+    b.disabled =
+      want.loaf > maxOf(quantity) - read(quantity) ||
+      want.croissant > maxOf(croissant) - read(croissant) ||
+      want.pain > maxOf(pain) - read(pain) ||
+      want.croissant + want.pain > pastryLeft() - read(croissant) - read(pain);
+  });
   const items = [
     c.loaves ? words.loaves(c.loaves) : '',
     c.halves ? `${halvesLabel(c.halves)} banana bread` : '',
@@ -317,6 +339,23 @@ document.querySelectorAll<HTMLButtonElement>('[data-add]').forEach((button) =>
     // A whole mould when only a half is left: add what remains.
     const room = maxOf(input) - read(input);
     change(input, Math.min(step, room), button);
+  }),
+);
+/* ---- Combina Molla: one button fills the same fields as the cards. ---- */
+combos.forEach((button) =>
+  button.addEventListener('click', () => {
+    const want = comboItems(button);
+    for (const [input, n] of [
+      [quantity, want.loaf],
+      [croissant, want.croissant],
+      [pain, want.pain],
+    ] as const)
+      if (n) change(input, n, button);
+    chosenCombos.add(button.dataset.combo!);
+    track(`combo_${button.dataset.combo}` as EventName);
+    const label = button.innerHTML;
+    button.textContent = button.dataset.added!;
+    setTimeout(() => (button.innerHTML = label), 1600);
   }),
 );
 document
@@ -573,6 +612,19 @@ form?.addEventListener('submit', async (event) => {
       quantity: order.quantity,
       total: order.total,
     });
+    const booked = cart();
+    if (
+      [...combos].some((b) => {
+        if (!chosenCombos.has(b.dataset.combo!)) return false;
+        const want = comboItems(b);
+        return (
+          booked.loaves >= want.loaf &&
+          booked.croissants >= want.croissant &&
+          booked.pains >= want.pain
+        );
+      })
+    )
+      track('reservation_with_combo', { total: order.total });
     void refreshBake();
   } catch (error) {
     showError(form, error);

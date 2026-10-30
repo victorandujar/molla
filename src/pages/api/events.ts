@@ -16,6 +16,11 @@ export const events = [
   'click_channel',
   'subscription_completed',
   'pickup_info_view',
+  // Combina Molla trial: each pairing added, and bookings that keep one.
+  'combo_desayuno',
+  'combo_capricho',
+  'combo_compartir',
+  'reservation_with_combo',
 ] as const;
 const schema = z.object({
   event: z.enum(events),
