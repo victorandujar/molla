@@ -7,7 +7,7 @@ import {
   launchReady,
   money,
   productById,
-  welcomeGift,
+  standingVoucher,
 } from '../lib/config';
 import { deliveryTowns, deliveryWindow } from '../lib/delivery';
 import { routes, type Lang } from '../lib/i18n';
@@ -222,7 +222,7 @@ const service = {
       <h2>{text.priceH}</h2>
       <p>{text.price}</p>
 
-      {welcomeGift.active && (
+      {standingVoucher.active && (
         <>
           <h2>{text.voucherH}</h2>
           <p>{text.voucher}</p>

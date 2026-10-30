@@ -10,7 +10,7 @@ import {
   launchReady,
   productById,
   PASTRY_MAX_PER_ORDER,
-  welcomeGift,
+  standingVoucher,
   googleReviews,
 } from '../lib/config';
 import { ui, routes, dayFormat, type Lang } from '../lib/i18n';
@@ -68,6 +68,37 @@ const pastries = [
     text: t.pastry.painText,
   },
 ] as const;
+// Combina Molla: three suggested pairings, priced as the sum of their pieces
+// (no discount). They fill the same order fields as the single products, and
+// need Saturday's bake because each one carries pastries.
+const combos = (
+  [
+    ['desayuno', 'croissant', { loaf: 1, croissant: 1 }],
+    ['capricho', 'pastries', { loaf: 1, pain: 1 }],
+    ['compartir', 'loaves', { loaf: 2, croissant: 2 }],
+  ] as const
+).map(([id, photo, items]) => {
+  const n = { croissant: 0, pain: 0, ...items };
+  return {
+    id,
+    photo,
+    items: n,
+    name: t.combos.items[id],
+    lines: [
+      t.catalog.loaves(n.loaf),
+      n.croissant && t.catalog.croissants(n.croissant),
+      n.pain && t.catalog.pains(n.pain),
+    ]
+      .filter(Boolean)
+      .join(' + '),
+    price:
+      n.loaf * loaf.price + n.croissant * croissant.price + n.pain * pain.price,
+    fits:
+      n.loaf <= stock.bread.max &&
+      n.croissant + n.pain <= pastryPool &&
+      Math.max(n.croissant, n.pain) <= pastryMax,
+  };
+});
 // Without the database the configured bake is only a placeholder: never show its date.
 const pickupDay = unavailable
   ? t.bake.dateSoon
@@ -196,14 +227,6 @@ const jsonLd = [
               molla<span>.</span>
             </span>
           </div>
-          {welcomeGift.active && (
-            <a class="hero-gift" href="#regal">
-              <span class="star" aria-hidden="true">
-                ✷
-              </span>
-              {t.hero.giftBadge}
-            </a>
-          )}
           <figcaption class="fig-bar">
             <span>{t.ed.fig}</span>
             <span>{t.ed.ferment}</span>
@@ -616,6 +639,73 @@ const jsonLd = [
       </div>
     </section>
 
+    <!-- Combina Molla: tres combinacions, al preu de les peces, sense descompte -->
+    <section
+      id="combina"
+      class="combos"
+      aria-labelledby="combos-title"
+      data-event-view="view_product"
+    >
+      <div class="wrap">
+        <div class="mono-bar" data-bar>
+          <span>Nº 02 · {t.combos.kicker}</span>
+          <span>{t.combos.bar}</span>
+        </div>
+        <header class="combos-head">
+          <h2 id="combos-title" data-split>
+            {t.combos.h2a} <em>{t.combos.h2b}</em>
+          </h2>
+          <p data-reveal>{t.combos.intro}</p>
+        </header>
+        <ul class="combo-list">
+          {combos.map((c) => (
+            <li class="combo">
+              <figure class="combo-photo">
+                <Photo
+                  name={c.photo}
+                  alt=""
+                  sizes="(max-width: 720px) 38vw, 30vw"
+                />
+              </figure>
+              <div class="combo-body">
+                <h3>{c.name}</h3>
+                <p class="combo-lines">{c.lines}</p>
+                <p class="combo-price">
+                  <span aria-hidden="true">{tight(c.price)}</span>
+                  <span class="visually-hidden">{money(c.price)}</span>
+                </p>
+                {open && pastryDay && (
+                  <button
+                    type="button"
+                    class="button button-orange combo-add"
+                    data-combo={c.id}
+                    data-combo-loaf={c.items.loaf}
+                    data-combo-croissant={c.items.croissant}
+                    data-combo-pain={c.items.pain}
+                    data-added={t.combos.added}
+                    disabled={!c.fits}
+                    aria-label={t.combos.add(c.name)}
+                  >
+                    {t.catalog.add}
+                    <span class="button-plus" aria-hidden="true">
+                      +
+                    </span>
+                  </button>
+                )}
+              </div>
+            </li>
+          ))}
+        </ul>
+        <p class="combos-note">
+          {!open
+            ? t.catalog.closed
+            : !pastryDay
+              ? t.pastry.saturdayOnly
+              : t.combos.note}
+        </p>
+      </div>
+    </section>
+
     <!-- Ressenyes de Google: un cartell amb l'índex al costat, com la taula
          del flyer. Una ressenya a la vegada. Cites textuals, en el seu idioma. -->
     <section
@@ -850,18 +940,6 @@ const jsonLd = [
               <dd>{t.reserve.payValue}</dd>
             </div>
           </dl>
-          {welcomeGift.active && (
-            <div class="gift-box" id="regal">
-              <p class="gift-title">{t.reserve.giftH}</p>
-              <ul class="gift-list">
-                {t.reserve.gift.map((line) => (
-                  <li>{line}</li>
-                ))}
-                {welcomeGift.chutney && <li>{t.reserve.giftChutney}</li>}
-              </ul>
-              <p class="gift-small">{t.reserve.giftAllergens}</p>
-            </div>
-          )}
           {brand.whatsapp && (
             <a
               class="text-link"
@@ -1249,7 +1327,7 @@ const jsonLd = [
             </h2>
           </div>
           <div class="fix-side" data-reveal>
-            {welcomeGift.active && (
+            {standingVoucher.active && (
               <p class="fix-voucher">
                 <span class="star" aria-hidden="true">
                   ✷

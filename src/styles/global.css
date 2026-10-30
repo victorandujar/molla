@@ -803,41 +803,6 @@ figure picture {
 .hero .link-arrow {
   color: var(--paper);
 }
-/* El regalo de la primera comanda: una etiqueta naranja pegada a la foto. */
-.hero-photo {
-  position: relative;
-}
-.hero-gift {
-  position: absolute;
-  z-index: 2;
-  top: clamp(14px, 2vw, 24px);
-  right: clamp(14px, 2vw, 24px);
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  max-width: 15ch;
-  padding: 12px 16px;
-  background: var(--orange);
-  color: var(--night);
-  font-family: var(--mono);
-  font-weight: 700;
-  font-size: 12px;
-  line-height: 1.35;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  text-decoration: none;
-  rotate: 4deg;
-  box-shadow: 0 18px 34px -18px rgba(0, 0, 0, 0.55);
-  animation: rise 0.9s var(--ease-out) 1.1s both;
-  transition: rotate 0.5s var(--ease-spring);
-}
-.hero-gift:hover {
-  rotate: 0deg;
-}
-.hero-gift .star {
-  color: var(--night);
-  font-size: 20px;
-}
 /* La hornada: el resguardo del flyer, recuadro de línea fina. */
 .hero-bake {
   display: grid;
@@ -1094,6 +1059,95 @@ figure picture {
   text-transform: uppercase;
   color: var(--ink-2);
 }
+/* Combina Molla: tres combinacions, al preu de les peces sumades. */
+.combos {
+  padding-block: 0 var(--section);
+  color: var(--cobalt);
+}
+.combos-head {
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+  align-items: end;
+  gap: 16px clamp(32px, 5vw, 96px);
+  margin: clamp(24px, 3vw, 44px) 0 clamp(32px, 4vw, 56px);
+}
+.combos-head h2 {
+  color: var(--cobalt);
+}
+.combos-head p {
+  max-width: 34ch;
+  font-size: clamp(16.5px, 1.25vw, 19px);
+  line-height: 1.5;
+  color: var(--ink-2);
+}
+.combo-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(16px, 2vw, 28px);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.combo {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  background: var(--card);
+  box-shadow: inset 0 0 0 1.5px var(--line);
+  transition: box-shadow 0.3s ease;
+}
+.combo:hover {
+  box-shadow: inset 0 0 0 1.5px var(--cobalt);
+}
+.combo-photo {
+  aspect-ratio: 4 / 3;
+  overflow: clip;
+  background: var(--paper-2);
+}
+.combo-photo img {
+  transition: transform 1.6s var(--ease-out);
+}
+.combo:hover .combo-photo img {
+  transform: scale(1.05);
+}
+.combo-body {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: clamp(18px, 2vw, 28px);
+}
+.combo h3 {
+  font-size: clamp(26px, 2.2vw, 36px);
+  line-height: 0.95;
+  text-transform: uppercase;
+}
+.combo-lines {
+  margin-top: 10px;
+  font-size: 16px;
+  color: var(--ink-2);
+}
+.combo-price {
+  margin-top: auto;
+  padding-top: 16px;
+  font-family: var(--sans);
+  font-weight: 800;
+  font-stretch: 125%;
+  font-size: clamp(34px, 3vw, 48px);
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+.combo-add {
+  margin-top: 16px;
+}
+.combos-note {
+  margin-top: 20px;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  line-height: 1.5;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
 /* Ressenyes de Google: franja cobalt, cites textuals en targetes crema.
    Al mòbil, carrusel amb scroll-snap; a l'escriptori, dues columnes. */
 .reviews {
@@ -3600,6 +3654,37 @@ details[open] p {
     border-left: 0;
     border-bottom: 1px solid var(--on-cobalt-line);
   }
+  .combos-head {
+    grid-template-columns: 1fr;
+  }
+  .combo-list {
+    grid-template-columns: 1fr;
+  }
+  .combo {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+    grid-template-rows: none;
+  }
+  .combo-photo {
+    aspect-ratio: auto;
+    min-height: 100%;
+  }
+  .combo-body {
+    padding: 16px;
+  }
+  .combo-price {
+    padding-top: 10px;
+  }
+  .combo-add {
+    min-height: 46px;
+    max-width: 100%;
+    gap: 8px;
+    padding-inline: 14px;
+    font-size: 11.5px;
+    letter-spacing: 0.06em;
+  }
+  .combo-add .button-plus {
+    margin-right: -6px;
+  }
   .why-stats {
     grid-template-columns: 1fr;
   }
@@ -3613,10 +3698,6 @@ details[open] p {
   }
   .why-stats strong {
     font-size: 44px;
-  }
-  .hero-gift {
-    font-size: 11px;
-    padding: 10px 12px;
   }
   .step {
     grid-template-columns: 56px 1fr;
@@ -3928,43 +4009,7 @@ details[open] p {
   margin-top: 28px;
 }
 
-/* Conversion helpers: welcome gift (the flyer's orange box) and WhatsApp. */
-.gift-box {
-  margin-top: 26px;
-  padding: 16px 18px 18px;
-  box-shadow: inset 0 0 0 2px var(--orange);
-  color: var(--on-cobalt);
-  font-size: 15px;
-  line-height: 1.55;
-}
-.gift-box p + p {
-  margin-top: 6px;
-}
-.gift-list {
-  display: grid;
-  gap: 6px;
-  margin: 10px 0 10px;
-  padding: 0 0 0 1.2em;
-  color: var(--paper);
-}
-.gift-list li::marker {
-  content: '✷  ';
-  color: var(--orange);
-}
-.gift-fix {
-  margin-top: 12px;
-  color: var(--paper);
-}
-.gift-title {
-  font-family: var(--mono);
-  font-size: 12px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--paper);
-}
-.gift-small {
-  font-size: 13px;
-}
+/* Conversion helpers: WhatsApp. */
 .reservation-panel .button-ghost.full {
   margin-top: 14px;
 }

@@ -56,13 +56,11 @@ export const privacy = {
   retention: privacyText('PRIVACY_RETENTION'),
   transfers: privacyText('PRIVACY_TRANSFERS'),
 };
-// Gift for a customer's first order: ¼ banana bread for them, another ¼ to
-// share, and the card voucher (4th "pa fix" loaf on the house). The baker adds
-// it by hand; WELCOME_GIFT=false turns the offer off. The chutney is an
-// occasional extra, hidden unless WELCOME_GIFT_CHUTNEY=true.
-export const welcomeGift = {
-  active: process.env.WELCOME_GIFT !== 'false',
-  chutney: process.env.WELCOME_GIFT_CHUTNEY === 'true',
+// The "pa fix" voucher: after 3 loaves delivered, the 4th is on the house.
+// The baker hands the card with a customer's first order and applies the
+// discount by hand; PA_FIX_VOUCHER=false turns the offer off.
+export const standingVoucher = {
+  active: process.env.PA_FIX_VOUCHER !== 'false',
 };
 // Google reviews shown on the home page. Update the score, the count, the
 // links and the quotes here only. Quotes are verbatim from Google, in the
