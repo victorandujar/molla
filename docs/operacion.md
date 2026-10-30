@@ -153,10 +153,22 @@ Se configuran en Vercel → proyecto → Settings → Environment Variables, mar
 | `WHATSAPP_NUMBER`      | `34649907912` (con prefijo de país, sin `+` ni espacios) | Botón «Reservar por WhatsApp», «Tengo una pregunta» y teléfono en los datos estructurados |
 | `WHATSAPP_CHANNEL_URL` | enlace del canal (`https://whatsapp.com/channel/…`)      | Botón del canal en el pie, junto al aviso y en el email de confirmación                   |
 | `GOOGLE_PROFILE_URL`   | enlace público del Perfil de Empresa de Google           | Datos estructurados (`sameAs`)                                                            |
-| `WELCOME_GIFT`         | `false` para quitar el regalo                            | Regalo de bienvenida de la primera comanda (por defecto activo)                           |
-| `WELCOME_GIFT_CHUTNEY` | `true` para añadir el chutney al regalo                  | Extra puntual del regalo de bienvenida (por defecto oculto)                               |
+| `PA_FIX_VOUCHER`       | `false` para quitar el vale                              | Vale del pan fijo: el 4.º pan corre de tu cuenta (por defecto activo)                     |
 | `ADMIN_PASSWORD`       | 16 caracteres o más                                      | Contraseña de `/gestio`                                                                   |
 
-## Regalo de bienvenida
+## Vale del pan fijo
 
-La primera comanda de cada cliente (por email, sin contar las canceladas) lleva de regalo **dos trozos de banana bread de dos dedos de grosor, uno para él y otro para quien quiera**, más **la tarjeta con el vale del pan fijo**. El vale es solo para el Pan fijo, no para pedidos sueltos: cuando le hayas entregado 3 panes, el 4.º corre de tu cuenta. Cuentan panes, no entregas: con 2 panes por entrega, el 4.º cae en la segunda. Saltar una semana no lo hace perder. La tarjeta la preparas tú. La web anuncia el regalo en la portada y en el bloque de reserva; el vale, solo en el bloque Pa fix y en `/pa-fix`; el email de confirmación lo menciona y a ti te llega en el aviso «Nueva reserva» y como etiqueta «Primera · regalo» en `/gestio`: el regalo lo añades tú al preparar el pedido. El chutney queda como extra puntual: `WELCOME_GIFT_CHUTNEY=true` lo añade a los textos y al aviso; por defecto no se muestra (confirma ingredientes y alérgenos antes de activarlo). La web no lleva la cuenta del vale: el descuento lo aplicas tú, a mano, al cobrar el 4.º pan entregado.
+La promoción del banana bread de regalo en la primera comanda terminó: la web, los emails y `/gestio` ya no la mencionan. Quien quiera banana bread lo añade a su pedido.
+
+Lo que sigue es el vale del pan fijo. Con la primera comanda de cada cliente (por email, sin contar las canceladas) entregas **la tarjeta con el vale**. El vale es solo para el Pan fijo, no para pedidos sueltos: cuando le hayas entregado 3 panes, el 4.º corre de tu cuenta. Cuentan panes, no entregas: con 2 panes por entrega, el 4.º cae en la segunda. Saltar una semana no lo hace perder. La web anuncia el vale en el bloque Pa fix y en `/pa-fix`; el email de confirmación de la primera comanda lo menciona y a ti te llega en el aviso «Nueva reserva» y como etiqueta «Primera · vale pan fijo» en `/gestio`. La web no lleva la cuenta del vale: el descuento lo aplicas tú, a mano, al cobrar el 4.º pan entregado. `PA_FIX_VOUCHER=false` lo quita.
+
+## Combina Molla (prueba de 3-4 semanas)
+
+Debajo de la carta, tres combinaciones: **El desayuno** (1 hogaza + 1 croissant, 7,20 €), **El capricho** (1 hogaza + 1 pain au chocolat, 7,50 €) y **Para compartir** (2 hogazas + 2 croissants, 14,40 €). No son ofertas: el precio es la suma de las piezas, sin descuento ni envío gratis, y las piezas siguen a la venta por separado. El botón solo rellena el mismo pedido de siempre; como todas llevan bollería, solo se pueden añadir en la hornada del sábado. Las combinaciones y sus piezas se definen en `src/components/Home.astro` (`combos`) y los textos en `src/lib/i18n.ts` (`combos`).
+
+Para decidir si se quedan, compara al cabo de 3-4 semanas:
+
+- En `/gestio`, «Últimos 28 días»: «Añaden …» cuenta cuántas veces se añade cada combinación y «Reservan con combinación» cuántas reservas confirmadas conservan todas las piezas de alguna. Compáralo con «Reservan».
+- Ticket medio: `npm run orders:prod` da `averageOrderCents`. Anota el valor antes de publicar y compáralo con el de las semanas de prueba, mejor por hornadas del sábado (las únicas con bollería).
+
+Si no se eligen o el ticket medio no sube, se quitan borrando la sección.
