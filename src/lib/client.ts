@@ -671,7 +671,6 @@ async function refreshBake() {
           .querySelectorAll<HTMLElement>(`[data-stock="${kind}"]`)
           .forEach((el) => {
             el.dataset.level = level;
-            if (kind === 'pastry' && b.pastries === false) return;
             if (kind === 'bread') {
               el.hidden = level !== 'low';
               return;

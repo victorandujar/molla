@@ -272,8 +272,8 @@ export const ui = {
     },
     pastry: {
       kicker: 'Bollería',
-      tag: 'Solo sábados',
-      short: 'Masa laminada con mantequilla, a mano. Por unidades.',
+      tag: 'Por unidades',
+      short: 'Masa laminada con mantequilla, a mano.',
       unit: 'La unidad',
       croissantText: 'Capas que crujen y miga de panal.',
       painText: 'La misma masa, con dos barritas de chocolate dentro.',
@@ -286,8 +286,6 @@ export const ui = {
       less: (name: string) => `Quitar un ${name}`,
       more: (name: string) => `Añadir un ${name}`,
       notify: 'Avísame cuando haya',
-      saturdayOnly:
-        'Solo para la hornada del sábado: se reserva desde el domingo a las 20 h.',
     },
     combos: {
       kicker: 'Combina Molla',
@@ -739,8 +737,8 @@ export const ui = {
     },
     pastry: {
       kicker: 'Brioixeria',
-      tag: 'Només dissabtes',
-      short: 'Massa fullada amb mantega, a mà. Per unitats.',
+      tag: 'Per unitats',
+      short: 'Massa fullada amb mantega, a mà.',
       unit: 'La unitat',
       croissantText: 'Capes que cruixen i molla de bresca.',
       painText: 'La mateixa massa, amb dues barretes de xocolata a dins.',
@@ -753,8 +751,6 @@ export const ui = {
       less: (name: string) => `Treure un ${name}`,
       more: (name: string) => `Afegir un ${name}`,
       notify: 'Avisa’m quan n’hi hagi',
-      saturdayOnly:
-        'Només per a la fornada de dissabte: es reserva des de diumenge a les 20 h.',
     },
     combos: {
       kicker: 'Combina Molla',

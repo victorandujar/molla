@@ -542,7 +542,7 @@ test('banana bread is ordered by halves, alone or with bread, within its quota',
   );
 });
 
-test('pastries only on Saturday: the Wednesday bake shows them but refuses them', async ({
+test('pastries on every bake: the Wednesday bake takes them too', async ({
   page,
   request,
 }) => {
@@ -551,35 +551,28 @@ test('pastries only on Saturday: the Wednesday bake shows them but refuses them'
     JSON.stringify({ orders: [], waitlist: [], limits: {}, bakeDay: 3 }),
   );
   const bake = await (await request.get('/api/bake')).json();
-  expect(bake.pastries).toBe(false);
-  expect(bake.pastry.max).toBe(0);
-  const post = (data: Record<string, unknown>) =>
-    request.post('/api/reservations', {
-      headers: origin,
-      data: {
-        requestId: crypto.randomUUID(),
-        bakeId: 'hornada-001',
-        name: 'Nil',
-        email: 'nil@example.com',
-        phone: '612345678',
-        quantity: 0,
-        pickup: 'yes',
-        privacy: 'yes',
-        ...data,
-      },
-    });
-  const croissant = await post({ croissant: 2 });
-  expect(croissant.status()).toBe(409);
-  expect((await croissant.json()).error).toContain('sábados');
-  // Bread and banana bread are delivered on Wednesday too.
-  expect((await post({ quantity: 1, banana: 1 })).status()).toBe(201);
+  expect(bake.pastry.max).toBeGreaterThan(0);
+  const post = await request.post('/api/reservations', {
+    headers: origin,
+    data: {
+      requestId: crypto.randomUUID(),
+      bakeId: 'hornada-001',
+      name: 'Nil',
+      email: 'nil@example.com',
+      phone: '612345678',
+      quantity: 1,
+      croissant: 1,
+      pain: 1,
+      pickup: 'yes',
+      privacy: 'yes',
+    },
+  });
+  expect(post.status()).toBe(201);
   await page.goto('/es/');
-  await expect(page.locator('.pastry-later').first()).toContainText(
-    'Solo para la hornada del sábado',
-  );
-  await expect(page.locator('[data-buy="croissant"]')).toHaveCount(0);
-  await expect(page.locator('#croissant')).toHaveCount(0);
   await expect(page.locator('#hornada .stub-day')).toContainText('miércoles');
+  await expect(page.locator('[data-buy="croissant"]')).toHaveCount(1);
+  await expect(page.locator('#croissant')).toHaveCount(1);
+  await expect(page.locator('[data-combo]')).toHaveCount(3);
 });
 
 test('Google reviews: verbatim quotes in both languages and exact links', async ({
@@ -1060,7 +1053,6 @@ test('no banana bread gift anywhere; the first order still gets the pa fix vouch
 test('Combina Molla: three pairings at the sum of their pieces, counted per pairing', async ({
   page,
 }) => {
-  // Saturday's bake: the pairings carry pastries.
   await writeFile(
     dataPath,
     JSON.stringify({ orders: [], waitlist: [], limits: {}, bakeDay: 6 }),
@@ -1068,10 +1060,10 @@ test('Combina Molla: three pairings at the sum of their pieces, counted per pair
   await page.goto('/es/');
   const combos = page.locator('#combina .combo');
   await expect(combos).toHaveCount(3);
-  // No discount: 5 + 2,20 · 5 + 2,50 · 2 × 5 + 2 × 2,20.
+  // No discount: 5 + 2,20 · 5 + 2,50 · 2 × 5 + 2,20 + 2,50.
   await expect(combos.nth(0)).toContainText('7,20€');
   await expect(combos.nth(1)).toContainText('7,50€');
-  await expect(combos.nth(2)).toContainText('14,40€');
+  await expect(combos.nth(2)).toContainText('14,70€');
   await expect(page.locator('#combina')).not.toContainText(
     /descuento|gratis|oferta/i,
   );
@@ -1081,8 +1073,9 @@ test('Combina Molla: three pairings at the sum of their pieces, counted per pair
     .getByRole('button', { name: 'Añadir Para compartir al pedido' })
     .click();
   await expect(page.locator('#quantity')).toHaveValue('2');
-  await expect(page.locator('#croissant')).toHaveValue('2');
-  await expect(page.locator('#total')).toContainText('14,40');
+  await expect(page.locator('#croissant')).toHaveValue('1');
+  await expect(page.locator('#pain')).toHaveValue('1');
+  await expect(page.locator('#total')).toContainText('14,70');
   // The trial is measured in /gestio: adds per pairing.
   await expect
     .poll(async () =>
@@ -1091,14 +1084,4 @@ test('Combina Molla: three pairings at the sum of their pieces, counted per pair
       ),
     )
     .toBe(true);
-  // On Wednesday there are no pastries: the pairings say so, without a button.
-  await writeFile(
-    dataPath,
-    JSON.stringify({ orders: [], waitlist: [], limits: {}, bakeDay: 3 }),
-  );
-  await page.goto('/es/');
-  await expect(page.locator('[data-combo]')).toHaveCount(0);
-  await expect(page.locator('.combos-note')).toContainText(
-    'Solo para la hornada del sábado',
-  );
 });
