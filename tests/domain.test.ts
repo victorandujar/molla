@@ -29,7 +29,6 @@ import {
   pickupCodePattern,
   reminderDue,
   weeklyCyclePlan,
-  pastryBake,
   madridWeekday,
   csvCell,
   bananaSplit,
@@ -165,9 +164,7 @@ test('two bakes a week: Wednesday closes Sunday 20:00, Saturday closes Thursday 
   );
 });
 
-test('pastries only on the Saturday bake', () => {
-  assert.equal(pastryBake('2026-10-31T11:00:00.000Z'), true);
-  assert.equal(pastryBake('2026-10-28T11:00:00.000Z'), false);
+test('madrid weekday follows the local calendar', () => {
   assert.equal(madridWeekday('2026-10-28T23:30:00.000Z'), 4);
 });
 
@@ -554,28 +551,26 @@ test('stock is shown as a level, never as a count', () => {
   // Pastries: 48 per bake, «few left» from 10.
   assert.equal(stockLevel(11, 48), 'ok');
   assert.equal(stockLevel(10, 48), 'low');
-  const saturday = publicStock({
-    capacity: 10,
-    reserved: 9,
-    bananaReserved: 0,
-    pastryReserved: 40,
-    pickupDate: '2026-10-31',
-  });
-  assert.deepEqual(saturday, {
-    bread: { level: 'low', max: 1 },
-    banana: { level: 'ok', max: 4 },
-    pastries: true,
-    pastry: { level: 'low', max: 8 },
-  });
-  // Wednesday: no pastries to order.
-  const wednesday = publicStock({
+  assert.deepEqual(
+    publicStock({
+      capacity: 10,
+      reserved: 9,
+      bananaReserved: 0,
+      pastryReserved: 40,
+    }),
+    {
+      bread: { level: 'low', max: 1 },
+      banana: { level: 'ok', max: 4 },
+      pastry: { level: 'low', max: 8 },
+    },
+  );
+  // Every bake takes pastries, Wednesday's too.
+  const fresh = publicStock({
     capacity: 10,
     reserved: 0,
     bananaReserved: 4,
     pastryReserved: 0,
-    pickupDate: '2026-10-28',
   });
-  assert.equal(wednesday.pastries, false);
-  assert.equal(wednesday.pastry.max, 0);
-  assert.deepEqual(wednesday.banana, { level: 'out', max: 0 });
+  assert.equal(fresh.pastry.max, 24);
+  assert.deepEqual(fresh.banana, { level: 'out', max: 0 });
 });

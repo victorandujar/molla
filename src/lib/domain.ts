@@ -211,7 +211,8 @@ const addCalendarDays = (date: string, days: number) =>
 
 // Two bakes a week. Wednesday's closes on Sunday at 20:00 and Saturday's on
 // Thursday at 20:00; each opens the moment the other one closes, so there is
-// always exactly one bake taking orders. Only Saturday's has pastries.
+// always exactly one bake taking orders. Both carry bread, banana bread and
+// pastries.
 export const bakeDays = [
   { weekday: 3, closesDaysBefore: 3 },
   { weekday: 6, closesDaysBefore: 2 },
@@ -219,8 +220,6 @@ export const bakeDays = [
 // Madrid weekday (0 = Sunday) of an instant.
 export const madridWeekday = (iso: string) =>
   new Date(`${madridDate(new Date(iso))}T12:00:00Z`).getUTCDay();
-// Croissants and pains au chocolat are baked for Saturday only.
-export const pastryBake = (pickupIso: string) => madridWeekday(pickupIso) === 6;
 export type StockLevel = 'ok' | 'low' | 'out';
 // The web says how a product is going, never how many are left: «few left»
 // from the last fifth of the batch, «sold out» at zero.
@@ -233,21 +232,16 @@ export function publicStock(b: {
   reserved: number;
   bananaReserved: number;
   pastryReserved: number;
-  pickupDate: string;
 }) {
   const loaves = Math.max(0, b.capacity - b.reserved);
   const halves = Math.max(0, BANANA_HALVES_PER_BAKE - b.bananaReserved);
-  const pastries = pastryBake(b.pickupDate);
-  const pieces = pastries
-    ? Math.max(0, PASTRY_UNITS_PER_BAKE - b.pastryReserved)
-    : 0;
+  const pieces = Math.max(0, PASTRY_UNITS_PER_BAKE - b.pastryReserved);
   return {
     bread: { level: stockLevel(loaves, b.capacity), max: Math.min(4, loaves) },
     banana: {
       level: stockLevel(halves, BANANA_HALVES_PER_BAKE),
       max: Math.min(4, halves),
     },
-    pastries,
     // Croissants and pains au chocolat share this pool within one order.
     pastry: {
       level: stockLevel(pieces, PASTRY_UNITS_PER_BAKE),

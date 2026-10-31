@@ -17,7 +17,6 @@ import {
   bananaSplit,
   madridIso,
   madridWeekday,
-  pastryBake,
   pickupCode,
   reminderDue,
   reminderWindowHours,
@@ -220,8 +219,7 @@ const assertBanana = (reserved: number, halves: number) => {
   if (halves > 0 && reserved + halves > BANANA_HALVES_PER_BAKE)
     throw new AppError('bananaCapacity');
 };
-const assertPastry = (pickupIso: string, reserved: number, units: number) => {
-  if (units > 0 && !pastryBake(pickupIso)) throw new AppError('pastryDay');
+const assertPastry = (reserved: number, units: number) => {
   if (units > 0 && reserved + units > PASTRY_UNITS_PER_BAKE)
     throw new AppError('pastryCapacity');
 };
@@ -274,11 +272,7 @@ export async function reserve(
         input.quantity,
       );
       assertBanana(bananaIn(d, bake.id), input.banana);
-      assertPastry(
-        order.pickupDate,
-        pastryIn(d, bake.id),
-        input.croissant + input.pain,
-      );
+      assertPastry(pastryIn(d, bake.id), input.croissant + input.pain);
       order.firstOrder =
         standingVoucher.active &&
         !d.orders.some(
@@ -319,11 +313,7 @@ export async function reserve(
       input.quantity,
     );
     assertBanana(count?.banana || 0, input.banana);
-    assertPastry(
-      new Date(b.pickup_date).toISOString(),
-      count?.pastry || 0,
-      input.croissant + input.pain,
-    );
+    assertPastry(count?.pastry || 0, input.croissant + input.pain);
     const [seen] =
       await tx`SELECT 1 FROM orders o JOIN customers c ON c.id=o.customer_id WHERE c.email=${input.email} AND o.status!='CANCELLED' LIMIT 1`;
     order.firstOrder = standingVoucher.active && !seen;

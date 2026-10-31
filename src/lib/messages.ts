@@ -25,8 +25,6 @@ export const messages = {
       'Ya no queda tanto banana bread en esta hornada. Prueba con menos.',
     pastryCapacity:
       'Ya no quedan tantas piezas de bollería en esta hornada. Prueba con menos.',
-    pastryDay:
-      'La bollería solo se entrega los sábados. Quítala del pedido para reservar esta hornada.',
     productUnavailable: 'Este pan no está disponible.',
     priceChanged: 'Este pan ha cambiado de precio. Contacta antes de reservar.',
     reservationFailed:
@@ -59,8 +57,6 @@ export const messages = {
       'Ja no queda tant banana bread en aquesta fornada. Prova-ho amb menys.',
     pastryCapacity:
       'Ja no queden tantes peces de brioixeria en aquesta fornada. Prova-ho amb menys.',
-    pastryDay:
-      'La brioixeria només s’entrega els dissabtes. Treu-la de la comanda per reservar aquesta fornada.',
     productUnavailable: 'Aquest pa no està disponible.',
     priceChanged: 'Aquest pa ha canviat de preu. Contacta abans de reservar.',
     reservationFailed:
