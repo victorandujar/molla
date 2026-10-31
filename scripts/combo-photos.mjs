@@ -1,7 +1,10 @@
 import sharp from 'sharp';
-// Combina Molla: each pairing is two real photos side by side, on the paper
-// of the flyer. No retouching or generated pixels: only crops and a gutter.
-// Sources are the largest published variants, so `npm run photos` comes first.
+// Combina Molla photos. El desayuno and El capricho are single scenes composed
+// with an image model (Nano Banana Pro, via Figma Weave) from the real photos
+// of the loaf and the pastries; their sources live in assets/combos/ and are
+// only cropped to 5:4 here. Para compartir is still two real photos side by
+// side, on the paper of the flyer: only crops and a gutter. Its sources are
+// the largest published variants, so `npm run photos` comes first.
 const W = 1600;
 const H = 1280; // 5:4
 const GUTTER = 14;
@@ -28,12 +31,6 @@ async function panel({ name, cx = 0.5, cy = 0.5, zoom = 1 }, w, h) {
 }
 
 const combos = {
-  // 1 hogaza + 1 pain au chocolat (the left piece of the pastries photo).
-  capricho: {
-    split: 0.5,
-    left: { name: 'crumb', cy: 0.6 },
-    right: { name: 'pastries', cx: 0.12, cy: 0.45, zoom: 1.9 },
-  },
   // 2 hogazas + 2 croissants: the loaves get the wider panel.
   compartir: {
     split: 0.6,
@@ -41,6 +38,29 @@ const combos = {
     right: { name: 'croissant', cy: 0.55 },
   },
 };
+
+async function publish(name, canvas) {
+  for (const width of [400, 720, 1100, 1600]) {
+    const out = sharp(canvas).resize(width, Math.round((width * H) / W));
+    await out
+      .clone()
+      .webp({ quality: 78 })
+      .toFile(`public/images/combo-${name}-${width}.webp`);
+    await out
+      .clone()
+      .avif({ quality: 53, effort: 4 })
+      .toFile(`public/images/combo-${name}-${width}.avif`);
+  }
+}
+
+for (const name of ['desayuno', 'capricho'])
+  await publish(
+    name,
+    await sharp(`assets/combos/${name}.webp`)
+      .resize(W, H, { fit: 'cover' })
+      .png()
+      .toBuffer(),
+  );
 
 for (const [name, c] of Object.entries(combos)) {
   const wl = Math.round((W - GUTTER) * c.split);
@@ -54,16 +74,6 @@ for (const [name, c] of Object.entries(combos)) {
     ])
     .png()
     .toBuffer();
-  for (const width of [400, 720, 1100, 1600]) {
-    const out = sharp(canvas).resize(width, Math.round((width * H) / W));
-    await out
-      .clone()
-      .webp({ quality: 78 })
-      .toFile(`public/images/combo-${name}-${width}.webp`);
-    await out
-      .clone()
-      .avif({ quality: 53, effort: 4 })
-      .toFile(`public/images/combo-${name}-${width}.avif`);
-  }
+  await publish(name, canvas);
 }
 console.log('Combinaciones preparadas.');
