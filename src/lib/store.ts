@@ -167,14 +167,15 @@ const toBake = (b: postgres.Row): ActiveBake => ({
 export async function currentBake(): Promise<ActiveBake> {
   if (useDemo()) return demo(demoBake);
   let [b] = await activeBakeRow(sql!);
-  // Past a close with no next bake yet (the cron has not run, or failed), or
-  // an earlier bake day due that does not exist yet: open it now so nobody
-  // lands on a closed shop or on the wrong day.
+  // Whenever the bake on show is not the one due or is not taking orders
+  // (the cron has not run, or failed, or a row was left closed), reconcile
+  // now: there is never a moment without a bake to reserve.
   const due = weeklyCyclePlan().pickupDate;
   if (
     !b ||
     new Date(b.deadline).getTime() <= Date.now() ||
-    madridDay(new Date(b.pickup_date)) > due
+    !['OPEN', 'SOLD_OUT'].includes(b.status as string) ||
+    madridDay(new Date(b.pickup_date)) !== due
   ) {
     try {
       await runWeeklyBakeCycle();
@@ -556,6 +557,8 @@ const madridClock = (at: Date) =>
     hourCycle: 'h23',
   }).format(at);
 
+const bakeId = (n: number) => `hornada-${String(n).padStart(3, '0')}`;
+
 export type WeeklyCycleResult = {
   closed: number;
   completed: number;
@@ -586,12 +589,19 @@ export async function runWeeklyBakeCycle(
       RETURNING id`;
 
     const [existing] = await tx`
-      SELECT id,status FROM bakes
+      SELECT id,status,deadline FROM bakes
       WHERE (pickup_date AT TIME ZONE 'Europe/Madrid')::date=${initialPlan.pickupDate}::date
       ORDER BY pickup_date LIMIT 1`;
     if (existing) {
-      if (existing.status === 'UPCOMING')
-        await tx`UPDATE bakes SET status='OPEN',opens_at=LEAST(opens_at,${now}) WHERE id=${existing.id}`;
+      // The planned bake always takes orders until its scheduled close: a
+      // wrong deadline or a stray CLOSED/UPCOMING status would otherwise leave
+      // the shop shut. SOLD_OUT is a real state and stays.
+      await tx`
+        UPDATE bakes SET
+          deadline=${initialPlan.deadline},
+          status=CASE WHEN status='SOLD_OUT' THEN 'SOLD_OUT' ELSE 'OPEN' END,
+          opens_at=LEAST(opens_at,${now})
+        WHERE id=${existing.id}`;
       return {
         closed: closed.length,
         completed: completed.length,
@@ -601,13 +611,20 @@ export async function runWeeklyBakeCycle(
     }
 
     const [latest] =
-      await tx`SELECT number,capacity,pickup_date,pickup_window FROM bakes ORDER BY pickup_date DESC LIMIT 1`;
+      await tx`SELECT capacity,pickup_date,pickup_window FROM bakes ORDER BY pickup_date DESC LIMIT 1`;
+    // Numbers follow the highest one ever used, not the latest pickup, so a
+    // bake created out of order can never make the new id collide.
+    const [max] =
+      await tx`SELECT COALESCE(MAX(NULLIF(regexp_replace(number,'[^0-9]','','g'),'')::int),0)::int AS top FROM bakes`;
+    let next = Number(max?.top || 0) + 1;
+    while ((await tx`SELECT 1 FROM bakes WHERE id=${bakeId(next)}`).length)
+      next++;
+    const number = String(next).padStart(3, '0');
+    const id = bakeId(next);
     const pickupTime = latest?.pickup_date
       ? madridClock(new Date(latest.pickup_date))
       : madridClock(new Date(bake.pickupDate));
     const plan = weeklyCyclePlan(now, pickupTime);
-    const number = String(Number(latest?.number || 0) + 1).padStart(3, '0');
-    const id = `hornada-${number}`;
     await tx`
       INSERT INTO bakes(id,number,pickup_date,deadline,opens_at,capacity,status,pickup_window)
       VALUES(
