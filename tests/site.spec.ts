@@ -1060,10 +1060,10 @@ test('Combina Molla: three pairings at the sum of their pieces, counted per pair
   await page.goto('/es/');
   const combos = page.locator('#combina .combo');
   await expect(combos).toHaveCount(3);
-  // No discount: 5 + 2,20 · 5 + 2,50 · 2 × 5 + 2 × 2,20.
+  // No discount: 5 + 2,20 · 5 + 2,50 · 2 × 5 + 2,20 + 2,50.
   await expect(combos.nth(0)).toContainText('7,20€');
   await expect(combos.nth(1)).toContainText('7,50€');
-  await expect(combos.nth(2)).toContainText('14,40€');
+  await expect(combos.nth(2)).toContainText('14,70€');
   await expect(page.locator('#combina')).not.toContainText(
     /descuento|gratis|oferta/i,
   );
@@ -1073,8 +1073,9 @@ test('Combina Molla: three pairings at the sum of their pieces, counted per pair
     .getByRole('button', { name: 'Añadir Para compartir al pedido' })
     .click();
   await expect(page.locator('#quantity')).toHaveValue('2');
-  await expect(page.locator('#croissant')).toHaveValue('2');
-  await expect(page.locator('#total')).toContainText('14,40');
+  await expect(page.locator('#croissant')).toHaveValue('1');
+  await expect(page.locator('#pain')).toHaveValue('1');
+  await expect(page.locator('#total')).toContainText('14,70');
   // The trial is measured in /gestio: adds per pairing.
   await expect
     .poll(async () =>
