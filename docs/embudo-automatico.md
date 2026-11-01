@@ -94,12 +94,13 @@ La mayoría de los clientes nuevos de una panadería llegan buscando «pan artes
 
 Un anuncio pequeño, bien segmentado y que no hay que tocar cada semana. Funciona porque **el email captado hace rentable cada clic**: aunque no compre ese día, el visitante que deja su email recibe el aviso todas las semanas.
 
-**El kit ya está hecho**: `exports/anuncis/` tiene 12 imágenes listas para subir (tres conceptos, en catalán y castellano, en formato feed y story, con fotos reales) y `exports/anuncis/textos.md` los textos, la configuración y los enlaces etiquetados. Si cambian precios o zonas: `npm run ads`.
+**El kit ya está hecho**: `exports/anuncis/` tiene 20 imágenes listas para subir, con el estilo de los flyers (cinco conceptos, en catalán y castellano, en formato feed 4:5 y story 9:16, con fotos reales). `exports/anuncis/textos.md` tiene los textos, la configuración y los enlaces etiquetados. Si cambian precios o zonas: `npm run ads`.
 
 **Meta (Instagram + Facebook)**, en Meta Business Suite → Anuncios:
 
 - Objetivo: **Tráfico**, hacia la página de entrega a domicilio.
 - Ubicación: radio de 3 km alrededor de Sant Boi, Sant Just Desvern y Santa Coloma de Cervelló (tres puntos). Edad 28–65. Sin intereses: deja que Meta optimice.
+- Ubicaciones manuales: solo Instagram y Facebook (feed, stories y reels), sin Audience Network.
 - Presupuesto: **5 €/día**, campaña continua, sin fecha de fin.
 - Creatividades (2–3, rotan solas): el reel «del horno a tu puerta» (15 s), la foto de la miga y la foto de la combinación «Para compartir». Texto: «Pan de poolish con 35 h de fermentación, a domicilio los sábados en Sant Boi, Sant Just y Santa Coloma. 5 € la hogaza, pagas al recibirlo».
 - Enlace: `https://www.mollapa.com/pa-a-domicili?utm_source=ads&utm_medium=meta&utm_campaign=local`

@@ -1,16 +1,28 @@
 # Kit de anuncios de Molla
 
-Imágenes en esta carpeta (`npm run ads` las regenera): tres conceptos, en catalán (`-ca-`) y castellano (`-es-`), cada uno en formato cuadrado para el feed (`-feed`, 1080×1080) y vertical para stories y reels (`-story`, 1080×1920). Solo fotos reales.
+20 imágenes en esta carpeta, con el lenguaje de los flyers: etiquetas en mono entre filetes, titular condensado, pies «(FIG. n)», precio en contorno y el patrón de miga. Solo fotos reales. `npm run ads` las regenera (por ejemplo, si cambian precios, días o zonas: los textos están en `scripts/ad-kit.mjs`).
 
-Sube a un mismo conjunto de anuncios los tres conceptos de un idioma: Meta reparte el presupuesto hacia el que mejor funciona.
+| Concepto   | Idea                                                     | Foto                         |
+| ---------- | -------------------------------------------------------- | ---------------------------- |
+| `encarrec` | «Pa per encàrrec.», 5 € en contorno y los tres pasos     | Hogaza partida por la mitad  |
+| `facil`    | «Així de fàcil.»: Reserva · Entrega · A taula            | Croissant y pain au chocolat |
+| `hores`    | «35 hores» sobre el patrón de miga con su marco de texto | Patrón de miga (vector)      |
+| `obrador`  | «Fet per algú del barri.»                                | El panadero en el obrador    |
+| `carta`    | La carta con precios                                     | Banana bread                 |
+
+Cada concepto existe en catalán (`-ca-`) y castellano (`-es-`), y en dos formatos:
+
+- `-feed` (1080×1350, 4:5): feed de Instagram y Facebook. Es el formato que más ocupa en el móvil.
+- `-story` (1080×1920, 9:16): stories y reels. Las franjas de arriba y abajo llevan solo el patrón, porque Instagram las tapa con su interfaz.
+
+Al crear el anuncio, sube el `-feed` y el `-story` del mismo concepto: Meta usa cada uno donde toca.
 
 ## Configuración (Meta Business Suite → Anuncios → Crear)
 
 - **Objetivo**: Tráfico. Destino: sitio web.
 - **Público**: ubicación «personas que viven en», radio de 3 km alrededor de Sant Boi de Llobregat, Sant Just Desvern y Santa Coloma de Cervelló. Edad 28–65. Sin intereses.
-- **Idiomas**: un conjunto con catalán y otro con castellano (o un solo conjunto con las dos versiones y la opción de idioma de Meta).
-- **Presupuesto**: 5 € al día, sin fecha de fin.
-- **Ubicaciones**: Advantage+ (automáticas).
+- **Ubicaciones**: manuales. Solo Instagram (feed, stories, reels, explorar) y Facebook (feed, stories, reels). Quita Audience Network y Messenger: dan clics accidentales que no acaban en pedidos.
+- **Presupuesto**: 5 € al día, sin fecha de fin. Un conjunto por idioma con los cinco conceptos de ese idioma: Meta reparte el presupuesto hacia los que funcionan.
 - **Botón**: «Más información».
 
 ## Enlaces (con la etiqueta para medir)
@@ -22,41 +34,42 @@ Sube a un mismo conjunto de anuncios los tres conceptos de un idioma: Meta repar
 
 ### Catalán
 
-**Texto principal (porta)**
-Pa de poolish fet a mà, amb farina ecològica i fins a 35 hores de fermentació. Te’l porto a casa dimecres i dissabte de 12 a 14 h a Sant Boi, Sant Just Desvern i Santa Coloma de Cervelló. 5 € la fogassa, sense cost d’enviament, i pagues en rebre’l.
-**Títol**: El pa del dissabte, a la teva porta
-**Descripció**: Reserva fins dijous a les 20:00
+**encarrec** · Pa de poolish fet a mà, amb farina ecològica i fins a 35 hores de fermentació. Te’l porto a casa dimecres i dissabte de 12 a 14 h a Sant Boi, Sant Just Desvern i Santa Coloma de Cervelló. 5 € la fogassa, sense cost d’enviament, i pagues en rebre’l.
+Títol: Pa per encàrrec, a la teva porta · Descripció: Tanca dilluns i dijous a les 20 h
 
-**Texto principal (molla)**
-Només fornejo el que es reserva: per això cada fogassa té el temps que necessita. Crosta que cruix, molla oberta i un gust que dura dies. A domicili a Sant Boi, Sant Just i Santa Coloma.
-**Títol**: 35 hores de fermentació. Es nota.
-**Descripció**: Pagues en rebre’l
+**facil** · Reserves al web en un minut, sense targeta ni compte. Te’l porto a casa dimecres o dissabte i pagues quan el reps.
+Títol: Així de fàcil · Descripció: Entrega gratuïta
 
-**Texto principal (brioixeria)**
-Croissants i pains au chocolat de massa laminada amb mantega, fets a mà, amb el pa de la setmana. Ho reserves al web i t’ho porto a casa el dissabte.
-**Títol**: Croissants i pa acabats de fer, a casa
-**Descripció**: Pa + croissant, 7,20 €
+**hores** · Només fornejo el que es reserva: per això cada fogassa té el temps que necessita. Crosta que cruix, molla oberta i un gust que dura dies.
+Títol: 35 hores de fermentació. Es nota. · Descripció: Pagues en rebre’l
+
+**obrador** · Soc un obrador petit de Sant Boi. Pasto, formo i fornejo cada fogassa a mà, i te la porto a casa dimecres i dissabte a Sant Boi, Sant Just i Santa Coloma.
+Títol: Fet per algú del barri · Descripció: Pa, banana bread i brioixeria
+
+**carta** · Pa de poolish 5 €, croissant 2,20 €, pain au chocolat 2,50 € i banana bread de xocolata. Ho reserves al web i t’ho porto a casa, sense cost d’enviament.
+Títol: La carta de Molla · Descripció: Entrega dimecres i dissabte
 
 ### Castellano
 
-**Texto principal (puerta)**
-Pan de poolish hecho a mano, con harina ecológica y hasta 35 horas de fermentación. Te lo llevo a casa el miércoles y el sábado de 12 a 14 h en Sant Boi, Sant Just Desvern y Santa Coloma de Cervelló. 5 € la hogaza, sin coste de envío, y pagas al recibirlo.
-**Título**: El pan del sábado, en tu puerta
-**Descripción**: Reserva hasta el jueves a las 20:00
+**encarrec** · Pan de poolish hecho a mano, con harina ecológica y hasta 35 horas de fermentación. Te lo llevo a casa el miércoles y el sábado de 12 a 14 h en Sant Boi, Sant Just Desvern y Santa Coloma de Cervelló. 5 € la hogaza, sin coste de envío, y pagas al recibirlo.
+Título: Pan por encargo, en tu puerta · Descripción: Cierra lunes y jueves a las 20 h
 
-**Texto principal (miga)**
-Solo horneo lo que se reserva: por eso cada hogaza tiene el tiempo que necesita. Corteza que cruje, miga abierta y un sabor que dura días. A domicilio en Sant Boi, Sant Just y Santa Coloma.
-**Título**: 35 horas de fermentación. Se nota.
-**Descripción**: Pagas al recibirlo
+**facil** · Reservas en la web en un minuto, sin tarjeta ni cuenta. Te lo llevo a casa el miércoles o el sábado y pagas al recibirlo.
+Título: Así de fácil · Descripción: Entrega gratis
 
-**Texto principal (bollería)**
-Croissants y pains au chocolat de masa laminada con mantequilla, hechos a mano, con el pan de la semana. Lo reservas en la web y te lo llevo a casa el sábado.
-**Título**: Croissants y pan recién hechos, en casa
-**Descripción**: Pan + croissant, 7,20 €
+**hores** · Solo horneo lo que se reserva: por eso cada hogaza tiene el tiempo que necesita. Corteza que cruje, miga abierta y un sabor que dura días.
+Título: 35 horas de fermentación. Se nota. · Descripción: Pagas al recibirlo
+
+**obrador** · Soy un obrador pequeño de Sant Boi. Amaso, formo y horneo cada hogaza a mano, y te la llevo a casa el miércoles y el sábado en Sant Boi, Sant Just y Santa Coloma.
+Título: Hecho por alguien del barrio · Descripción: Pan, banana bread y bollería
+
+**carta** · Pan de poolish 5 €, croissant 2,20 €, pain au chocolat 2,50 € y banana bread de chocolate. Lo reservas en la web y te lo llevo a casa, sin coste de envío.
+Título: La carta de Molla · Descripción: Entrega miércoles y sábado
 
 ## Regla de decisión (cada domingo, con el resumen semanal)
 
 En el resumen, fila `ads` de «Por canal»:
 
-- Si en 3 semanas no hay al menos **1 pedido o 3 altas de aviso por cada 10 €** gastados: cambia de imagen una vez; si sigue igual, apaga la campaña.
+- Si en 3 semanas no hay al menos **1 pedido o 3 altas de aviso por cada 10 €** gastados: cambia de concepto una vez; si sigue igual, apaga la campaña.
 - Si funciona: sube el presupuesto un 50% y vuelve a medir 2 semanas.
+- En Meta (Administrador de anuncios → Desglose por anuncio) verás qué concepto gana: deja ese y prueba otro nuevo en lugar del peor.
