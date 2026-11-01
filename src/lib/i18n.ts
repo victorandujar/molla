@@ -91,6 +91,11 @@ export const ui = {
       description: `Pan de fermentación lenta y banana bread con harina ecológica, hechos a mano en el Baix Llobregat. Reserva online y te lo llevo a casa el miércoles o el sábado ${hours.es} en Sant Boi, Sant Just Desvern y Santa Coloma.`,
       ogAlt: 'Hogazas de corteza tostada recién cortadas',
     },
+    xmas: {
+      label: 'Navidad',
+      lead: 'Ya puedes reservar para el ',
+      week: 'Hornada de esta semana',
+    },
     status: {
       OPEN: 'Reservas abiertas',
       SOLD_OUT: 'Hornada agotada',
@@ -562,6 +567,11 @@ export const ui = {
       title: `Pa artesà a domicili a Sant Boi i Sant Just Desvern · ${brand.name}`,
       description: `Pa de fermentació lenta i banana bread amb farina ecològica, fets a mà al Baix Llobregat. Reserva en línia i te’l porto a casa dimecres o dissabte ${hours.ca} a Sant Boi, Sant Just Desvern i Santa Coloma.`,
       ogAlt: 'Pans de crosta torrada acabats de tallar',
+    },
+    xmas: {
+      label: 'Nadal',
+      lead: 'Ja pots reservar per a ',
+      week: 'Fornada d’aquesta setmana',
     },
     status: {
       OPEN: 'Reserves obertes',

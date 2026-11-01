@@ -11,6 +11,10 @@ export type Campaign = {
   sendOn: string;
   // Pickup date (Madrid) of the bake it promotes, if any.
   bakeDate?: string;
+  // Where the buttons lead: the Christmas page for that day (24 or 31).
+  dia: string;
+  // A second button to the other Christmas bake (the first email only).
+  secondDia?: string;
   copy: Record<
     Lang,
     {
@@ -21,6 +25,7 @@ export type Campaign = {
       // Rows of the details table: [label, value].
       rows: [string, string][];
       button: string;
+      secondButton?: string;
       // Extra paragraph after the button (optional).
       note?: string;
     }
@@ -35,21 +40,23 @@ export const campaigns: Campaign[] = [
   {
     id: 'nadal-2026-anunci',
     sendOn: '2026-12-01',
+    dia: '24',
+    secondDia: '31',
     copy: {
       ca: {
         subject: 'Aquest Nadal, pa de Molla a taula',
         kicker: 'Nadal 2026',
         heading: 'Fornades de Nit de Nadal i de Cap d’Any.',
         intro:
-          'Aquest any fornejo el dijous 24 i el dijous 31 de desembre, perquè el pa arribi a taula el mateix dia. Com sempre, només el que es reserva: quan s’omple, es tanca. T’aviso per correu el dia que s’obre cada fornada.',
+          'Aquest any fornejo el dijous 24 i el dijous 31 de desembre, perquè el pa arribi a taula el mateix dia. Ja pots reservar per a tots dos dies. Com sempre, només fornejo el que es reserva: quan s’omple, es tanca.',
         rows: [
           [
             'Nit de Nadal',
-            'Dijous 24, 12–14 h · comandes del dijous 17 al dimarts 22 a les 20 h',
+            'Dijous 24, 12–14 h · comandes obertes fins dimarts 22 a les 20 h',
           ],
           [
             'Cap d’Any',
-            'Dijous 31, 12–14 h · comandes del dijous 24 al dimarts 29 a les 20 h',
+            'Dijous 31, 12–14 h · comandes obertes fins dimarts 29 a les 20 h',
           ],
           [
             'Entrega',
@@ -57,7 +64,8 @@ export const campaigns: Campaign[] = [
           ],
           ['La carta', 'Pa de poolish, banana bread i brioixeria, com sempre.'],
         ],
-        button: 'Mentrestant, la fornada d’aquesta setmana →',
+        button: 'Reservar per al 24 →',
+        secondButton: 'Reservar per al 31 →',
         note: panettoneTeaser
           ? 'I una cosa més: estic provant un panettone de massa mare. Encara no sé si arribarà a temps per a aquestes festes. Si t’agradaria tenir-ne un, respon aquest correu i seràs dels primers a saber-ho.'
           : undefined,
@@ -67,15 +75,15 @@ export const campaigns: Campaign[] = [
         kicker: 'Navidad 2026',
         heading: 'Hornadas de Nochebuena y de Nochevieja.',
         intro:
-          'Este año horneo el jueves 24 y el jueves 31 de diciembre, para que el pan llegue a la mesa el mismo día. Como siempre, solo lo que se reserva: cuando se llena, se cierra. Te aviso por email el día que se abre cada hornada.',
+          'Este año horneo el jueves 24 y el jueves 31 de diciembre, para que el pan llegue a la mesa el mismo día. Ya puedes reservar para los dos días. Como siempre, solo horneo lo que se reserva: cuando se llena, se cierra.',
         rows: [
           [
             'Nochebuena',
-            'Jueves 24, 12–14 h · pedidos del jueves 17 al martes 22 a las 20 h',
+            'Jueves 24, 12–14 h · pedidos abiertos hasta el martes 22 a las 20 h',
           ],
           [
             'Nochevieja',
-            'Jueves 31, 12–14 h · pedidos del jueves 24 al martes 29 a las 20 h',
+            'Jueves 31, 12–14 h · pedidos abiertos hasta el martes 29 a las 20 h',
           ],
           [
             'Entrega',
@@ -86,7 +94,8 @@ export const campaigns: Campaign[] = [
             'Pan de poolish, banana bread y bollería, como siempre.',
           ],
         ],
-        button: 'Mientras tanto, la hornada de esta semana →',
+        button: 'Reservar para el 24 →',
+        secondButton: 'Reservar para el 31 →',
         note: panettoneTeaser
           ? 'Y una cosa más: estoy probando un panettone de masa madre. Todavía no sé si llegará a tiempo para estas fiestas. Si te gustaría tener uno, responde a este correo y serás de los primeros en saberlo.'
           : undefined,
@@ -97,13 +106,14 @@ export const campaigns: Campaign[] = [
     id: 'nadal-2026-nit-de-nadal',
     sendOn: '2026-12-18',
     bakeDate: '2026-12-24',
+    dia: '24',
     copy: {
       ca: {
         subject: 'El pa de Nit de Nadal: comandes fins dimarts',
         kicker: 'Nit de Nadal',
         heading: 'El pa del 24, a casa a migdia.',
         intro:
-          'Ja pots reservar el pa i la brioixeria per al dijous 24. Te’ls porto de 12 a 14 h, acabats de fer. Les comandes tanquen dimarts 22 a les 20 h o quan s’omple la fornada.',
+          'Encara hi ets a temps de reservar el pa i la brioixeria per al dijous 24. Te’ls porto de 12 a 14 h, acabats de fer. Les comandes tanquen dimarts 22 a les 20 h o quan s’omple la fornada.',
         rows: [
           ['Entrega', 'Dijous 24 de desembre, 12–14 h'],
           ['Tancament', 'Dimarts 22 a les 20 h'],
@@ -115,7 +125,7 @@ export const campaigns: Campaign[] = [
         kicker: 'Nochebuena',
         heading: 'El pan del 24, en casa a mediodía.',
         intro:
-          'Ya puedes reservar el pan y la bollería para el jueves 24. Te lo llevo de 12 a 14 h, recién hecho. Los pedidos cierran el martes 22 a las 20 h o cuando se llena la hornada.',
+          'Aún estás a tiempo de reservar el pan y la bollería para el jueves 24. Te lo llevo de 12 a 14 h, recién hecho. Los pedidos cierran el martes 22 a las 20 h o cuando se llena la hornada.',
         rows: [
           ['Entrega', 'Jueves 24 de diciembre, 12–14 h'],
           ['Cierre', 'Martes 22 a las 20 h'],
@@ -128,6 +138,7 @@ export const campaigns: Campaign[] = [
     id: 'nadal-2026-cap-d-any',
     sendOn: '2026-12-27',
     bakeDate: '2026-12-31',
+    dia: '31',
     copy: {
       ca: {
         subject: 'El pa de Cap d’Any: comandes fins dimarts',

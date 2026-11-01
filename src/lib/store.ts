@@ -16,6 +16,10 @@ import { AppError } from './messages';
 import {
   assertCapacity,
   bananaSplit,
+  earlyBakeDeadline,
+  earlyBakes,
+  earlyBakesOpen,
+  isEarlyBakeDate,
   madridIso,
   madridWeekday,
   pickupCode,
@@ -200,6 +204,33 @@ export async function currentBake(): Promise<ActiveBake> {
   if (!b) throw new Error('La próxima hornada todavía se está preparando.');
   return toBake(b);
 }
+// A bake that takes orders on a page of its own: the one on show or an early
+// bake (Christmas). Null for any other id.
+export async function bookableBake(id: string): Promise<ActiveBake | null> {
+  if (useDemo()) return demo((d) => (id === bake.id ? demoBake(d) : null));
+  const [b] =
+    await sql!`SELECT b.*, ${reservedSql!} FROM bakes b WHERE b.id=${id}`;
+  if (!b) return null;
+  const [active] = await activeBakeRow(sql!);
+  if (
+    active?.id !== b.id &&
+    !isEarlyBakeDate(madridDay(new Date(b.pickup_date)))
+  )
+    return null;
+  return toBake(b);
+}
+// The early bake with this pickup date (Madrid), created if it is due.
+export async function earlyBake(date: string): Promise<ActiveBake | null> {
+  if (useDemo()) return demo((d) => demoBake(d));
+  const find = () =>
+    sql!`SELECT b.*, ${reservedSql!} FROM bakes b WHERE (b.pickup_date AT TIME ZONE 'Europe/Madrid')::date=${date}::date ORDER BY b.pickup_date LIMIT 1`;
+  let [b] = await find();
+  if (!b) {
+    await runWeeklyBakeCycle();
+    [b] = await find();
+  }
+  return b ? toBake(b) : null;
+}
 export async function listBakes(): Promise<ActiveBake[]> {
   if (useDemo()) return demo((d) => [demoBake(d)]);
   const rows =
@@ -337,9 +368,14 @@ export async function reserve(
       if (previous.email !== input.email) throw new AppError('invalid', 400);
       return previous;
     }
-    // Only the bake the page shows accepts orders, even if another is open.
+    // Only the bake the page shows accepts orders, even if another is open,
+    // and the early bakes (Christmas) on their own page.
     const [active] = await activeBakeRow(tx as unknown as postgres.Sql);
-    if (active?.id !== b.id) throw new AppError('bakeChanged');
+    if (
+      active?.id !== b.id &&
+      !isEarlyBakeDate(madridDay(new Date(b.pickup_date)))
+    )
+      throw new AppError('bakeChanged');
     const [count] =
       await tx`SELECT COALESCE(SUM(i.quantity) FILTER (WHERE i.product_id='clasica'),0)::int AS n,
         COALESCE(SUM(CASE i.product_id WHEN 'banana' THEN i.quantity*2 WHEN 'banana-mitad' THEN i.quantity ELSE 0 END),0)::int AS banana,
@@ -666,6 +702,46 @@ export async function runWeeklyBakeCycle(
       WHERE pickup_date < ${startOfToday} AND status!='COMPLETED'
       RETURNING id`;
 
+    // The template for new bakes: the latest weekly one (early bakes aside,
+    // so a capacity change on the bake of the week keeps carrying over).
+    const earlyDates = earlyBakes.map((e) => e.pickupDate);
+    const latestWeekly = async () =>
+      (
+        await tx`SELECT capacity,pickup_date,pickup_window FROM bakes
+          WHERE NOT ((pickup_date AT TIME ZONE 'Europe/Madrid')::date = ANY(${earlyDates}::date[]))
+          ORDER BY pickup_date DESC LIMIT 1`
+      )[0];
+    // Numbers follow the highest one ever used, not the latest pickup, so a
+    // bake created out of order can never make the new id collide.
+    const nextBakeId = async () => {
+      const [max] =
+        await tx`SELECT COALESCE(MAX(NULLIF(regexp_replace(number,'[^0-9]','','g'),'')::int),0)::int AS top FROM bakes`;
+      let next = Number(max?.top || 0) + 1;
+      while ((await tx`SELECT 1 FROM bakes WHERE id=${bakeId(next)}`).length)
+        next++;
+      return next;
+    };
+    // Early bakes (Christmas) open on their day, alongside the weekly one.
+    for (const early of earlyBakesOpen(now)) {
+      const [found] = await tx`
+        SELECT 1 FROM bakes
+        WHERE (pickup_date AT TIME ZONE 'Europe/Madrid')::date=${early.pickupDate}::date`;
+      if (found) continue;
+      const template = await latestWeekly();
+      const next = await nextBakeId();
+      const time = template?.pickup_date
+        ? madridClock(new Date(template.pickup_date))
+        : madridClock(new Date(bake.pickupDate));
+      await tx`
+        INSERT INTO bakes(id,number,pickup_date,deadline,opens_at,capacity,status,pickup_window)
+        VALUES(
+          ${bakeId(next)},${String(next).padStart(3, '0')},
+          ${madridIso(early.pickupDate, time)},${earlyBakeDeadline(early.pickupDate)},${now},
+          ${Number(template?.capacity || bake.capacity)},'OPEN',
+          ${(template?.pickup_window as string | null) || brand.pickupWindow || null}
+        )`;
+    }
+
     const [existing] = await tx`
       SELECT id,status,deadline FROM bakes
       WHERE (pickup_date AT TIME ZONE 'Europe/Madrid')::date=${initialPlan.pickupDate}::date
@@ -688,15 +764,8 @@ export async function runWeeklyBakeCycle(
       };
     }
 
-    const [latest] =
-      await tx`SELECT capacity,pickup_date,pickup_window FROM bakes ORDER BY pickup_date DESC LIMIT 1`;
-    // Numbers follow the highest one ever used, not the latest pickup, so a
-    // bake created out of order can never make the new id collide.
-    const [max] =
-      await tx`SELECT COALESCE(MAX(NULLIF(regexp_replace(number,'[^0-9]','','g'),'')::int),0)::int AS top FROM bakes`;
-    let next = Number(max?.top || 0) + 1;
-    while ((await tx`SELECT 1 FROM bakes WHERE id=${bakeId(next)}`).length)
-      next++;
+    const latest = await latestWeekly();
+    const next = await nextBakeId();
     const number = String(next).padStart(3, '0');
     const id = bakeId(next);
     const pickupTime = latest?.pickup_date

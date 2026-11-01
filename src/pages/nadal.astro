@@ -1,0 +1,14 @@
+---
+// Christmas: the early bakes (24 and 31 December) take orders on this page
+// from 1 December, alongside the bake of the week on the home page.
+import Home from '../components/Home.astro';
+import { earlyBakesOpen } from '../lib/domain';
+import { earlyBake } from '../lib/store';
+const dia = Astro.url.searchParams.get('dia');
+const open = earlyBakesOpen();
+const pick = open.find((e) => e.pickupDate.slice(-2) === dia) ?? open[0];
+const chosen = pick ? await earlyBake(pick.pickupDate).catch(() => null) : null;
+if (!chosen) return Astro.redirect('/', 302);
+---
+
+<Home lang="ca" bake={chosen} noindex />

@@ -237,6 +237,25 @@ export const bakeDateOverrides: Record<string, string> = {
   '2026-12-23': '2026-12-24',
   '2026-12-30': '2026-12-31',
 };
+// Special bakes that take orders early, alongside the weekly one: they open
+// on `opensOn` (Madrid) and close two days before pickup at 20:00, like a
+// Wednesday bake. The weekly cycle shows them on their own page (/nadal) and
+// the shop keeps showing the bake of the week.
+export const earlyBakes = [
+  { pickupDate: '2026-12-24', opensOn: '2026-12-01' },
+  { pickupDate: '2026-12-31', opensOn: '2026-12-01' },
+] as const;
+export const earlyBakeDeadline = (pickupDate: string) =>
+  madridIso(addCalendarDays(pickupDate, -2), '20:00');
+export const isEarlyBakeDate = (date: string) =>
+  earlyBakes.some((e) => e.pickupDate === date);
+// Early bakes taking orders at this instant, soonest first.
+export const earlyBakesOpen = (now = new Date()) =>
+  earlyBakes.filter(
+    (e) =>
+      madridDate(now) >= e.opensOn &&
+      now.getTime() < Date.parse(earlyBakeDeadline(e.pickupDate)),
+  );
 // Madrid weekday (0 = Sunday) of an instant.
 export const madridWeekday = (iso: string) =>
   new Date(`${madridDate(new Date(iso))}T12:00:00Z`).getUTCDay();

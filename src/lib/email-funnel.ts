@@ -611,7 +611,17 @@ export function campaignEmail(
   inviteCode?: string,
 ): Message {
   const t = campaign.copy[lang];
-  const url = shopUrl(lang, campaign.id);
+  // Straight to the Christmas page of that day: orders are open already.
+  const page = { ca: '/nadal', es: '/es/navidad' }[lang];
+  const dayUrl = (dia: string) =>
+    asset(
+      `${page}?dia=${dia}&utm_source=email&utm_medium=funnel&utm_campaign=${encodeURIComponent(campaign.id)}`,
+    );
+  const url = dayUrl(campaign.dia);
+  const second =
+    campaign.secondDia && t.secondButton
+      ? { url: dayUrl(campaign.secondDia), label: t.secondButton }
+      : null;
   const unsub = unsubscribeUrl(unsubscribeToken, lang);
   const invite = inviteCode ? inviteSection(lang, inviteCode) : null;
   const why =
@@ -621,7 +631,13 @@ export function campaignEmail(
   const content =
     photo('hornada.jpg', 'Molla') +
     intro(esc(t.kicker), esc(t.heading), esc(t.intro)) +
-    section(button(esc(url), t.button), '24px 40px 4px') +
+    section(
+      button(esc(url), t.button) +
+        (second
+          ? `<div style="height:10px;line-height:10px;">&nbsp;</div>${button(esc(second.url), second.label)}`
+          : ''),
+      '24px 40px 4px',
+    ) +
     section(table(t.rows.map(([k, v]) => [esc(k), esc(v)]))) +
     (t.note
       ? section(
@@ -643,7 +659,7 @@ ${t.intro}
 
 ${t.rows.map(([k, v]) => `${k}: ${v}`).join('\n')}
 
-${t.button} ${url}
+${t.button} ${url}${second ? `\n${second.label} ${second.url}` : ''}
 ${t.note ? `\n${t.note}\n` : ''}${invite ? `\n${invite.text}\n` : ''}
 ${why}
 ${lang === 'ca' ? 'Baixa' : 'Baja'}: ${unsub}

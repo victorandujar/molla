@@ -2192,6 +2192,28 @@ details.dish-more {
   border-bottom: 1px solid var(--on-cobalt-line);
 }
 
+/* Christmas: the early bakes, linked above the reservation. */
+.xmas-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  align-items: baseline;
+  margin: 0 0 clamp(20px, 2.4vw, 32px);
+  padding: 14px 18px;
+  box-shadow: inset 0 0 0 2px var(--orange);
+  font-family: var(--mono);
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.xmas-strip strong {
+  color: var(--orange);
+}
+.xmas-strip a {
+  color: inherit;
+  font-weight: 700;
+}
+
 /* 4 · Proceso: «AIXÍ DE FÀCIL.» — la tabla del flyer, con su foto fija. */
 .process {
   padding-block: clamp(72px, 8vw, 120px) var(--section);

@@ -326,11 +326,15 @@ test('Christmas campaigns: due on their day or up to two days after, in both lan
   assert.match(ca.subject, /Aquest Nadal/);
   assert.match(ca.html, /Dijous 24/);
   assert.match(ca.html, /panettone de massa mare/);
+  assert.match(ca.html, /\/nadal\?dia=24&amp;utm_source=email/);
+  assert.match(ca.html, /\/nadal\?dia=31&amp;utm_source=email/);
   assert.match(ca.html, /utm_campaign=nadal-2026-anunci/);
   assert.match(ca.html, /\/baja\?token=/);
   assert.match(ca.html, /ref%3DK7QMRT/);
   assert.match(ca.headers!['List-Unsubscribe']!, /baja/);
   const es = campaignEmail(campaigns[2]!, 'es', token);
   assert.match(es.subject, /Nochevieja/);
+  assert.match(es.html, /\/es\/navidad\?dia=31/);
+  assert.doesNotMatch(es.html, /dia=24/);
   assert.doesNotMatch(es.html, /panettone/);
 });
