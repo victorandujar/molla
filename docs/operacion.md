@@ -186,6 +186,6 @@ Debajo de la carta, tres combinaciones: **El desayuno** (1 hogaza + 1 croissant,
 Para decidir si se quedan, compara al cabo de 3-4 semanas:
 
 - En `/gestio`, «Últimos 28 días»: «Añaden …» cuenta cuántas veces se añade cada combinación y «Reservan con combinación» cuántas reservas confirmadas conservan todas las piezas de alguna. Compáralo con «Reservan».
-- Ticket medio: `npm run orders:prod` da `averageOrderCents`. Anota el valor antes de publicar y compáralo con el de las semanas de prueba, mejor por hornadas del sábado (las únicas con bollería).
+- Ticket medio: `npm run orders:prod` da `averageOrderCents`. Anota el valor antes de publicar y compáralo con el de las semanas de prueba, mejor por el mismo día de la semana (miércoles con miércoles, sábado con sábado).
 
 Si no se eligen o el ticket medio no sube, se quitan borrando la sección.
