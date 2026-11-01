@@ -61,6 +61,7 @@ En Bing Webmaster Tools, verifica el mismo dominio con `BING_SITE_VERIFICATION` 
 - `docs/operacion.md` también describe el pan fijo (suscripción semanal) y la cancelación con un clic.
 - `docs/publicacions-4-setmanes.md`: textos en catalán, con fechas, para el canal de WhatsApp, Instagram y Google.
 - `docs/crecimiento-baix-llobregat.md`: propuesta de valor y plan para llegar a Sant Boi, Sant Just Desvern y el Baix Llobregat.
+- `docs/premsa.md`: nota de premsa (català i castellà), correu per als mitjans locals i llista de mitjans; fotos en `exports/premsa/`.
 - `docs/embudo-automatico.md`: embudo de ventas automático (avisos semanales, reseñas, Pan fijo, resumen del domingo) y cómo atraer tráfico con Google y anuncios locales.
 - `docs/verificacion.md`: pruebas realizadas y límites de la entrega.
 
