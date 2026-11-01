@@ -1,6 +1,7 @@
 import { brand, money } from './config';
 import {
   bananaSplit,
+  giftCroissants,
   orderSummary,
   type Lang,
   type Order,
@@ -10,7 +11,7 @@ import { townById } from './delivery';
 import { routes, ui } from './i18n';
 // Email clients ignore stylesheets and web fonts unevenly: inline styles,
 // table layout, hosted PNGs and system-font fallbacks for everything.
-const c = {
+export const c = {
   tile: '#1b3a9f',
   tileDeep: '#122874',
   crumb: '#f7f1e8',
@@ -20,9 +21,10 @@ const c = {
   line: '#d9d3c7',
   orange: '#ff7a2e',
 };
-const display = "'Bricolage Grotesque','Arial Narrow',Arial,sans-serif";
-const body = "'Instrument Sans','Helvetica Neue',Helvetica,Arial,sans-serif";
-const esc = (s: string) =>
+export const display = "'Bricolage Grotesque','Arial Narrow',Arial,sans-serif";
+export const body =
+  "'Instrument Sans','Helvetica Neue',Helvetica,Arial,sans-serif";
+export const esc = (s: string) =>
   s.replace(
     /[&<>"']/g,
     (ch) =>
@@ -31,7 +33,7 @@ const esc = (s: string) =>
       ]!,
   );
 // Resolved against the site URL, which may include a base path.
-const asset = (path: string) => {
+export const asset = (path: string) => {
   const base = brand.site || 'https://www.mollapa.com';
   return new URL(
     path.replace(/^\//, ''),
@@ -47,7 +49,7 @@ export const pickupDay = (iso: string, lang: Lang = 'es') => {
   }).format(new Date(iso));
   return text.charAt(0).toUpperCase() + text.slice(1);
 };
-const firstName = (name: string) => name.trim().split(/\s+/)[0] || name;
+export const firstName = (name: string) => name.trim().split(/\s+/)[0] || name;
 const langOf = (o: Order): Lang => (o.lang === 'ca' ? 'ca' : 'es');
 const privacyPath = { es: '/privacidad', ca: '/privacitat' };
 // Catalan dates read "dissabte, 26 de setembre"; after "el" they stay lowercase.
@@ -135,6 +137,16 @@ const copy = {
       'Alguien (esperamos que tú) ha pedido recibir un email cuando abra una nueva hornada de Molla. Confírmalo con el botón. Si no fuiste tú, ignora este mensaje y no te escribiremos más.',
     waitlistButton: 'Confirmar el aviso →',
     waitlistUnsubscribe: 'Darme de baja',
+    giftInvited:
+      '🎁 Vienes invitado: con este pedido tienes un croissant de regalo.',
+    giftEarned: (n: number) =>
+      `🎁 Por haber invitado a ${n === 1 ? 'un vecino' : `${n} vecinos`}, este pedido incluye ${n === 1 ? 'un croissant' : `${n} croissants`} de regalo.`,
+    inviteH: 'Invita a un vecino',
+    inviteP:
+      'Con su primer pedido tendrá un croissant de regalo, y tú otro en tu siguiente pedido cuando se lo entregue. Este es tu enlace:',
+    inviteButton: 'Enviar la invitación por WhatsApp →',
+    inviteMessage:
+      'Te invito a probar el pan de Molla, un obrador de Sant Boi: fermentación lenta y te lo llevan a casa. Con tu primer pedido tienes un croissant de regalo: ',
   },
   ca: {
     footer: 'Pa de poolish per encàrrec',
@@ -215,10 +227,26 @@ const copy = {
       'Algú (esperem que tu) ha demanat rebre un correu quan obri una nova fornada de Molla. Confirma-ho amb el botó. Si no has estat tu, ignora aquest missatge i no t’escriurem més.',
     waitlistButton: 'Confirmar l’avís →',
     waitlistUnsubscribe: 'Donar-me de baixa',
+    giftInvited:
+      '🎁 Vens convidat: amb aquesta comanda tens un croissant de regal.',
+    giftEarned: (n: number) =>
+      `🎁 Per haver convidat ${n === 1 ? 'un veí' : `${n} veïns`}, aquesta comanda inclou ${n === 1 ? 'un croissant' : `${n} croissants`} de regal.`,
+    inviteH: 'Convida un veí',
+    inviteP:
+      'Amb la seva primera comanda tindrà un croissant de regal, i tu un altre a la teva propera comanda quan l’hi entregui. Aquest és el teu enllaç:',
+    inviteButton: 'Enviar la invitació per WhatsApp →',
+    inviteMessage:
+      'Et convido a provar el pa de Molla, un obrador de Sant Boi: fermentació lenta i te’l porten a casa. Amb la primera comanda tens un croissant de regal: ',
   },
 };
 
-function layout(lang: Lang, preheader: string, content: string) {
+// `extra` adds a footer line, such as the unsubscribe link of the funnel emails.
+export function layout(
+  lang: Lang,
+  preheader: string,
+  content: string,
+  extra = '',
+) {
   const t = copy[lang];
   return `<!doctype html>
 <html lang="${lang}">
@@ -252,7 +280,7 @@ ${content}
 <tr><td class="pad" style="background:${c.tileDeep};padding:28px 40px;font-family:${body};font-size:13px;line-height:1.6;color:${c.crumb};">
   <strong style="font-family:${display};font-size:18px;">molla.</strong><br>
   ${t.footer} · ${esc(brand.town)}<br>
-  ${brand.contact ? `<a href="mailto:${esc(brand.contact)}" style="color:${c.crumb};">${esc(brand.contact)}</a> · ` : ''}<a href="${asset(privacyPath[lang])}" style="color:${c.crumb};">${t.privacy}</a>
+  ${brand.contact ? `<a href="mailto:${esc(brand.contact)}" style="color:${c.crumb};">${esc(brand.contact)}</a> · ` : ''}<a href="${asset(privacyPath[lang])}" style="color:${c.crumb};">${t.privacy}</a>${extra ? `<br>${extra}` : ''}
 </td></tr>
 </table>
 </td></tr>
@@ -261,7 +289,7 @@ ${content}
 </html>`;
 }
 
-function details(rows: [string, string][]) {
+export function details(rows: [string, string][]) {
   return rows
     .map(
       ([label, value], i) =>
@@ -270,7 +298,7 @@ function details(rows: [string, string][]) {
     .join('');
 }
 
-function button(href: string, label: string) {
+export function button(href: string, label: string) {
   return `<table role="presentation" cellpadding="0" cellspacing="0"><tr><td style="background:${c.tile};border-radius:999px;"><a href="${href}" style="display:inline-block;padding:14px 26px;font-family:${body};font-size:15px;font-weight:600;color:${c.crumb};text-decoration:none;border-radius:999px;">${label}</a></td></tr></table>`;
 }
 
@@ -282,6 +310,49 @@ export const cancelUrl = (o: Order) =>
     : '';
 export const manageUrl = (token: string, lang: Lang) =>
   asset(`/subscripcio?token=${token}&lang=${lang}`);
+
+// "Convida un veí": the buyer's personal invite link and a ready WhatsApp text.
+export const inviteUrl = (code: string, lang: Lang) =>
+  asset(
+    `${routes.home[lang]}?ref=${code}&utm_source=referral&utm_campaign=convida`,
+  );
+export const inviteWhatsapp = (code: string, lang: Lang) =>
+  `https://wa.me/?text=${encodeURIComponent(copy[lang].inviteMessage + inviteUrl(code, lang))}`;
+const giftLines = (o: Order) => {
+  const t = copy[langOf(o)];
+  return [
+    o.invited ? t.giftInvited : '',
+    o.referralGifts ? t.giftEarned(o.referralGifts) : '',
+  ].filter(Boolean);
+};
+// Gifts this order carries and the buyer's own invite link.
+export function inviteBlock(o: Order) {
+  const lang = langOf(o);
+  const t = copy[lang];
+  const gifts = giftLines(o)
+    .map(
+      (g) =>
+        `<p style="margin:0 0 10px;font-family:${body};font-size:16px;font-weight:600;line-height:1.5;color:${c.tile};">${esc(g)}</p>`,
+    )
+    .join('');
+  const invite = o.referralCode
+    ? `<h2 style="margin:${gifts ? '18px' : '0'} 0 6px;font-family:${display};font-size:22px;line-height:1.15;font-weight:800;color:${c.ink};">${esc(t.inviteH)}</h2>
+  <p style="margin:0 0 6px;font-family:${body};font-size:15px;line-height:1.6;color:${c.muted};">${esc(t.inviteP)}</p>
+  <p style="margin:0 0 14px;font-family:${body};font-size:15px;"><a href="${esc(inviteUrl(o.referralCode, lang))}" style="color:${c.tile};font-weight:600;">${esc(inviteUrl(o.referralCode, lang).replace(/^https?:\/\//, ''))}</a></p>
+  ${button(esc(inviteWhatsapp(o.referralCode, lang)), t.inviteButton)}`
+    : '';
+  if (!gifts && !invite) return '';
+  return `<tr><td class="pad" style="padding:24px 40px 4px;">${gifts}${invite}</td></tr>`;
+}
+const inviteText = (o: Order) => {
+  const t = copy[langOf(o)];
+  const lines = giftLines(o);
+  if (o.referralCode)
+    lines.push(
+      `${t.inviteH}. ${t.inviteP} ${inviteUrl(o.referralCode, langOf(o))}`,
+    );
+  return lines.length ? `\n${lines.join('\n')}\n` : '';
+};
 
 export function confirmationSubject(o: Order) {
   const t = copy[langOf(o)];
@@ -300,7 +371,7 @@ ${orderSummary(o)} — ${money(o.total)} (${o.delivery ? t.payOnDelivery : t.pay
 ${t.when}: ${pickupDay(o.pickupDate, langOf(o))}, ${o.pickupWindow}
 ${t.where}: ${where(o)}
 ${o.delivery ? t.deliveryNote : t.pickupNote}
-
+${inviteText(o)}
 
 ${
   o.subscription
@@ -346,7 +417,7 @@ function pickupBlock(o: Order, totalLabel: string) {
 </td></tr>`;
 }
 
-function intro(kicker: string, heading: string, text: string) {
+export function intro(kicker: string, heading: string, text: string) {
   return `
 <tr><td class="pad" style="padding:44px 40px 8px;">
   <p style="margin:0 0 10px;font-family:${body};font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:${c.tile};">${kicker}</p>
@@ -355,7 +426,7 @@ function intro(kicker: string, heading: string, text: string) {
 </td></tr>`;
 }
 
-function closing(button: string, note: string) {
+export function closing(button: string, note: string) {
   return `
 <tr><td class="pad" style="padding:20px 40px 40px;">
   ${button}
@@ -398,6 +469,7 @@ export function confirmationHtml(o: Order) {
           esc(t.intro(o)),
         )) +
     pickupBlock(o, pay) +
+    inviteBlock(o) +
     ending;
   return layout(
     lang,
@@ -485,10 +557,23 @@ ${o.delivery ? 'Entrega a domicilio' : 'Recogida'}: ${pickupDay(o.pickupDate)}, 
 Dirección: ${where(o)}`
       : ''
   }
-Canal: ${o.source}${o.firstOrder ? `\n${ownerVoucher()}` : ''}
+Canal: ${o.source}${o.firstOrder ? `\n${ownerVoucher()}` : ''}${giftCroissants(o) ? `\n${ownerGift(o)}` : ''}
 Referencia interna: ${o.id}`;
 }
 
+// "Convida un veí": the gift croissants the baker adds to this order.
+const ownerGift = (o: Order) => {
+  const n = giftCroissants(o);
+  const why = [
+    o.invited ? 'viene invitado por otro cliente' : '',
+    o.referralGifts
+      ? `ha invitado a ${o.referralGifts} cliente${o.referralGifts > 1 ? 's' : ''} ya entregado${o.referralGifts > 1 ? 's' : ''}`
+      : '',
+  ]
+    .filter(Boolean)
+    .join(' y ');
+  return `Regalo: ${n} croissant${n > 1 ? 's' : ''} sin cobrar (${why})`;
+};
 // What the baker adds to a first order: the card with the "pa fix" voucher.
 const ownerVoucher = () =>
   `Primera comanda: añade la tarjeta con el vale del pan fijo. Vale solo para el pan fijo: cuando le hayas entregado 3 panes, el 4.º corre de tu cuenta (cuentan panes, no entregas: con 2 por entrega cae en la segunda); el descuento lo aplicas tú al cobrar ese 4.º pan`;
@@ -513,6 +598,12 @@ export function ownerHtml(o: Order) {
       ['Canal', esc(o.source)],
       ...(o.firstOrder
         ? ([['Vale', esc(ownerVoucher())]] as [string, string][])
+        : []),
+      ...(giftCroissants(o)
+        ? ([['Regalo', `<strong>${esc(ownerGift(o))}</strong>`]] as [
+            string,
+            string,
+          ][])
         : []),
       ['Código', `<strong>${esc(o.code)}</strong>`],
     ])}

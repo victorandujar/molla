@@ -1,17 +1,46 @@
+import { createHash } from 'node:crypto';
 import {
   claimReminders,
   cleanup,
+  currentBake,
   releaseReminder,
   runWeeklyBakeCycle,
   unsentConfirmations,
 } from './store';
 import {
   emailEnabled,
+  sendBatch,
   sendConfirmation,
+  sendFunnel,
   sendReminder,
   sendSubscriptionFull,
 } from './email';
 import { generateSubscriptionOrders } from './subscriptions';
+import { brand } from './config';
+import {
+  bakeState,
+  broadcastDue,
+  followupDue,
+  followupKind,
+  madridWeekday,
+} from './domain';
+import {
+  claimBroadcast,
+  claimOnce,
+  deliveredOrders,
+  earnedRewards,
+  inviteToken,
+  releaseSends,
+  weeklyFigures,
+} from './funnel';
+import {
+  broadcastEmail,
+  ownerReportEmail,
+  pafixEmail,
+  rewardEmail,
+  thanksEmail,
+} from './email-funnel';
+import { asset } from './email-templates';
 const pause = (ms: number) => new Promise((r) => setTimeout(r, ms));
 // Places the order of every active "pa fix" for the open bake and emails the
 // result. Repeating it is harmless: each bake is handled once per subscription.
@@ -53,6 +82,7 @@ export async function runDailyJobs() {
     cycle: await runWeeklyBakeCycle(),
     subscriptions: null as
       Awaited<ReturnType<typeof runSubscriptionJob>> | { error: true } | null,
+    funnel: null as Awaited<ReturnType<typeof runFunnelJob>> | null,
   };
   try {
     result.subscriptions = await runSubscriptionJob();
@@ -78,6 +108,133 @@ export async function runDailyJobs() {
       await pause(600);
     }
   }
+  // The funnel never blocks housekeeping: a failure is logged and retried
+  // by the next run.
+  result.funnel = await runFunnelJob({ followups: true, report: true });
   await cleanup();
+  return result;
+}
+
+// ---- Automated sales funnel -----------------------------------------------------
+
+// Emails per run, across all funnel emails. Resend's free plan allows 100 a
+// day (confirmations and reminders included): raise FUNNEL_MAX_PER_RUN after
+// moving to a paid plan.
+const funnelLimit = () => {
+  const n = Number(process.env.FUNNEL_MAX_PER_RUN);
+  return Number.isInteger(n) && n > 0 ? n : 80;
+};
+// Idempotency keys appear in the logs when a send fails: hash the address.
+const keyOf = (...parts: string[]) =>
+  createHash('sha256').update(parts.join('|')).digest('hex').slice(0, 32);
+export const funnelEnabled = () =>
+  emailEnabled() && process.env.FUNNEL_EMAILS !== 'false';
+
+// Opening and last call of the bake on show, to confirmed subscribers.
+async function runBroadcast(budget: number) {
+  const b = await currentBake();
+  const kind = broadcastDue({ ...b, status: bakeState(b, b.reserved) });
+  if (!kind || budget <= 0) return { kind, sent: 0 };
+  const recipients = await claimBroadcast(kind, b.id, budget);
+  let sent = 0;
+  for (let i = 0; i < recipients.length; i += 100) {
+    const chunk = recipients.slice(i, i + 100);
+    const ok = await sendBatch(
+      chunk.map((r) => ({
+        to: r.email,
+        ...broadcastEmail(kind, r.lang, b, r.token),
+      })),
+      `${kind}-${b.id}-${keyOf(...chunk.map((r) => r.email))}`,
+    );
+    if (ok) sent += chunk.length;
+    else
+      await releaseSends(
+        kind,
+        b.id,
+        chunk.map((r) => r.email),
+      );
+  }
+  return { kind, sent, bake: b.id };
+}
+
+// The day after a delivery: thank-you after a first order, the "pa fix"
+// offer after a second one. Each customer gets each email once, ever.
+async function runFollowups(budget: number) {
+  let thanks = 0;
+  let pafix = 0;
+  for (const { order, number, subscribed } of await deliveredOrders()) {
+    if (thanks + pafix >= budget) break;
+    if (!followupDue(order.pickupDate)) continue;
+    const kind = followupKind(number, subscribed);
+    if (!kind || !(await claimOnce(kind, 'once', order.email))) continue;
+    const lang = order.lang === 'ca' ? 'ca' : 'es';
+    let message;
+    if (kind === 'thanks') {
+      const token = await inviteToken(order.email, lang);
+      message = thanksEmail(
+        order,
+        token ? asset(`/alta?token=${token}&lang=${lang}`) : null,
+      );
+    } else message = pafixEmail(order);
+    if (
+      await sendFunnel(order.email, message, `${kind}-${keyOf(order.email)}`)
+    ) {
+      if (kind === 'thanks') thanks++;
+      else pafix++;
+    } else await releaseSends(kind, 'once', [order.email]);
+    await pause(600);
+  }
+  // "Convida un veí": the referrer hears their gift is waiting.
+  let reward = 0;
+  for (const r of await earnedRewards()) {
+    if (thanks + pafix + reward >= budget) break;
+    if (!(await claimOnce('reward', r.orderId, r.email))) continue;
+    if (await sendFunnel(r.email, rewardEmail(r), `reward-${keyOf(r.orderId)}`))
+      reward++;
+    else await releaseSends('reward', r.orderId, [r.email]);
+    await pause(600);
+  }
+  return { thanks, pafix, reward };
+}
+
+// Sunday afternoon: what the week brought, in the baker's inbox.
+async function runReport() {
+  if (!brand.contact) return false;
+  const today = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Europe/Madrid',
+  }).format(new Date());
+  if (madridWeekday(new Date().toISOString()) !== 0) return false;
+  if (!(await claimOnce('report', today, brand.contact))) return false;
+  const figures = await weeklyFigures();
+  if (!figures) return false;
+  const ok = await sendFunnel(
+    brand.contact,
+    ownerReportEmail(figures),
+    `report-${today}`,
+  );
+  if (!ok) await releaseSends('report', today, [brand.contact]);
+  return ok;
+}
+
+export async function runFunnelJob(
+  what: { followups?: boolean; report?: boolean } = {},
+) {
+  const result = {
+    broadcast: null as Awaited<ReturnType<typeof runBroadcast>> | null,
+    followups: null as Awaited<ReturnType<typeof runFollowups>> | null,
+    report: false,
+    error: false,
+  };
+  if (!funnelEnabled()) return result;
+  try {
+    const budget = funnelLimit();
+    result.broadcast = await runBroadcast(budget);
+    if (what.followups)
+      result.followups = await runFollowups(budget - result.broadcast.sent);
+    if (what.report) result.report = await runReport();
+  } catch (e) {
+    console.error('Funnel job failed', e instanceof Error ? e.message : e);
+    result.error = true;
+  }
   return result;
 }

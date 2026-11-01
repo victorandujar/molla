@@ -62,6 +62,15 @@ export const privacy = {
 export const standingVoucher = {
   active: process.env.PA_FIX_VOUCHER !== 'false',
 };
+// "Convida un veí": a gift croissant for a friend's first order through a
+// customer's invite link, and another for that customer once the friend's
+// order is delivered. The baker adds them by hand (they show in /gestio and
+// in the "Nueva reserva" email). REFERRAL_GIFT=false turns the programme off.
+export const referralGift = {
+  active: process.env.REFERRAL_GIFT !== 'false',
+  // Most gifts one order of the referrer can carry; the rest wait.
+  maxPerOrder: 2,
+};
 // Google reviews shown on the home page. Update the score, the count, the
 // links and the quotes here only. Quotes are verbatim from Google, in the
 // language they were written (`lang`): never translate or correct them.

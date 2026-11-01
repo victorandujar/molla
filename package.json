@@ -8,7 +8,7 @@
     "dev:e2e": "ADMIN_PASSWORD=e2e-password-local astro dev --port 4381",
     "build": "astro build",
     "check": "astro check",
-    "test": "node --import tsx --test tests/*.test.ts",
+    "test": "node --import tsx --test --test-concurrency=1 tests/*.test.ts",
     "test:e2e": "playwright test",
     "photos": "node scripts/photos.mjs && node scripts/combo-photos.mjs",
     "brand": "node scripts/brand-assets.mjs",
@@ -23,7 +23,8 @@
     "db:seed:prod": "node --env-file=.env.production --import tsx scripts/seed.ts",
     "audit:local": "node scripts/audit.mjs",
     "seo:indexnow": "node scripts/indexnow.mjs",
-    "qr": "node --env-file-if-exists=.env scripts/qr-cards.mjs"
+    "qr": "node --env-file-if-exists=.env scripts/qr-cards.mjs",
+    "ads": "node scripts/ad-kit.mjs"
   },
   "dependencies": {
     "@astrojs/vercel": "^11.0.10",

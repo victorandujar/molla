@@ -2,7 +2,7 @@ import type { APIRoute } from 'astro';
 import { createHash, timingSafeEqual } from 'node:crypto';
 import { json } from '../../../lib/http';
 import { runWeeklyBakeCycle } from '../../../lib/store';
-import { runSubscriptionJob } from '../../../lib/jobs';
+import { runFunnelJob, runSubscriptionJob } from '../../../lib/jobs';
 
 const digest = (value: string) => createHash('sha256').update(value).digest();
 
@@ -31,7 +31,10 @@ export const GET: APIRoute = async ({ request }) => {
       );
       subscriptions = { error: true };
     }
-    return json({ ...cycle, subscriptions });
+    // Subscribers hear about the new bake the moment it opens (the daily
+    // job repeats this as a backup; each email goes out once).
+    const funnel = await runFunnelJob();
+    return json({ ...cycle, subscriptions, funnel });
   } catch (error) {
     console.error(
       'Weekly cycle failed',
