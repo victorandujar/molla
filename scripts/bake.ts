@@ -11,7 +11,8 @@ const flags = Object.fromEntries(
 const args = rest.filter((a) => !a.startsWith('--'));
 const writes = command !== 'list';
 console.log(`Base de datos: ${new URL(url).host}${new URL(url).pathname}`);
-if (writes && flags.yes === undefined)
+// A bare --yes parses as { yes: undefined }: test the key, not the value.
+if (writes && !('yes' in flags))
   throw new Error(
     'Este comando modifica la base de datos. Revisa el host y repite con --yes.',
   );
