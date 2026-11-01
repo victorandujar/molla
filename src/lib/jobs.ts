@@ -30,6 +30,7 @@ import {
   deliveredOrders,
   earnedRewards,
   inviteToken,
+  referralCodesFor,
   releaseSends,
   weeklyFigures,
 } from './funnel';
@@ -136,13 +137,20 @@ async function runBroadcast(budget: number) {
   const kind = broadcastDue({ ...b, status: bakeState(b, b.reserved) });
   if (!kind || budget <= 0) return { kind, sent: 0 };
   const recipients = await claimBroadcast(kind, b.id, budget);
+  // Customers among them get their personal invite link in the email.
+  let codes: Record<string, string> = {};
+  try {
+    codes = await referralCodesFor(recipients.map((r) => r.email));
+  } catch (e) {
+    console.error('Invite codes failed', e instanceof Error ? e.message : e);
+  }
   let sent = 0;
   for (let i = 0; i < recipients.length; i += 100) {
     const chunk = recipients.slice(i, i + 100);
     const ok = await sendBatch(
       chunk.map((r) => ({
         to: r.email,
-        ...broadcastEmail(kind, r.lang, b, r.token),
+        ...broadcastEmail(kind, r.lang, b, r.token, codes[r.email]),
       })),
       `${kind}-${b.id}-${keyOf(...chunk.map((r) => r.email))}`,
     );

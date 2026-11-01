@@ -146,13 +146,44 @@ const broadcastCopy = {
   },
 };
 
+const inviteCopy = {
+  es: {
+    h: 'Invita a un vecino: un croissant para cada uno',
+    p: 'Con su primer pedido por tu enlace tendrá un croissant de regalo, y tú otro en tu siguiente pedido cuando se lo entregue.',
+    button: 'Enviar la invitación por WhatsApp ↗',
+  },
+  ca: {
+    h: 'Convida un veí: un croissant per a cadascú',
+    p: 'Amb la seva primera comanda pel teu enllaç tindrà un croissant de regal, i tu un altre a la teva propera comanda quan l’hi entregui.',
+    button: 'Enviar la invitació per WhatsApp ↗',
+  },
+};
+function inviteSection(lang: Lang, code: string) {
+  const t = inviteCopy[lang];
+  const url = personalInvite(code, lang);
+  return {
+    html: section(
+      `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:3px solid ${c.orange};border-radius:12px;"><tr><td style="padding:20px 22px;">
+      ${subhead(t.h, t.p)}
+      ${link(inviteWhatsapp(code, lang), t.button)}
+      <p style="margin:10px 0 0;font-family:${body};font-size:13px;color:${c.muted};">${esc(url.replace(/^https?:\/\//, ''))}</p>
+    </td></tr></table>`,
+      '24px 40px 4px',
+    ),
+    text: `${t.h}. ${t.p} ${url}`,
+  };
+}
+
 export function broadcastEmail(
   kind: 'open' | 'last',
   lang: Lang,
   bake: FunnelBake,
   unsubscribeToken: string,
+  // "Convida un veí": the recipient's own invite code, if they are a customer.
+  inviteCode?: string,
 ): Message {
   const t = broadcastCopy[lang];
+  const invite = inviteCode ? inviteSection(lang, inviteCode) : null;
   const day = pickupDay(bake.pickupDate, lang).toLowerCase();
   const dayName = weekday(bake.pickupDate, lang);
   const close = `${weekday(bake.deadline, lang)} ${lang === 'ca' ? 'a les' : 'a las'} ${clock(bake.deadline)}`;
@@ -186,6 +217,7 @@ export function broadcastEmail(
     section(button(esc(url), t.button), '24px 40px 4px') +
     section(table(rows)) +
     (kind === 'open' ? quoteBlock(Number(bake.number) || 0, lang) : '') +
+    (invite?.html || '') +
     closing(
       button(esc(url), t.button),
       `${esc(t.fix)} <a href="${esc(fixUrl)}" style="color:${c.tile};font-weight:600;">${esc(routes.standing[lang])}</a><br><br><span style="font-size:12px;">${esc(t.why)}</span>`,
@@ -208,7 +240,7 @@ ${t.pay}: ${t.payText}
 ${t.button} ${url}
 
 ${t.fix} ${fixUrl}
-
+${invite ? `\n${invite.text}\n` : ''}
 ${t.why}
 ${lang === 'ca' ? 'Baixa' : 'Baja'}: ${unsub}
 
