@@ -263,3 +263,12 @@ test('reward email tells the referrer their gift waits, without naming the frien
   assert.match(m.html, /utm_campaign=reward/);
   assert.match(m.text, /\?ref=K7QMRT/);
 });
+
+test('weekly emails carry the personal invite link of customers only', () => {
+  const withCode = broadcastEmail('open', 'ca', bake, token, 'K7QMRT');
+  assert.match(withCode.html, /Convida un veí: un croissant per a cadascú/);
+  assert.match(withCode.html, /ref%3DK7QMRT/);
+  assert.match(withCode.text, /\?ref=K7QMRT/);
+  const without = broadcastEmail('open', 'ca', bake, token);
+  assert.doesNotMatch(without.html, /Convida un veí: un croissant/);
+});

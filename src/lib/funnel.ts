@@ -1,9 +1,10 @@
 // Data side of the automated funnel. Every email is claimed in `email_sends`
 // before it goes out (and released if the provider refuses it), so repeated
 // or overlapping cron runs never send the same email twice.
-import { randomUUID } from 'node:crypto';
+import { randomBytes, randomUUID } from 'node:crypto';
 import { demo, sql, useDemo } from './store';
-import type { Lang, Order } from './domain';
+import { referralGift } from './config';
+import { referralCode, type Lang, type Order } from './domain';
 
 export type Recipient = { email: string; lang: Lang; token: string };
 
@@ -259,4 +260,31 @@ export async function earnedRewards(): Promise<
     lang: r.lang === 'ca' ? 'ca' : 'es',
     code: r.referral_code as string,
   }));
+}
+
+// "Convida un veí" in the weekly emails: the invite code of every recipient
+// who is already a customer, created now for those who ordered before the
+// programme existed (their code would otherwise wait for their next order).
+export async function referralCodesFor(
+  emails: string[],
+): Promise<Record<string, string>> {
+  if (useDemo() || !emails.length || !referralGift.active) return {};
+  const missing =
+    await sql!`SELECT id FROM customers WHERE email IN ${sql!(emails)} AND referral_code IS NULL`;
+  for (const c of missing) {
+    let done = false;
+    while (!done) {
+      const candidate = referralCode(randomBytes(6));
+      const rows =
+        await sql!`UPDATE customers SET referral_code=${candidate} WHERE id=${c.id} AND referral_code IS NULL AND NOT EXISTS (SELECT 1 FROM customers WHERE referral_code=${candidate}) RETURNING id`;
+      const [still] =
+        await sql!`SELECT referral_code FROM customers WHERE id=${c.id}`;
+      done = rows.length > 0 || !!still?.referral_code;
+    }
+  }
+  const rows =
+    await sql!`SELECT email, referral_code FROM customers WHERE email IN ${sql!(emails)} AND referral_code IS NOT NULL`;
+  return Object.fromEntries(
+    rows.map((r) => [r.email as string, r.referral_code as string]),
+  );
 }

@@ -22,7 +22,9 @@ Al crear el anuncio, sube el `-feed` y el `-story` del mismo concepto: Meta usa 
 - **Objetivo**: Tráfico. Destino: sitio web.
 - **Público**: ubicación «personas que viven en», radio de 3 km alrededor de Sant Boi de Llobregat, Sant Just Desvern y Santa Coloma de Cervelló. Edad 28–65. Sin intereses.
 - **Ubicaciones**: manuales. Solo Instagram (feed, stories, reels, explorar) y Facebook (feed, stories, reels). Quita Audience Network y Messenger: dan clics accidentales que no acaban en pedidos.
-- **Presupuesto**: 5 € al día, sin fecha de fin. Un conjunto por idioma con los cinco conceptos de ese idioma: Meta reparte el presupuesto hacia los que funcionan.
+- **Presupuesto**: **2,50 € al día** (unos 17 € a la semana, 75 € al mes), sin fecha de fin.
+- **Un solo conjunto de anuncios** para los dos idiomas: con poco presupuesto, dividirlo deja cada parte sin datos para aprender. En cada anuncio, «Añadir idiomas» → catalán como principal y castellano como segundo, con su texto y su enlace: Meta enseña a cada persona su versión.
+- **Tres conceptos para empezar**: `obrador` (la cara de quien hornea), `encarrec` (precio y cómo funciona) y `carta` (bollería y precios). `hores` y `facil` quedan de reserva para sustituir al que peor vaya.
 - **Botón**: «Más información».
 
 ## Enlaces (con la etiqueta para medir)
@@ -70,6 +72,6 @@ Título: La carta de Molla · Descripción: Entrega miércoles y sábado
 
 En el resumen, fila `ads` de «Por canal»:
 
-- Si en 3 semanas no hay al menos **1 pedido o 3 altas de aviso por cada 10 €** gastados: cambia de concepto una vez; si sigue igual, apaga la campaña.
+- Mide a las **4 semanas** (con 2,50 €/día llegan datos más despacio). La referencia es **1 pedido o 3 altas de aviso por cada 10 €** gastados: unos 7 pedidos o 20 altas al mes. Si no llegas ni a la mitad, cambia el peor concepto por uno de reserva; si a las 4 semanas siguientes sigue igual, apaga la campaña.
 - Si funciona: sube el presupuesto un 50% y vuelve a medir 2 semanas.
 - En Meta (Administrador de anuncios → Desglose por anuncio) verás qué concepto gana: deja ese y prueba otro nuevo en lugar del peor.

@@ -990,7 +990,11 @@ test('no banana bread gift anywhere; the first order still gets the pa fix vouch
   // The banana bread welcome gift is over: not in the hero nor by the ticket.
   await expect(page.locator('.hero-gift')).toHaveCount(0);
   await expect(page.locator('#regal')).toHaveCount(0);
-  await expect(page.locator('body')).not.toContainText(/regalo|dos trozos/i);
+  // The only gift is the "invite a neighbour" croissant, never banana bread.
+  await expect(page.locator('body')).not.toContainText(
+    /banana bread de regalo|dos trozos/i,
+  );
+  await expect(page.locator('.invite')).toContainText('Un vecino,');
   await expect(page.locator('.fix')).toContainText(
     'Solo para el Pan fijo: cuando te haya entregado 3 panes, el 4.º corre de mi cuenta.',
   );
@@ -1148,6 +1152,9 @@ test('invite a neighbour: personal link, invited note and gift croissant', async
   };
   await page.goto('/');
   await expect(page.locator('#referral-note')).toBeHidden();
+  // The programme is explained on the home page before anyone orders.
+  await expect(page.locator('.invite')).toContainText('dos croissants.');
+  await expect(page.locator('.invite a[href="#reserva"]')).toBeVisible();
   await order('ona@example.com');
   const share = page.locator('#confirmation a[data-invite]');
   await expect(share).toContainText('Enviar la invitació per WhatsApp');

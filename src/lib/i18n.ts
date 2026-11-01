@@ -339,6 +339,19 @@ export const ui = {
         'Saltas o cancelas con un clic',
       ],
     },
+    invite: {
+      kicker: 'Invita a un vecino',
+      bar: 'Un croissant para cada uno',
+      h2a: 'Un vecino,',
+      h2b: 'dos croissants.',
+      steps: [
+        'Con cada pedido te llega tu enlace personal de invitación, en la confirmación y en el email.',
+        'Tu vecino hace su primer pedido con ese enlace: se lleva un croissant de regalo.',
+        'Cuando se lo entrego, tu siguiente pedido también lleva un croissant de regalo.',
+      ],
+      note: '¿Ya has pedido? Tu enlace está en el email de confirmación y en los avisos de cada hornada.',
+      cta: 'Hacer mi pedido',
+    },
     organic: {
       kicker: 'Harina',
       h2a: 'Harinas ecológicas,',
@@ -807,6 +820,19 @@ export const ui = {
         `${price} el pa · sense enviament`,
         'Saltes o cancel·les amb un clic',
       ],
+    },
+    invite: {
+      kicker: 'Convida un veí',
+      bar: 'Un croissant per a cadascú',
+      h2a: 'Un veí,',
+      h2b: 'dos croissants.',
+      steps: [
+        'Amb cada comanda et arriba el teu enllaç personal d’invitació, a la confirmació i al correu.',
+        'El teu veí fa la primera comanda amb aquest enllaç: s’emporta un croissant de regal.',
+        'Quan l’hi entrego, la teva propera comanda també porta un croissant de regal.',
+      ],
+      note: 'Ja has fet alguna comanda? El teu enllaç és al correu de confirmació i als avisos de cada fornada.',
+      cta: 'Fer la meva comanda',
     },
     organic: {
       kicker: 'Farina',
