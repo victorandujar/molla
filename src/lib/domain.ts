@@ -48,6 +48,11 @@ export const reservationSchema = z
     product: z.literal('clasica').default('clasica'),
     pickup: z.literal('yes', { error: 'pickup' }),
     privacy: z.literal('yes', { error: 'privacy' }),
+    // Optional, unticked by default: the buyer asks for the weekly email.
+    news: z
+      .enum(['yes', ''])
+      .default('')
+      .transform((v) => v === 'yes'),
     website: z.string().max(0).default(''),
     source: z.enum(sources).default('direct'),
     ...deliveryFields,
@@ -372,4 +377,57 @@ export const csvCell = (v: unknown) => {
     (/^[=+\-@\t\r]/.test(text) ? `'${text}` : text).replaceAll('"', '""') +
     '"'
   );
+};
+
+// ---- Automated funnel -------------------------------------------------------
+// Which bake days get the weekly emails (opening and last call). Saturday's
+// only by default, so subscribers get at most two emails a week;
+// NEWSLETTER_DAYS=3,6 adds Wednesday's.
+export function newsletterDays(value = process.env.NEWSLETTER_DAYS) {
+  const days = (value ?? '6')
+    .split(',')
+    .map((d) => Number(d.trim()))
+    .filter((d) => bakeDays.some((b) => b.weekday === d));
+  return days.length ? days : [6];
+}
+export type BroadcastKind = 'open' | 'last';
+// What the funnel may send now for a bake taking orders:
+//  open: it opened within the last 36 hours and closes in more than a day;
+//  last: it closes within the next 8 hours (the daily run on closing day).
+// A sold-out, closed or not-yet-open bake gets nothing.
+export function broadcastDue(
+  b: {
+    status: BakeState;
+    opensAt: string;
+    deadline: string;
+    pickupDate: string;
+  },
+  now = Date.now(),
+  days = newsletterDays(),
+): BroadcastKind | null {
+  if (b.status !== 'OPEN') return null;
+  if (!days.includes(madridWeekday(b.pickupDate))) return null;
+  const opens = Date.parse(b.opensAt);
+  const left = Date.parse(b.deadline) - now;
+  if (now < opens || left <= 0) return null;
+  if (left <= 8 * 3600000) return 'last';
+  if (now - opens <= 36 * 3600000 && left > 24 * 3600000) return 'open';
+  return null;
+}
+// After-delivery follow-ups, counted over a customer's orders that were not
+// cancelled: a thank-you (review, neighbour, weekly email) after the first,
+// the "pa fix" offer after the second. Standing orders get neither.
+export type FollowupKind = 'thanks' | 'pafix';
+export function followupKind(
+  orderNumber: number,
+  hasSubscription: boolean,
+): FollowupKind | null {
+  if (orderNumber === 1) return 'thanks';
+  if (orderNumber === 2 && !hasSubscription) return 'pafix';
+  return null;
+}
+// The follow-up goes out the day after delivery: between 20 hours and 5 days.
+export const followupDue = (pickupIso: string, now = Date.now()) => {
+  const since = now - Date.parse(pickupIso);
+  return since >= 20 * 3600000 && since <= 5 * 86400000;
 };

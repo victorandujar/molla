@@ -1,0 +1,205 @@
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import {
+  broadcastDue,
+  followupDue,
+  followupKind,
+  newsletterDays,
+  reservationSchema,
+  type Order,
+} from '../src/lib/domain';
+import {
+  broadcastEmail,
+  ownerReportEmail,
+  pafixEmail,
+  thanksEmail,
+} from '../src/lib/email-funnel';
+import { googleReviews } from '../src/lib/config';
+
+// Saturday 7 Nov 2026 bake: opens Monday 2 Nov 20:00, closes Thursday 5 Nov
+// 20:00 (Madrid, CET = UTC+1).
+const saturday = {
+  status: 'OPEN' as const,
+  opensAt: '2026-11-02T19:00:00.000Z',
+  deadline: '2026-11-05T19:00:00.000Z',
+  pickupDate: '2026-11-07T11:00:00.000Z',
+};
+const at = (iso: string) => Date.parse(iso);
+
+test('newsletter days default to Saturday and ignore unknown days', () => {
+  assert.deepEqual(newsletterDays(undefined), [6]);
+  assert.deepEqual(newsletterDays('3,6'), [3, 6]);
+  assert.deepEqual(newsletterDays('1,9'), [6]);
+});
+
+test('opening email goes out right after the bake opens, last call on closing day', () => {
+  // Monday 20:05, the cycle cron: opening.
+  assert.equal(broadcastDue(saturday, at('2026-11-02T19:05:00Z'), [6]), 'open');
+  // Tuesday 17:00, daily backup run: still the opening (within 36 h).
+  assert.equal(broadcastDue(saturday, at('2026-11-03T16:00:00Z'), [6]), 'open');
+  // Wednesday 17:00: nothing.
+  assert.equal(broadcastDue(saturday, at('2026-11-04T16:00:00Z'), [6]), null);
+  // Thursday 17:00, three hours before closing: last call.
+  assert.equal(broadcastDue(saturday, at('2026-11-05T16:00:00Z'), [6]), 'last');
+  // After the close, nothing.
+  assert.equal(broadcastDue(saturday, at('2026-11-05T19:30:00Z'), [6]), null);
+});
+
+test('no emails for sold-out bakes or days outside the newsletter', () => {
+  const now = at('2026-11-02T19:05:00Z');
+  assert.equal(
+    broadcastDue({ ...saturday, status: 'SOLD_OUT' }, now, [6]),
+    null,
+  );
+  assert.equal(broadcastDue(saturday, now, [3]), null);
+  const wednesday = {
+    status: 'OPEN' as const,
+    opensAt: '2026-11-05T19:00:00.000Z',
+    deadline: '2026-11-09T19:00:00.000Z',
+    pickupDate: '2026-11-11T11:00:00.000Z',
+  };
+  assert.equal(broadcastDue(wednesday, at('2026-11-05T19:05:00Z'), [6]), null);
+  assert.equal(
+    broadcastDue(wednesday, at('2026-11-05T19:05:00Z'), [3, 6]),
+    'open',
+  );
+});
+
+test('follow-ups: thank-you after the first order, pa fix offer after the second', () => {
+  assert.equal(followupKind(1, false), 'thanks');
+  assert.equal(followupKind(1, true), 'thanks');
+  assert.equal(followupKind(2, false), 'pafix');
+  assert.equal(followupKind(2, true), null);
+  assert.equal(followupKind(3, false), null);
+  const pickup = '2026-11-07T11:00:00.000Z';
+  assert.equal(followupDue(pickup, at('2026-11-07T20:00:00Z')), false);
+  assert.equal(followupDue(pickup, at('2026-11-08T16:00:00Z')), true);
+  assert.equal(followupDue(pickup, at('2026-11-13T16:00:00Z')), false);
+});
+
+test('checkout opt-in is optional and unticked by default', () => {
+  const base = {
+    requestId: '11111111-1111-4111-8111-111111111111',
+    bakeId: 'hornada-010',
+    name: 'Ana',
+    email: 'ANA@example.com',
+    phone: '600 000 000',
+    quantity: 1,
+    pickup: 'yes',
+    privacy: 'yes',
+  };
+  assert.equal(reservationSchema.parse(base).news, false);
+  assert.equal(reservationSchema.parse({ ...base, news: 'yes' }).news, true);
+  assert.equal(
+    reservationSchema.safeParse({ ...base, news: 'si' }).success,
+    false,
+  );
+});
+
+const bake = {
+  id: 'hornada-010',
+  number: '010',
+  ...saturday,
+};
+const token = '22222222-2222-4222-8222-222222222222';
+
+test('opening email: tagged links, unsubscribe link and header, both languages', () => {
+  const es = broadcastEmail('open', 'es', bake, token);
+  assert.match(es.subject, /Ya puedes reservar el pan del sábado/);
+  assert.match(
+    es.html,
+    /utm_source=email&amp;utm_medium=funnel&amp;utm_campaign=open-010/,
+  );
+  assert.match(
+    es.html,
+    /\/baja\?token=22222222-2222-4222-8222-222222222222&amp;lang=es/,
+  );
+  assert.match(es.html, /jueves a las 20:00/);
+  assert.match(es.html, /hornada\.jpg/);
+  assert.match(es.headers!['List-Unsubscribe']!, /\/baja\?token=/);
+  assert.match(es.text, /utm_campaign=open-010/);
+  const ca = broadcastEmail('last', 'ca', bake, token);
+  assert.match(ca.subject, /Avui a les 20:00 tanco les comandes de dissabte/);
+  assert.match(ca.html, /<html lang="ca">/);
+  assert.match(ca.html, /utm_campaign=last-010/);
+  assert.match(ca.html, /lang=ca/);
+});
+
+const order: Order = {
+  id: 'x',
+  code: '010-K7QM',
+  requestId: 'r',
+  bakeId: 'hornada-010',
+  name: '<b>Ana</b> Pérez',
+  email: 'a@example.com',
+  phone: '600000000',
+  quantity: 1,
+  product: 'clasica',
+  productName: 'La de cada semana',
+  total: 500,
+  pickupDate: saturday.pickupDate,
+  pickupAddress: 'Punto de recogida en Sant Boi de Llobregat',
+  pickupWindow: '12:00–14:00',
+  source: 'google',
+  status: 'COLLECTED',
+  createdAt: '',
+  emailStatus: 'SENT',
+};
+
+test('thank-you email asks for a review, a neighbour and (if not subscribed) the weekly email', () => {
+  const m = thanksEmail(
+    order,
+    'https://www.mollapa.com/alta?token=abc&lang=es',
+  );
+  assert.doesNotMatch(m.html, /<b>Ana/);
+  assert.ok(m.html.includes(googleReviews.reviewUrl));
+  assert.match(m.html, /wa\.me/);
+  assert.match(m.html, /\/alta\?token=abc/);
+  const subscribed = thanksEmail({ ...order, lang: 'ca' }, null);
+  assert.doesNotMatch(subscribed.html, /\/alta\?token/);
+  assert.match(subscribed.subject, /Què tal el pa\?/);
+});
+
+test('pa fix offer links the standing order page with its campaign', () => {
+  const m = pafixEmail(order);
+  assert.match(m.html, /\/es\/pan-fijo\?utm_source=email/);
+  assert.match(m.html, /pafix-offer/);
+  assert.match(
+    pafixEmail({ ...order, lang: 'ca' }).html,
+    /\/pa-fix\?utm_source=email/,
+  );
+});
+
+test('weekly report adds up the funnel without personal data', () => {
+  const m = ownerReportEmail({
+    from: '2026-10-25',
+    to: '2026-10-31',
+    events: {
+      landing_view: 300,
+      view_current_bake: 200,
+      start_reservation: 40,
+      reservation_completed: 20,
+    },
+    bySource: [{ source: 'google', visits: 120, orders: 9 }],
+    orders: 20,
+    customers: 18,
+    newCustomers: 7,
+    revenueCents: 14250,
+    bakes: [
+      {
+        number: '009',
+        pickupDate: '2026-10-31T11:00:00.000Z',
+        reserved: 10,
+        capacity: 10,
+      },
+    ],
+    subscribers: { confirmed: 55, pending: 3 },
+    standing: 6,
+    emails: { open: 50, thanks: 7 },
+  });
+  assert.match(m.subject, /20 pedidos/);
+  assert.match(m.text, /Empiezan a reservar: 40 · 20%/);
+  assert.match(m.text, /google: 120 visitas · 9 pedidos/);
+  assert.match(m.text, /Apertura de hornada: 50/);
+  assert.match(m.text, /10\/10 hogazas \(100%\)/);
+});

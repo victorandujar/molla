@@ -26,6 +26,7 @@ async function send(
     text: string;
     html: string;
     replyTo?: string;
+    headers?: Record<string, string>;
   },
   key: string,
 ) {
@@ -44,6 +45,7 @@ async function send(
       text: payload.text,
       html: payload.html,
       reply_to: payload.replyTo,
+      headers: payload.headers,
     }),
   });
   // Logged without personal data so a delivery problem is visible in Vercel logs.
@@ -139,7 +141,12 @@ export async function sendWaitlistConfirmation(
 
 async function sendTo(
   to: string,
-  message: { subject: string; html: string; text: string },
+  message: {
+    subject: string;
+    html: string;
+    text: string;
+    headers?: Record<string, string>;
+  },
   key: string,
   replyTo?: string,
 ) {
@@ -223,3 +230,53 @@ export async function notifyOwnerCancellation(o: Order) {
     o.email,
   );
 }
+
+// ---- Automated funnel ----------------------------------------------------------
+
+export type BatchMessage = {
+  to: string;
+  subject: string;
+  text: string;
+  html: string;
+  headers?: Record<string, string>;
+};
+// Up to 100 emails per request through Resend's batch endpoint, so a list of
+// subscribers goes out in seconds instead of one request every 600 ms. Returns
+// whether the provider accepted the whole batch (it is all or nothing).
+export async function sendBatch(messages: BatchMessage[], key: string) {
+  if (!emailEnabled() || !messages.length) return false;
+  try {
+    const response = await fetch('https://api.resend.com/emails/batch', {
+      method: 'POST',
+      signal: AbortSignal.timeout(15000),
+      headers: {
+        Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+        'Content-Type': 'application/json',
+        'Idempotency-Key': key,
+      },
+      body: JSON.stringify(
+        messages.map((m) => ({
+          from: process.env.EMAIL_FROM,
+          to: [m.to],
+          subject: m.subject,
+          text: m.text,
+          html: m.html,
+          headers: m.headers,
+          reply_to: brand.contact || undefined,
+        })),
+      ),
+    });
+    if (!response.ok)
+      console.error(`Batch rejected (${response.status}) for ${key}`);
+    return response.ok;
+  } catch {
+    console.error('Batch failed', key);
+    return false;
+  }
+}
+// One email of the funnel (a follow-up or the weekly report).
+export const sendFunnel = (
+  to: string,
+  message: BatchMessage | Omit<BatchMessage, 'to'>,
+  key: string,
+) => sendTo(to, message, key, brand.contact || undefined);

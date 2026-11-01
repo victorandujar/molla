@@ -1085,3 +1085,40 @@ test('Combina Molla: three pairings at the sum of their pieces, counted per pair
     )
     .toBe(true);
 });
+test('checkout opt-in: the weekly email is optional and unticked by default', async ({
+  page,
+}) => {
+  const fill = async (email: string, news: boolean) => {
+    await page.goto('/');
+    await page.locator('#reservation-form [name=name]').fill('Ona Prova');
+    await page.locator('#email').fill(email);
+    await page.locator('#phone').fill('612345678');
+    await page.locator('input[name=delivery][value=pickup]').check({
+      force: true,
+    });
+    await page
+      .locator('#reservation-form [data-target=quantity][data-step="1"]')
+      .click();
+    await page.locator('input[name=pickup]').check();
+    await page.locator('input[name=privacy]').check();
+    const box = page.locator('input[name=news]');
+    await expect(box).not.toBeChecked();
+    await expect(page.locator('#reservation-form')).toContainText(
+      'avisa’m per correu quan obri cada fornada del dissabte',
+    );
+    if (news) await box.check();
+    await page.locator('#reservation-form button[type=submit]').click();
+    await expect(page.locator('#confirmation')).toBeVisible();
+  };
+  await fill('sense@example.com', false);
+  await fill('amb@example.com', true);
+  await expect
+    .poll(async () => (await readData()).waitlist)
+    .toEqual([
+      expect.objectContaining({
+        email: 'amb@example.com',
+        lang: 'ca',
+        confirmedAt: expect.any(String),
+      }),
+    ]);
+});

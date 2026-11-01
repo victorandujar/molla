@@ -442,6 +442,8 @@ export const ui = {
         `Recibiré el pedido el ${day}: en casa ${hours.es} si he elegido entrega a domicilio, o en el punto de recogida de Sant Boi de Llobregat${window ? ` (${window})` : ''}.`,
       privacyA: 'He leído la',
       privacyLink: 'privacidad y las condiciones',
+      newsCheck:
+        'Opcional: avísame por email cuando abra cada hornada del sábado (como mucho dos emails por semana; baja con un clic).',
       submitDemo: 'Probar reserva',
       submit: 'Confirmar reserva',
       footnote:
@@ -908,6 +910,8 @@ export const ui = {
         `Rebré la comanda ${day}: a casa ${hours.ca} si he triat entrega a domicili, o al punt de recollida de Sant Boi de Llobregat${window ? ` (${window})` : ''}.`,
       privacyA: 'He llegit la',
       privacyLink: 'privacitat i les condicions',
+      newsCheck:
+        'Opcional: avisa’m per correu quan obri cada fornada del dissabte (com a molt dos correus per setmana; baixa amb un clic).',
       submitDemo: 'Provar la reserva',
       submit: 'Confirmar la reserva',
       footnote:

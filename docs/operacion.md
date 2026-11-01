@@ -49,7 +49,7 @@ Los comandos siguientes aparecen sin sufijo; para producción usa `orders:prod`.
 - `npm run orders -- funnel --days=28`: embudo por evento y canal (visitas, ven la hornada, empiezan a reservar, reservan, se apuntan al aviso).
 - `npm run orders -- collected 001-K7QM --yes`: marca una reserva confirmada como recogida. Acepta el código de recogida (número de hornada + 4 caracteres sin 0/O, 1/I/L) o la referencia UUID interna.
 - `npm run orders -- cancel 001-K7QM --yes`: cancela una reserva confirmada. No se puede reactivar una cancelada mediante este comando; se crea una nueva reserva para validar cupo.
-- `npm run orders -- waitlist .data/avisos.json`: exporta solo los avisos **confirmados** (doble opt-in), con su idioma. Incluir un enlace a `https://DOMINIO/baja?token=TOKEN&lang=IDIOMA` por destinatario. Los avisos semanales no se envían automáticamente en este MVP.
+- `npm run orders -- waitlist .data/avisos.json`: exporta solo los avisos **confirmados** (doble opt-in), con su idioma. Los avisos semanales ya se envían solos (ver «Embudo automático»); la exportación queda para copias o envíos especiales, con un enlace a `https://DOMINIO/baja?token=TOKEN&lang=IDIOMA` por destinatario.
 - `npm run orders -- purge --months=12 --yes`: anonimiza nombre, email, teléfono y dirección de entrega de los pedidos cuya recogida tiene más de N meses. Conserva importes, cantidades, fechas, canal y municipio de entrega para las métricas. Ajusta N al plazo de conservación publicado.
 
 Las exportaciones se crean con permisos privados. No subirlas a Git. En local sin DATABASE_URL, los comandos de lectura usan `.data/demo.json`. No trasladar datos ficticios a producción. La lista y el resumen son herramientas de operación; no hay un panel público con pedidos.
@@ -63,6 +63,10 @@ Vercel Cron llama cada día a `/api/cron/cycle` a las 19:05 UTC (20:05 en invier
 3. Borra los límites de peticiones antiguos y los avisos sin confirmar de más de 7 días.
 
 El resultado (`reminders`, `reminderFailures`, `retried`) aparece en los logs de la ejecución en Vercel (Settings → Cron Jobs). En `/gestio` cada pedido indica si el recordatorio salió.
+
+## Embudo automático
+
+Los mismos crons envían, sin intervención, el aviso «hornada abierta» (lunes al abrir la del sábado) y el «último aviso» (jueves por la tarde) a la lista confirmada, el email «¿qué tal el pan?» con la reseña de Google al día siguiente del primer pedido, la oferta del Pan fijo tras el segundo y, el domingo, un resumen semanal a `CONTACT_EMAIL`. Al reservar hay una casilla opcional para entrar en la lista. Cada envío se registra en `email_sends` (migración `008_funnel.sql`) y no se repite. Variables: `FUNNEL_EMAILS`, `NEWSLETTER_DAYS`, `FUNNEL_MAX_PER_RUN`. Detalle, activación y captación de tráfico en `embudo-automatico.md`.
 
 ## Lista de avisos: doble opt-in
 
@@ -155,6 +159,9 @@ Se configuran en Vercel → proyecto → Settings → Environment Variables, mar
 | `GOOGLE_PROFILE_URL`   | enlace público del Perfil de Empresa de Google           | Datos estructurados (`sameAs`)                                                            |
 | `PA_FIX_VOUCHER`       | `false` para quitar el vale                              | Vale del pan fijo: el 4.º pan corre de tu cuenta (por defecto activo)                     |
 | `ADMIN_PASSWORD`       | 16 caracteres o más                                      | Contraseña de `/gestio`                                                                   |
+| `FUNNEL_EMAILS`        | `false` para apagarlo (por defecto activo)               | Emails automáticos del embudo (avisos, «¿qué tal?», Pan fijo, resumen)                    |
+| `NEWSLETTER_DAYS`      | `6` (sábado) o `3,6`                                     | Hornadas que se anuncian a la lista                                                       |
+| `FUNNEL_MAX_PER_RUN`   | `80` (plan gratuito de Resend)                           | Tope de emails del embudo por ejecución                                                   |
 
 ## Vale del pan fijo
 

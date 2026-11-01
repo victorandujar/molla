@@ -25,6 +25,7 @@ import {
   type Order,
 } from '../lib/domain';
 import { townById } from '../lib/delivery';
+import { funnelEmailCounts } from '../lib/funnel';
 import {
   money,
   BANANA_HALVES_PER_BAKE,
@@ -100,20 +101,22 @@ let data: null | {
   events: Record<string, number>;
   standing: Awaited<ReturnType<typeof subscriptionStats>>;
   subs: Awaited<ReturnType<typeof listSubscriptions>>;
+  sends: Record<string, number>;
 } = null;
 let loadError = '';
 if (signedIn) {
   try {
-    const [bakes, active, waitlist, events, standing, subs] = await Promise.all(
-      [
+    const [bakes, active, waitlist, events, standing, subs, sends] =
+      await Promise.all([
         listBakes(),
         currentBake(),
         waitlistCounts(),
         funnel(28),
         subscriptionStats(),
         listSubscriptions(),
-      ],
-    );
+        // Before migration 008 the table does not exist: show zeros.
+        funnelEmailCounts(28).catch(() => ({}) as Record<string, number>),
+      ]);
     // After Thursday's close the shop shows next week's bake, but the panel
     // keeps showing the one still to bake and deliver.
     const toBake = bakes.findLast(
@@ -129,7 +132,7 @@ if (signedIn) {
       (a, b) =>
         order[a.status] - order[b.status] || a.name.localeCompare(b.name),
     );
-    data = { bakes, bake, orders, waitlist, events, standing, subs };
+    data = { bakes, bake, orders, waitlist, events, standing, subs, sends };
   } catch (e) {
     console.error('Admin panel failed', e instanceof Error ? e.message : e);
     loadError = 'No se han podido cargar los datos. Recarga en unos segundos.';
@@ -537,6 +540,19 @@ import {
               <dt>Avisos sin confirmar</dt>
               <dd>{data.waitlist.pending}</dd>
             </div>
+            {(
+              [
+                ['open', 'Emails «hornada abierta»'],
+                ['last', 'Emails «último aviso»'],
+                ['thanks', 'Emails «¿qué tal el pan?»'],
+                ['pafix', 'Emails oferta pan fijo'],
+              ] as const
+            ).map(([key, label]) => (
+              <div>
+                <dt>{label}</dt>
+                <dd>{data!.sends[key] || 0}</dd>
+              </div>
+            ))}
           </dl>
         </section>
       </>

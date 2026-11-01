@@ -10,7 +10,7 @@ import { townById } from './delivery';
 import { routes, ui } from './i18n';
 // Email clients ignore stylesheets and web fonts unevenly: inline styles,
 // table layout, hosted PNGs and system-font fallbacks for everything.
-const c = {
+export const c = {
   tile: '#1b3a9f',
   tileDeep: '#122874',
   crumb: '#f7f1e8',
@@ -20,9 +20,10 @@ const c = {
   line: '#d9d3c7',
   orange: '#ff7a2e',
 };
-const display = "'Bricolage Grotesque','Arial Narrow',Arial,sans-serif";
-const body = "'Instrument Sans','Helvetica Neue',Helvetica,Arial,sans-serif";
-const esc = (s: string) =>
+export const display = "'Bricolage Grotesque','Arial Narrow',Arial,sans-serif";
+export const body =
+  "'Instrument Sans','Helvetica Neue',Helvetica,Arial,sans-serif";
+export const esc = (s: string) =>
   s.replace(
     /[&<>"']/g,
     (ch) =>
@@ -31,7 +32,7 @@ const esc = (s: string) =>
       ]!,
   );
 // Resolved against the site URL, which may include a base path.
-const asset = (path: string) => {
+export const asset = (path: string) => {
   const base = brand.site || 'https://www.mollapa.com';
   return new URL(
     path.replace(/^\//, ''),
@@ -47,7 +48,7 @@ export const pickupDay = (iso: string, lang: Lang = 'es') => {
   }).format(new Date(iso));
   return text.charAt(0).toUpperCase() + text.slice(1);
 };
-const firstName = (name: string) => name.trim().split(/\s+/)[0] || name;
+export const firstName = (name: string) => name.trim().split(/\s+/)[0] || name;
 const langOf = (o: Order): Lang => (o.lang === 'ca' ? 'ca' : 'es');
 const privacyPath = { es: '/privacidad', ca: '/privacitat' };
 // Catalan dates read "dissabte, 26 de setembre"; after "el" they stay lowercase.
@@ -218,7 +219,13 @@ const copy = {
   },
 };
 
-function layout(lang: Lang, preheader: string, content: string) {
+// `extra` adds a footer line, such as the unsubscribe link of the funnel emails.
+export function layout(
+  lang: Lang,
+  preheader: string,
+  content: string,
+  extra = '',
+) {
   const t = copy[lang];
   return `<!doctype html>
 <html lang="${lang}">
@@ -252,7 +259,7 @@ ${content}
 <tr><td class="pad" style="background:${c.tileDeep};padding:28px 40px;font-family:${body};font-size:13px;line-height:1.6;color:${c.crumb};">
   <strong style="font-family:${display};font-size:18px;">molla.</strong><br>
   ${t.footer} · ${esc(brand.town)}<br>
-  ${brand.contact ? `<a href="mailto:${esc(brand.contact)}" style="color:${c.crumb};">${esc(brand.contact)}</a> · ` : ''}<a href="${asset(privacyPath[lang])}" style="color:${c.crumb};">${t.privacy}</a>
+  ${brand.contact ? `<a href="mailto:${esc(brand.contact)}" style="color:${c.crumb};">${esc(brand.contact)}</a> · ` : ''}<a href="${asset(privacyPath[lang])}" style="color:${c.crumb};">${t.privacy}</a>${extra ? `<br>${extra}` : ''}
 </td></tr>
 </table>
 </td></tr>
@@ -261,7 +268,7 @@ ${content}
 </html>`;
 }
 
-function details(rows: [string, string][]) {
+export function details(rows: [string, string][]) {
   return rows
     .map(
       ([label, value], i) =>
@@ -270,7 +277,7 @@ function details(rows: [string, string][]) {
     .join('');
 }
 
-function button(href: string, label: string) {
+export function button(href: string, label: string) {
   return `<table role="presentation" cellpadding="0" cellspacing="0"><tr><td style="background:${c.tile};border-radius:999px;"><a href="${href}" style="display:inline-block;padding:14px 26px;font-family:${body};font-size:15px;font-weight:600;color:${c.crumb};text-decoration:none;border-radius:999px;">${label}</a></td></tr></table>`;
 }
 
@@ -346,7 +353,7 @@ function pickupBlock(o: Order, totalLabel: string) {
 </td></tr>`;
 }
 
-function intro(kicker: string, heading: string, text: string) {
+export function intro(kicker: string, heading: string, text: string) {
   return `
 <tr><td class="pad" style="padding:44px 40px 8px;">
   <p style="margin:0 0 10px;font-family:${body};font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:${c.tile};">${kicker}</p>
@@ -355,7 +362,7 @@ function intro(kicker: string, heading: string, text: string) {
 </td></tr>`;
 }
 
-function closing(button: string, note: string) {
+export function closing(button: string, note: string) {
   return `
 <tr><td class="pad" style="padding:20px 40px 40px;">
   ${button}

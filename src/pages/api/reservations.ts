@@ -4,6 +4,7 @@ import { reservationSchema, orderItems } from '../../lib/domain';
 import { reserve } from '../../lib/store';
 import { sendConfirmation, notifyOwner } from '../../lib/email';
 import { isDemo, brand } from '../../lib/config';
+import { optInFromOrder } from '../../lib/funnel';
 import { AppError } from '../../lib/messages';
 export const POST: APIRoute = async (ctx) => {
   const lang = langOf(ctx);
@@ -17,6 +18,16 @@ export const POST: APIRoute = async (ctx) => {
     // Emails go out after the response; they never roll back a confirmed
     // order, and the daily job retries a failed confirmation.
     after(Promise.all([sendConfirmation(order), notifyOwner(order)]));
+    // The buyer ticked "tell me when each bake opens".
+    if (result.data.news)
+      after(
+        optInFromOrder(order.email, order.source, lang).catch((e) =>
+          console.error(
+            'Checkout opt-in failed',
+            e instanceof Error ? e.message : e,
+          ),
+        ),
+      );
     return json(
       {
         id: order.id,
