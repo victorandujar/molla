@@ -1043,7 +1043,13 @@ test('no banana bread gift anywhere; the first order still gets the pa fix vouch
   await page.locator('input[name=privacy]').check();
   await page.locator('#reservation-form button[type=submit]').click();
   await expect(page.locator('#confirmation')).toBeVisible();
-  await expect(page.locator('#confirmation')).not.toContainText(/regalo/i);
+  // No banana bread gift; the only gift is the "invite a neighbour" croissant.
+  await expect(page.locator('#confirmation')).not.toContainText(
+    /banana bread de regalo|Con este pedido tienes/i,
+  );
+  await expect(page.locator('#confirmation')).toContainText(
+    'Invita a un vecino',
+  );
   await expect(
     page.locator('#confirmation').getByRole('link', { name: /Pan fijo/ }),
   ).toHaveAttribute('href', '/es/pan-fijo');
@@ -1121,4 +1127,62 @@ test('checkout opt-in: the weekly email is optional and unticked by default', as
         confirmedAt: expect.any(String),
       }),
     ]);
+});
+test('invite a neighbour: personal link, invited note and gift croissant', async ({
+  page,
+}) => {
+  const order = async (email: string) => {
+    await page.locator('#reservation-form [name=name]').fill('Ona Prova');
+    await page.locator('#email').fill(email);
+    await page.locator('#phone').fill('612345678');
+    await page.locator('input[name=delivery][value=pickup]').check({
+      force: true,
+    });
+    await page
+      .locator('#reservation-form [data-target=quantity][data-step="1"]')
+      .click();
+    await page.locator('input[name=pickup]').check();
+    await page.locator('input[name=privacy]').check();
+    await page.locator('#reservation-form button[type=submit]').click();
+    await expect(page.locator('#confirmation')).toBeVisible();
+  };
+  await page.goto('/');
+  await expect(page.locator('#referral-note')).toBeHidden();
+  await order('ona@example.com');
+  const share = page.locator('#confirmation a[data-invite]');
+  await expect(share).toContainText('Enviar la invitació per WhatsApp');
+  const invite = new URL((await share.getAttribute('data-invite'))!);
+  const code = invite.searchParams.get('ref')!;
+  expect(code).toMatch(/^[A-HJKMNP-Z2-9]{6}$/);
+  expect(invite.searchParams.get('utm_source')).toBe('referral');
+  await expect(page.locator('#confirmation')).not.toContainText(
+    'croissant de regal.',
+  );
+
+  // The friend opens the link: the form says they come invited.
+  await page.goto(`/?ref=${code}&utm_source=referral`);
+  await expect(page.locator('#referral-note')).toBeVisible();
+  await expect(page.locator('#referral-note')).toContainText(
+    'Vens convidat per un veí',
+  );
+  await order('pau@example.com');
+  await expect(page.locator('#confirmation')).toContainText(
+    'Amb aquesta comanda tens un croissant de regal.',
+  );
+  const data = await readData();
+  const pau = data.orders.find(
+    (o: { email: string }) => o.email === 'pau@example.com',
+  );
+  expect(pau).toMatchObject({ invited: true, source: 'referral' });
+  expect(data.referrals).toEqual([
+    expect.objectContaining({ referrerEmail: 'ona@example.com' }),
+  ]);
+
+  // The owner panel shows the gift to hand over.
+  await page.goto('/gestio');
+  await page.locator('input[name=password]').fill('e2e-password-local');
+  await page.locator('form button[type=submit]').first().click();
+  await expect(page.locator('#pedidos .admin-orders')).toContainText(
+    '1 croissant de regalo · invitado',
+  );
 });

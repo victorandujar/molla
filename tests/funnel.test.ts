@@ -203,3 +203,63 @@ test('weekly report adds up the funnel without personal data', () => {
   assert.match(m.text, /Apertura de hornada: 50/);
   assert.match(m.text, /10\/10 hogazas \(100%\)/);
 });
+
+test('invite codes: valid ones pass through, anything else is ignored', async () => {
+  const { referralCode, referralPattern, giftCroissants } =
+    await import('../src/lib/domain');
+  const code = referralCode(new Uint8Array([0, 1, 2, 3, 4, 5]));
+  assert.match(code, referralPattern);
+  const base = {
+    requestId: '11111111-1111-4111-8111-111111111111',
+    bakeId: 'hornada-010',
+    name: 'Ana',
+    email: 'ana@example.com',
+    phone: '600 000 000',
+    quantity: 1,
+    pickup: 'yes',
+    privacy: 'yes',
+  };
+  assert.equal(
+    reservationSchema.parse({ ...base, ref: ' k7qmrt ' }).ref,
+    'K7QMRT',
+  );
+  assert.equal(reservationSchema.parse({ ...base, ref: 'K7QMR0' }).ref, '');
+  assert.equal(reservationSchema.parse({ ...base, ref: '<script>' }).ref, '');
+  assert.equal(reservationSchema.parse(base).ref, '');
+  assert.equal(giftCroissants({ invited: true, referralGifts: 2 }), 3);
+  assert.equal(giftCroissants({}), 0);
+});
+
+test('confirmation and owner emails carry the gifts and the personal invite link', async () => {
+  const t = await import('../src/lib/email-templates');
+  const o = {
+    ...order,
+    status: 'CONFIRMED' as const,
+    referralCode: 'K7QMRT',
+    invited: true,
+    referralGifts: 1,
+  };
+  const html = t.confirmationHtml(o);
+  assert.match(
+    html,
+    /\?ref=K7QMRT&amp;utm_source=referral&amp;utm_campaign=convida/,
+  );
+  assert.match(html, /Vienes invitado/);
+  assert.match(html, /Por haber invitado a un vecino/);
+  assert.match(t.confirmationText(o), /\?ref=K7QMRT/);
+  assert.match(t.ownerText(o), /Regalo: 2 croissants sin cobrar/);
+  assert.match(t.ownerHtml(o), /Regalo/);
+  assert.doesNotMatch(t.ownerText(order), /Regalo/);
+  const thanks = thanksEmail({ ...o, lang: 'ca' }, null);
+  assert.match(thanks.html, /ref%3DK7QMRT/);
+  assert.match(thanks.html, /croissant de regal/);
+});
+
+test('reward email tells the referrer their gift waits, without naming the friend', async () => {
+  const { rewardEmail } = await import('../src/lib/email-funnel');
+  const m = rewardEmail({ name: 'Marta Soler', lang: 'ca', code: 'K7QMRT' });
+  assert.match(m.subject, /Un veí ha provat Molla gràcies a tu/);
+  assert.match(m.html, /Marta, el teu proper croissant és de regal/);
+  assert.match(m.html, /utm_campaign=reward/);
+  assert.match(m.text, /\?ref=K7QMRT/);
+});

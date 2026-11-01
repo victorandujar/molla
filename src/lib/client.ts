@@ -16,11 +16,28 @@ type EventName =
   | 'combo_capricho'
   | 'combo_compartir'
   | 'reservation_with_combo';
+// "Convida un veí": a friend's invite code from the link (?ref=K7QMRT), kept
+// for this tab only so it survives moving between pages.
+const refPattern = /^[A-HJKMNP-Z2-9]{6}$/;
+const inviteCode = (() => {
+  const q =
+    new URLSearchParams(location.search).get('ref')?.trim().toUpperCase() || '';
+  const valid = refPattern.test(q) ? q : '';
+  try {
+    if (valid) sessionStorage.setItem('molla-ref', valid);
+    const kept = sessionStorage.getItem('molla-ref') || '';
+    return valid || (refPattern.test(kept) ? kept : '');
+  } catch {
+    return valid;
+  }
+})();
 function source(): Source {
   const q = new URLSearchParams(location.search)
     .get('utm_source')
     ?.toLowerCase();
   if (q && (sources as readonly string[]).includes(q)) return q as Source;
+  if (new URLSearchParams(location.search).has('ref') && inviteCode)
+    return 'referral';
   const ref = document.referrer;
   try {
     const host = new URL(ref).hostname;
@@ -102,6 +119,16 @@ const requestId = form?.querySelector<HTMLInputElement>(
   'input[name=requestId]',
 );
 if (requestId) requestId.value = crypto.randomUUID();
+const refInput = form?.querySelector<HTMLInputElement>('input[name=ref]');
+if (refInput && inviteCode) {
+  refInput.value = inviteCode;
+  const note = document.querySelector<HTMLElement>('#referral-note');
+  // The text lives in a data attribute: other visitors never get it.
+  if (note) {
+    note.textContent = note.dataset.text || '';
+    note.hidden = false;
+  }
+}
 
 /* ---- El pedido: el formulario es la única fuente de verdad. La carta, el
    tiquet y la píldora flotante leen y escriben los mismos campos. ---- */
@@ -572,9 +599,54 @@ form?.addEventListener('submit', async (event) => {
         : 'Consultar o cambiar mi reserva ↗';
       result.append(support);
     }
+    // "Convida un veí": gifts this order carries and the buyer's own link.
+    const gifts = [
+      order.invited
+        ? isCa
+          ? '🎁 Amb aquesta comanda tens un croissant de regal.'
+          : '🎁 Con este pedido tienes un croissant de regalo.'
+        : '',
+      order.referralGifts
+        ? isCa
+          ? `🎁 Inclou ${order.referralGifts} croissant${order.referralGifts > 1 ? 's' : ''} de regal per haver convidat.`
+          : `🎁 Incluye ${order.referralGifts} croissant${order.referralGifts > 1 ? 's' : ''} de regalo por haber invitado.`
+        : '',
+    ].filter(Boolean);
+    for (const line of gifts) {
+      const row = document.createElement('p');
+      row.className = 'confirmation-gift';
+      row.textContent = line;
+      result.append(row);
+    }
+    if (order.referralCode) {
+      const invite = new URL(location.origin + location.pathname);
+      invite.searchParams.set('ref', order.referralCode);
+      invite.searchParams.set('utm_source', 'referral');
+      invite.searchParams.set('utm_campaign', 'convida');
+      const pitch = document.createElement('p');
+      pitch.className = 'confirmation-invite';
+      pitch.textContent = isCa
+        ? 'Convida un veí: amb la seva primera comanda tindrà un croissant de regal, i tu un altre quan l’hi entregui.'
+        : 'Invita a un vecino: con su primer pedido tendrá un croissant de regalo, y tú otro cuando se lo entregue.';
+      const share = document.createElement('a');
+      share.className = 'text-link';
+      share.target = '_blank';
+      share.rel = 'noopener noreferrer';
+      share.href = `https://wa.me/?text=${encodeURIComponent(
+        (isCa
+          ? 'Et convido a provar el pa de Molla, un obrador de Sant Boi: fermentació lenta i te’l porten a casa. Amb la primera comanda tens un croissant de regal: '
+          : 'Te invito a probar el pan de Molla, un obrador de Sant Boi: fermentación lenta y te lo llevan a casa. Con tu primer pedido tienes un croissant de regalo: ') +
+          invite.href,
+      )}`;
+      share.textContent = isCa
+        ? 'Enviar la invitació per WhatsApp ↗'
+        : 'Enviar la invitación por WhatsApp ↗';
+      share.dataset.invite = invite.href;
+      result.append(pitch, share);
+    }
     // Word of mouth: a ready-made message for a neighbour, tagged so the
     // visits it brings show up as their own campaign.
-    if (!order.demo) {
+    else if (!order.demo) {
       const invite = new URL(location.origin + location.pathname);
       invite.searchParams.set('utm_source', 'whatsapp');
       invite.searchParams.set('utm_campaign', 'vecino');

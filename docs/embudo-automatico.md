@@ -16,15 +16,24 @@ Complementa `crecimiento-baix-llobregat.md` (zonas y oferta) y `operacion.md` (o
 
 La pieza que faltaba era el paso del medio: hasta ahora la lista de avisos se guardaba, pero nadie la avisaba. Quien visitaba la web y no compraba ese día se perdía. Ahora cada visita que deja su email recibe, cada semana y sin intervención, el aviso de la hornada.
 
+Para **clientes nuevos** hay tres motores, de más barato a más caro:
+
+1. **«Convida un veí»** (automático, en la web): cada cliente trae al siguiente. Ver §2.1.
+2. **Google** (gratis): las reseñas se piden solas tras cada primer pedido y suben el perfil en Maps. Ver §4.1.
+3. **Anuncios locales** (5 €/día): el kit de imágenes y textos ya está hecho en `exports/anuncis/`. Ver §4.2.
+
+Cada visitante nuevo que no compra el primer día deja su email y el embudo lo sigue trabajando cada semana. Por eso cada euro de anuncios rinde más que sin él.
+
 ## 2. Qué hace solo, desde que se despliega
 
-| Cuándo (hora de Madrid)                                   | Email                                                                                                                                                 | A quién                                                                      |
-| --------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
-| **Lunes ~20:05**, al abrir la hornada del sábado          | «Ya puedes reservar el pan del sábado»: foto, carta con precios, entrega, una reseña real de Google y botón de reserva                                | Avisos confirmados que aún no han reservado esa hornada y no tienen Pan fijo |
-| **Jueves ~17:00**, el día del cierre                      | «Hoy a las 20:00 cierro los pedidos»                                                                                                                  | Los mismos, si siguen sin reservar y la hornada no está agotada              |
-| **Día siguiente a la entrega** (~17:00) del primer pedido | «¿Qué tal el pan?»: botón de reseña en Google, «pásaselo a un vecino» por WhatsApp y, si no está en la lista, «¿te aviso cada semana?» (doble opt-in) | Cada cliente, una sola vez en la vida                                        |
-| **Día siguiente a la entrega** del segundo pedido         | «¿Te guardo el pan cada semana?»: la propuesta del Pan fijo                                                                                           | Cada cliente sin Pan fijo, una sola vez                                      |
-| **Domingo ~17:00**                                        | Resumen semanal: pedidos, importe, clientes nuevos, embudo de la web, canales, ocupación de hornadas y emails enviados                                | Tú (`CONTACT_EMAIL`)                                                         |
+| Cuándo (hora de Madrid)                                         | Email                                                                                                                                                 | A quién                                                                      |
+| --------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| **Lunes ~20:05**, al abrir la hornada del sábado                | «Ya puedes reservar el pan del sábado»: foto, carta con precios, entrega, una reseña real de Google y botón de reserva                                | Avisos confirmados que aún no han reservado esa hornada y no tienen Pan fijo |
+| **Jueves ~17:00**, el día del cierre                            | «Hoy a las 20:00 cierro los pedidos»                                                                                                                  | Los mismos, si siguen sin reservar y la hornada no está agotada              |
+| **Día siguiente a la entrega** (~17:00) del primer pedido       | «¿Qué tal el pan?»: botón de reseña en Google, «pásaselo a un vecino» por WhatsApp y, si no está en la lista, «¿te aviso cada semana?» (doble opt-in) | Cada cliente, una sola vez en la vida                                        |
+| **Día siguiente a la entrega** del segundo pedido               | «¿Te guardo el pan cada semana?»: la propuesta del Pan fijo                                                                                           | Cada cliente sin Pan fijo, una sola vez                                      |
+| **Día siguiente a la entrega** del primer pedido de un invitado | «Un vecino ha probado Molla gracias a ti»: su próximo croissant es de regalo                                                                          | Quien le invitó                                                              |
+| **Domingo ~17:00**                                              | Resumen semanal: pedidos, importe, clientes nuevos, embudo de la web, canales, ocupación de hornadas y emails enviados                                | Tú (`CONTACT_EMAIL`)                                                         |
 
 Y en la web:
 
@@ -39,9 +48,23 @@ Garantías:
 - Cada aviso lleva enlace de baja en el pie y en la cabecera `List-Unsubscribe` (Gmail y Outlook muestran el botón «Cancelar suscripción»).
 - Las hornadas agotadas no generan emails.
 
+### 2.1 «Convida un veí»: cada cliente trae al siguiente
+
+El canal más rentable de un obrador de barrio es la recomendación de un vecino. Ahora está automatizada y tiene premio para los dos:
+
+- **Cada cliente tiene un enlace personal** (`mollapa.com/?ref=K7QMRT`). Lo recibe en la pantalla de confirmación, en el email de confirmación y en el email «¿qué tal el pan?», con un botón que abre WhatsApp con el mensaje ya escrito.
+- **El vecino que entra por ese enlace** ve en el formulario «Vienes invitado por un vecino: con tu primer pedido, un croissant de regalo». Su primer pedido lleva el regalo.
+- **Quien invitó** recibe otro croissant en su siguiente pedido, pero solo **cuando el pedido del amigo ya se ha entregado** (así nadie se autoinvita con un email falso para cancelar después). El día después de la entrega le llega el email «Un vecino ha probado Molla gracias a ti: tu próximo croissant es de regalo», que además le anima a reservar y a invitar a otro.
+- **Tú no haces nada más que poner el croissant en la bolsa**: el aviso «Nueva reserva» dice «Regalo: 1 croissant sin cobrar (viene invitado…)», `/gestio` muestra la etiqueta 🎁 en el pedido y el total de «Croissants de regalo» para hornear.
+- Reglas: el regalo del invitado solo vale en su primer pedido; quien invita acumula como mucho 2 croissants por pedido (el resto espera al siguiente); si un pedido con regalo se cancela, el regalo pasa al siguiente.
+- Coste: unos 2 croissants por cliente nuevo. Es tu coste de captación, muy por debajo de cualquier anuncio. `REFERRAL_GIFT=false` lo apaga.
+- Medición: los pedidos llegan con canal `referral` (campaña `convida`) y el resumen del domingo muestra «Nuevos por invitación».
+
+Para darle empuje: pon el enlace también en la tarjeta QR de cada entrega («Invita a un vecino: croissant para los dos»).
+
 ## 3. Activarlo (una vez, unos 15 minutos)
 
-1. **Migración**: `npm run db:migrate:prod` (crea `email_sends`; compatible con la versión anterior). Hazlo **antes** de desplegar `main`.
+1. **Migraciones**: `npm run db:migrate:prod` (crea `email_sends`, `referrals` y el código personal de cada cliente; compatibles con la versión anterior). Hazlo **antes** de desplegar `main`.
 2. **Desplegar** `main`. Desde ese momento los crons existentes (`/api/cron/cycle` y `/api/cron/daily`) hacen todo lo demás.
 3. **Revisar el plan de Resend**. El plan gratuito permite 100 emails al día y 3.000 al mes, contando confirmaciones y recordatorios. Por eso el embudo envía como mucho 80 por ejecución (`FUNNEL_MAX_PER_RUN`). Cuando la lista pase de ~70 personas, cambia a Resend Pro (50.000 al mes) y sube `FUNNEL_MAX_PER_RUN` a 1000.
 4. **Entregabilidad** (en el DNS de mollapa.com): que Resend muestre SPF y DKIM en verde y añade un registro DMARC `_dmarc` con `v=DMARC1; p=none; rua=mailto:TU_EMAIL`. Sin esto, los emails a listas acaban en spam.
@@ -71,6 +94,8 @@ La mayoría de los clientes nuevos de una panadería llegan buscando «pan artes
 
 Un anuncio pequeño, bien segmentado y que no hay que tocar cada semana. Funciona porque **el email captado hace rentable cada clic**: aunque no compre ese día, el visitante que deja su email recibe el aviso todas las semanas.
 
+**El kit ya está hecho**: `exports/anuncis/` tiene 12 imágenes listas para subir (tres conceptos, en catalán y castellano, en formato feed y story, con fotos reales) y `exports/anuncis/textos.md` los textos, la configuración y los enlaces etiquetados. Si cambian precios o zonas: `npm run ads`.
+
 **Meta (Instagram + Facebook)**, en Meta Business Suite → Anuncios:
 
 - Objetivo: **Tráfico**, hacia la página de entrega a domicilio.
@@ -94,7 +119,7 @@ Un anuncio pequeño, bien segmentado y que no hay que tocar cada semana. Funcion
 
 ### 4.4 Boca a boca, automatizado
 
-Tres momentos piden la recomendación sin que intervengas: la pantalla de confirmación («Pásaselo a un vecino por WhatsApp»), el email del día siguiente y la tarjeta QR. Todos van etiquetados (`utm_campaign=vecino`, `utm_source=qr`).
+Cuatro momentos piden la recomendación sin que intervengas, todos con el enlace personal de «Convida un veí» (§2.1): la pantalla de confirmación, el email de confirmación, el email del día siguiente y el email del regalo. Más la tarjeta QR de cada entrega (`utm_source=qr`).
 
 ## 5. Qué no se puede automatizar (y cómo reducirlo al mínimo)
 

@@ -5,6 +5,7 @@ import {
   brand,
   isDemo,
   productById,
+  referralGift,
   standingVoucher,
   BANANA_HALVES_PER_BAKE,
   PASTRY_UNITS_PER_BAKE,
@@ -18,6 +19,7 @@ import {
   madridIso,
   madridWeekday,
   pickupCode,
+  referralCode,
   reminderDue,
   reminderWindowHours,
   weeklyCyclePlan,
@@ -55,6 +57,12 @@ export type Demo = {
   limits: Record<string, { count: number; until: number }>;
   events?: Record<string, number>;
   subscriptions?: Subscription[];
+  referralCodes?: Record<string, string>;
+  referrals?: {
+    orderId: string;
+    referrerEmail: string;
+    rewardOrderId?: string | null;
+  }[];
 };
 // Vite may load this module once per route: the write queue lives on
 // globalThis so every copy serialises its read-modify-write of the file.
@@ -276,13 +284,45 @@ export async function reserve(
       );
       assertBanana(bananaIn(d, bake.id), input.banana);
       assertPastry(pastryIn(d, bake.id), input.croissant + input.pain);
-      order.firstOrder =
-        standingVoucher.active &&
-        !d.orders.some(
-          (o) => o.email === input.email && o.status !== 'CANCELLED',
-        );
+      const seen = d.orders.some(
+        (o) => o.email === input.email && o.status !== 'CANCELLED',
+      );
+      order.firstOrder = standingVoucher.active && !seen;
       do order.code = pickupCode(bake.number, randomBytes(4));
       while (d.orders.some((o) => o.code === order.code));
+      if (referralGift.active) {
+        const codes = (d.referralCodes ||= {});
+        const refs = (d.referrals ||= []);
+        if (!codes[input.email]) {
+          let code;
+          do code = referralCode(randomBytes(6));
+          while (Object.values(codes).includes(code));
+          codes[input.email] = code;
+        }
+        order.referralCode = codes[input.email];
+        const referrer = Object.entries(codes).find(
+          ([email, code]) => code === input.ref && email !== input.email,
+        )?.[0];
+        if (referrer && !seen && !standing) {
+          order.invited = true;
+          refs.push({ orderId: order.id, referrerEmail: referrer });
+        }
+        const byId = (id?: string | null) => d.orders.find((o) => o.id === id);
+        const earned = refs
+          .filter((r) => {
+            const friend = byId(r.orderId);
+            return (
+              r.referrerEmail === input.email &&
+              friend?.status !== 'CANCELLED' &&
+              Date.parse(friend?.pickupDate || '') < Date.now() &&
+              (!r.rewardOrderId ||
+                byId(r.rewardOrderId)?.status === 'CANCELLED')
+            );
+          })
+          .slice(0, referralGift.maxPerOrder);
+        for (const r of earned) r.rewardOrderId = order.id;
+        if (earned.length) order.referralGifts = earned.length;
+      }
       d.orders.push(order);
       return order;
     });
@@ -338,10 +378,46 @@ export async function reserve(
     // email, so a new order must not overwrite someone else's name or phone.
     // Each order snapshot keeps the details given with that order.
     const [customer] =
-      await tx`INSERT INTO customers (id,email,name,phone) VALUES (${randomUUID()},${input.email},${input.name},${input.phone}) ON CONFLICT(email) DO UPDATE SET email=customers.email RETURNING id`;
+      await tx`INSERT INTO customers (id,email,name,phone) VALUES (${randomUUID()},${input.email},${input.name},${input.phone}) ON CONFLICT(email) DO UPDATE SET email=customers.email RETURNING id, referral_code`;
+    // "Convida un veí": the buyer's own code, the friend who invited them
+    // (first order only) and the gifts their delivered friends earned them.
+    let referrerId: string | null = null;
+    let earned: string[] = [];
+    if (referralGift.active) {
+      let code = customer!.referral_code as string | null;
+      while (!code) {
+        const candidate = referralCode(randomBytes(6));
+        const [row] =
+          await tx`UPDATE customers SET referral_code=${candidate} WHERE id=${customer!.id} AND referral_code IS NULL AND NOT EXISTS (SELECT 1 FROM customers WHERE referral_code=${candidate}) RETURNING referral_code`;
+        code = (row?.referral_code as string) || null;
+      }
+      order.referralCode = code;
+      if (input.ref && !seen && !standing) {
+        const [referrer] =
+          await tx`SELECT id FROM customers WHERE referral_code=${input.ref} AND id!=${customer!.id}`;
+        if (referrer) {
+          referrerId = referrer.id as string;
+          order.invited = true;
+        }
+      }
+      const rows = await tx`
+        SELECT r.order_id FROM referrals r
+        JOIN orders f ON f.id=r.order_id JOIN bakes fb ON fb.id=f.bake_id
+        LEFT JOIN orders ro ON ro.id=r.reward_order_id
+        WHERE r.referrer_id=${customer!.id} AND f.status!='CANCELLED' AND fb.pickup_date < now()
+          AND (r.reward_order_id IS NULL OR ro.status='CANCELLED')
+        ORDER BY r.created_at LIMIT ${referralGift.maxPerOrder}
+        FOR UPDATE OF r`;
+      earned = rows.map((r) => r.order_id as string);
+      if (earned.length) order.referralGifts = earned.length;
+    }
     await tx`INSERT INTO orders (id,code,request_id,bake_id,customer_id,snapshot,status,subscription_id,cancel_token) VALUES (${order.id},${order.code},${order.requestId},${input.bakeId},${customer!.id},${tx.json(order)},'CONFIRMED',${standing?.id ?? null},${order.cancelToken!})`;
     for (const item of items)
       await tx`INSERT INTO order_items (order_id,product_id,quantity,unit_price) VALUES (${order.id},${item.product},${item.quantity},${item.unitPrice})`;
+    if (referrerId)
+      await tx`INSERT INTO referrals (order_id, referrer_id) VALUES (${order.id}, ${referrerId})`;
+    if (earned.length)
+      await tx`UPDATE referrals SET reward_order_id=${order.id} WHERE order_id IN ${tx(earned)}`;
     return order;
   });
   return result as unknown as Order;

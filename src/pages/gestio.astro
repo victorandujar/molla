@@ -20,6 +20,7 @@ import {
 import {
   bakeState,
   bananaSplit,
+  giftCroissants,
   orderItems,
   orderSummary,
   type Order,
@@ -291,6 +292,10 @@ import {
             <dd>{pieces(live, 'croissant')}</dd>
           </div>
           <div>
+            <dt>Croissants de regalo</dt>
+            <dd>{live.reduce((n, o) => n + giftCroissants(o), 0)}</dd>
+          </div>
+          <div>
             <dt>Pains au chocolat</dt>
             <dd>{pieces(live, 'pain-au-chocolat')}</dd>
           </div>
@@ -326,6 +331,13 @@ import {
                   {o.subscription && <span class="admin-badge">Pan fijo</span>}
                   {o.firstOrder && (
                     <span class="admin-badge">Primera · vale pan fijo</span>
+                  )}
+                  {giftCroissants(o) > 0 && (
+                    <span class="admin-badge">
+                      🎁 {giftCroissants(o)} croissant
+                      {giftCroissants(o) > 1 ? 's' : ''} de regalo
+                      {o.invited ? ' · invitado' : ''}
+                    </span>
                   )}
                 </div>
                 <p class="admin-name">
@@ -546,6 +558,7 @@ import {
                 ['last', 'Emails «último aviso»'],
                 ['thanks', 'Emails «¿qué tal el pan?»'],
                 ['pafix', 'Emails oferta pan fijo'],
+                ['reward', 'Emails regalo por invitar'],
               ] as const
             ).map(([key, label]) => (
               <div>

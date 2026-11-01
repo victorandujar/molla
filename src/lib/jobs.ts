@@ -28,6 +28,7 @@ import {
   claimBroadcast,
   claimOnce,
   deliveredOrders,
+  earnedRewards,
   inviteToken,
   releaseSends,
   weeklyFigures,
@@ -36,6 +37,7 @@ import {
   broadcastEmail,
   ownerReportEmail,
   pafixEmail,
+  rewardEmail,
   thanksEmail,
 } from './email-funnel';
 import { asset } from './email-templates';
@@ -182,7 +184,17 @@ async function runFollowups(budget: number) {
     } else await releaseSends(kind, 'once', [order.email]);
     await pause(600);
   }
-  return { thanks, pafix };
+  // "Convida un veí": the referrer hears their gift is waiting.
+  let reward = 0;
+  for (const r of await earnedRewards()) {
+    if (thanks + pafix + reward >= budget) break;
+    if (!(await claimOnce('reward', r.orderId, r.email))) continue;
+    if (await sendFunnel(r.email, rewardEmail(r), `reward-${keyOf(r.orderId)}`))
+      reward++;
+    else await releaseSends('reward', r.orderId, [r.email]);
+    await pause(600);
+  }
+  return { thanks, pafix, reward };
 }
 
 // Sunday afternoon: what the week brought, in the baker's inbox.

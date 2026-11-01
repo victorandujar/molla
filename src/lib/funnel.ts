@@ -172,6 +172,9 @@ export async function weeklyFigures(days = 7) {
       (SELECT COUNT(*) FROM waitlist_subscribers WHERE confirmed_at IS NOT NULL)::int AS confirmed,
       (SELECT COUNT(*) FROM waitlist_subscribers WHERE confirmed_at IS NULL)::int AS pending,
       (SELECT COUNT(*) FROM subscriptions WHERE status='ACTIVE')::int AS standing`;
+  const [refs] = await sql!`
+    SELECT COUNT(*)::int AS n FROM referrals
+    WHERE created_at >= ${from}::date AND created_at < ${to}::date + 1`;
   const sends = await sql!`
     SELECT kind, COUNT(*)::int AS n FROM email_sends
     WHERE sent_at >= ${from}::date GROUP BY kind`;
@@ -212,6 +215,7 @@ export async function weeklyFigures(days = 7) {
       pending: lists!.pending as number,
     },
     standing: lists!.standing as number,
+    referred: refs!.n as number,
     emails: Object.fromEntries(sends.map((r) => [r.kind, r.n])) as Record<
       string,
       number
@@ -229,4 +233,30 @@ export async function funnelEmailCounts(days = 28) {
     string,
     number
   >;
+}
+
+// Referrers whose friend's first order was delivered between 20 hours and
+// 10 days ago and whose gift is still waiting: they hear about it once.
+export async function earnedRewards(): Promise<
+  { orderId: string; email: string; name: string; lang: Lang; code: string }[]
+> {
+  if (useDemo()) return [];
+  const rows = await sql!`
+    SELECT r.order_id, c.email, c.name, c.referral_code,
+      (SELECT o.snapshot->>'lang' FROM orders o WHERE o.customer_id=c.id
+        ORDER BY o.created_at DESC LIMIT 1) AS lang
+    FROM referrals r
+    JOIN customers c ON c.id=r.referrer_id
+    JOIN orders f ON f.id=r.order_id JOIN bakes fb ON fb.id=f.bake_id
+    WHERE f.status!='CANCELLED' AND r.reward_order_id IS NULL
+      AND c.referral_code IS NOT NULL
+      AND fb.pickup_date <= now() - interval '20 hours'
+      AND fb.pickup_date >= now() - interval '10 days'`;
+  return rows.map((r) => ({
+    orderId: String(r.order_id),
+    email: r.email as string,
+    name: r.name as string,
+    lang: r.lang === 'ca' ? 'ca' : 'es',
+    code: r.referral_code as string,
+  }));
 }

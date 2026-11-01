@@ -53,6 +53,13 @@ export const reservationSchema = z
       .enum(['yes', ''])
       .default('')
       .transform((v) => v === 'yes'),
+    // A friend's invite code; an invalid one is ignored, never an error.
+    ref: z
+      .string()
+      .max(20)
+      .default('')
+      .transform((v) => v.trim().toUpperCase())
+      .transform((v) => (referralPattern.test(v) ? v : '')),
     website: z.string().max(0).default(''),
     source: z.enum(sources).default('direct'),
     ...deliveryFields,
@@ -303,6 +310,10 @@ export function pickupCode(bakeNumber: string, bytes: Uint8Array) {
   return `${bakeNumber}-${chars.join('')}`;
 }
 export const pickupCodePattern = /^\d{3}-[A-Z2-9]{4}$/;
+// Personal invite code such as K7QMRT: six characters of the same alphabet.
+export const referralPattern = /^[A-HJKMNP-Z2-9]{6}$/;
+export const referralCode = (bytes: Uint8Array) =>
+  Array.from(bytes.slice(0, 6), (b) => codeAlphabet[b % 31]).join('');
 // Halves of banana bread become whole moulds plus, at most, one half.
 export const bananaSplit = (halves: number) => ({
   whole: Math.floor(halves / 2),
@@ -341,6 +352,12 @@ export type Order = {
   firstOrder?: boolean;
   // Private one-click cancellation link; absent on orders made before it existed.
   cancelToken?: string;
+  // "Convida un veí": the buyer's own invite code, whether this first order
+  // came through a friend's code (gift croissant) and how many gift
+  // croissants it carries for friends this buyer brought.
+  referralCode?: string;
+  invited?: boolean;
+  referralGifts?: number;
   // Set on orders the weekly job placed for a "pa fix": token manages it.
   subscription?: { token: string };
   // Absent on orders created before banana bread could be ordered online:
@@ -431,3 +448,8 @@ export const followupDue = (pickupIso: string, now = Date.now()) => {
   const since = now - Date.parse(pickupIso);
   return since >= 20 * 3600000 && since <= 5 * 86400000;
 };
+
+// Gift croissants an order carries: one if the buyer came invited, plus one
+// per friend they brought whose first order has been delivered.
+export const giftCroissants = (o: Pick<Order, 'invited' | 'referralGifts'>) =>
+  (o.invited ? 1 : 0) + (o.referralGifts || 0);

@@ -68,6 +68,8 @@ El resultado (`reminders`, `reminderFailures`, `retried`) aparece en los logs de
 
 Los mismos crons envían, sin intervención, el aviso «hornada abierta» (lunes al abrir la del sábado) y el «último aviso» (jueves por la tarde) a la lista confirmada, el email «¿qué tal el pan?» con la reseña de Google al día siguiente del primer pedido, la oferta del Pan fijo tras el segundo y, el domingo, un resumen semanal a `CONTACT_EMAIL`. Al reservar hay una casilla opcional para entrar en la lista. Cada envío se registra en `email_sends` (migración `008_funnel.sql`) y no se repite. Variables: `FUNNEL_EMAILS`, `NEWSLETTER_DAYS`, `FUNNEL_MAX_PER_RUN`. Detalle, activación y captación de tráfico en `embudo-automatico.md`.
 
+«Convida un veí»: cada cliente tiene un enlace personal (`/?ref=CÓDIGO`). El primer pedido de quien entra por él lleva un croissant de regalo y, cuando ese pedido se entrega, el siguiente pedido de quien invitó lleva otro (como mucho 2 por pedido). La web no los cobra ni los resta del cupo: los ves con la etiqueta 🎁 en `/gestio`, en «Croissants de regalo» y en el aviso «Nueva reserva». Migración `009_referrals.sql`.
+
 ## Lista de avisos: doble opt-in
 
 Al apuntarse, el email queda pendiente y recibe un correo con el botón «Confirmar el aviso». El enlace abre `/alta`, que pide pulsar un botón, para que los antivirus de correo que abren enlaces no confirmen por nadie. Solo los confirmados salen en la exportación. Si alguien lo vuelve a pedir estando pendiente, el correo se reenvía como mucho una vez por hora. Sin `RESEND_API_KEY` no hay forma de confirmar, así que ese despliegue apunta directamente.
@@ -162,6 +164,7 @@ Se configuran en Vercel → proyecto → Settings → Environment Variables, mar
 | `FUNNEL_EMAILS`        | `false` para apagarlo (por defecto activo)               | Emails automáticos del embudo (avisos, «¿qué tal?», Pan fijo, resumen)                    |
 | `NEWSLETTER_DAYS`      | `6` (sábado) o `3,6`                                     | Hornadas que se anuncian a la lista                                                       |
 | `FUNNEL_MAX_PER_RUN`   | `80` (plan gratuito de Resend)                           | Tope de emails del embudo por ejecución                                                   |
+| `REFERRAL_GIFT`        | `false` para apagarlo (por defecto activo)               | «Convida un veí»: croissant de regalo para el invitado y para quien invita                |
 
 ## Vale del pan fijo
 

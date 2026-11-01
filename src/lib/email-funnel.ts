@@ -17,6 +17,8 @@ import {
   firstName,
   intro,
   layout,
+  inviteUrl as personalInvite,
+  inviteWhatsapp,
   pickupDay,
 } from './email-templates';
 
@@ -232,6 +234,8 @@ const followCopy = {
     shareP:
       'Si conoces a alguien en Sant Boi, Sant Just o Santa Coloma a quien le guste el buen pan, mándale el enlace.',
     shareLink: 'Enviar por WhatsApp ↗',
+    shareGift:
+      'Si conoces a alguien en Sant Boi, Sant Just o Santa Coloma a quien le guste el buen pan, mándale tu invitación: con su primer pedido tendrá un croissant de regalo, y tú otro en tu siguiente pedido.',
     shareText:
       'He probado el pan de Molla, un obrador de Sant Boi: fermentación lenta y te lo llevan a casa. Mira: ',
     newsH: '¿Te aviso cada semana?',
@@ -268,6 +272,8 @@ const followCopy = {
     shareP:
       'Si coneixes algú a Sant Boi, Sant Just o Santa Coloma a qui li agradi el bon pa, envia-li l’enllaç.',
     shareLink: 'Enviar per WhatsApp ↗',
+    shareGift:
+      'Si coneixes algú a Sant Boi, Sant Just o Santa Coloma a qui li agradi el bon pa, envia-li la teva invitació: amb la primera comanda tindrà un croissant de regal, i tu un altre a la teva propera comanda.',
     shareText:
       'He provat el pa de Molla, un obrador de Sant Boi: fermentació lenta i te’l porten a casa. Mira: ',
     newsH: 'T’aviso cada setmana?',
@@ -303,10 +309,14 @@ export function thanksEmail(o: Order, inviteUrl: string | null): Message {
   const lang = langOf(o);
   const t = followCopy[lang];
   const name = firstName(o.name);
-  const share = `https://wa.me/?text=${encodeURIComponent(
-    t.shareText +
-      asset(`${routes.home[lang]}?utm_source=whatsapp&utm_campaign=vecino`),
-  )}`;
+  // A personal invite link (gift croissant for both) when the order has one.
+  const share = o.referralCode
+    ? inviteWhatsapp(o.referralCode, lang)
+    : `https://wa.me/?text=${encodeURIComponent(
+        t.shareText +
+          asset(`${routes.home[lang]}?utm_source=whatsapp&utm_campaign=vecino`),
+      )}`;
+  const shareP = o.referralCode ? t.shareGift : t.shareP;
   const fixUrl = shopUrl(lang, 'thanks', 'standing');
   const content =
     photo('miga.jpg', lang === 'ca' ? 'La molla del pa' : 'La miga del pan') +
@@ -317,7 +327,7 @@ export function thanksEmail(o: Order, inviteUrl: string | null): Message {
       '28px 40px 8px',
     ) +
     section(
-      subhead(t.shareH, t.shareP) + link(share, t.shareLink),
+      subhead(t.shareH, shareP) + link(share, t.shareLink),
       '28px 40px 8px',
     ) +
     (inviteUrl
@@ -340,7 +350,7 @@ ${t.thanksIntro}
 ${t.reviewH}. ${t.reviewP}
 ${googleReviews.reviewUrl}
 
-${t.shareH}. ${t.shareP}
+${t.shareH}. ${shareP}
 ${share}
 ${inviteUrl ? `\n${t.newsH} ${t.newsP}\n${inviteUrl}\n` : ''}
 ${t.fix} ${fixUrl}
@@ -403,6 +413,8 @@ export type WeeklyReport = {
   }[];
   subscribers: { confirmed: number; pending: number };
   standing: number;
+  // New customers whose first order came through a friend's invite.
+  referred?: number;
   emails: Record<string, number>;
 };
 
@@ -429,6 +441,7 @@ export function ownerReportEmail(r: WeeklyReport): Message {
     ['Pedidos', String(r.orders)],
     ['Clientes', `${r.customers} · ${r.newCustomers} nuevos`],
     ['Importe reservado', money(r.revenueCents)],
+    ['Nuevos por invitación', String(r.referred || 0)],
     ['Pan fijo activos', String(r.standing)],
     [
       'Lista de avisos',
@@ -453,6 +466,7 @@ export function ownerReportEmail(r: WeeklyReport): Message {
     last: 'Último aviso',
     thanks: 'Gracias + reseña',
     pafix: 'Oferta pan fijo',
+    reward: 'Regalo por invitar',
   };
   const emailRows: [string, string][] = Object.keys(kinds).map((k) => [
     kinds[k]!,
@@ -495,5 +509,61 @@ ${lines(channelRows)}
 
 EMAILS AUTOMÁTICOS
 ${lines(emailRows)}`,
+  };
+}
+
+// ---- "Convida un veí" -------------------------------------------------------
+
+const rewardCopy = {
+  es: {
+    subject: 'Un vecino ha probado Molla gracias a ti',
+    kicker: 'Convida un veí',
+    heading: (name: string) => `${name}, tu próximo croissant es de regalo.`,
+    intro:
+      'Alguien a quien invitaste acaba de recibir su primer pedido. Gracias por recomendarme: en tu próximo pedido te llevas un croissant de regalo, sin hacer nada.',
+    button: 'Reservar mi próximo pedido →',
+    again:
+      '¿Conoces a alguien más? Cada vecino que pruebe Molla con tu enlace es otro croissant:',
+    share: 'Enviar la invitación por WhatsApp ↗',
+  },
+  ca: {
+    subject: 'Un veí ha provat Molla gràcies a tu',
+    kicker: 'Convida un veí',
+    heading: (name: string) => `${name}, el teu proper croissant és de regal.`,
+    intro:
+      'Algú a qui vas convidar acaba de rebre la seva primera comanda. Gràcies per recomanar-me: a la teva propera comanda t’emportes un croissant de regal, sense fer res.',
+    button: 'Reservar la meva propera comanda →',
+    again:
+      'Coneixes algú més? Cada veí que provi Molla amb el teu enllaç és un altre croissant:',
+    share: 'Enviar la invitació per WhatsApp ↗',
+  },
+};
+
+// The day after a friend's first order is delivered: the referrer's gift.
+export function rewardEmail(r: {
+  name: string;
+  lang: Lang;
+  code: string;
+}): Message {
+  const t = rewardCopy[r.lang];
+  const url = shopUrl(r.lang, 'reward');
+  const content =
+    intro(t.kicker, esc(t.heading(firstName(r.name))), esc(t.intro)) +
+    closing(
+      button(esc(url), t.button),
+      `${esc(t.again)}<br>${link(inviteWhatsapp(r.code, r.lang), t.share)}<br><span style="font-size:13px;">${esc(personalInvite(r.code, r.lang).replace(/^https?:\/\//, ''))}</span>`,
+    );
+  return {
+    subject: t.subject,
+    html: layout(r.lang, t.intro, content),
+    text: `${t.heading(firstName(r.name))}
+
+${t.intro}
+
+${t.button} ${url}
+
+${t.again} ${personalInvite(r.code, r.lang)}
+
+${brand.name}`,
   };
 }

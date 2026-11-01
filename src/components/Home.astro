@@ -963,6 +963,13 @@ const jsonLd = [
               <input type="hidden" name="bakeId" value={current.id} />
               <input type="hidden" name="product" value="clasica" />
               <input type="hidden" name="source" value="direct" />
+              <input type="hidden" name="ref" value="" />
+              <p
+                id="referral-note"
+                class="form-intro"
+                hidden
+                data-text={t.reserve.referralNote}
+              ></p>
               <div class="order-lines">
                 <div class="order-line">
                   <label for="quantity">
