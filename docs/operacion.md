@@ -70,6 +70,13 @@ Los mismos crons envían, sin intervención, el aviso «hornada abierta» (lunes
 
 «Convida un veí»: cada cliente tiene un enlace personal (`/?ref=CÓDIGO`). El primer pedido de quien entra por él lleva un croissant de regalo y, cuando ese pedido se entrega, el siguiente pedido de quien invitó lleva otro (como mucho 2 por pedido). La web no los cobra ni los resta del cupo: los ves con la etiqueta 🎁 en `/gestio`, en «Croissants de regalo» y en el aviso «Nueva reserva». Migración `009_referrals.sql`.
 
+## Navidad 2026 (y otras fechas especiales)
+
+- **Calendario**: el 24 y el 31 de diciembre caen en jueves, así que esas dos semanas la hornada del miércoles pasa al jueves (`bakeDateOverrides` en `src/lib/domain.ts`). En enero vuelve el miércoles y el sábado.
+- **Reserva anticipada**: las hornadas del 24 y del 31 se crean solas el **1 de diciembre** y admiten pedidos desde ese día hasta el martes anterior a las 20:00 (el 22 y el 29), **a la vez** que la hornada de cada semana. Cada una tiene su propio cupo, copiado de la hornada semanal (16). Se reservan en `/nadal` (`/es/navidad`), con `?dia=24` o `?dia=31`; la portada enlaza ahí con un aviso naranja mientras estén abiertas. En `/gestio` elige la hornada del 24 o del 31 en el selector para ver sus pedidos. Se configuran en `earlyBakes` (`src/lib/domain.ts`). Si cambias su cupo con `bake:prod -- capacity`, no afecta a las semanales.
+- **Emails**: tres envíos a la lista confirmada, definidos en `src/lib/campaigns.ts`: el 1 de diciembre (anuncio, con botones para reservar ya el 24 y el 31), el 18 (recordatorio de Nochebuena) y el 27 (recordatorio de Nochevieja). Todos llevan directamente a `/nadal`. Los dos últimos se saltan a quien ya ha pedido para ese día. Los envía la tarea diaria (~17:00) y, si un día falla, los reintenta los dos días siguientes. Cada persona recibe cada campaña una vez.
+- **Panettone**: no está a la venta. El email del 1 de diciembre dice que lo estás probando y pide responder si interesa; las respuestas te llegan a ti (`CONTACT_EMAIL`). Para quitar ese párrafo, `panettoneTeaser = false` en `src/lib/campaigns.ts`. Si decides venderlo, hay que añadirlo como producto (precio, cupo y una migración), como se hizo con la bollería.
+
 ## Lista de avisos: doble opt-in
 
 Al apuntarse, el email queda pendiente y recibe un correo con el botón «Confirmar el aviso». El enlace abre `/alta`, que pide pulsar un botón, para que los antivirus de correo que abren enlaces no confirmen por nadie. Solo los confirmados salen en la exportación. Si alguien lo vuelve a pedir estando pendiente, el correo se reenvía como mucho una vez por hora. Sin `RESEND_API_KEY` no hay forma de confirmar, así que ese despliegue apunta directamente.
@@ -179,6 +186,6 @@ Debajo de la carta, tres combinaciones: **El desayuno** (1 hogaza + 1 croissant,
 Para decidir si se quedan, compara al cabo de 3-4 semanas:
 
 - En `/gestio`, «Últimos 28 días»: «Añaden …» cuenta cuántas veces se añade cada combinación y «Reservan con combinación» cuántas reservas confirmadas conservan todas las piezas de alguna. Compáralo con «Reservan».
-- Ticket medio: `npm run orders:prod` da `averageOrderCents`. Anota el valor antes de publicar y compáralo con el de las semanas de prueba, mejor por hornadas del sábado (las únicas con bollería).
+- Ticket medio: `npm run orders:prod` da `averageOrderCents`. Anota el valor antes de publicar y compáralo con el de las semanas de prueba, mejor por el mismo día de la semana (miércoles con miércoles, sábado con sábado).
 
 Si no se eligen o el ticket medio no sube, se quitan borrando la sección.

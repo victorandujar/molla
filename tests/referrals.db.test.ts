@@ -22,8 +22,8 @@ test(
     try {
       await db`TRUNCATE referrals, email_sends, order_items, orders, subscriptions, customers, bakes CASCADE`;
       // A fresh database has no seed: the weekly loaf comes from scripts/seed.ts.
-    await db`INSERT INTO products(id,name,price) VALUES ('clasica','La de cada semana',500) ON CONFLICT(id) DO UPDATE SET price=EXCLUDED.price`;
-    const plan = weeklyCyclePlan();
+      await db`INSERT INTO products(id,name,price) VALUES ('clasica','La de cada semana',500) ON CONFLICT(id) DO UPDATE SET price=EXCLUDED.price`;
+      const plan = weeklyCyclePlan();
       await db`INSERT INTO bakes(id,number,pickup_date,deadline,opens_at,capacity,status) VALUES ('hornada-030','030',${plan.pickupAt},${plan.deadline},${new Date(Date.now() - 3600000)},20,'OPEN')`;
       const bake = await store.currentBake();
       assert.equal(bake.id, 'hornada-030');

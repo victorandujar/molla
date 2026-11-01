@@ -14,23 +14,42 @@ import {
   googleReviews,
 } from '../lib/config';
 import { ui, routes, dayFormat, type Lang } from '../lib/i18n';
-import { currentBake } from '../lib/store';
-import { bakeState, publicStock } from '../lib/domain';
+import { currentBake, type ActiveBake } from '../lib/store';
+import { bakeState, earlyBakesOpen, publicStock } from '../lib/domain';
 import { deliveryTowns } from '../lib/delivery';
 interface Props {
   lang: Lang;
+  // An early bake (Christmas) shown on its own page instead of the weekly one.
+  bake?: ActiveBake;
+  noindex?: boolean;
 }
-const { lang } = Astro.props;
+const { lang, bake: chosen, noindex = false } = Astro.props;
 const t = ui[lang];
 let current = { ...bake, reserved: 0, bananaReserved: 0, pastryReserved: 0 };
 let unavailable = false;
-if (isDemo || launchReady) {
+if (chosen) current = chosen;
+else if (isDemo || launchReady) {
   try {
     current = await currentBake();
   } catch {
     unavailable = true;
   }
 }
+// Christmas: links to the early bakes taking orders, except the one on show.
+const madridDate = (iso: string) =>
+  new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Madrid' }).format(
+    new Date(iso),
+  );
+const xmasPage = { ca: '/nadal', es: '/es/navidad' }[lang];
+const xmasLinks =
+  isDemo || launchReady
+    ? earlyBakesOpen()
+        .filter((e) => e.pickupDate !== madridDate(current.pickupDate))
+        .map((e) => ({
+          href: `${xmasPage}?dia=${e.pickupDate.slice(-2)}`,
+          label: dayFormat(lang, `${e.pickupDate}T12:00:00Z`),
+        }))
+    : [];
 const state = unavailable
   ? 'CLOSED'
   : isDemo || launchReady
@@ -189,7 +208,12 @@ const jsonLd = [
 ];
 ---
 
-<Base lang={lang} route="home" jsonLd={jsonLd}>
+<Base
+  lang={lang}
+  route={chosen ? undefined : 'home'}
+  jsonLd={chosen ? [] : jsonLd}
+  noindex={noindex}
+>
   <main id="contenido">
     <!-- 1 · Portada: el flyer. El pan abierto en las manos de mi madre, en cobalto -->
     <section class="hero" aria-labelledby="hero-title">
@@ -898,6 +922,28 @@ const jsonLd = [
 
     <!-- 7 · Reserva: el tiquet, sobre el azul del flyer -->
     <section id="reserva" class="reserve" aria-labelledby="reserve-title">
+      {(xmasLinks.length > 0 || chosen) && (
+        <div class="wrap">
+          <p class="xmas-strip">
+            <strong>{t.xmas.label}</strong>
+            <span>
+              {xmasLinks.length > 0 ? t.xmas.lead : ''}
+              {xmasLinks.map((l, i) => (
+                <>
+                  {i > 0 && ' · '}
+                  <a href={l.href}>{l.label} →</a>
+                </>
+              ))}
+              {chosen && (
+                <>
+                  {xmasLinks.length > 0 && ' · '}
+                  <a href={routes.home[lang]}>{t.xmas.week} →</a>
+                </>
+              )}
+            </span>
+          </p>
+        </div>
+      )}
       <div class="wrap">
         <div class="mono-bar" data-bar>
           <span>Nº 03 · {t.reserve.kicker}</span>

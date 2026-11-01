@@ -229,6 +229,33 @@ export const bakeDays = [
   { weekday: 3, closesDaysBefore: 2 },
   { weekday: 6, closesDaysBefore: 2 },
 ] as const;
+// Holiday weeks: a bake day moved to another date (pickup dates in Madrid).
+// Christmas Eve and New Year's Eve 2026 fall on Thursdays, so those weeks the
+// Wednesday bake moves to Thursday; it still closes two days before (Tuesday
+// at 20:00) and the Saturday bake opens when it closes, as any other week.
+export const bakeDateOverrides: Record<string, string> = {
+  '2026-12-23': '2026-12-24',
+  '2026-12-30': '2026-12-31',
+};
+// Special bakes that take orders early, alongside the weekly one: they open
+// on `opensOn` (Madrid) and close two days before pickup at 20:00, like a
+// Wednesday bake. The weekly cycle shows them on their own page (/nadal) and
+// the shop keeps showing the bake of the week.
+export const earlyBakes = [
+  { pickupDate: '2026-12-24', opensOn: '2026-12-01' },
+  { pickupDate: '2026-12-31', opensOn: '2026-12-01' },
+] as const;
+export const earlyBakeDeadline = (pickupDate: string) =>
+  madridIso(addCalendarDays(pickupDate, -2), '20:00');
+export const isEarlyBakeDate = (date: string) =>
+  earlyBakes.some((e) => e.pickupDate === date);
+// Early bakes taking orders at this instant, soonest first.
+export const earlyBakesOpen = (now = new Date()) =>
+  earlyBakes.filter(
+    (e) =>
+      madridDate(now) >= e.opensOn &&
+      now.getTime() < Date.parse(earlyBakeDeadline(e.pickupDate)),
+  );
 // Madrid weekday (0 = Sunday) of an instant.
 export const madridWeekday = (iso: string) =>
   new Date(`${madridDate(new Date(iso))}T12:00:00Z`).getUTCDay();
@@ -269,10 +296,11 @@ export function weeklyCyclePlan(now = new Date(), pickupTime = '12:00') {
   const [next] = bakeDays
     .flatMap(({ weekday: day, closesDaysBefore }) =>
       [0, 7].map((week) => {
-        const pickupDate = addCalendarDays(
+        const regular = addCalendarDays(
           today,
           ((day - weekday + 7) % 7) + week,
         );
+        const pickupDate = bakeDateOverrides[regular] ?? regular;
         const deadline = madridIso(
           addCalendarDays(pickupDate, -closesDaysBefore),
           '20:00',
