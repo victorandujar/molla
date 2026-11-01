@@ -477,7 +477,7 @@ export const ui = {
         ],
         [
           '¿Lleváis pan a Sant Just Desvern?',
-          `Sí. Cada miércoles y cada sábado reparto en Sant Just Desvern ${hours.es}, igual que en Sant Boi y Santa Coloma de Cervelló. Reserva antes del cierre de pedidos: el domingo para el miércoles y el jueves para el sábado, a las 20:00.`,
+          `Sí. Cada miércoles y cada sábado reparto en Sant Just Desvern ${hours.es}, igual que en Sant Boi y Santa Coloma de Cervelló. Reserva antes del cierre de pedidos: el lunes para el miércoles y el jueves para el sábado, a las 20:00.`,
         ],
         [
           '¿Y si no voy a estar?',
@@ -942,7 +942,7 @@ export const ui = {
         ],
         [
           'Porteu pa a Sant Just Desvern?',
-          `Sí. Cada dimecres i cada dissabte reparteixo a Sant Just Desvern ${hours.ca}, igual que a Sant Boi i Santa Coloma de Cervelló. Reserva abans del tancament de comandes: diumenge per al dimecres i dijous per al dissabte, a les 20:00.`,
+          `Sí. Cada dimecres i cada dissabte reparteixo a Sant Just Desvern ${hours.ca}, igual que a Sant Boi i Santa Coloma de Cervelló. Reserva abans del tancament de comandes: dilluns per al dimecres i dijous per al dissabte, a les 20:00.`,
         ],
         [
           'I si no hi seré?',

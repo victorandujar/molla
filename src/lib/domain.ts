@@ -209,12 +209,12 @@ const addCalendarDays = (date: string, days: number) =>
     .toISOString()
     .slice(0, 10);
 
-// Two bakes a week. Wednesday's closes on Sunday at 20:00 and Saturday's on
+// Two bakes a week. Wednesday's closes on Monday at 20:00 and Saturday's on
 // Thursday at 20:00; each opens the moment the other one closes, so there is
 // always exactly one bake taking orders. Both carry bread, banana bread and
 // pastries.
 export const bakeDays = [
-  { weekday: 3, closesDaysBefore: 3 },
+  { weekday: 3, closesDaysBefore: 2 },
   { weekday: 6, closesDaysBefore: 2 },
 ] as const;
 // Madrid weekday (0 = Sunday) of an instant.

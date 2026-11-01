@@ -167,13 +167,15 @@ const toBake = (b: postgres.Row): ActiveBake => ({
 export async function currentBake(): Promise<ActiveBake> {
   if (useDemo()) return demo(demoBake);
   let [b] = await activeBakeRow(sql!);
-  // Whenever the bake on show is not the one due or is not taking orders
-  // (the cron has not run, or failed, or a row was left closed), reconcile
+  // Whenever the bake on show is not the one due, is not taking orders or
+  // does not close when the calendar says (the cron has not run, or failed,
+  // a row was left closed, or the closing day changed), reconcile
   // now: there is never a moment without a bake to reserve.
-  const due = weeklyCyclePlan().pickupDate;
+  const { pickupDate: due, deadline } = weeklyCyclePlan();
   if (
     !b ||
     new Date(b.deadline).getTime() <= Date.now() ||
+    new Date(b.deadline).getTime() !== Date.parse(deadline) ||
     !['OPEN', 'SOLD_OUT'].includes(b.status as string) ||
     madridDay(new Date(b.pickup_date)) !== due
   ) {
