@@ -2,71 +2,71 @@
 
 Objectiu: sortir en un o dos mitjans locals de Sant Boi, Sant Just Desvern o el Baix Llobregat abans de Nadal. Una notícia d’un veí que emprèn arriba a molta gent de la zona exacta i deixa un enllaç a la web que ajuda a Google.
 
-Abans d’enviar res, **omple els buits entre claudàtors** [així] amb dades reals teves. No hi posis res que no sigui cert: un periodista pot trucar per confirmar-ho.
+Abans d’enviar-ho, només queda posar la **data d’enviament** i, si el saps, el **nom de la persona de la redacció**. Tota la resta és real: un periodista pot trucar per confirmar-ho.
 
-Fotos per adjuntar (reals, en JPG): `exports/premsa/`. Adjunta’n 2 o 3, no més: `molla-01-obrador.jpg` (tu a l’obrador), `molla-02-pa-tallat.jpg` (la molla) i `molla-04-brioixeria.jpg`.
+Fotos per adjuntar (reals, en JPG): `exports/premsa/`. Adjunta’n 2 o 3, no més: `molla-01-obrador.jpg` (tu a l’obrador), `molla-02-pa-tallat.jpg` (les mans de la teva mare amb el pa) i `molla-04-brioixeria.jpg`.
 
 ---
 
 ## 1. Nota de premsa (català)
 
-**Un microobrador de Sant Boi porta pa de 35 hores de fermentació a domicili per encàrrec**
+**D’escriure codi a pastar pa: un programador desplaçat per les màquines obre un microobrador a Sant Boi**
 
-*Molla només forneja el que els veïns han reservat i reparteix a casa a Sant Boi, Sant Just Desvern i Santa Coloma de Cervelló. Per Nadal obre fornades especials el 24 i el 31 de desembre.*
+*Víctor Andújar fa pa de fins a 35 hores de fermentació, només per encàrrec, i el porta a casa a Sant Boi, Sant Just Desvern i Santa Coloma de Cervelló. Per Nadal obre fornades especials el 24 i el 31 de desembre.*
 
-**Sant Boi de Llobregat, [data d’enviament] de 2026.** Des del setembre, [Víctor Cognom], veí de Sant Boi de Llobregat, fa pa artesà per encàrrec sota el nom de Molla. La idea és senzilla: els veïns reserven al web durant la setmana i ell forneja només el que s’ha demanat, de manera que no sobra res. Dimecres i dissabte, de 12 a 14 h, porta les comandes a casa a Sant Boi, Sant Just Desvern i Santa Coloma de Cervelló sense cost d’enviament, i la resta del Baix Llobregat ho pot recollir a Sant Boi.
+**Sant Boi de Llobregat, [data d’enviament] de 2026.** Fins fa poc, Víctor Andújar Murcia es guanyava la vida programant. Avui és forner. Des del setembre fa pa artesà per encàrrec a Sant Boi de Llobregat amb el nom de Molla: els veïns reserven al web durant la setmana i ell forneja només el que s’ha demanat, perquè no en sobri res. Dimecres i dissabte, de 12 a 14 h, porta les comandes a casa a Sant Boi, Sant Just Desvern i Santa Coloma de Cervelló, sense cost d’enviament.
 
-El pa de Molla es fa amb poolish, una massa prèvia de farina, aigua i molt poc llevat que fermenta durant la nit. En total, cada fogassa porta fins a 35 hores de fermentació lenta i farina ecològica. «[Una frase teva: per què fas pa així, què t’hi va portar. Per exemple, com vas començar o què vols que senti qui el tasta.]», explica [Víctor].
+«Vaig començar a fer pa perquè no trobava un bon pa a prop de casa. Era una necessitat molt meva, gairebé egoista», explica. «Però el pa em representa. La meva parella sempre em diu, de broma, que menjo pa amb pa, i té raó: per a mi és gairebé sagrat. Era programador, les màquines m’han anat desplaçant de la meva feina, i ara soc forner. I m’encanta.»
 
-La fogassa, de 750 a 850 grams, costa 5 euros, i també fa banana bread, croissants i pains au chocolat. El pagament es fa en rebre la comanda, sense targeta ni registre. Qui vol pa cada setmana pot apuntar-se al Pa fix, una comanda fixa que es pot saltar, pausar o cancel·lar amb un clic.
+La fotografia que obre la seva web són les mans de la seva mare sostenint una fogassa partida per la meitat. És del dia que li va portar els seus pans per explicar-li que volia provar de dedicar-s’hi i deixar enrere la programació.
 
-[Opcional, una dada humana: d’on vens, què feies abans, qui t’ajuda. Per exemple, si les mans de la foto principal de la web són de la teva mare, és un detall que agrada molt.]
+El pa de Molla es fa amb poolish, una massa prèvia de farina, aigua i molt poc llevat que fermenta durant la nit, i amb farina ecològica: en total, cada fogassa porta fins a 35 hores de fermentació. La fogassa, de 750 a 850 grams, costa 5 euros, i també fa banana bread, croissants i pains au chocolat. Es paga en rebre la comanda, sense targeta ni registre, i la resta del Baix Llobregat ho pot recollir a Sant Boi.
 
-En dos mesos, Molla ja té [nombre] clients i una valoració de 5 sobre 5 a Google. Per Nadal, l’obrador fornejarà el dijous 24 i el dijous 31 de desembre perquè el pa arribi a taula el mateix dia; les reserves s’obren l’1 de desembre a mollapa.com.
+El projecte tot just comença, però les set primeres ressenyes a Google li donen un 5 sobre 5. Per Nadal, Molla fornejarà el dijous 24 i el dijous 31 de desembre perquè el pa arribi a taula el mateix dia; les reserves s’obren l’1 de desembre a mollapa.com.
 
 **Contacte de premsa**
-[Víctor Cognom] · [telèfon] · hola@mollapa.com
+Víctor Andújar Murcia · 649 90 79 12 · hola@mollapa.com
 Web: https://www.mollapa.com · Instagram: @molla.baixllobregat
 
 ---
 
 ## 2. Nota de prensa (castellano)
 
-**Un microobrador de Sant Boi lleva pan de 35 horas de fermentación a domicilio por encargo**
+**De escribir código a amasar pan: un programador desplazado por las máquinas abre un microobrador en Sant Boi**
 
-*Molla solo hornea lo que los vecinos han reservado y reparte a casa en Sant Boi, Sant Just Desvern y Santa Coloma de Cervelló. En Navidad abre hornadas especiales el 24 y el 31 de diciembre.*
+*Víctor Andújar hace pan de hasta 35 horas de fermentación, solo por encargo, y lo lleva a casa en Sant Boi, Sant Just Desvern y Santa Coloma de Cervelló. En Navidad abre hornadas especiales el 24 y el 31 de diciembre.*
 
-**Sant Boi de Llobregat, [fecha de envío] de 2026.** Desde septiembre, [Víctor Apellido], vecino de Sant Boi de Llobregat, hace pan artesano por encargo bajo el nombre de Molla. La idea es sencilla: los vecinos reservan en la web durante la semana y él hornea solo lo que se ha pedido, así que no sobra nada. Los miércoles y los sábados, de 12 a 14 h, lleva los pedidos a casa en Sant Boi, Sant Just Desvern y Santa Coloma de Cervelló sin coste de envío, y el resto del Baix Llobregat puede recogerlo en Sant Boi.
+**Sant Boi de Llobregat, [fecha de envío] de 2026.** Hasta hace poco, Víctor Andújar Murcia se ganaba la vida programando. Hoy es panadero. Desde septiembre hace pan artesano por encargo en Sant Boi de Llobregat con el nombre de Molla: los vecinos reservan en la web durante la semana y él hornea solo lo que se ha pedido, para que no sobre nada. Los miércoles y los sábados, de 12 a 14 h, lleva los pedidos a casa en Sant Boi, Sant Just Desvern y Santa Coloma de Cervelló, sin coste de envío.
 
-El pan de Molla se hace con poolish, una masa previa de harina, agua y muy poca levadura que fermenta durante la noche. En total, cada hogaza lleva hasta 35 horas de fermentación lenta y harina ecológica. «[Una frase tuya: por qué haces pan así, qué te llevó a empezar.]», explica [Víctor].
+«Empecé a hacer pan porque no encontraba un buen pan cerca de casa. Era una necesidad muy mía, casi egoísta», explica. «Pero el pan me representa. Mi pareja siempre me dice, en broma, que como pan con pan, y tiene razón: para mí es casi sagrado. Era programador, las máquinas me han ido desplazando de mi trabajo, y ahora soy panadero. Y me encanta.»
 
-La hogaza, de 750 a 850 gramos, cuesta 5 euros, y también hace banana bread, croissants y pains au chocolat. Se paga al recibir el pedido, sin tarjeta ni registro. Quien quiere pan cada semana puede apuntarse al Pan fijo, un pedido fijo que se puede saltar, pausar o cancelar con un clic.
+La fotografía que abre su web son las manos de su madre sosteniendo una hogaza partida por la mitad. Es del día en que le llevó sus panes para contarle que quería probar a dedicarse a esto y dejar atrás la programación.
 
-[Opcional, un dato humano: de dónde vienes, qué hacías antes, quién te ayuda.]
+El pan de Molla se hace con poolish, una masa previa de harina, agua y muy poca levadura que fermenta durante la noche, y con harina ecológica: en total, cada hogaza lleva hasta 35 horas de fermentación. La hogaza, de 750 a 850 gramos, cuesta 5 euros, y también hace banana bread, croissants y pains au chocolat. Se paga al recibir el pedido, sin tarjeta ni registro, y el resto del Baix Llobregat puede recogerlo en Sant Boi.
 
-En dos meses, Molla ya tiene [número] clientes y una valoración de 5 sobre 5 en Google. En Navidad, el obrador horneará el jueves 24 y el jueves 31 de diciembre para que el pan llegue a la mesa el mismo día; las reservas se abren el 1 de diciembre en mollapa.com.
+El proyecto acaba de empezar, pero las siete primeras reseñas en Google le dan un 5 sobre 5. En Navidad, Molla horneará el jueves 24 y el jueves 31 de diciembre para que el pan llegue a la mesa el mismo día; las reservas se abren el 1 de diciembre en mollapa.com.
 
 **Contacto de prensa**
-[Víctor Apellido] · [teléfono] · hola@mollapa.com
+Víctor Andújar Murcia · 649 90 79 12 · hola@mollapa.com
 Web: https://www.mollapa.com · Instagram: @molla.baixllobregat
 
 ---
 
 ## 3. Correu de presentació (català)
 
-**Assumpte:** Un veí de Sant Boi fa pa de 35 hores i el porta a casa per encàrrec
+**Assumpte:** De programador a forner: un veí de Sant Boi obre un microobrador de pa per encàrrec
 
 Hola, [nom de la persona de la redacció, si el saps],
 
-Em dic [Víctor] i des del setembre faig pa artesà per encàrrec a Sant Boi, amb el nom de Molla. Només fornejo el que els veïns reserven i el porto a casa a Sant Boi, Sant Just i Santa Coloma de Cervelló. Per Nadal faré fornades especials el 24 i el 31 de desembre.
+Em dic Víctor Andújar. Fins fa poc era programador; ara faig pa artesà per encàrrec a Sant Boi, amb el nom de Molla. Només fornejo el que els veïns reserven i el porto a casa a Sant Boi, Sant Just i Santa Coloma de Cervelló. Per Nadal faré fornades especials el 24 i el 31 de desembre.
 
-Us adjunto una nota amb els detalls i tres fotos que podeu fer servir lliurement. Si us interessa, us puc portar pa perquè el tasteu o atendre-us per telèfon o a l’obrador.
+Us adjunto una nota amb la història i tres fotos que podeu fer servir lliurement. Si us interessa, us porto pa perquè el tasteu, o us atenc per telèfon o a l’obrador.
 
 Moltes gràcies,
-[Víctor Cognom]
-[telèfon] · hola@mollapa.com · www.mollapa.com
+Víctor Andújar Murcia
+649 90 79 12 · hola@mollapa.com · www.mollapa.com
 
-*(Adjunts: la nota en PDF o enganxada sota el correu, i 2–3 fotos de `exports/premsa/`.)*
+*(Adjunts: la nota enganxada sota el correu o en PDF, i les fotos `molla-01-obrador.jpg`, `molla-02-pa-tallat.jpg` i `molla-04-brioixeria.jpg`.)*
 
 ---
 
