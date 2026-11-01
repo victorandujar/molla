@@ -48,6 +48,18 @@ export const reservationSchema = z
     product: z.literal('clasica').default('clasica'),
     pickup: z.literal('yes', { error: 'pickup' }),
     privacy: z.literal('yes', { error: 'privacy' }),
+    // Optional, unticked by default: the buyer asks for the weekly email.
+    news: z
+      .enum(['yes', ''])
+      .default('')
+      .transform((v) => v === 'yes'),
+    // A friend's invite code; an invalid one is ignored, never an error.
+    ref: z
+      .string()
+      .max(20)
+      .default('')
+      .transform((v) => v.trim().toUpperCase())
+      .transform((v) => (referralPattern.test(v) ? v : '')),
     website: z.string().max(0).default(''),
     source: z.enum(sources).default('direct'),
     ...deliveryFields,
@@ -298,6 +310,10 @@ export function pickupCode(bakeNumber: string, bytes: Uint8Array) {
   return `${bakeNumber}-${chars.join('')}`;
 }
 export const pickupCodePattern = /^\d{3}-[A-Z2-9]{4}$/;
+// Personal invite code such as K7QMRT: six characters of the same alphabet.
+export const referralPattern = /^[A-HJKMNP-Z2-9]{6}$/;
+export const referralCode = (bytes: Uint8Array) =>
+  Array.from(bytes.slice(0, 6), (b) => codeAlphabet[b % 31]).join('');
 // Halves of banana bread become whole moulds plus, at most, one half.
 export const bananaSplit = (halves: number) => ({
   whole: Math.floor(halves / 2),
@@ -336,6 +352,12 @@ export type Order = {
   firstOrder?: boolean;
   // Private one-click cancellation link; absent on orders made before it existed.
   cancelToken?: string;
+  // "Convida un veí": the buyer's own invite code, whether this first order
+  // came through a friend's code (gift croissant) and how many gift
+  // croissants it carries for friends this buyer brought.
+  referralCode?: string;
+  invited?: boolean;
+  referralGifts?: number;
   // Set on orders the weekly job placed for a "pa fix": token manages it.
   subscription?: { token: string };
   // Absent on orders created before banana bread could be ordered online:
@@ -373,3 +395,61 @@ export const csvCell = (v: unknown) => {
     '"'
   );
 };
+
+// ---- Automated funnel -------------------------------------------------------
+// Which bake days get the weekly emails (opening and last call). Saturday's
+// only by default, so subscribers get at most two emails a week;
+// NEWSLETTER_DAYS=3,6 adds Wednesday's.
+export function newsletterDays(value = process.env.NEWSLETTER_DAYS) {
+  const days = (value ?? '6')
+    .split(',')
+    .map((d) => Number(d.trim()))
+    .filter((d) => bakeDays.some((b) => b.weekday === d));
+  return days.length ? days : [6];
+}
+export type BroadcastKind = 'open' | 'last';
+// What the funnel may send now for a bake taking orders:
+//  open: it opened within the last 36 hours and closes in more than a day;
+//  last: it closes within the next 8 hours (the daily run on closing day).
+// A sold-out, closed or not-yet-open bake gets nothing.
+export function broadcastDue(
+  b: {
+    status: BakeState;
+    opensAt: string;
+    deadline: string;
+    pickupDate: string;
+  },
+  now = Date.now(),
+  days = newsletterDays(),
+): BroadcastKind | null {
+  if (b.status !== 'OPEN') return null;
+  if (!days.includes(madridWeekday(b.pickupDate))) return null;
+  const opens = Date.parse(b.opensAt);
+  const left = Date.parse(b.deadline) - now;
+  if (now < opens || left <= 0) return null;
+  if (left <= 8 * 3600000) return 'last';
+  if (now - opens <= 36 * 3600000 && left > 24 * 3600000) return 'open';
+  return null;
+}
+// After-delivery follow-ups, counted over a customer's orders that were not
+// cancelled: a thank-you (review, neighbour, weekly email) after the first,
+// the "pa fix" offer after the second. Standing orders get neither.
+export type FollowupKind = 'thanks' | 'pafix';
+export function followupKind(
+  orderNumber: number,
+  hasSubscription: boolean,
+): FollowupKind | null {
+  if (orderNumber === 1) return 'thanks';
+  if (orderNumber === 2 && !hasSubscription) return 'pafix';
+  return null;
+}
+// The follow-up goes out the day after delivery: between 20 hours and 5 days.
+export const followupDue = (pickupIso: string, now = Date.now()) => {
+  const since = now - Date.parse(pickupIso);
+  return since >= 20 * 3600000 && since <= 5 * 86400000;
+};
+
+// Gift croissants an order carries: one if the buyer came invited, plus one
+// per friend they brought whose first order has been delivered.
+export const giftCroissants = (o: Pick<Order, 'invited' | 'referralGifts'>) =>
+  (o.invited ? 1 : 0) + (o.referralGifts || 0);

@@ -2888,6 +2888,18 @@ input::placeholder {
   color: var(--cobalt);
 }
 
+#confirmation .confirmation-gift {
+  margin: 12px 0 0;
+  font-weight: 700;
+  color: var(--cobalt);
+}
+#confirmation .confirmation-invite {
+  margin: 22px 0 6px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+  font-size: 15.5px;
+}
+
 /* 8 · Preguntas */
 .faq {
   padding-block: clamp(72px, 8vw, 120px) var(--section);

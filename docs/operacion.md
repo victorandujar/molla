@@ -49,7 +49,7 @@ Los comandos siguientes aparecen sin sufijo; para producción usa `orders:prod`.
 - `npm run orders -- funnel --days=28`: embudo por evento y canal (visitas, ven la hornada, empiezan a reservar, reservan, se apuntan al aviso).
 - `npm run orders -- collected 001-K7QM --yes`: marca una reserva confirmada como recogida. Acepta el código de recogida (número de hornada + 4 caracteres sin 0/O, 1/I/L) o la referencia UUID interna.
 - `npm run orders -- cancel 001-K7QM --yes`: cancela una reserva confirmada. No se puede reactivar una cancelada mediante este comando; se crea una nueva reserva para validar cupo.
-- `npm run orders -- waitlist .data/avisos.json`: exporta solo los avisos **confirmados** (doble opt-in), con su idioma. Incluir un enlace a `https://DOMINIO/baja?token=TOKEN&lang=IDIOMA` por destinatario. Los avisos semanales no se envían automáticamente en este MVP.
+- `npm run orders -- waitlist .data/avisos.json`: exporta solo los avisos **confirmados** (doble opt-in), con su idioma. Los avisos semanales ya se envían solos (ver «Embudo automático»); la exportación queda para copias o envíos especiales, con un enlace a `https://DOMINIO/baja?token=TOKEN&lang=IDIOMA` por destinatario.
 - `npm run orders -- purge --months=12 --yes`: anonimiza nombre, email, teléfono y dirección de entrega de los pedidos cuya recogida tiene más de N meses. Conserva importes, cantidades, fechas, canal y municipio de entrega para las métricas. Ajusta N al plazo de conservación publicado.
 
 Las exportaciones se crean con permisos privados. No subirlas a Git. En local sin DATABASE_URL, los comandos de lectura usan `.data/demo.json`. No trasladar datos ficticios a producción. La lista y el resumen son herramientas de operación; no hay un panel público con pedidos.
@@ -63,6 +63,12 @@ Vercel Cron llama cada día a `/api/cron/cycle` a las 19:05 UTC (20:05 en invier
 3. Borra los límites de peticiones antiguos y los avisos sin confirmar de más de 7 días.
 
 El resultado (`reminders`, `reminderFailures`, `retried`) aparece en los logs de la ejecución en Vercel (Settings → Cron Jobs). En `/gestio` cada pedido indica si el recordatorio salió.
+
+## Embudo automático
+
+Los mismos crons envían, sin intervención, el aviso «hornada abierta» (lunes al abrir la del sábado) y el «último aviso» (jueves por la tarde) a la lista confirmada, el email «¿qué tal el pan?» con la reseña de Google al día siguiente del primer pedido, la oferta del Pan fijo tras el segundo y, el domingo, un resumen semanal a `CONTACT_EMAIL`. Al reservar hay una casilla opcional para entrar en la lista. Cada envío se registra en `email_sends` (migración `008_funnel.sql`) y no se repite. Variables: `FUNNEL_EMAILS`, `NEWSLETTER_DAYS`, `FUNNEL_MAX_PER_RUN`. Detalle, activación y captación de tráfico en `embudo-automatico.md`.
+
+«Convida un veí»: cada cliente tiene un enlace personal (`/?ref=CÓDIGO`). El primer pedido de quien entra por él lleva un croissant de regalo y, cuando ese pedido se entrega, el siguiente pedido de quien invitó lleva otro (como mucho 2 por pedido). La web no los cobra ni los resta del cupo: los ves con la etiqueta 🎁 en `/gestio`, en «Croissants de regalo» y en el aviso «Nueva reserva». Migración `009_referrals.sql`.
 
 ## Lista de avisos: doble opt-in
 
@@ -155,6 +161,10 @@ Se configuran en Vercel → proyecto → Settings → Environment Variables, mar
 | `GOOGLE_PROFILE_URL`   | enlace público del Perfil de Empresa de Google           | Datos estructurados (`sameAs`)                                                            |
 | `PA_FIX_VOUCHER`       | `false` para quitar el vale                              | Vale del pan fijo: el 4.º pan corre de tu cuenta (por defecto activo)                     |
 | `ADMIN_PASSWORD`       | 16 caracteres o más                                      | Contraseña de `/gestio`                                                                   |
+| `FUNNEL_EMAILS`        | `false` para apagarlo (por defecto activo)               | Emails automáticos del embudo (avisos, «¿qué tal?», Pan fijo, resumen)                    |
+| `NEWSLETTER_DAYS`      | `6` (sábado) o `3,6`                                     | Hornadas que se anuncian a la lista                                                       |
+| `FUNNEL_MAX_PER_RUN`   | `80` (plan gratuito de Resend)                           | Tope de emails del embudo por ejecución                                                   |
+| `REFERRAL_GIFT`        | `false` para apagarlo (por defecto activo)               | «Convida un veí»: croissant de regalo para el invitado y para quien invita                |
 
 ## Vale del pan fijo
 
@@ -164,7 +174,7 @@ Lo que sigue es el vale del pan fijo. Con la primera comanda de cada cliente (po
 
 ## Combina Molla (prueba de 3-4 semanas)
 
-Debajo de la carta, tres combinaciones: **El desayuno** (1 hogaza + 1 croissant, 7,20 €), **El capricho** (1 hogaza + 1 pain au chocolat, 7,50 €) y **Para compartir** (2 hogazas + 1 croissant + 1 pain au chocolat, 14,70 €). No son ofertas: el precio es la suma de las piezas, sin descuento ni envío gratis, y las piezas siguen a la venta por separado. El botón solo rellena el mismo pedido de siempre, en cualquier hornada. Las combinaciones y sus piezas se definen en `src/components/Home.astro` (`combos`) y los textos en `src/lib/i18n.ts` (`combos`). Las tres fotos son escenas compuestas con IA (Nano Banana Pro) a partir de las fotos reales de las hogazas y la bollería, y cada una enseña exactamente las piezas de su combinación. Los originales están en `assets/combos/`; `scripts/combo-photos.mjs` los recorta a 5:4 y `npm run photos` los rehace.
+Debajo de la carta, tres combinaciones: **El desayuno** (1 hogaza + 1 croissant, 7,20 €), **El capricho** (1 hogaza + 1 pain au chocolat, 7,50 €) y **Para compartir** (2 hogazas + 1 croissant + 1 pain au chocolat, 14,70 €). No son ofertas: el precio es la suma de las piezas, sin descuento ni envío gratis, y las piezas siguen a la venta por separado. El botón solo rellena el mismo pedido de siempre, en cualquier hornada. Las combinaciones y sus piezas se definen en `src/components/Home.astro` (`combos`) y los textos en `src/lib/i18n.ts` (`combos`). Cada foto enseña exactamente las piezas de su combinación: El desayuno y Para compartir son las fotos que aportó el obrador el 1/11/2026 (la del desayuno es vertical y `scripts/combo-photos.mjs` la recorta a la franja con la hogaza y el croissant); El capricho sigue siendo una escena compuesta con IA (Nano Banana Pro) a partir de las fotos reales. Los originales están en `assets/combos/`; `scripts/combo-photos.mjs` los recorta a 5:4 y `npm run photos` los rehace.
 
 Para decidir si se quedan, compara al cabo de 3-4 semanas:
 

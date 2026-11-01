@@ -375,6 +375,8 @@ const requestFor = (
   product: 'clasica',
   pickup: 'yes',
   privacy: 'yes',
+  news: false,
+  ref: '',
   website: '',
   source: 'pafix',
   delivery: sub.delivery,
