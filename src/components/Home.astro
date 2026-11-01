@@ -12,7 +12,6 @@ import {
   PASTRY_MAX_PER_ORDER,
   standingVoucher,
   googleReviews,
-  referralGift,
 } from '../lib/config';
 import { ui, routes, dayFormat, type Lang } from '../lib/i18n';
 import { currentBake } from '../lib/store';
@@ -1346,42 +1345,6 @@ const jsonLd = [
         </div>
       </div>
     </section>
-
-    <!-- Convida un veí: cada client porta el següent -->
-    {referralGift.active && (
-      <section class="invite" aria-labelledby="invite-title">
-        <div class="wrap invite-card">
-          <div class="mono-bar invite-bar" data-bar>
-            <span>{t.invite.kicker}</span>
-            <span>{t.invite.bar}</span>
-          </div>
-          <div class="invite-grid">
-            <h2 id="invite-title" data-split>
-              {t.invite.h2a} <em>{t.invite.h2b}</em>
-            </h2>
-            <div data-reveal>
-              <ol class="invite-steps">
-                {t.invite.steps.map((step, i) => (
-                  <li>
-                    <span class="invite-num" aria-hidden="true">
-                      0{i + 1}
-                    </span>
-                    <span>{step}</span>
-                  </li>
-                ))}
-              </ol>
-              <p class="invite-note">{t.invite.note}</p>
-              <a class="button" href="#reserva">
-                {t.invite.cta}
-                <span class="button-arrow" aria-hidden="true">
-                  →
-                </span>
-              </a>
-            </div>
-          </div>
-        </div>
-      </section>
-    )}
 
     <!-- 8 · Preguntas -->
     <section id="preguntas" class="faq" aria-labelledby="faq-title">

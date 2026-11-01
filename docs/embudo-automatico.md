@@ -53,7 +53,7 @@ Garantías:
 El canal más rentable de un obrador de barrio es la recomendación de un vecino. Ahora está automatizada y tiene premio para los dos:
 
 - **Cada cliente tiene un enlace personal** (`mollapa.com/?ref=K7QMRT`). Lo recibe en la pantalla de confirmación, en el email de confirmación, en el email «¿qué tal el pan?» y en cada aviso semanal de la hornada, con un botón que abre WhatsApp con el mensaje ya escrito. Los clientes que compraron antes de existir el programa reciben su código con el primer aviso semanal que les llega.
-- **La portada lo explica** en la sección «Convida un veí · Un veí, dos croissants», debajo del Pa fix.
+- **No está en la portada**, a propósito: quien aún no ha comprado no tiene enlace. Lo ven quien acaba de comprar (una tarjeta en la confirmación con el botón de WhatsApp y «Copiar l’enllaç») y el invitado (el aviso en el formulario).
 - **El vecino que entra por ese enlace** ve en el formulario «Vienes invitado por un vecino: con tu primer pedido, un croissant de regalo». Su primer pedido lleva el regalo.
 - **Quien invitó** recibe otro croissant en su siguiente pedido, pero solo **cuando el pedido del amigo ya se ha entregado** (así nadie se autoinvita con un email falso para cancelar después). El día después de la entrega le llega el email «Un vecino ha probado Molla gracias a ti: tu próximo croissant es de regalo», que además le anima a reservar y a invitar a otro.
 - **Tú no haces nada más que poner el croissant en la bolsa**: el aviso «Nueva reserva» dice «Regalo: 1 croissant sin cobrar (viene invitado…)», `/gestio` muestra la etiqueta 🎁 en el pedido y el total de «Croissants de regalo» para hornear.
