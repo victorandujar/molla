@@ -229,6 +229,14 @@ export const bakeDays = [
   { weekday: 3, closesDaysBefore: 2 },
   { weekday: 6, closesDaysBefore: 2 },
 ] as const;
+// Holiday weeks: a bake day moved to another date (pickup dates in Madrid).
+// Christmas Eve and New Year's Eve 2026 fall on Thursdays, so those weeks the
+// Wednesday bake moves to Thursday; it still closes two days before (Tuesday
+// at 20:00) and the Saturday bake opens when it closes, as any other week.
+export const bakeDateOverrides: Record<string, string> = {
+  '2026-12-23': '2026-12-24',
+  '2026-12-30': '2026-12-31',
+};
 // Madrid weekday (0 = Sunday) of an instant.
 export const madridWeekday = (iso: string) =>
   new Date(`${madridDate(new Date(iso))}T12:00:00Z`).getUTCDay();
@@ -269,10 +277,11 @@ export function weeklyCyclePlan(now = new Date(), pickupTime = '12:00') {
   const [next] = bakeDays
     .flatMap(({ weekday: day, closesDaysBefore }) =>
       [0, 7].map((week) => {
-        const pickupDate = addCalendarDays(
+        const regular = addCalendarDays(
           today,
           ((day - weekday + 7) % 7) + week,
         );
+        const pickupDate = bakeDateOverrides[regular] ?? regular;
         const deadline = madridIso(
           addCalendarDays(pickupDate, -closesDaysBefore),
           '20:00',

@@ -70,6 +70,12 @@ Los mismos crons envían, sin intervención, el aviso «hornada abierta» (lunes
 
 «Convida un veí»: cada cliente tiene un enlace personal (`/?ref=CÓDIGO`). El primer pedido de quien entra por él lleva un croissant de regalo y, cuando ese pedido se entrega, el siguiente pedido de quien invitó lleva otro (como mucho 2 por pedido). La web no los cobra ni los resta del cupo: los ves con la etiqueta 🎁 en `/gestio`, en «Croissants de regalo» y en el aviso «Nueva reserva». Migración `009_referrals.sql`.
 
+## Navidad 2026 (y otras fechas especiales)
+
+- **Calendario**: el 24 y el 31 de diciembre caen en jueves. Esas dos semanas la hornada del miércoles pasa al jueves: la del 24 se reserva del jueves 17 a las 20:00 al martes 22 a las 20:00, y la del 31, del jueves 24 al martes 29. La del sábado se abre al cerrar la del jueves, como siempre. En enero vuelve el miércoles y el sábado. Los cambios de fecha están en `bakeDateOverrides` (`src/lib/domain.ts`); para otro festivo se añade ahí la fecha original y la nueva.
+- **Emails**: tres envíos a la lista confirmada, definidos en `src/lib/campaigns.ts`: el 1 de diciembre (anuncio de las dos hornadas), el 18 (Nochebuena) y el 27 (Nochevieja). Los dos últimos se saltan a quien ya ha pedido para ese día. Los envía la tarea diaria (~17:00) y, si un día falla, los reintenta los dos días siguientes. Cada persona recibe cada campaña una vez.
+- **Panettone**: no está a la venta. El email del 1 de diciembre dice que lo estás probando y pide responder si interesa; las respuestas te llegan a ti (`CONTACT_EMAIL`). Para quitar ese párrafo, `panettoneTeaser = false` en `src/lib/campaigns.ts`. Si decides venderlo, hay que añadirlo como producto (precio, cupo y una migración), como se hizo con la bollería.
+
 ## Lista de avisos: doble opt-in
 
 Al apuntarse, el email queda pendiente y recibe un correo con el botón «Confirmar el aviso». El enlace abre `/alta`, que pide pulsar un botón, para que los antivirus de correo que abren enlaces no confirmen por nadie. Solo los confirmados salen en la exportación. Si alguien lo vuelve a pedir estando pendiente, el correo se reenvía como mucho una vez por hora. Sin `RESEND_API_KEY` no hay forma de confirmar, así que ese despliegue apunta directamente.

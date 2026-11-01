@@ -272,3 +272,65 @@ test('weekly emails carry the personal invite link of customers only', () => {
   const without = broadcastEmail('open', 'ca', bake, token);
   assert.doesNotMatch(without.html, /Convida un veí: un croissant/);
 });
+
+test('Christmas: the Wednesday bake moves to Thursday 24 and 31, still one bake open', async () => {
+  const { weeklyCyclePlan } = await import('../src/lib/domain');
+  const at = (iso: string) => weeklyCyclePlan(new Date(iso));
+  // Thursday 17 Dec after 20:00 (CET): Saturday 19 has closed, Thursday 24 opens.
+  assert.deepEqual(
+    (({ pickupDate, deadline }) => ({ pickupDate, deadline }))(
+      at('2026-12-17T19:30:00Z'),
+    ),
+    { pickupDate: '2026-12-24', deadline: '2026-12-22T19:00:00.000Z' },
+  );
+  // Tuesday 22 before 20:00: still Thursday 24; after 20:00, Saturday 26.
+  assert.equal(at('2026-12-22T18:59:00Z').pickupDate, '2026-12-24');
+  assert.equal(at('2026-12-22T19:01:00Z').pickupDate, '2026-12-26');
+  // Thursday 24 after 20:00: Thursday 31 (closes Tuesday 29).
+  assert.deepEqual(
+    (({ pickupDate, deadline }) => ({ pickupDate, deadline }))(
+      at('2026-12-24T19:30:00Z'),
+    ),
+    { pickupDate: '2026-12-31', deadline: '2026-12-29T19:00:00.000Z' },
+  );
+  assert.equal(at('2026-12-29T19:01:00Z').pickupDate, '2027-01-02');
+  // January is back to Wednesday and Saturday.
+  assert.equal(at('2027-01-02T19:01:00Z').pickupDate, '2027-01-06');
+  // An ordinary week is unchanged.
+  assert.equal(at('2026-11-05T19:01:00Z').pickupDate, '2026-11-11');
+});
+
+test('Christmas campaigns: due on their day or up to two days after, in both languages', async () => {
+  const { campaigns, campaignsDue } = await import('../src/lib/campaigns');
+  const { campaignEmail } = await import('../src/lib/email-funnel');
+  assert.deepEqual(campaignsDue('2026-11-30'), []);
+  assert.deepEqual(
+    campaignsDue('2026-12-01').map((c) => c.id),
+    ['nadal-2026-anunci'],
+  );
+  assert.deepEqual(
+    campaignsDue('2026-12-03').map((c) => c.id),
+    ['nadal-2026-anunci'],
+  );
+  assert.deepEqual(campaignsDue('2026-12-04'), []);
+  assert.deepEqual(
+    campaignsDue('2026-12-18').map((c) => c.bakeDate),
+    ['2026-12-24'],
+  );
+  assert.deepEqual(
+    campaignsDue('2026-12-27').map((c) => c.bakeDate),
+    ['2026-12-31'],
+  );
+  const first = campaigns[0]!;
+  const ca = campaignEmail(first, 'ca', token, 'K7QMRT');
+  assert.match(ca.subject, /Aquest Nadal/);
+  assert.match(ca.html, /Dijous 24/);
+  assert.match(ca.html, /panettone de massa mare/);
+  assert.match(ca.html, /utm_campaign=nadal-2026-anunci/);
+  assert.match(ca.html, /\/baja\?token=/);
+  assert.match(ca.html, /ref%3DK7QMRT/);
+  assert.match(ca.headers!['List-Unsubscribe']!, /baja/);
+  const es = campaignEmail(campaigns[2]!, 'es', token);
+  assert.match(es.subject, /Nochevieja/);
+  assert.doesNotMatch(es.html, /panettone/);
+});

@@ -5,6 +5,7 @@ import { brand, googleReviews, money, productById } from './config';
 import { deliveryTowns, deliveryWindow } from './delivery';
 import { routes } from './i18n';
 import type { Lang, Order } from './domain';
+import type { Campaign } from './campaigns';
 import {
   asset,
   body,
@@ -499,6 +500,7 @@ export function ownerReportEmail(r: WeeklyReport): Message {
     thanks: 'Gracias + reseña',
     pafix: 'Oferta pan fijo',
     reward: 'Regalo por invitar',
+    campaign: 'Campañas (Navidad…)',
   };
   const emailRows: [string, string][] = Object.keys(kinds).map((k) => [
     kinds[k]!,
@@ -597,5 +599,56 @@ ${t.button} ${url}
 ${t.again} ${personalInvite(r.code, r.lang)}
 
 ${brand.name}`,
+  };
+}
+
+// ---- Seasonal campaigns ---------------------------------------------------------
+
+export function campaignEmail(
+  campaign: Campaign,
+  lang: Lang,
+  unsubscribeToken: string,
+  inviteCode?: string,
+): Message {
+  const t = campaign.copy[lang];
+  const url = shopUrl(lang, campaign.id);
+  const unsub = unsubscribeUrl(unsubscribeToken, lang);
+  const invite = inviteCode ? inviteSection(lang, inviteCode) : null;
+  const why =
+    lang === 'ca'
+      ? 'Reps aquest correu perquè et vas apuntar als avisos de fornades de Molla.'
+      : 'Recibes este email porque te apuntaste a los avisos de hornadas de Molla.';
+  const content =
+    photo('hornada.jpg', 'Molla') +
+    intro(esc(t.kicker), esc(t.heading), esc(t.intro)) +
+    section(button(esc(url), t.button), '24px 40px 4px') +
+    section(table(t.rows.map(([k, v]) => [esc(k), esc(v)]))) +
+    (t.note
+      ? section(
+          `<p style="margin:0;padding:18px 20px;background:#ffffff;border-radius:12px;font-family:${body};font-size:16px;line-height:1.6;color:${c.ink};">${esc(t.note)}</p>`,
+          '20px 40px 4px',
+        )
+      : '') +
+    (invite?.html || '') +
+    closing(
+      button(esc(url), t.button),
+      `<span style="font-size:12px;">${esc(why)}</span>`,
+    );
+  return {
+    subject: t.subject,
+    html: layout(lang, t.intro, content, unsubscribeLine(unsub, lang)),
+    text: `${t.heading}
+
+${t.intro}
+
+${t.rows.map(([k, v]) => `${k}: ${v}`).join('\n')}
+
+${t.button} ${url}
+${t.note ? `\n${t.note}\n` : ''}${invite ? `\n${invite.text}\n` : ''}
+${why}
+${lang === 'ca' ? 'Baixa' : 'Baja'}: ${unsub}
+
+${brand.name}`,
+    headers: listHeaders(unsub),
   };
 }
