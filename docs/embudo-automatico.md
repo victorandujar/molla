@@ -20,7 +20,7 @@ Para **clientes nuevos** hay tres motores, de más barato a más caro:
 
 1. **«Convida un veí»** (automático, en la web): cada cliente trae al siguiente. Ver §2.1.
 2. **Google** (gratis): las reseñas se piden solas tras cada primer pedido y suben el perfil en Maps. Ver §4.1.
-3. **Anuncios locales** (5 €/día): el kit de imágenes y textos ya está hecho en `exports/anuncis/`. Ver §4.2.
+3. **Anuncios locales** (2,50 €/día): el kit de imágenes y textos ya está hecho en `exports/anuncis/`. Ver §4.2.
 
 Cada visitante nuevo que no compra el primer día deja su email y el embudo lo sigue trabajando cada semana. Por eso cada euro de anuncios rinde más que sin él.
 
@@ -90,7 +90,7 @@ La mayoría de los clientes nuevos de una panadería llegan buscando «pan artes
 - [ ] **Reseñas**: ya no hace falta pedirlas a mano. El email «¿Qué tal el pan?» las pide a cada cliente nuevo al día siguiente de probarlo, que es cuando más ganas tiene de opinar. Las reseñas son lo que más sube el perfil en Maps.
 - [ ] Search Console: reenviar `sitemap.xml` tras desplegar y `npm run seo:indexnow`.
 
-### 4.2 Anuncios locales siempre activos (5–10 €/día, se configuran una vez)
+### 4.2 Anuncios locales siempre activos (2,50 €/día, se configuran una vez)
 
 Un anuncio pequeño, bien segmentado y que no hay que tocar cada semana. Funciona porque **el email captado hace rentable cada clic**: aunque no compre ese día, el visitante que deja su email recibe el aviso todas las semanas.
 
@@ -101,9 +101,9 @@ Un anuncio pequeño, bien segmentado y que no hay que tocar cada semana. Funcion
 - Objetivo: **Tráfico**, hacia la página de entrega a domicilio.
 - Ubicación: radio de 3 km alrededor de Sant Boi, Sant Just Desvern y Santa Coloma de Cervelló (tres puntos). Edad 28–65. Sin intereses: deja que Meta optimice.
 - Ubicaciones manuales: solo Instagram y Facebook (feed, stories y reels), sin Audience Network.
-- Presupuesto: **5 €/día**, campaña continua, sin fecha de fin.
-- Creatividades (2–3, rotan solas): el reel «del horno a tu puerta» (15 s), la foto de la miga y la foto de la combinación «Para compartir». Texto: «Pan de poolish con 35 h de fermentación, a domicilio los sábados en Sant Boi, Sant Just y Santa Coloma. 5 € la hogaza, pagas al recibirlo».
-- Enlace: `https://www.mollapa.com/pa-a-domicili?utm_source=ads&utm_medium=meta&utm_campaign=local`
+- Presupuesto: **2,50 €/día** (unos 75 € al mes), campaña continua, sin fecha de fin, en **un solo conjunto** con las versiones en catalán y castellano de cada anuncio.
+- Creatividades: tres conceptos del kit (`obrador`, `encarrec` y `carta`), que rotan solos; `hores` y `facil` quedan de reserva.
+- Textos y enlaces etiquetados: `exports/anuncis/textos.md`.
 
 **Google Ads (búsqueda)**, solo si sobra presupuesto, 3–5 €/día:
 
@@ -111,7 +111,7 @@ Un anuncio pequeño, bien segmentado y que no hay que tocar cada semana. Funcion
 - Ubicación: Sant Boi, Sant Just Desvern, Santa Coloma de Cervelló, Cornellà, Sant Joan Despí.
 - Enlace: `https://www.mollapa.com/es/pan-a-domicilio?utm_source=ads&utm_medium=google&utm_campaign=busqueda`
 
-**Regla para no tirar dinero** (se revisa con el resumen del domingo, fila «ads» en «Por canal»): si en 3 semanas un anuncio no ha traído al menos **1 pedido o 3 altas de aviso por cada 10 € gastados**, cambia la creatividad una vez; si sigue igual, apágalo. Si funciona, sube el presupuesto un 50% y vuelve a medir.
+**Regla para no tirar dinero** (se revisa con el resumen del domingo, fila «ads» en «Por canal»): si en 4 semanas la campaña no ha traído al menos la mitad de **1 pedido o 3 altas de aviso por cada 10 € gastados** (con 2,50 €/día, unos 7 pedidos o 20 altas al mes), cambia la peor creatividad una vez; si sigue igual, apágala. Si funciona, sube el presupuesto un 50% y vuelve a medir.
 
 ### 4.3 Lo físico que trabaja solo
 
