@@ -623,13 +623,29 @@ form?.addEventListener('submit', async (event) => {
       invite.searchParams.set('ref', order.referralCode);
       invite.searchParams.set('utm_source', 'referral');
       invite.searchParams.set('utm_campaign', 'convida');
+      // A card like the one in the emails: the moment right after ordering
+      // is when people share most.
+      const card = document.createElement('div');
+      card.className = 'invite-card';
+      const kicker = document.createElement('p');
+      kicker.className = 'invite-kicker';
+      kicker.textContent = isCa
+        ? 'Convida un veí · Un croissant per a cadascú'
+        : 'Invita a un vecino · Un croissant para cada uno';
+      const title = document.createElement('p');
+      title.className = 'invite-title';
+      const strong = document.createElement('strong');
+      strong.textContent = isCa ? 'Un veí, ' : 'Un vecino, ';
+      const em = document.createElement('em');
+      em.textContent = 'dos croissants.';
+      title.append(strong, em);
       const pitch = document.createElement('p');
-      pitch.className = 'confirmation-invite';
+      pitch.className = 'invite-text';
       pitch.textContent = isCa
-        ? 'Convida un veí: amb la seva primera comanda tindrà un croissant de regal, i tu un altre quan l’hi entregui.'
-        : 'Invita a un vecino: con su primer pedido tendrá un croissant de regalo, y tú otro cuando se lo entregue.';
+        ? 'Amb la seva primera comanda pel teu enllaç tindrà un croissant de regal, i tu un altre a la teva propera comanda quan l’hi entregui.'
+        : 'Con su primer pedido por tu enlace tendrá un croissant de regalo, y tú otro en tu siguiente pedido cuando se lo entregue.';
       const share = document.createElement('a');
-      share.className = 'text-link';
+      share.className = 'button button-orange';
       share.target = '_blank';
       share.rel = 'noopener noreferrer';
       share.href = `https://wa.me/?text=${encodeURIComponent(
@@ -642,7 +658,35 @@ form?.addEventListener('submit', async (event) => {
         ? 'Enviar la invitació per WhatsApp ↗'
         : 'Enviar la invitación por WhatsApp ↗';
       share.dataset.invite = invite.href;
-      result.append(pitch, share);
+      const copyRow = document.createElement('div');
+      copyRow.className = 'invite-copy';
+      const field = document.createElement('input');
+      field.readOnly = true;
+      // Short to read; the copy button copies the full, tagged link.
+      field.value = `${location.host.replace(/^www\./, '')}/?ref=${order.referralCode}`;
+      field.setAttribute(
+        'aria-label',
+        isCa ? 'El teu enllaç d’invitació' : 'Tu enlace de invitación',
+      );
+      const copy = document.createElement('button');
+      copy.type = 'button';
+      copy.className = 'invite-copy-button';
+      const copyLabel = isCa ? 'Copiar l’enllaç' : 'Copiar el enlace';
+      copy.textContent = copyLabel;
+      copy.addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText(invite.href);
+        } catch {
+          // Without clipboard access the link stays selected to copy by hand.
+          field.select();
+          return;
+        }
+        copy.textContent = isCa ? 'Copiat ✓' : 'Copiado ✓';
+        setTimeout(() => (copy.textContent = copyLabel), 2500);
+      });
+      copyRow.append(field, copy);
+      card.append(kicker, title, pitch, share, copyRow);
+      result.append(card);
     }
     // Word of mouth: a ready-made message for a neighbour, tagged so the
     // visits it brings show up as their own campaign.

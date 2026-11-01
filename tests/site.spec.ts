@@ -994,7 +994,7 @@ test('no banana bread gift anywhere; the first order still gets the pa fix vouch
   await expect(page.locator('body')).not.toContainText(
     /banana bread de regalo|dos trozos/i,
   );
-  await expect(page.locator('.invite')).toContainText('Un vecino,');
+  await expect(page.locator('.invite')).toHaveCount(0);
   await expect(page.locator('.fix')).toContainText(
     'Solo para el Pan fijo: cuando te haya entregado 3 panes, el 4.º corre de mi cuenta.',
   );
@@ -1152,12 +1152,17 @@ test('invite a neighbour: personal link, invited note and gift croissant', async
   };
   await page.goto('/');
   await expect(page.locator('#referral-note')).toBeHidden();
-  // The programme is explained on the home page before anyone orders.
-  await expect(page.locator('.invite')).toContainText('dos croissants.');
-  await expect(page.locator('.invite a[href="#reserva"]')).toBeVisible();
+  // Only buyers and invited friends see the programme, not the home page.
+  await expect(page.locator('body')).not.toContainText('dos croissants');
   await order('ona@example.com');
   const share = page.locator('#confirmation a[data-invite]');
   await expect(share).toContainText('Enviar la invitació per WhatsApp');
+  await expect(page.locator('#confirmation .invite-card')).toContainText(
+    'dos croissants.',
+  );
+  await expect(page.locator('#confirmation .invite-copy input')).toHaveValue(
+    /\?ref=[A-HJKMNP-Z2-9]{6}/,
+  );
   const invite = new URL((await share.getAttribute('data-invite'))!);
   const code = invite.searchParams.get('ref')!;
   expect(code).toMatch(/^[A-HJKMNP-Z2-9]{6}$/);
