@@ -1198,3 +1198,12 @@ test('invite a neighbour: personal link, invited note and gift croissant', async
     '1 croissant de regalo · invitado',
   );
 });
+test('Christmas page: before December it sends visitors to the shop', async ({
+  page,
+}) => {
+  await page.goto('/nadal');
+  await expect(page).toHaveURL(/\/$/);
+  await page.goto('/es/navidad?dia=24');
+  await expect(page).toHaveURL(/\/es\/$/);
+  await expect(page.locator('.xmas-strip')).toHaveCount(0);
+});

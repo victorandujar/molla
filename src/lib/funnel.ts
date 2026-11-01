@@ -288,3 +288,39 @@ export async function referralCodesFor(
     rows.map((r) => [r.email as string, r.referral_code as string]),
   );
 }
+
+// Seasonal campaigns: every confirmed subscriber, once per campaign. With a
+// bake date, whoever already ordered from that bake is skipped.
+export async function claimCampaign(
+  id: string,
+  bakeDate: string | undefined,
+  limit: number,
+): Promise<Recipient[]> {
+  if (useDemo()) return [];
+  const rows = await sql!`
+    WITH claimed AS (
+      INSERT INTO email_sends (kind, ref, email)
+      SELECT 'campaign', ${id}, w.email FROM waitlist_subscribers w
+      WHERE w.confirmed_at IS NOT NULL
+        AND NOT EXISTS (
+          SELECT 1 FROM email_sends e
+          WHERE e.kind='campaign' AND e.ref=${id} AND e.email=w.email)
+        AND (${bakeDate ?? null}::date IS NULL OR NOT EXISTS (
+          SELECT 1 FROM orders o
+          JOIN customers c ON c.id=o.customer_id
+          JOIN bakes b ON b.id=o.bake_id
+          WHERE c.email=w.email AND o.status!='CANCELLED'
+            AND (b.pickup_date AT TIME ZONE 'Europe/Madrid')::date=${bakeDate ?? null}::date))
+      ORDER BY w.subscribed_at
+      LIMIT ${limit}
+      ON CONFLICT DO NOTHING
+      RETURNING email
+    )
+    SELECT w.email, w.lang, w.unsubscribe_token
+    FROM claimed JOIN waitlist_subscribers w ON w.email=claimed.email`;
+  return rows.map((r) => ({
+    email: r.email as string,
+    lang: r.lang === 'ca' ? 'ca' : 'es',
+    token: String(r.unsubscribe_token),
+  }));
+}

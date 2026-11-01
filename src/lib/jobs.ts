@@ -26,6 +26,7 @@ import {
 } from './domain';
 import {
   claimBroadcast,
+  claimCampaign,
   claimOnce,
   deliveredOrders,
   earnedRewards,
@@ -34,8 +35,10 @@ import {
   releaseSends,
   weeklyFigures,
 } from './funnel';
+import { campaignsDue } from './campaigns';
 import {
   broadcastEmail,
+  campaignEmail,
   ownerReportEmail,
   pafixEmail,
   rewardEmail,
@@ -205,6 +208,46 @@ async function runFollowups(budget: number) {
   return { thanks, pafix, reward };
 }
 
+// Seasonal campaigns due today (or missed in the last two days), in batches.
+async function runCampaigns(budget: number) {
+  const today = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Europe/Madrid',
+  }).format(new Date());
+  let sent = 0;
+  for (const campaign of campaignsDue(today)) {
+    if (sent >= budget) break;
+    const recipients = await claimCampaign(
+      campaign.id,
+      campaign.bakeDate,
+      budget - sent,
+    );
+    let codes: Record<string, string> = {};
+    try {
+      codes = await referralCodesFor(recipients.map((r) => r.email));
+    } catch (e) {
+      console.error('Invite codes failed', e instanceof Error ? e.message : e);
+    }
+    for (let i = 0; i < recipients.length; i += 100) {
+      const chunk = recipients.slice(i, i + 100);
+      const ok = await sendBatch(
+        chunk.map((r) => ({
+          to: r.email,
+          ...campaignEmail(campaign, r.lang, r.token, codes[r.email]),
+        })),
+        `campaign-${campaign.id}-${keyOf(...chunk.map((r) => r.email))}`,
+      );
+      if (ok) sent += chunk.length;
+      else
+        await releaseSends(
+          'campaign',
+          campaign.id,
+          chunk.map((r) => r.email),
+        );
+    }
+  }
+  return sent;
+}
+
 // Sunday afternoon: what the week brought, in the baker's inbox.
 async function runReport() {
   if (!brand.contact) return false;
@@ -230,6 +273,7 @@ export async function runFunnelJob(
   const result = {
     broadcast: null as Awaited<ReturnType<typeof runBroadcast>> | null,
     followups: null as Awaited<ReturnType<typeof runFollowups>> | null,
+    campaigns: 0,
     report: false,
     error: false,
   };
@@ -237,8 +281,12 @@ export async function runFunnelJob(
   try {
     const budget = funnelLimit();
     result.broadcast = await runBroadcast(budget);
-    if (what.followups)
-      result.followups = await runFollowups(budget - result.broadcast.sent);
+    let left = budget - result.broadcast.sent;
+    if (what.followups) {
+      result.campaigns = await runCampaigns(left);
+      left -= result.campaigns;
+      result.followups = await runFollowups(left);
+    }
     if (what.report) result.report = await runReport();
   } catch (e) {
     console.error('Funnel job failed', e instanceof Error ? e.message : e);

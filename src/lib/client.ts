@@ -774,7 +774,13 @@ waitlist?.addEventListener('submit', async (event) => {
 });
 async function refreshBake() {
   try {
-    const response = await fetch('/api/bake', { cache: 'no-store' });
+    // The bake of this page: the weekly one, or an early (Christmas) bake.
+    const id =
+      form?.querySelector<HTMLInputElement>('input[name=bakeId]')?.value;
+    const response = await fetch(
+      id ? `/api/bake?bake=${encodeURIComponent(id)}` : '/api/bake',
+      { cache: 'no-store' },
+    );
     if (!response.ok) return;
     const b = await response.json();
     // Levels only: «few left» or «sold out», never a count.
