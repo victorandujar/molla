@@ -3,6 +3,7 @@ import { emailStatus } from './store';
 import { orderSummary, type Order, type Subscription } from './domain';
 import { townById } from './delivery';
 import {
+  cancelledByOwner,
   confirmationHtml,
   confirmationSubject,
   confirmationText,
@@ -230,6 +231,16 @@ export async function notifyOwnerCancellation(o: Order) {
     o.email,
   );
 }
+
+// The baker cancelled the order from the panel: the customer hears about it
+// straight away, so nobody waits for bread that is not coming.
+export const sendCancelledByOwner = (o: Order) =>
+  sendTo(
+    o.email,
+    cancelledByOwner(o),
+    `cancelled-${o.id}`,
+    brand.contact || undefined,
+  );
 
 // ---- Automated funnel ----------------------------------------------------------
 

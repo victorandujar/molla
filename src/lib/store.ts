@@ -491,15 +491,17 @@ export async function setOrderStatus(
   to: 'COLLECTED' | 'CANCELLED' | 'CONFIRMED',
 ) {
   const from = to === 'CONFIRMED' ? 'COLLECTED' : 'CONFIRMED';
+  // Returns the updated order (or null if it had already changed), so the
+  // caller can tell the customer about a cancellation.
   if (useDemo())
-    return demo((d) => {
+    return demo((d): Order | null => {
       const o = d.orders.find((o) => o.id === id && o.status === from);
       if (o) o.status = to;
-      return !!o;
+      return o ? { ...o } : null;
     });
-  const rows =
-    await sql!`UPDATE orders SET status=${to},snapshot=jsonb_set(snapshot,'{status}',${sql!.json(to)}) WHERE id=${id} AND status=${from} RETURNING id`;
-  return rows.length > 0;
+  const [row] =
+    await sql!`UPDATE orders SET status=${to},snapshot=jsonb_set(snapshot,'{status}',${sql!.json(to)}) WHERE id=${id} AND status=${from} RETURNING snapshot`;
+  return row ? (row.snapshot as Order) : null;
 }
 export type WaitlistTokens = { confirm: string; unsubscribe: string };
 // Returns tokens when a confirmation email should go out: a new pending
