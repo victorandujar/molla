@@ -131,6 +131,18 @@ const copy = {
     reminderCancel:
       '¿Al final no puedes venir? Responde a este email cuanto antes: así la hogaza no se desperdicia.',
     toPay: 'A pagar al recoger',
+    cancelledSubject: (o: Order) => `Pedido ${o.code} cancelado · ${onDay(o)}`,
+    cancelledKicker: 'Pedido cancelado',
+    cancelledHeading: (o: Order) =>
+      `Lo siento, ${firstName(o.name)}: esta vez no hay pan.`,
+    cancelledIntro: (o: Order) =>
+      `He tenido que cancelar tu pedido del ${onDay(o)}. Ha surgido un imprevisto y no puedo prepararlo. No tienes que hacer nada ni se te cobra nada. Disculpa las molestias.`,
+    cancelledNext:
+      'Me encantaría hornear para ti en la próxima hornada: puedes reservar ya.',
+    cancelledButton: 'Reservar para la próxima hornada →',
+    cancelledStanding:
+      'Tu pan fijo sigue activo: no tienes que hacer nada y la próxima entrega llegará como siempre.',
+    cancelledReply: 'Si tienes cualquier duda, responde a este email.',
     waitlistSubject: 'Confirma tu aviso de nuevas hornadas',
     waitlistHeading: 'Un clic y te aviso.',
     waitlistIntro:
@@ -221,6 +233,19 @@ const copy = {
     reminderCancel:
       'Al final no pots venir? Respon aquest correu com més aviat millor: així el pa no es malbarata.',
     toPay: 'A pagar en recollir',
+    cancelledSubject: (o: Order) =>
+      `Comanda ${o.code} cancel·lada · ${onDay(o)}`,
+    cancelledKicker: 'Comanda cancel·lada',
+    cancelledHeading: (o: Order) =>
+      `Ho sento, ${firstName(o.name)}: aquesta vegada no hi ha pa.`,
+    cancelledIntro: (o: Order) =>
+      `He hagut de cancel·lar la teva comanda de ${onDay(o)}. Ha sorgit un imprevist i no la puc preparar. No has de fer res ni se’t cobra res. Disculpa les molèsties.`,
+    cancelledNext:
+      'M’encantaria fornejar per a tu a la propera fornada: ja pots reservar.',
+    cancelledButton: 'Reservar per a la propera fornada →',
+    cancelledStanding:
+      'El teu pa fix continua actiu: no has de fer res i la propera entrega arribarà com sempre.',
+    cancelledReply: 'Si tens qualsevol dubte, respon aquest correu.',
     waitlistSubject: 'Confirma l’avís de noves fornades',
     waitlistHeading: 'Un clic i t’aviso.',
     waitlistIntro:
@@ -516,6 +541,49 @@ export function reminderHtml(o: Order) {
     `${o.code} · ${pickupDay(o.pickupDate, lang)}, ${o.pickupWindow}`,
     content,
   );
+}
+
+// The baker cancelled the order from the panel (an unforeseen problem):
+// apologise and point to the next bake, or reassure a pa fix customer.
+export function cancelledByOwner(o: Order) {
+  const lang = langOf(o);
+  const t = copy[lang];
+  const subject = t.cancelledSubject(o);
+  const next = o.subscription ? t.cancelledStanding : t.cancelledNext;
+  const shop = asset(routes.home[lang]);
+  const rows: [string, string][] = [
+    [t.order, esc(orderSummary(o))],
+    [t.when, esc(`${pickupDay(o.pickupDate, lang)}, ${o.pickupWindow}`)],
+  ];
+  const content =
+    intro(
+      t.cancelledKicker,
+      esc(t.cancelledHeading(o)),
+      esc(t.cancelledIntro(o)),
+    ) +
+    `<tr><td class="pad" style="padding:20px 40px 8px;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0">${details(rows)}</table></td></tr>` +
+    closing(
+      o.subscription
+        ? ''
+        : `<p style="margin:0 0 16px;font-family:${body};font-size:16px;line-height:1.6;color:${c.ink};">${esc(next)}</p>${button(esc(shop), t.cancelledButton)}`,
+      `${o.subscription ? `${esc(next)}<br><br>` : ''}${esc(t.cancelledReply)}`,
+    );
+  return {
+    subject,
+    html: layout(lang, `${o.code} · ${t.cancelledKicker}`, content),
+    text: `${t.hello} ${firstName(o.name)},
+
+${t.cancelledIntro(o)}
+
+${t.order}: ${orderSummary(o)} (${o.code})
+${t.when}: ${pickupDay(o.pickupDate, lang)}, ${o.pickupWindow}
+
+${next}${o.subscription ? '' : `\n${shop}`}
+
+${t.cancelledReply}
+
+${brand.name}`,
+  };
 }
 
 export function waitlistConfirmation(
