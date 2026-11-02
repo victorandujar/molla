@@ -34,7 +34,8 @@ import {
 } from '../lib/config';
 import { pickupDay } from '../lib/email-templates';
 import { ui } from '../lib/i18n';
-import { clientIp } from '../lib/http';
+import { clientIp, after } from '../lib/http';
+import { sendCancelledByOwner } from '../lib/email';
 // Owner's panel for the pickup point: today's orders, mark collected or
 // cancelled from the phone. Spanish only; it is not a public page.
 if (!adminEnabled()) return new Response('Not found', { status: 404 });
@@ -82,8 +83,12 @@ if (Astro.request.method === 'POST') {
     const id = String(form.get('id'));
     const bake = String(form.get('bake') || '');
     let ok = false;
-    if (to === 'COLLECTED' || to === 'CANCELLED' || to === 'CONFIRMED')
-      ok = await setOrderStatus(id, to);
+    if (to === 'COLLECTED' || to === 'CANCELLED' || to === 'CONFIRMED') {
+      const changed = await setOrderStatus(id, to);
+      ok = !!changed;
+      // The customer gets an apology email, sent after the redirect.
+      if (changed && to === 'CANCELLED') after(sendCancelledByOwner(changed));
+    }
     const query = new URLSearchParams({ bake, done: ok ? to : 'none' });
     return Astro.redirect(`/gestio?${query.toString()}#pedidos`, 303);
   }
@@ -144,7 +149,9 @@ const notice =
   done === 'none'
     ? 'Ese pedido ya había cambiado de estado. Revisa la lista.'
     : done
-      ? `Pedido marcado como ${labels[done as Order['status']]?.toLowerCase() || 'actualizado'}.`
+      ? done === 'CANCELLED'
+        ? 'Pedido cancelado. El cliente recibirá un email avisándole.'
+        : `Pedido marcado como ${labels[done as Order['status']]?.toLowerCase() || 'actualizado'}.`
       : '';
 const subDone = Astro.url.searchParams.get('subdone');
 const subNotice =
@@ -421,7 +428,10 @@ import {
                           name="bake"
                           value={data!.bake.id}
                         />
-                        <p>Libera {orderSummary(o)}. No se puede deshacer.</p>
+                        <p>
+                          Libera {orderSummary(o)} y avisa al cliente por email.
+                          No se puede deshacer.
+                        </p>
                         <button
                           class="button admin-danger"
                           name="to"

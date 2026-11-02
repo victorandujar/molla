@@ -2,6 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { randomBytes } from 'node:crypto';
 import {
+  cancelledByOwner,
   confirmationHtml,
   confirmationSubject,
   confirmationText,
@@ -573,4 +574,20 @@ test('stock is shown as a level, never as a count', () => {
   });
   assert.equal(fresh.pastry.max, 24);
   assert.deepEqual(fresh.banana, { level: 'out', max: 0 });
+});
+
+test('owner cancellation email apologises and points to the next bake', () => {
+  const m = cancelledByOwner(order);
+  assert.match(m.subject, /^Pedido 001-K7QM cancelado/);
+  assert.match(m.html, /Disculpa las molestias/);
+  assert.match(m.html, /Reservar para la próxima hornada/);
+  assert.doesNotMatch(m.html, /<script>/);
+  assert.match(m.text, /\/es\//);
+  const ca = cancelledByOwner({ ...order, lang: 'ca' });
+  assert.match(ca.subject, /^Comanda 001-K7QM cancel·lada/);
+  assert.match(ca.html, /<html lang="ca">[\s\S]*Disculpa les molèsties/);
+  // A pa fix order: no shop button, the subscription carries on.
+  const fix = cancelledByOwner({ ...order, subscription: { token: 't' } });
+  assert.doesNotMatch(fix.html, /Reservar para la próxima hornada/);
+  assert.match(fix.text, /Tu pan fijo sigue activo/);
 });
