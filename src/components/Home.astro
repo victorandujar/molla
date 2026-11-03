@@ -334,6 +334,30 @@ const jsonLd = [
       </div>
     </section>
 
+    <!-- Quién hace el pan y qué dicen de él, antes de nada más -->
+    <section class="baker" aria-label={t.baker.line}>
+      <div class="wrap baker-inner">
+        <div class="baker-photo">
+          <Photo name="person" alt={t.baker.photo} sizes="112px" />
+        </div>
+        <div class="baker-text">
+          <p class="baker-line">{t.baker.line}</p>
+          <figure class="baker-quote">
+            <blockquote lang={googleReviews.quotes[1].lang}>
+              <p>“{googleReviews.quotes[1].text}”</p>
+            </blockquote>
+            <figcaption>
+              <span class="hero-stars" aria-hidden="true">★★★★★</span>{' '}
+              {googleReviews.quotes[1].author} ·{' '}
+              <a href="#resenas">
+                {googleReviews.score} · {t.reviews.count(googleReviews.count)}
+              </a>
+            </figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+
     <!-- La cinta: palabras del obrador que corren con el scroll -->
     <div class="marquee" aria-hidden="true" data-marquee>
       {[0, 1].map((row) => (
@@ -392,7 +416,7 @@ const jsonLd = [
                 {t.loaf.kicker}
               </p>
               <h3 id="loaf-title">{t.loaf.name}</h3>
-              <p class="dish-desc">{t.loaf.fermentationValue}.</p>
+              <p class="dish-desc">{t.loaf.pitch}.</p>
               <p class="dish-price">
                 <span class="outline-price" aria-hidden="true">
                   {short(loaf.price)}
@@ -1289,14 +1313,16 @@ const jsonLd = [
                   <input name="website" tabindex="-1" autocomplete="off" />
                 </label>
               </div>
-              <label class="check">
-                <input type="checkbox" name="pickup" value="yes" required />
-                <span>
-                  {isDemo
-                    ? t.reserve.demoCheck
-                    : t.reserve.pickupCheck(pickupDay, current.pickupWindow)}
-                </span>
-              </label>
+              {isDemo ? (
+                <label class="check">
+                  <input type="checkbox" name="pickup" value="yes" required />
+                  <span>{t.reserve.demoCheck}</span>
+                </label>
+              ) : (
+                <p class="check-note">
+                  {t.reserve.pickupCheck(pickupDay, current.pickupWindow)}
+                </p>
+              )}
               <label class="check">
                 <input type="checkbox" name="privacy" value="yes" required />
                 <span>

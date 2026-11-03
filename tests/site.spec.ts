@@ -22,7 +22,7 @@ test('real photos, keyboard access, responsive layout and accessibility', async 
     await page.goto('/es/');
     await page.evaluate(() => document.fonts.ready);
     await expect(page.getByRole('heading', { level: 1 })).toContainText(
-      'Pan que solo se hornea si lo has reservado',
+      'Pan artesano, recién hecho, en tu puerta',
     );
     // The packaging crumb, traced into one path per alveolus, wraps the footer.
     expect(
@@ -451,7 +451,7 @@ test('Catalan is the main language, Spanish lives under /es/', async ({
   await page.goto('/');
   await expect(page.locator('html')).toHaveAttribute('lang', 'ca');
   await expect(page.getByRole('heading', { level: 1 })).toContainText(
-    'Pa que només es cou si l’has reservat',
+    'Pa artesà, acabat de fer, a la porta de casa',
   );
   for (const path of [
     '/pa-a-domicili',
@@ -985,7 +985,7 @@ test('no banana bread gift anywhere; the first order still gets the pa fix vouch
 }) => {
   await page.goto('/es/');
   await expect(page.locator('.hero-lede')).toContainText(
-    'Miércoles y sábado en tu puerta. Pagas al recibirlo.',
+    'Pagas al recibirlo, sin compromiso.',
   );
   // The banana bread welcome gift is over: not in the hero nor by the ticket.
   await expect(page.locator('.hero-gift')).toHaveCount(0);
