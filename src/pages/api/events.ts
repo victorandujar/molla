@@ -8,6 +8,8 @@ export const events = [
   'landing_view',
   'view_current_bake',
   'view_product',
+  // "Reservar" on a content page (ad landing pages), before the form.
+  'click_reserve',
   'start_reservation',
   'reservation_completed',
   'waitlist_signup',

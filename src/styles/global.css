@@ -3435,6 +3435,14 @@ details[open] p {
   color: var(--on-cobalt);
   animation: rise 1s var(--ease-out) 0.15s both;
 }
+.article-hero-cta {
+  --bg: var(--orange);
+  --fg: var(--night);
+  --sweep: var(--paper);
+  --sweep-fg: var(--night);
+  margin-top: 28px;
+  animation: rise 1s var(--ease-out) 0.3s both;
+}
 .breadcrumbs {
   display: flex;
   gap: 10px;

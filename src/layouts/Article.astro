@@ -66,6 +66,13 @@ const breadcrumbs = {
         <p class="kicker">{kicker}</p>
         <h1>{h1}</h1>
         <p class="article-lede">{lede}</p>
+        <a
+          class="button article-hero-cta"
+          href={`${routes.home[lang]}#reserva`}
+          data-event="click_reserve"
+        >
+          {t.hero.order}
+        </a>
       </div>
     </header>
     <article class="wrap article">
@@ -75,7 +82,11 @@ const breadcrumbs = {
     <section class="article-cta">
       <div class="wrap article-cta-inner">
         <h2>{t.reserve.h2}</h2>
-        <a class="button" href={`${routes.home[lang]}#reserva`}>
+        <a
+          class="button"
+          href={`${routes.home[lang]}#reserva`}
+          data-event="click_reserve"
+        >
           {t.hero.order}
         </a>
       </div>
