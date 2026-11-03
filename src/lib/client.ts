@@ -4,6 +4,7 @@ type EventName =
   | 'landing_view'
   | 'view_current_bake'
   | 'view_product'
+  | 'click_reserve'
   | 'start_reservation'
   | 'reservation_completed'
   | 'waitlist_signup'
