@@ -904,6 +904,63 @@ figure picture {
   min-height: 60px;
   font-size: 14px;
 }
+/* Qui fa el pa i una ressenya, just sota la portada. */
+.baker {
+  background: var(--paper);
+  border-bottom: 1.5px solid var(--cobalt);
+  padding-block: clamp(28px, 4vw, 48px);
+}
+.baker-inner {
+  display: flex;
+  align-items: center;
+  gap: clamp(18px, 3vw, 32px);
+}
+.baker-photo {
+  flex: 0 0 auto;
+  width: clamp(88px, 12vw, 112px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  overflow: hidden;
+}
+.baker-photo :is(picture, img) {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 25%;
+}
+.baker-line {
+  font-size: clamp(17px, 1.6vw, 21px);
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--cobalt);
+}
+.baker-quote {
+  margin: 10px 0 0;
+}
+.baker-quote blockquote {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--ink-2);
+}
+.baker-quote figcaption {
+  margin-top: 6px;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+.baker-quote a {
+  color: var(--cobalt);
+}
+.check-note {
+  margin-top: 18px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--ink-2);
+}
 /* Prova social sota el botó: les estrelles i el que treu la por. */
 .hero-proof {
   display: flex;

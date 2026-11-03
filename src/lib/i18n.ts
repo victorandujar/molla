@@ -1,4 +1,4 @@
-import { bake, brand } from './config';
+import { bake, brand, money, productById } from './config';
 import { deliveryWindow } from './delivery';
 import type { Lang } from './messages';
 export type { Lang };
@@ -59,6 +59,8 @@ const areaTowns =
 const [fromH, toH] = deliveryWindow
   .split('–')
   .map((t) => String(Number(t.split(':')[0])));
+// Shown in the hero so the price is visible before scrolling.
+const loafPrice = money(productById('clasica')!.price);
 const hours = {
   es: `de ${fromH}\u00a0a\u00a0${toH}\u00a0h`,
   ca: `de ${fromH}\u00a0a\u00a0${toH}\u00a0h`,
@@ -104,11 +106,10 @@ export const ui = {
       COMPLETED: 'Esta hornada ya salió del horno',
     },
     hero: {
-      h1a: 'Pan que solo se hornea',
-      h1b: 'si lo has reservado',
+      h1a: 'Pan artesano, recién hecho,',
+      h1b: 'en tu puerta',
       sub: `Cada miércoles y cada sábado ${hours.es}, a domicilio en Sant Boi, Sant Just Desvern y Santa Coloma.`,
-      short:
-        'Pan por encargo. Miércoles y sábado en tu puerta. Pagas al recibirlo.',
+      short: `Lo horneo esa misma mañana y te lo llevo a casa o a la oficina, en Sant Boi, Sant Just y Santa Coloma. ${loafPrice} la hogaza. Pagas al recibirlo, sin compromiso.`,
       kicker: 'Panadería de barrio · Baix Llobregat',
       keywords: [
         'Harinas ecológicas',
@@ -146,6 +147,11 @@ export const ui = {
       hands: 'Las manos de mi madre',
       sealTop: 'hasta',
       sealBottom: 'de fermentación',
+    },
+    baker: {
+      line: 'Soy Víctor. Hago el pan en Sant Boi, hogaza a hogaza, y te lo llevo yo.',
+      photo: 'Víctor, el panadero, sostiene una hogaza recién horneada y sonríe',
+      reviews: 'Ver las reseñas',
     },
     film: {
       label: 'La cocina, en fotos',
@@ -246,6 +252,8 @@ export const ui = {
       altSlice:
         'Media hogaza sostenida en la mano, con la miga alveolada a la vista',
       fermentation: 'Fermentación',
+      pitch:
+        'Corteza que cruje, miga tierna y aguanta varios días. Harina ecológica, agua, sal y levadura',
       fermentationValue: 'Poolish y hasta 35 horas de fermentación lenta',
       ingredients: 'Ingredientes',
       ingredientsValue:
@@ -426,7 +434,7 @@ export const ui = {
       town: 'Municipio',
       townPick: 'Elige tu municipio',
       address: 'Dirección de entrega',
-      addressPlaceholder: 'Calle, número, piso y puerta',
+      addressPlaceholder: 'Calle, número, piso y puerta (casa o trabajo)',
       deliveryLabel: (town: string) => `Entrega a domicilio en ${town}`,
       pay: 'Pago',
       payValue: 'Al recibirlo o recogerlo. Sin tarjeta ni cuenta.',
@@ -444,7 +452,7 @@ export const ui = {
       honey: 'Deja este campo vacío',
       demoCheck: 'Entiendo que estoy probando una reserva ficticia.',
       pickupCheck: (day: string, window: string) =>
-        `Recibiré el pedido el ${day}: en casa ${hours.es} si he elegido entrega a domicilio, o en el punto de recogida de Sant Boi de Llobregat${window ? ` (${window})` : ''}.`,
+        `Te lo entrego el ${day}: en la dirección que pongas ${hours.es} si eliges entrega a domicilio, o en el punto de recogida de Sant Boi de Llobregat${window ? ` (${window})` : ''}.`,
       privacyA: 'He leído la',
       privacyLink: 'privacidad y las condiciones',
       referralNote:
@@ -470,7 +478,7 @@ export const ui = {
       items: [
         [
           '¿Es pan de masa madre?',
-          'No. Uso poolish: una masa previa de harina, agua y muy poca levadura que fermenta durante la noche. En total, cada hogaza lleva hasta 35 horas de fermentación. Como la masa madre, es una fermentación lenta que da sabor y una miga abierta, pero con un gusto más suave y menos ácido.',
+          'Es pan de fermentación lenta, como el de masa madre, pero hecho con poolish: una masa previa de harina, agua y muy poca levadura que fermenta durante la noche. En total, hasta 35 horas de fermentación. El resultado: mucho sabor, miga abierta y corteza que cruje, con un gusto suave y nada ácido.',
         ],
         [
           '¿Qué lleva la hogaza?',
@@ -581,11 +589,10 @@ export const ui = {
       COMPLETED: 'Aquesta fornada ja ha sortit del forn',
     },
     hero: {
-      h1a: 'Pa que només es cou',
-      h1b: 'si l’has reservat',
+      h1a: 'Pa artesà, acabat de fer,',
+      h1b: 'a la porta de casa',
       sub: `Cada dimecres i cada dissabte ${hours.ca}, a domicili a Sant Boi, Sant Just Desvern i Santa Coloma.`,
-      short:
-        'Pa per encàrrec. Dimecres i dissabte a la teva porta. Pagues en rebre’l.',
+      short: `El faig aquell mateix matí i te’l porto a casa o a la feina, a Sant Boi, Sant Just i Santa Coloma. ${loafPrice} el pa. Pagues en rebre’l, sense compromís.`,
       kicker: 'Fleca de barri · Baix Llobregat',
       keywords: [
         'Farines ecològiques',
@@ -623,6 +630,11 @@ export const ui = {
       hands: 'Les mans de la meva mare',
       sealTop: 'fins a',
       sealBottom: 'de fermentació',
+    },
+    baker: {
+      line: 'Sóc el Víctor. Faig el pa a Sant Boi, d’un en un, i te’l porto jo.',
+      photo: 'El Víctor, el forner, sosté un pa acabat de coure i somriu',
+      reviews: 'Veure les ressenyes',
     },
     film: {
       label: 'La cuina, en fotos',
@@ -721,6 +733,8 @@ export const ui = {
       alt: 'Dos pans artesans amb els talls oberts sobre una taula de fusta',
       altSlice: 'Mig pa sostingut a la mà, amb la molla alveolada a la vista',
       fermentation: 'Fermentació',
+      pitch:
+        'Crosta que cruix, molla tendra i aguanta uns quants dies. Farina ecològica, aigua, sal i llevat',
       fermentationValue: 'Poolish i fins a 35 hores de fermentació lenta',
       ingredients: 'Ingredients',
       ingredientsValue:
@@ -901,7 +915,7 @@ export const ui = {
       town: 'Municipi',
       townPick: 'Tria el teu municipi',
       address: 'Adreça d’entrega',
-      addressPlaceholder: 'Carrer, número, pis i porta',
+      addressPlaceholder: 'Carrer, número, pis i porta (casa o feina)',
       deliveryLabel: (town: string) => `Entrega a domicili a ${town}`,
       pay: 'Pagament',
       payValue: 'En rebre’l o recollir-lo. Sense targeta ni compte.',
@@ -919,7 +933,7 @@ export const ui = {
       honey: 'Deixa aquest camp buit',
       demoCheck: 'Entenc que estic provant una reserva fictícia.',
       pickupCheck: (day: string, window: string) =>
-        `Rebré la comanda ${day}: a casa ${hours.ca} si he triat entrega a domicili, o al punt de recollida de Sant Boi de Llobregat${window ? ` (${window})` : ''}.`,
+        `Te l’entrego ${day}: a l’adreça que posis ${hours.ca} si tries entrega a domicili, o al punt de recollida de Sant Boi de Llobregat${window ? ` (${window})` : ''}.`,
       privacyA: 'He llegit la',
       privacyLink: 'privacitat i les condicions',
       referralNote:
@@ -944,7 +958,7 @@ export const ui = {
       items: [
         [
           'És pa de massa mare?',
-          'No. Faig servir poolish: una massa prèvia de farina, aigua i molt poc llevat que fermenta durant la nit. En total, cada pa porta fins a 35 hores de fermentació. Com la massa mare, és una fermentació lenta que dona gust i una molla oberta, però amb un sabor més suau i menys àcid.',
+          'És pa de fermentació lenta, com el de massa mare, però fet amb poolish: una massa prèvia de farina, aigua i molt poc llevat que fermenta durant la nit. En total, fins a 35 hores de fermentació. El resultat: molt de gust, molla oberta i crosta que cruix, amb un sabor suau i gens àcid.',
         ],
         [
           'Què porta el pa?',

@@ -46,7 +46,9 @@ export const reservationSchema = z
     croissant: z.coerce.number().int().min(0).max(12).default(0),
     pain: z.coerce.number().int().min(0).max(12).default(0),
     product: z.literal('clasica').default('clasica'),
-    pickup: z.literal('yes', { error: 'pickup' }),
+    // Only the demo still asks for this tick; live orders state the delivery
+    // day as plain text instead of making it another box to tick.
+    pickup: z.enum(['yes', '']).default(''),
     privacy: z.literal('yes', { error: 'privacy' }),
     // Optional, unticked by default: the buyer asks for the weekly email.
     news: z
