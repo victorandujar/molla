@@ -4210,3 +4210,14 @@ details[open] p {
   line-height: 1.45;
   color: var(--ink-2);
 }
+
+/* /gestio: progress towards the weekly pa fix target. */
+.admin-goal {
+  margin: 12px 0 20px;
+}
+.admin-goal meter {
+  display: block;
+  width: 100%;
+  height: 14px;
+  margin-top: 8px;
+}

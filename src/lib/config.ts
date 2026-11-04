@@ -60,6 +60,9 @@ export const privacy = {
 // The "pa fix" voucher: after 3 loaves delivered, the 4th is on the house.
 // The baker hands the card with a customer's first order and applies the
 // discount by hand; PA_FIX_VOUCHER=false turns the offer off.
+// First target: this many loaves a week from pa fix (a fortnightly one counts
+// half). /gestio shows the progress.
+export const STANDING_GOAL_LOAVES = 10;
 export const standingVoucher = {
   active: process.env.PA_FIX_VOUCHER !== 'false',
 };

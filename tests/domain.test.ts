@@ -660,3 +660,16 @@ test('order emails do not assume there is bread in the order', () => {
     assert.doesNotMatch(all, /tu pan\b|Tu pan\b|teu pa\b|no hay pan|no hi ha pa\b|hogaza|el pa no|No el podràs/);
   }
 });
+
+test('pa fix loaves a week: a fortnightly one counts half, paused ones not', async () => {
+  const { weeklyLoaves } = await import('../src/lib/subscriptions');
+  const base = { status: 'ACTIVE', frequency: 'weekly', quantity: 1 } as const;
+  assert.equal(
+    weeklyLoaves([
+      { ...base } as never,
+      { ...base, quantity: 2, frequency: 'biweekly' } as never,
+      { ...base, quantity: 3, status: 'PAUSED' } as never,
+    ]),
+    2,
+  );
+});

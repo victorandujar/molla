@@ -188,6 +188,75 @@ test('a booking without email goes through and is keyed by phone', async ({
     'Soy Víctor, de Molla. Salgo ahora con tu pedido',
   );
 });
+test('the panel shows the pa fix goal and whom to offer it to', async ({
+  page,
+}) => {
+  const past = '2026-10-03T10:00:00.000Z';
+  const order = (name: string, email: string, phone: string, lang = 'es') => ({
+    id: crypto.randomUUID(),
+    code: '001-AAAA',
+    bakeId: 'hornada-old',
+    name,
+    email,
+    phone,
+    lang,
+    quantity: 1,
+    total: 500,
+    status: 'COLLECTED',
+    pickupDate: past,
+  });
+  const sub = (name: string, email: string, phone: string, quantity: number, frequency: string) => ({
+    id: crypto.randomUUID(),
+    token: crypto.randomUUID(),
+    name,
+    email,
+    phone,
+    lang: 'es',
+    quantity,
+    banana: 0,
+    delivery: 'pickup',
+    town: '',
+    address: '',
+    frequency,
+    status: 'ACTIVE',
+    skipRemaining: 0,
+    lastBakeId: null,
+    source: 'direct',
+    createdAt: past,
+    cancelledAt: null,
+  });
+  await writeFile(
+    dataPath,
+    JSON.stringify({
+      orders: [
+        order('Ana Prueba', 'ana@example.com', '612 345 678', 'ca'),
+        order('Ana Prueba', 'ana@example.com', '612 345 678', 'ca'),
+        order('Bea Fija', 'bea@example.com', '622 222 222'),
+      ],
+      waitlist: [],
+      limits: {},
+      subscriptions: [
+        sub('Bea Fija', 'bea@example.com', '+34 622 222 222', 1, 'weekly'),
+        sub('Carles', 'carles@example.com', '633 333 333', 2, 'biweekly'),
+      ],
+    }),
+  );
+  await page.goto('/gestio');
+  await page.locator('input[name=password]').fill('e2e-password-local');
+  await page.locator('form button[type=submit]').first().click();
+  // 1 weekly + 2 every other week = 2 loaves a week.
+  await expect(page.locator('.admin-goal')).toContainText('2 / 10');
+  const offer = page.locator('#ofrecer');
+  await expect(offer).toContainText('Ofrecer pan fijo (1)');
+  await expect(offer).toContainText('Ana Prueba');
+  await expect(offer).toContainText('2 pedidos');
+  await expect(offer).not.toContainText('Bea Fija');
+  const link = offer.getByRole('link', { name: /Ofrecer pan fijo por WhatsApp/ });
+  const href = decodeURIComponent((await link.getAttribute('href'))!);
+  expect(href).toContain('wa.me/34612345678');
+  expect(href).toContain('Hola, Ana! Sóc el Víctor, de Molla.');
+  expect(href).toContain('/pa-fix');
+});
 test('every request id is generated in the browser, never in shared HTML', async ({
   page,
 }) => {
