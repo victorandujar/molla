@@ -473,6 +473,38 @@ test('the weekly job places, skips or rests each subscription once per bake', ()
   );
   assert.equal(subscriptionAction(fortnight, bake, null), 'place');
 });
+test('each pa fix only takes the bakes of its own day', () => {
+  const saturday = { id: 'hornada-010', pickupDate: '2026-10-24T10:00:00.000Z' };
+  const wednesday = { id: 'hornada-011', pickupDate: '2026-10-28T11:00:00.000Z' };
+  const christmas = { id: 'hornada-xmas', pickupDate: '2026-12-24T11:00:00.000Z' };
+  const sub = {
+    status: 'ACTIVE' as const,
+    frequency: 'weekly' as const,
+    skipRemaining: 0,
+    lastBakeId: null,
+  };
+  const wed = { ...sub, day: 'wed' as const };
+  // Older rows without a day are Saturday ones.
+  assert.equal(subscriptionAction(sub, saturday, null), 'place');
+  assert.equal(subscriptionAction(sub, wednesday, null), 'otherDay');
+  assert.equal(subscriptionAction(wed, wednesday, null), 'place');
+  assert.equal(subscriptionAction(wed, saturday, null), 'otherDay');
+  assert.equal(subscriptionAction(wed, christmas, null), 'otherDay');
+  // A skip is spent on its own day, not on the other bake of the week.
+  assert.equal(
+    subscriptionAction({ ...wed, skipRemaining: 1 }, saturday, null),
+    'otherDay',
+  );
+  // Fortnightly counts from its own last delivery, a week of the same day.
+  assert.equal(
+    subscriptionAction(
+      { ...wed, frequency: 'biweekly' },
+      wednesday,
+      '2026-10-21T11:00:00.000Z',
+    ),
+    'rest',
+  );
+});
 test('an order is cancellable with its link only until the bake closes', () => {
   const deadline = '2026-10-22T18:00:00.000Z';
   const before = Date.parse(deadline) - 1000;

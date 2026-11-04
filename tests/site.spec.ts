@@ -940,6 +940,28 @@ test('pa fix: sign up, skip, pause, resume and cancel with one click each', asyn
   expect(result.violations).toEqual([]);
 });
 
+test('a Wednesday pa fix waits for a Wednesday bake', async ({ page }) => {
+  await page.goto('/pa-fix');
+  await page.locator('#subscription-form input[name=day][value=wed]').check({
+    force: true,
+  });
+  await page
+    .locator('#subscription-form input[value=pickup]')
+    .check({ force: true });
+  await page.locator('#sub-name').fill('Oficina Prova');
+  await page.locator('#sub-email').fill('oficina@example.com');
+  await page.locator('#sub-phone').fill('612345678');
+  await page.locator('input[name=terms]').check();
+  await page.locator('input[name=privacy]').check();
+  await page.locator('#subscription-form button[type=submit]').click();
+  await expect(page.locator('#subscription-result')).toBeVisible();
+  const data = await readData();
+  expect(data.subscriptions[0]).toMatchObject({ day: 'wed', status: 'ACTIVE' });
+  // The open bake is a Saturday one: no order for this pa fix yet.
+  expect(data.orders).toHaveLength(0);
+  await page.locator('#subscription-result [data-manage]').click();
+  await expect(page.locator('.manage-summary')).toContainText('Cada dimecres');
+});
 test('pa fix sign-up validation, language and bad links', async ({
   page,
   request,
@@ -1078,7 +1100,7 @@ test('owner panel lists pa fix subscribers and can pause, resume and cancel them
     hasText: 'Marta Fija',
   });
   await expect(card).toContainText('2 × La de cada semana');
-  await expect(card).toContainText('cada dos semanas');
+  await expect(card).toContainText('un sábado sí y otro no');
   await expect(card).toContainText('Carrer Major 1');
   await expect(card).toContainText('612345678');
   await card.getByRole('button', { name: 'Pausar' }).click();

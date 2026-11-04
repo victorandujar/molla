@@ -108,6 +108,7 @@ export const subscriptionSchema = z
     quantity: z.coerce.number().int().min(0).max(4),
     banana: z.coerce.number().int().min(0).max(4).default(0),
     frequency: z.enum(['weekly', 'biweekly']).default('weekly'),
+    day: z.enum(['wed', 'sat']).default('sat'),
     ...deliveryFields,
     terms: z.literal('yes', { error: 'terms' }),
     privacy: z.literal('yes', { error: 'privacy' }),
@@ -129,6 +130,15 @@ export const subscriptionSchema = z
   });
 export type SubscriptionInput = z.infer<typeof subscriptionSchema>;
 export type SubscriptionStatus = 'ACTIVE' | 'PAUSED' | 'CANCELLED';
+// "Pa fix" runs on the Wednesday or the Saturday bake (one day each).
+export type StandingDay = 'wed' | 'sat';
+export const standingDayOf = (sub: { day?: StandingDay }): StandingDay =>
+  sub.day === 'wed' ? 'wed' : 'sat';
+// The pa fix day of a bake: none for Christmas Thursdays or other dates.
+export const bakeStandingDay = (pickupDate: string): StandingDay | null => {
+  const w = madridWeekday(pickupDate);
+  return w === 3 ? 'wed' : w === 6 ? 'sat' : null;
+};
 export type Subscription = {
   id: string;
   // Private link to manage it; never shown to anyone else.
@@ -143,6 +153,8 @@ export type Subscription = {
   town: string;
   address: string;
   frequency: 'weekly' | 'biweekly';
+  // Bake day it belongs to. Older demo rows lack it: they are Saturday ones.
+  day?: StandingDay;
   status: SubscriptionStatus;
   // Upcoming bakes the customer asked to skip before they exist.
   skipRemaining: number;
@@ -157,17 +169,20 @@ export type Subscription = {
 //  skip: the customer asked to skip it · rest: the off week of a fortnightly
 //  place: create the order.
 export type SubscriptionAction =
-  'inactive' | 'handled' | 'skip' | 'rest' | 'place';
+  'inactive' | 'otherDay' | 'handled' | 'skip' | 'rest' | 'place';
 export function subscriptionAction(
   sub: Pick<
     Subscription,
-    'status' | 'frequency' | 'skipRemaining' | 'lastBakeId'
+    'status' | 'frequency' | 'skipRemaining' | 'lastBakeId' | 'day'
   >,
   bake: { id: string; pickupDate: string },
   // Pickup date of the subscription's latest order that was not cancelled.
   lastDelivery: string | null,
 ): SubscriptionAction {
   if (sub.status !== 'ACTIVE') return 'inactive';
+  // A Wednesday pa fix ignores Saturday bakes and the other way round.
+  if (bakeStandingDay(bake.pickupDate) !== standingDayOf(sub))
+    return 'otherDay';
   if (sub.lastBakeId === bake.id) return 'handled';
   if (sub.skipRemaining > 0) return 'skip';
   if (

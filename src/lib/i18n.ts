@@ -3,6 +3,29 @@ import { deliveryWindow } from './delivery';
 import type { Lang } from './messages';
 export type { Lang };
 
+// "Pa fix" days: the bake day, when its orders close, and the frequency line.
+export const standingWords = {
+  es: {
+    day: { wed: 'miércoles', sat: 'sábado' },
+    closes: { wed: 'el lunes anterior', sat: 'el jueves anterior' },
+    until: { wed: 'el lunes', sat: 'el jueves' },
+  },
+  ca: {
+    day: { wed: 'dimecres', sat: 'dissabte' },
+    closes: { wed: 'el dilluns abans', sat: 'el dijous abans' },
+    until: { wed: 'dilluns', sat: 'dijous' },
+  },
+} as const;
+export const standingFrequency = (
+  lang: Lang,
+  frequency: 'weekly' | 'biweekly',
+  day: 'wed' | 'sat',
+) => {
+  const d = standingWords[lang].day[day];
+  if (frequency === 'weekly') return `Cada ${d}`;
+  return lang === 'ca' ? `Un ${d} sí i un altre no` : `Un ${d} sí y otro no`;
+};
+
 // Pages that exist in both languages. Keys are shared, paths are localised.
 export const routes = {
   home: { ca: '/', es: '/es/' },
@@ -340,14 +363,14 @@ export const ui = {
     },
     fix: {
       kicker: 'Pan fijo',
-      bar: 'Cada sábado, sin pensarlo',
-      h2a: 'Tu pan cada sábado.',
+      bar: 'Cada semana, sin pensarlo',
+      h2a: 'Tu pan cada semana.',
       h2b: 'Sin pensarlo.',
       voucher:
         'Solo para el Pan fijo: cuando te haya entregado 3 panes, el 4.º corre de mi cuenta.',
       cta: 'Apúntate al Pan fijo',
       facts: (price: string) => [
-        `Sábado ${hours.es}`,
+        `Miércoles o sábado ${hours.es}`,
         `${price} la hogaza · sin envío`,
         'Saltas o cancelas con un clic',
       ],
@@ -823,14 +846,14 @@ export const ui = {
     },
     fix: {
       kicker: 'Pa fix',
-      bar: 'Cada dissabte, sense pensar-hi',
-      h2a: 'El teu pa cada dissabte.',
+      bar: 'Cada setmana, sense pensar-hi',
+      h2a: 'El teu pa cada setmana.',
       h2b: 'Sense pensar-hi.',
       voucher:
         'Només per al Pa fix: quan t’hagi entregat 3 pans, el 4t va de part meva.',
       cta: 'Apunta’t al Pa fix',
       facts: (price: string) => [
-        `Dissabte ${hours.ca}`,
+        `Dimecres o dissabte ${hours.ca}`,
         `${price} el pa · sense enviament`,
         'Saltes o cancel·les amb un clic',
       ],

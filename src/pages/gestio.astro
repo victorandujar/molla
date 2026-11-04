@@ -25,6 +25,7 @@ import {
   orderSummary,
   type Order,
   hasMailbox,
+  standingDayOf,
 } from '../lib/domain';
 import { townById } from '../lib/delivery';
 import { funnelEmailCounts } from '../lib/funnel';
@@ -35,7 +36,7 @@ import {
   PASTRY_UNITS_PER_BAKE,
 } from '../lib/config';
 import { pickupDay } from '../lib/email-templates';
-import { routes, ui } from '../lib/i18n';
+import { routes, standingFrequency, ui } from '../lib/i18n';
 import { clientIp, after } from '../lib/http';
 import { sendCancelledByOwner } from '../lib/email';
 // Owner's panel for the pickup point: today's orders, mark collected or
@@ -555,9 +556,7 @@ import {
                 </div>
                 <p class="admin-name">
                   {subItems(s)} ·{' '}
-                  {s.frequency === 'weekly'
-                    ? 'cada semana'
-                    : 'cada dos semanas'}
+                  {standingFrequency('es', s.frequency, standingDayOf(s)).toLowerCase()}
                   {s.skipRemaining > 0 && ' · salta la próxima entrega'}
                 </p>
                 <p class="admin-contact">

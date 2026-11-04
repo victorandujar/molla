@@ -1,15 +1,18 @@
 import { brand, money } from './config';
 import {
   bananaSplit,
+  bakeStandingDay,
   giftCroissants,
   hasMailbox,
+  standingDayOf,
+  type StandingDay,
   orderSummary,
   type Lang,
   type Order,
   type Subscription,
 } from './domain';
 import { townById } from './delivery';
-import { routes, ui } from './i18n';
+import { routes, standingFrequency, standingWords, ui } from './i18n';
 // Email clients ignore stylesheets and web fonts unevenly: inline styles,
 // table layout, hosted PNGs and system-font fallbacks for everything.
 export const c = {
@@ -56,6 +59,9 @@ const privacyPath = { es: '/privacidad', ca: '/privacitat' };
 // Catalan dates read "dissabte, 26 de setembre"; after "el" they stay lowercase.
 const onDay = (o: Order) => pickupDay(o.pickupDate, langOf(o)).toLowerCase();
 // Delivery orders show the street under the town; pickup orders the note.
+// The pa fix day of an order: from its bake (Saturday if the date is odd).
+const orderDay = (o: Order): StandingDay =>
+  bakeStandingDay(o.pickupDate) ?? 'sat';
 const where = (o: Order) =>
   o.delivery?.address
     ? `${o.pickupAddress}, ${o.delivery.address}`
@@ -96,8 +102,8 @@ const copy = {
       'Solo para el Pan fijo: cuando te haya entregado 3 panes, el 4.º corre de mi cuenta. Apúntate:',
     standingKicker: 'Pan fijo',
     standingHeading: (name: string) => `${name}, esta semana te toca pan.`,
-    standingIntro:
-      'Ya tienes reservado tu pan fijo del sábado. Si esa semana no lo quieres, sáltalo con un clic hasta el cierre de pedidos (el jueves anterior, a las 20:00): no pasa nada y seguirás con tu pan fijo.',
+    standingIntro: (day: StandingDay) =>
+      `Ya tienes reservado tu pan fijo del ${standingWords.es.day[day]}. Si esa semana no lo quieres, sáltalo con un clic hasta el cierre de pedidos (${standingWords.es.closes[day]}, a las 20:00): no pasa nada y seguirás con tu pan fijo.`,
     skipLink: 'Saltar esta semana →',
     manageLink: 'Gestionar mi pan fijo: pausar o darme de baja',
     standingSubject: (o: Order) =>
@@ -110,8 +116,8 @@ const copy = {
         ? `Tu primera entrega es el ${first}. Desde ahí, cada semana preparo tu pan sin que tengas que reservar nada.`
         : 'Esta semana la hornada ya está completa: empezarás con la próxima. Desde ahí, cada semana preparo tu pan sin que tengas que reservar nada.',
     welcomeButton: 'Gestionar mi pan fijo →',
-    welcomeHow:
-      'Cuando quieras, desde ese enlace puedes saltar una semana, pausarlo o darte de baja con un solo clic. Cada semana te aviso por email, y tienes hasta el jueves a las 20:00 para saltar la entrega. Pagas al recibirlo; nunca se cobra nada por adelantado.',
+    welcomeHow: (day: StandingDay) =>
+      `Cuando quieras, desde ese enlace puedes saltar una semana, pausarlo o darte de baja con un solo clic. Cada semana te aviso por email, y tienes hasta ${standingWords.es.until[day]} a las 20:00 para saltar la entrega. Pagas al recibirlo; nunca se cobra nada por adelantado.`,
     plan: 'Tu pan fijo',
     frequency: 'Frecuencia',
     weekly: 'Cada sábado',
@@ -197,8 +203,8 @@ const copy = {
       'Només per al Pa fix: quan t’hagi entregat 3 pans, el 4t va de part meva. Apunta’t:',
     standingKicker: 'Pa fix',
     standingHeading: (name: string) => `${name}, aquesta setmana et toca pa.`,
-    standingIntro:
-      'Ja tens reservat el teu pa fix del dissabte. Si aquella setmana no el vols, salta’l amb un clic fins al tancament de comandes (el dijous abans, a les 20:00): no passa res i continuaràs amb el teu pa fix.',
+    standingIntro: (day: StandingDay) =>
+      `Ja tens reservat el teu pa fix del ${standingWords.ca.day[day]}. Si aquella setmana no el vols, salta’l amb un clic fins al tancament de comandes (${standingWords.ca.closes[day]}, a les 20:00): no passa res i continuaràs amb el teu pa fix.`,
     skipLink: 'Saltar aquesta setmana →',
     manageLink: 'Gestionar el meu pa fix: pausar-lo o donar-me de baixa',
     standingSubject: (o: Order) =>
@@ -211,8 +217,8 @@ const copy = {
         ? `La teva primera entrega és ${first}. A partir d’aquí, cada setmana et preparo el pa sense que hagis de reservar res.`
         : 'Aquesta setmana la fornada ja està completa: començaràs amb la propera. A partir d’aquí, cada setmana et preparo el pa sense que hagis de reservar res.',
     welcomeButton: 'Gestionar el meu pa fix →',
-    welcomeHow:
-      'Quan vulguis, des d’aquest enllaç pots saltar una setmana, pausar-lo o donar-te de baixa amb un sol clic. Cada setmana t’aviso per correu, i tens fins dijous a les 20:00 per saltar l’entrega. Pagues en rebre’l; mai es cobra res per avançat.',
+    welcomeHow: (day: StandingDay) =>
+      `Quan vulguis, des d’aquest enllaç pots saltar una setmana, pausar-lo o donar-te de baixa amb un sol clic. Cada setmana t’aviso per correu, i tens fins ${standingWords.ca.until[day]} a les 20:00 per saltar l’entrega. Pagues en rebre’l; mai es cobra res per avançat.`,
     plan: 'El teu pa fix',
     frequency: 'Freqüència',
     weekly: 'Cada dissabte',
@@ -401,7 +407,7 @@ ${inviteText(o)}
 
 ${
   o.subscription
-    ? `${t.standingIntro}\n${t.skipLink} ${cancelUrl(o)}\n${t.manageLink}: ${manageUrl(o.subscription.token, langOf(o))}`
+    ? `${t.standingIntro(orderDay(o))}\n${t.skipLink} ${cancelUrl(o)}\n${t.manageLink}: ${manageUrl(o.subscription.token, langOf(o))}`
     : o.cancelToken
       ? `${t.cancelNote}\n${cancelUrl(o)}`
       : t.changesText(brand.contact)
@@ -487,7 +493,7 @@ export function confirmationHtml(o: Order) {
       ? intro(
           t.standingKicker,
           esc(t.standingHeading(firstName(o.name))),
-          t.standingIntro,
+          t.standingIntro(orderDay(o)),
         )
       : intro(
           t.confirmed,
@@ -710,7 +716,7 @@ const planRows = (sub: Subscription): [string, string][] => {
       : brand.pickupLabel[lang];
   return [
     [t.plan, items.map(esc).join('<br>')],
-    [t.frequency, sub.frequency === 'weekly' ? t.weekly : t.biweekly],
+    [t.frequency, standingFrequency(lang, sub.frequency, standingDayOf(sub))],
     [
       t.where,
       where.includes('<br>')
@@ -731,14 +737,17 @@ export function subscriptionWelcome(sub: Subscription, firstDay: string) {
       esc(t.welcomeIntro(firstDay)),
     ) +
     `<tr><td class="pad" style="padding:20px 40px 8px;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0">${details(planRows(sub))}</table></td></tr>` +
-    closing(button(esc(url), t.welcomeButton), esc(t.welcomeHow));
+    closing(
+      button(esc(url), t.welcomeButton),
+      esc(t.welcomeHow(standingDayOf(sub))),
+    );
   const lines = planRows(sub)
     .map(([k, v]) => `${k}: ${v.replaceAll('<br>', ' · ')}`)
     .join('\n');
   return {
     subject: t.welcomeSubject,
     html: layout(sub.lang, t.welcomeSubject, content),
-    text: `${t.hello} ${firstName(sub.name)},\n\n${t.welcomeIntro(firstDay)}\n\n${lines}\n\n${t.welcomeHow}\n${url}\n\n${brand.name}`,
+    text: `${t.hello} ${firstName(sub.name)},\n\n${t.welcomeIntro(firstDay)}\n\n${lines}\n\n${t.welcomeHow(standingDayOf(sub))}\n${url}\n\n${brand.name}`,
   };
 }
 
@@ -748,7 +757,10 @@ export function subscriptionFull(sub: Subscription) {
   const url = manageUrl(sub.token, sub.lang);
   const content =
     intro(t.welcomeKicker, esc(t.fullHeading), esc(t.fullIntro)) +
-    closing(button(esc(url), t.welcomeButton), esc(t.welcomeHow));
+    closing(
+      button(esc(url), t.welcomeButton),
+      esc(t.welcomeHow(standingDayOf(sub))),
+    );
   return {
     subject: t.fullSubject,
     html: layout(sub.lang, t.fullSubject, content),

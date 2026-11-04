@@ -2,8 +2,14 @@
 import Base from '../layouts/Base.astro';
 import { brand } from '../lib/config';
 import { townById } from '../lib/delivery';
-import { bananaSplit, orderSummary } from '../lib/domain';
-import { dayFormat, madridParts, routes, ui } from '../lib/i18n';
+import { bananaSplit, orderSummary, standingDayOf } from '../lib/domain';
+import {
+  dayFormat,
+  madridParts,
+  routes,
+  standingFrequency,
+  ui,
+} from '../lib/i18n';
 import { after } from '../lib/http';
 import { notifyOwnerChange } from '../lib/email';
 import {
@@ -223,7 +229,7 @@ const actions = !sub
         </p>
         <p>
           <strong>{t.frequency}</strong>{' '}
-          {sub.frequency === 'weekly' ? t.weekly : t.biweekly}
+          {standingFrequency(lang, sub.frequency, standingDayOf(sub))}
         </p>
         <p>
           <strong>{t.where}</strong> {where}
