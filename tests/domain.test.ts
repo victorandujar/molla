@@ -657,6 +657,6 @@ test('order emails do not assume there is bread in the order', () => {
       cancelledByOwner(o).subject,
       cancelledByOwner(o).html,
     ].join('\n');
-    assert.doesNotMatch(all, /tu pan\b|Tu pan\b|teu pa\b|no hay pan|no hi ha pa\b|hogaza|el pa no/);
+    assert.doesNotMatch(all, /tu pan\b|Tu pan\b|teu pa\b|no hay pan|no hi ha pa\b|hogaza|el pa no|No el podràs/);
   }
 });
