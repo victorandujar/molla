@@ -130,6 +130,30 @@ test('reservation, validation and waitlist journey', async ({ page }) => {
   );
   expect((await readData()).waitlist[0].confirmedAt).toBeTruthy();
 });
+test('croissants alone can be booked from the form', async ({ page }) => {
+  await page.goto('/es/');
+  await page
+    .locator('#reservation-form [data-target=croissant][data-step="1"]')
+    .click();
+  await page
+    .locator('#reservation-form [data-target=croissant][data-step="1"]')
+    .click();
+  await expect(page.locator('#total')).toContainText('4,40');
+  await expect(page.locator('#reservation-form [data-empty]')).toBeHidden();
+  await page.getByLabel('Tu nombre', { exact: true }).fill('Ana Prueba');
+  await page.locator('#email').fill('ana@example.com');
+  await page.locator('#phone').fill('612345678');
+  await page.locator('#town').selectOption('sant-boi');
+  await page.locator('#address').fill('Carrer Major 1, 2n 1a');
+  await page.locator('input[name=pickup]').check();
+  await page.locator('input[name=privacy]').check();
+  await page.locator('#reservation-form button[type=submit]').click();
+  await expect(page.locator('#confirmation')).toBeVisible();
+  await expect(page.locator('#confirmation')).toContainText('2 × Croissant');
+  const d = await readData();
+  expect(d.orders).toHaveLength(1);
+  expect(d.orders[0].total).toBe(440);
+});
 test('every request id is generated in the browser, never in shared HTML', async ({
   page,
 }) => {

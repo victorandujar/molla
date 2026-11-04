@@ -6,6 +6,8 @@ type EventName =
   | 'view_product'
   | 'click_reserve'
   | 'start_reservation'
+  | 'reservation_submit'
+  | 'reservation_error'
   | 'reservation_completed'
   | 'waitlist_signup'
   | 'click_instagram'
@@ -504,11 +506,19 @@ for (const target of [form, subscriptionForm]) {
     .forEach((el) => el.addEventListener('change', () => syncDelivery(target)));
   syncDelivery(target);
 }
+// Counted on the click, before the browser's own required-field check, so
+// /gestio shows who tried to send the form and not only who got through.
+form
+  ?.querySelector('button[type=submit]')
+  ?.addEventListener('click', () => track('reservation_submit'));
 form?.addEventListener('submit', async (event) => {
   event.preventDefault();
   const button = form.querySelector<HTMLButtonElement>('button[type=submit]')!;
   if (button.disabled) return;
-  if (cart().loaves + cart().halves === 0) {
+  const c = cart();
+  // Pastries alone are a valid order (the server accepts them too).
+  if (c.loaves + c.halves + c.croissants + c.pains === 0) {
+    track('reservation_error');
     showError(form, new Error(words.empty));
     return;
   }
@@ -744,6 +754,7 @@ form?.addEventListener('submit', async (event) => {
       track('reservation_with_combo', { total: order.total });
     void refreshBake();
   } catch (error) {
+    track('reservation_error');
     showError(form, error);
     button.disabled = false;
     button.textContent = label;
