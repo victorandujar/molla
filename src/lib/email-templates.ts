@@ -190,7 +190,7 @@ const copy = {
       'Si vols assabentar-te de la propera fornada, segueix el canal de WhatsApp.',
     channelButton: 'Segueix el canal →',
     cancelNote:
-      'No el podràs rebre? Cancel·la la comanda amb un clic fins al tancament de comandes de la fornada, a les 20:00, sense donar explicacions.',
+      'No la podràs rebre? Cancel·la la comanda amb un clic fins al tancament de comandes de la fornada, a les 20:00, sense donar explicacions.',
     cancelLink: 'Cancel·lar la comanda →',
     fixCta: 'El vols cada setmana? Pa fix:',
     fixCtaFirst:
