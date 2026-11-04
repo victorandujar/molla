@@ -230,6 +230,74 @@ export async function listSubscriptions(): Promise<Subscription[]> {
   return sorted(rows.map(toSubscription));
 }
 
+// Loaves a week the active pa fix adds up to: a fortnightly one counts half.
+export const weeklyLoaves = (subs: Subscription[]) =>
+  subs
+    .filter((s) => s.status === 'ACTIVE')
+    .reduce((n, s) => n + s.quantity * (s.frequency === 'weekly' ? 1 : 0.5), 0);
+
+export type StandingCandidate = {
+  name: string;
+  phone: string;
+  lang: Lang;
+  orders: number;
+  lastDate: string;
+};
+const digits = (phone: string) => phone.replace(/\D/g, '').slice(-9);
+// People who already got at least one one-off order and have no pa fix (by
+// email or phone): the first ones to offer it to. Most recent first.
+export async function standingCandidates(): Promise<StandingCandidate[]> {
+  if (useDemo())
+    return demo((d) => {
+      const subs = (d.subscriptions || []).filter(
+        (s) => s.status !== 'CANCELLED',
+      );
+      const taken = (o: Order) =>
+        subs.some((s) => s.email === o.email || digits(s.phone) === digits(o.phone));
+      const byPhone = new Map<string, StandingCandidate>();
+      for (const o of d.orders) {
+        if (o.status === 'CANCELLED' || o.subscription) continue;
+        if (Date.parse(o.pickupDate) > Date.now() || taken(o)) continue;
+        const key = digits(o.phone);
+        const prev = byPhone.get(key);
+        byPhone.set(key, {
+          name: prev?.name ?? o.name,
+          phone: o.phone,
+          lang: o.lang === 'ca' ? 'ca' : 'es',
+          orders: (prev?.orders ?? 0) + 1,
+          lastDate:
+            prev && prev.lastDate > o.pickupDate ? prev.lastDate : o.pickupDate,
+        });
+      }
+      return [...byPhone.values()].sort((a, b) =>
+        b.lastDate.localeCompare(a.lastDate),
+      );
+    });
+  const rows = await sql!`
+    SELECT c.name, c.phone, MAX(o.snapshot->>'lang') AS lang,
+           COUNT(*)::int AS orders, MAX(b.pickup_date) AS last
+    FROM orders o
+    JOIN customers c ON c.id=o.customer_id
+    JOIN bakes b ON b.id=o.bake_id
+    WHERE o.status!='CANCELLED' AND o.subscription_id IS NULL
+      AND b.pickup_date < now() AND c.phone <> ''
+      AND NOT EXISTS (
+        SELECT 1 FROM subscriptions s WHERE s.status!='CANCELLED'
+          AND (s.email=c.email
+            OR right(regexp_replace(s.phone,'\D','','g'),9)
+             = right(regexp_replace(c.phone,'\D','','g'),9)))
+    GROUP BY c.id, c.name, c.phone
+    ORDER BY last DESC
+    LIMIT 60`;
+  return rows.map((r) => ({
+    name: r.name as string,
+    phone: r.phone as string,
+    lang: r.lang === 'ca' ? 'ca' : 'es',
+    orders: r.orders as number,
+    lastDate: new Date(r.last).toISOString(),
+  }));
+}
+
 export async function subscriptionStats() {
   if (useDemo())
     return demo((d) => {

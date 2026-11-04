@@ -30,11 +30,12 @@ import { townById } from '../lib/delivery';
 import { funnelEmailCounts } from '../lib/funnel';
 import {
   money,
+  STANDING_GOAL_LOAVES,
   BANANA_HALVES_PER_BAKE,
   PASTRY_UNITS_PER_BAKE,
 } from '../lib/config';
 import { pickupDay } from '../lib/email-templates';
-import { ui } from '../lib/i18n';
+import { routes, ui } from '../lib/i18n';
 import { clientIp, after } from '../lib/http';
 import { sendCancelledByOwner } from '../lib/email';
 // Owner's panel for the pickup point: today's orders, mark collected or
@@ -109,11 +110,12 @@ let data: null | {
   standing: Awaited<ReturnType<typeof subscriptionStats>>;
   subs: Awaited<ReturnType<typeof listSubscriptions>>;
   sends: Record<string, number>;
+  candidates: StandingCandidate[];
 } = null;
 let loadError = '';
 if (signedIn) {
   try {
-    const [bakes, active, waitlist, events, standing, subs, sends] =
+    const [bakes, active, waitlist, events, standing, subs, sends, candidates] =
       await Promise.all([
         listBakes(),
         currentBake(),
@@ -123,6 +125,7 @@ if (signedIn) {
         listSubscriptions(),
         // Before migration 008 the table does not exist: show zeros.
         funnelEmailCounts(28).catch(() => ({}) as Record<string, number>),
+        standingCandidates(),
       ]);
     // After Thursday's close the shop shows next week's bake, but the panel
     // keeps showing the one still to bake and deliver.
@@ -139,7 +142,17 @@ if (signedIn) {
       (a, b) =>
         order[a.status] - order[b.status] || a.name.localeCompare(b.name),
     );
-    data = { bakes, bake, orders, waitlist, events, standing, subs, sends };
+    data = {
+      bakes,
+      bake,
+      orders,
+      waitlist,
+      events,
+      standing,
+      subs,
+      sends,
+      candidates,
+    };
   } catch (e) {
     console.error('Admin panel failed', e instanceof Error ? e.message : e);
     loadError = 'No se han podido cargar los datos. Recarga en unos segundos.';
@@ -193,6 +206,15 @@ const pieces = (orders: Order[], product: string) =>
         .reduce((m, i) => m + i.quantity, 0),
     0,
   );
+// The pa fix offer, sent by the baker in person to someone who already
+// ordered: their language, their first name and the sign-up link.
+const offerStanding = (c: StandingCandidate) => {
+  const first = c.name.split(' ')[0];
+  const link = new URL(routes.standing[c.lang], Astro.url.origin).href;
+  return c.lang === 'ca'
+    ? `Hola, ${first}! Sóc el Víctor, de Molla. Estic organitzant el pa per a clients fixos: et guardo el teu pa cada setmana, te’l porto a casa i el pagues en rebre’l. Si una setmana no el vols, el saltes amb un clic. T’hi apunto? Aquí ho tens: ${link}`
+    : `¡Hola, ${first}! Soy Víctor, de Molla. Estoy organizando el pan para clientes fijos: te guardo tu hogaza cada semana, te la llevo a casa y la pagas al recibirla. Si una semana no la quieres, la saltas con un clic. ¿Te apunto? Aquí lo tienes: ${link}`;
+};
 // The message for the day: "on my way" for home delivery, "ready" for pickup,
 // in the customer's language, so the baker only has to press send.
 const onTheWay = (o: Order) => {
@@ -228,7 +250,10 @@ const steps = [
 import {
   listSubscriptions,
   setSubscriptionStatus,
+  standingCandidates,
   subscriptionStats,
+  weeklyLoaves,
+  type StandingCandidate,
 } from '../lib/subscriptions';
 ---
 
@@ -488,6 +513,29 @@ import {
             Pan fijo ({data.standing.active} activos
             {data.standing.paused > 0 && `, ${data.standing.paused} en pausa`})
           </h2>
+          {(() => {
+            const loaves = weeklyLoaves(data.subs);
+            const shown = Number.isInteger(loaves)
+              ? String(loaves)
+              : loaves.toFixed(1).replace('.', ',');
+            return (
+              <div class="admin-goal">
+                <p>
+                  Objetivo: <strong>{shown} / {STANDING_GOAL_LOAVES}</strong>{' '}
+                  panes fijos por semana
+                </p>
+                <meter
+                  min="0"
+                  max={STANDING_GOAL_LOAVES}
+                  value={Math.min(loaves, STANDING_GOAL_LOAVES)}
+                  aria-label="Panes fijos por semana"
+                ></meter>
+                <p class="admin-meta">
+                  Un pan fijo cada dos semanas cuenta como medio.
+                </p>
+              </div>
+            );
+          })()}
           {subNotice && (
             <p class="admin-notice" role="status">
               {subNotice}
@@ -566,6 +614,42 @@ import {
                     </details>
                   </div>
                 )}
+              </li>
+            ))}
+          </ul>
+        </section>
+        <section id="ofrecer" aria-labelledby="ofrecer-title">
+          <h2 id="ofrecer-title">
+            Ofrecer pan fijo ({data.candidates.length})
+          </h2>
+          <p>
+            Ya te han comprado y todavía no tienen pan fijo. El botón abre
+            WhatsApp con la propuesta escrita en su idioma.
+          </p>
+          {data.candidates.length === 0 && (
+            <p>Nadie pendiente por ahora.</p>
+          )}
+          <ul class="admin-orders">
+            {data.candidates.map((c) => (
+              <li data-status="CONFIRMED">
+                <div class="admin-order-top">
+                  <strong class="admin-code">{c.name}</strong>
+                  <span class="admin-badge">
+                    {c.orders} {c.orders === 1 ? 'pedido' : 'pedidos'}
+                  </span>
+                </div>
+                <p class="admin-meta">
+                  Último: {pickupDay(c.lastDate)} · {c.lang === 'ca' ? 'catalán' : 'castellano'}
+                </p>
+                <p class="admin-contact">
+                  <a
+                    href={`${whatsapp(c.phone)}?text=${encodeURIComponent(offerStanding(c))}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Ofrecer pan fijo por WhatsApp ↗
+                  </a>
+                </p>
               </li>
             ))}
           </ul>
