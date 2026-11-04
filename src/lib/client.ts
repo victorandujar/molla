@@ -538,13 +538,13 @@ form?.addEventListener('submit', async (event) => {
         ? 'Així serà la teva confirmació.'
         : 'Así será tu confirmación.'
       : isCa
-        ? 'El teu pa ja té el teu nom.'
-        : 'Tu pan tiene tu nombre.';
+        ? 'La teva comanda ja té el teu nom.'
+        : 'Tu pedido ya tiene tu nombre.';
     const intro = document.createElement('p');
     intro.textContent = order.demo
       ? isCa
-        ? 'Reserva de prova completada. No has encarregat pa ni rebràs cap correu.'
-        : 'Reserva de prueba completada. No has encargado pan ni recibirás un email.'
+        ? 'Reserva de prova completada. No has encarregat res ni rebràs cap correu.'
+        : 'Reserva de prueba completada. No has encargado nada ni recibirás un email.'
       : isCa
         ? 'Reserva confirmada. Guarda aquestes dades per a la recollida.'
         : 'Reserva confirmada. Guarda estos datos para la recogida.';
@@ -562,7 +562,7 @@ form?.addEventListener('submit', async (event) => {
       lines.join(' · '),
       home
         ? isCa
-          ? `Total: ${money(order.total)} · Pagament en rebre’l`
+          ? `Total: ${money(order.total)} · Pagament en rebre-la`
           : `Total: ${money(order.total)} · Pago al recibirlo`
         : isCa
           ? `Total: ${money(order.total)} · Pagament en recollir`
@@ -580,7 +580,7 @@ form?.addEventListener('submit', async (event) => {
             : 'Punto de recogida en Sant Boi de Llobregat'),
       home
         ? isCa
-          ? 'Te’l porto a casa dins de la franja.'
+          ? 'Te la porto a casa dins de la franja.'
           : 'Te lo llevo a casa dentro de la franja.'
         : isCa
           ? 'Et confirmarem el punt exacte de recollida amb la teva comanda.'
@@ -731,8 +731,8 @@ form?.addEventListener('submit', async (event) => {
       share.rel = 'noopener noreferrer';
       share.href = `https://wa.me/?text=${encodeURIComponent(
         (isCa
-          ? 'Acabo d’encarregar pa artesà de fermentació lenta per a aquesta setmana. Te’l porten a casa dimecres o dissabte a Sant Boi, Sant Just i Santa Coloma: '
-          : 'Acabo de encargar pan artesano de fermentación lenta para esta semana. Te lo llevan a casa el miércoles o el sábado en Sant Boi, Sant Just y Santa Coloma: ') +
+          ? 'Acabo de fer una comanda a Molla, un obrador de pa i brioixeria artesans de Sant Boi. Te la porten a casa dimecres o dissabte a Sant Boi, Sant Just i Santa Coloma: '
+          : 'Acabo de hacer un pedido en Molla, un obrador de pan y bollería artesanos de Sant Boi. Te lo llevan a casa el miércoles o el sábado en Sant Boi, Sant Just y Santa Coloma: ') +
           invite.href,
       )}`;
       share.textContent = isCa

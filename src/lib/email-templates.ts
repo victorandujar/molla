@@ -62,14 +62,14 @@ const where = (o: Order) =>
     : o.pickupAddress;
 const copy = {
   es: {
-    footer: 'Pan de poolish por encargo',
+    footer: 'Pan y bollería por encargo',
     privacy: 'Privacidad y condiciones',
-    subject: (o: Order) => `Reserva ${o.code} · Tu pan del ${onDay(o)}`,
+    subject: (o: Order) => `Reserva ${o.code} · Tu pedido del ${onDay(o)}`,
     hello: 'Hola',
     confirmed: 'Reserva confirmada',
-    heading: 'Tu pan ya tiene tu nombre',
+    heading: 'Tu pedido ya tiene tu nombre',
     intro: (o: Order) =>
-      `Hecho a mano, con poolish y hasta 35 horas de fermentación lenta. Te esperamos el ${onDay(o)}.`,
+      `Todo hecho a mano en Sant Boi, sin prisas. Nos vemos el ${onDay(o)}.`,
     code: 'Código de recogida',
     codeHint: 'Dilo o enséñalo al recoger.',
     order: 'Tu pedido',
@@ -82,7 +82,7 @@ const copy = {
     deliveryNote:
       'Te lo llevo a casa dentro de la franja. Si necesito confirmar algo, te escribo por WhatsApp.',
     changes:
-      '¿Cambios o no puedes venir? Responde a este email con tu código antes del cierre de pedidos y la hogaza pasará a otra persona.',
+      '¿Cambios o no puedes venir? Responde a este email con tu código antes del cierre de pedidos y tu pedido pasará a otra persona.',
     changesText: (contact: string) =>
       `¿Cambios o no puedes venir? Responde a este email${contact ? ` o escribe a ${contact}` : ''} con tu código antes del cierre de pedidos.`,
     channel:
@@ -122,20 +122,20 @@ const copy = {
       'La hornada de esta semana se ha completado y no ha quedado sitio para tu pedido. No se te cobra nada y tu pan fijo sigue activo: la semana que viene lo volveremos a preparar.',
     thanks: 'Gracias por reservar,',
     reminderSubject: (o: Order) =>
-      `Recordatorio · Recoge tu pan el ${onDay(o)} (${o.code})`,
-    reminderKicker: 'Recordatorio de recogida',
+      `Recordatorio · Tu pedido del ${onDay(o)} (${o.code})`,
+    reminderKicker: 'Recordatorio',
     reminderHeading: (o: Order) =>
-      `${firstName(o.name)}, tu pan sale del horno el ${onDay(o)}.`,
+      `${firstName(o.name)}, tu pedido sale del horno el ${onDay(o)}.`,
     reminderIntro: 'Ven dentro de la franja con tu código. Se paga al recoger.',
     reminderDelivery:
       'Te lo llevo a casa dentro de la franja. Se paga al recibirlo.',
     reminderCancel:
-      '¿Al final no puedes venir? Responde a este email cuanto antes: así la hogaza no se desperdicia.',
+      '¿Al final no puedes venir? Responde a este email cuanto antes: así no se desperdicia nada.',
     toPay: 'A pagar al recoger',
     cancelledSubject: (o: Order) => `Pedido ${o.code} cancelado · ${onDay(o)}`,
     cancelledKicker: 'Pedido cancelado',
     cancelledHeading: (o: Order) =>
-      `Lo siento, ${firstName(o.name)}: esta vez no hay pan.`,
+      `Lo siento, ${firstName(o.name)}: esta vez no podré preparar tu pedido.`,
     cancelledIntro: (o: Order) =>
       `He tenido que cancelar tu pedido del ${onDay(o)}. Ha surgido un imprevisto y no puedo prepararlo. No tienes que hacer nada ni se te cobra nada. Disculpa las molestias.`,
     cancelledNext:
@@ -162,28 +162,28 @@ const copy = {
       'Te invito a probar el pan de Molla, un obrador de Sant Boi: fermentación lenta y te lo llevan a casa. Con tu primer pedido tienes un croissant de regalo: ',
   },
   ca: {
-    footer: 'Pa de poolish per encàrrec',
+    footer: 'Pa i brioixeria per encàrrec',
     privacy: 'Privacitat i condicions',
-    subject: (o: Order) => `Reserva ${o.code} · El teu pa de ${onDay(o)}`,
+    subject: (o: Order) => `Reserva ${o.code} · La teva comanda de ${onDay(o)}`,
     hello: 'Hola',
     confirmed: 'Reserva confirmada',
-    heading: 'El teu pa ja té el teu nom',
+    heading: 'La teva comanda ja té el teu nom',
     intro: (o: Order) =>
-      `Fet a mà, amb poolish i fins a 35 hores de fermentació lenta. T’esperem ${onDay(o)}.`,
+      `Tot fet a mà a Sant Boi, sense presses. Ens veiem ${onDay(o)}.`,
     code: 'Codi de recollida',
     codeHint: 'Digues-lo o ensenya’l en recollir.',
     order: 'La teva comanda',
     total: 'Total',
     payLater: 'pagament en recollir',
-    payOnDelivery: 'pagament en rebre’l',
+    payOnDelivery: 'pagament en rebre-la',
     when: 'Quan',
     where: 'On',
     pickupNote:
       'Et confirmarem el punt exacte de recollida amb la teva comanda.',
     deliveryNote:
-      'Te’l porto a casa dins de la franja. Si he de confirmar alguna cosa, t’escric per WhatsApp.',
+      'Te la porto a casa dins de la franja. Si he de confirmar alguna cosa, t’escric per WhatsApp.',
     changes:
-      'Canvis o no pots venir? Respon aquest correu amb el teu codi abans del tancament de comandes i el pa passarà a una altra persona.',
+      'Canvis o no pots venir? Respon aquest correu amb el teu codi abans del tancament de comandes i la teva comanda passarà a una altra persona.',
     changesText: (contact: string) =>
       `Canvis o no pots venir? Respon aquest correu${contact ? ` o escriu a ${contact}` : ''} amb el teu codi abans del tancament de comandes.`,
     channel:
@@ -223,22 +223,22 @@ const copy = {
       'La fornada d’aquesta setmana s’ha completat i no ha quedat lloc per a la teva comanda. No se’t cobra res i el teu pa fix continua actiu: la setmana vinent el tornarem a preparar.',
     thanks: 'Gràcies per reservar,',
     reminderSubject: (o: Order) =>
-      `Recordatori · Recull el teu pa ${onDay(o)} (${o.code})`,
-    reminderKicker: 'Recordatori de recollida',
+      `Recordatori · La teva comanda de ${onDay(o)} (${o.code})`,
+    reminderKicker: 'Recordatori',
     reminderHeading: (o: Order) =>
-      `${firstName(o.name)}, el teu pa surt del forn ${onDay(o)}.`,
+      `${firstName(o.name)}, la teva comanda surt del forn ${onDay(o)}.`,
     reminderIntro:
       'Vine dins de la franja amb el teu codi. Es paga en recollir.',
     reminderDelivery:
-      'Te’l porto a casa dins de la franja. Es paga en rebre’l.',
+      'Te la porto a casa dins de la franja. Es paga en rebre-la.',
     reminderCancel:
-      'Al final no pots venir? Respon aquest correu com més aviat millor: així el pa no es malbarata.',
+      'Al final no pots venir? Respon aquest correu com més aviat millor: així no es malbarata res.',
     toPay: 'A pagar en recollir',
     cancelledSubject: (o: Order) =>
       `Comanda ${o.code} cancel·lada · ${onDay(o)}`,
     cancelledKicker: 'Comanda cancel·lada',
     cancelledHeading: (o: Order) =>
-      `Ho sento, ${firstName(o.name)}: aquesta vegada no hi ha pa.`,
+      `Ho sento, ${firstName(o.name)}: aquesta vegada no podré preparar la teva comanda.`,
     cancelledIntro: (o: Order) =>
       `He hagut de cancel·lar la teva comanda de ${onDay(o)}. Ha sorgit un imprevist i no la puc preparar. No has de fer res ni se’t cobra res. Disculpa les molèsties.`,
     cancelledNext:

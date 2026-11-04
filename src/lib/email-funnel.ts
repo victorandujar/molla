@@ -116,7 +116,7 @@ const broadcastCopy = {
       `${day}, ${deliveryWindow}, a domicilio en ${towns('es')}, sin coste de envío. O recogida en Sant Boi para el resto del Baix Llobregat.`,
     pay: 'Pago',
     payText: 'Al recibirlo. Cancelas con un clic hasta el cierre.',
-    button: 'Reservar mi pan →',
+    button: 'Hacer mi pedido →',
     fix: '¿Lo quieres cada semana sin acordarte? Prueba el Pan fijo:',
     why: 'Recibes este email porque te apuntaste a los avisos de hornadas de Molla.',
   },
@@ -140,8 +140,8 @@ const broadcastCopy = {
     deliveryText: (day: string) =>
       `${day}, ${deliveryWindow}, a domicili a ${towns('ca')}, sense cost d’enviament. O recollida a Sant Boi per a la resta del Baix Llobregat.`,
     pay: 'Pagament',
-    payText: 'En rebre’l. Cancel·les amb un clic fins al tancament.',
-    button: 'Reservar el meu pa →',
+    payText: 'En rebre-la. Cancel·les amb un clic fins al tancament.',
+    button: 'Fer la meva comanda →',
     fix: 'El vols cada setmana sense haver-te’n de recordar? Prova el Pa fix:',
     why: 'Reps aquest correu perquè et vas apuntar als avisos de fornades de Molla.',
   },
@@ -254,9 +254,9 @@ ${brand.name}`,
 
 const followCopy = {
   es: {
-    thanksSubject: '¿Qué tal el pan?',
+    thanksSubject: '¿Qué tal tu pedido?',
     thanksKicker: 'Gracias por tu primer pedido',
-    thanksHeading: (name: string) => `${name}, ¿qué tal el pan?`,
+    thanksHeading: (name: string) => `${name}, ¿qué tal tu pedido?`,
     thanksIntro:
       'Espero que lo hayas disfrutado. Soy un obrador muy pequeño, sin tienda ni publicidad: lo que más me ayuda a seguir es que otras personas del barrio sepan que existo.',
     reviewH: '30 segundos que me ayudan muchísimo',
@@ -292,11 +292,11 @@ const followCopy = {
     fixOnce: 'Solo te escribo esto una vez. Gracias por repetir.',
   },
   ca: {
-    thanksSubject: 'Què tal el pa?',
+    thanksSubject: 'Què tal la comanda?',
     thanksKicker: 'Gràcies per la teva primera comanda',
-    thanksHeading: (name: string) => `${name}, què tal el pa?`,
+    thanksHeading: (name: string) => `${name}, què tal la comanda?`,
     thanksIntro:
-      'Espero que l’hagis gaudit. Soc un obrador molt petit, sense botiga ni publicitat: el que més m’ajuda a continuar és que altres persones del barri sàpiguen que existeixo.',
+      'Espero que t’hagi agradat. Soc un obrador molt petit, sense botiga ni publicitat: el que més m’ajuda a continuar és que altres persones del barri sàpiguen que existeixo.',
     reviewH: '30 segons que m’ajuden moltíssim',
     reviewP:
       'Si t’ha agradat, una ressenya a Google fa que els veïns em trobin quan busquen pa artesà.',

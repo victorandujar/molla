@@ -234,19 +234,19 @@ test('confirmation email escapes customer input without exposing the old pickup 
     html,
     /Te confirmaremos el punto exacto de recogida con tu pedido/,
   );
-  assert.match(html, /hasta 35 horas de fermentación lenta/);
+  assert.match(html, /Todo hecho a mano en Sant Boi, sin prisas/);
   assert.doesNotMatch(html, /Ronda de Sant Ramon|Google Maps|mapa-recogida/);
   assert.match(html, /<html lang="es">/);
 });
 test('emails follow the customer language; older orders stay in Spanish', () => {
   const ca = { ...order, lang: 'ca' as const };
-  assert.match(confirmationSubject(ca), /El teu pa de dissabte/);
+  assert.match(confirmationSubject(ca), /La teva comanda de dissabte/);
   assert.match(
     confirmationHtml(ca),
     /<html lang="ca">[\s\S]*Codi de recollida[\s\S]*\/privacitat/,
   );
-  assert.match(confirmationHtml(ca), /fins a 35 hores de fermentació lenta/);
-  assert.match(confirmationSubject(order), /Tu pan del sábado/);
+  assert.match(confirmationHtml(ca), /Tot fet a mà a Sant Boi, sense presses/);
+  assert.match(confirmationSubject(order), /Tu pedido del sábado/);
   assert.match(reminderSubject(ca), /^Recordatori/);
   const reminder = reminderHtml(order);
   assert.doesNotMatch(reminder, /<script>/);
@@ -638,4 +638,25 @@ test('delivery notes: optional, capped and shown to the owner', () => {
     delivery: { town: 'Sant Boi de Llobregat', address: 'Major 1', notes: 'Portería' },
   });
   assert.match(text, /Si no está: Portería/);
+});
+
+test('order emails do not assume there is bread in the order', () => {
+  const pastries: Order = {
+    ...order,
+    quantity: 0,
+    items: [{ product: 'croissant', name: 'Croissant', quantity: 2, unitPrice: 220 }],
+  };
+  for (const lang of ['es', 'ca'] as const) {
+    const o = { ...pastries, lang };
+    const all = [
+      confirmationSubject(o),
+      confirmationText(o),
+      confirmationHtml(o),
+      reminderSubject(o),
+      reminderHtml(o),
+      cancelledByOwner(o).subject,
+      cancelledByOwner(o).html,
+    ].join('\n');
+    assert.doesNotMatch(all, /tu pan\b|Tu pan\b|teu pa\b|no hay pan|no hi ha pa\b|hogaza|el pa no/);
+  }
 });
