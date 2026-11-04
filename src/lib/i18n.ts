@@ -501,7 +501,7 @@ export const ui = {
         ],
         [
           '¿Y si no voy a estar?',
-          'Responde al email de confirmación o escríbeme cuanto antes con el código de tu reserva. El día antes te llega un recordatorio. Si aún estamos a tiempo, libero tu hogaza para otra persona.',
+          'Responde al email de confirmación o escríbeme cuanto antes con el código de tu reserva. El día antes te llega un recordatorio. Si aún estamos a tiempo, libero tu pedido para otra persona.',
         ],
       ],
     },
@@ -901,7 +901,7 @@ export const ui = {
       bananaMore: 'Afegir mitja peça de banana bread',
       bananaNone: 'Sense banana bread',
       emptyOrder: 'Afegeix un pa, un banana bread o brioixeria per reservar.',
-      totalLabel: 'Total a pagar en rebre’l',
+      totalLabel: 'Total a pagar a l’entrega',
       pickup: 'Entrega',
       where: 'On',
       pickupLocation: `A domicili, ${hours.ca}`,
@@ -923,7 +923,7 @@ export const ui = {
       addressPlaceholder: 'Carrer, número, pis i porta (casa o feina)',
       deliveryLabel: (town: string) => `Entrega a domicili a ${town}`,
       pay: 'Pagament',
-      payValue: 'En rebre’l o recollir-lo. Sense targeta ni compte.',
+      payValue: 'En rebre o recollir la comanda. Sense targeta ni compte.',
       question: 'Tinc una pregunta ↗',
       yourOrder: 'La teva comanda',
       demoIntro:
@@ -949,7 +949,7 @@ export const ui = {
       submitDemo: 'Provar la reserva',
       submit: 'Confirmar la reserva',
       footnote:
-        'Pagues en rebre’l. Cancel·les amb un clic fins al tancament. Sense compromís.',
+        'Pagues a l’entrega. Cancel·les amb un clic fins al tancament. Sense compromís.',
       whatsappCta: 'Reservar per WhatsApp',
       whatsappText: (day: string) =>
         `Hola! Voldria reservar pa per al ${day}. M’agradaria: `,
@@ -984,7 +984,7 @@ export const ui = {
         ],
         [
           'I si no hi seré?',
-          'Respon el correu de confirmació o escriu-me com més aviat millor amb el codi de la reserva. El dia abans t’arriba un recordatori. Si encara som a temps, allibero el teu pa per a una altra persona.',
+          'Respon el correu de confirmació o escriu-me com més aviat millor amb el codi de la reserva. El dia abans t’arriba un recordatori. Si encara som a temps, allibero la teva comanda per a una altra persona.',
         ],
       ],
     },

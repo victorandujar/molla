@@ -157,7 +157,7 @@ test('thank-you email asks for a review, a neighbour and (if not subscribed) the
   assert.match(m.html, /\/alta\?token=abc/);
   const subscribed = thanksEmail({ ...order, lang: 'ca' }, null);
   assert.doesNotMatch(subscribed.html, /\/alta\?token/);
-  assert.match(subscribed.subject, /Què tal el pa\?/);
+  assert.match(subscribed.subject, /Què tal la comanda\?/);
 });
 
 test('pa fix offer links the standing order page with its campaign', () => {
