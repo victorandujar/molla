@@ -290,7 +290,13 @@ export async function reserve(
       ? ui[input.lang].reserve.deliveryLabel(town.name)
       : brand.pickupLabel[input.lang],
     pickupWindow: town ? deliveryWindow : bake.pickupWindow,
-    delivery: town ? { town: town.name, address: input.address } : undefined,
+    delivery: town
+      ? {
+          town: town.name,
+          address: input.address,
+          ...(input.notes ? { notes: input.notes } : {}),
+        }
+      : undefined,
     cancelToken: randomUUID(),
     subscription: standing ? { token: standing.token } : undefined,
     source: input.source,

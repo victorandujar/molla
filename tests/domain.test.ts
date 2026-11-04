@@ -626,3 +626,16 @@ test('the owner is told to use WhatsApp for an order without email', () => {
   assert.match(text, /sin email \(avísale por WhatsApp\)/);
   assert.doesNotMatch(text, /tel\.invalid/);
 });
+
+test('delivery notes: optional, capped and shown to the owner', () => {
+  assert.equal(reservationSchema.parse(input).notes, '');
+  assert.equal(
+    reservationSchema.safeParse({ ...input, notes: 'x'.repeat(201) }).success,
+    false,
+  );
+  const text = ownerText({
+    ...order,
+    delivery: { town: 'Sant Boi de Llobregat', address: 'Major 1', notes: 'Portería' },
+  });
+  assert.match(text, /Si no está: Portería/);
+});

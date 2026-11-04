@@ -55,7 +55,7 @@ try {
       throw new Error('Indica --months=N (mínimo 1).');
     await sql!.begin(async (tx) => {
       const orders =
-        await tx`UPDATE orders o SET snapshot = (o.snapshot || '{"name":"—","email":"","phone":""}'::jsonb) #- '{delivery,address}' FROM bakes b WHERE o.bake_id=b.id AND b.pickup_date < now() - make_interval(months => ${months}) AND o.snapshot->>'email' <> '' RETURNING o.customer_id`;
+        await tx`UPDATE orders o SET snapshot = (o.snapshot || '{"name":"—","email":"","phone":""}'::jsonb) #- '{delivery,address}' #- '{delivery,notes}' FROM bakes b WHERE o.bake_id=b.id AND b.pickup_date < now() - make_interval(months => ${months}) AND o.snapshot->>'email' <> '' RETURNING o.customer_id`;
       // A customer with a more recent order keeps their details.
       const customers =
         await tx`UPDATE customers c SET email='anonimo-' || c.id, name='—', phone='' WHERE c.email NOT LIKE 'anonimo-%' AND NOT EXISTS (SELECT 1 FROM orders o JOIN bakes b ON b.id=o.bake_id WHERE o.customer_id=c.id AND b.pickup_date >= now() - make_interval(months => ${months})) RETURNING c.id`;

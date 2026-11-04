@@ -623,7 +623,8 @@ Teléfono: ${o.phone}
 ${o.delivery ? 'Entrega a domicilio' : 'Recogida'}: ${pickupDay(o.pickupDate)}, ${o.pickupWindow}${
     o.delivery
       ? `
-Dirección: ${where(o)}`
+Dirección: ${where(o)}${o.delivery.notes ? `
+Si no está: ${o.delivery.notes}` : ''}`
       : ''
   }
 Canal: ${o.source}${o.firstOrder ? `\n${ownerVoucher()}` : ''}${giftCroissants(o) ? `\n${ownerGift(o)}` : ''}
@@ -667,7 +668,12 @@ export function ownerHtml(o: Order) {
           : 'Sin email: avísale por WhatsApp',
       ],
       ...(o.delivery
-        ? ([['Entrega', esc(where(o))]] as [string, string][])
+        ? ([
+            ['Entrega', esc(where(o))],
+            ...(o.delivery.notes
+              ? [['Si no está', esc(o.delivery.notes)]]
+              : []),
+          ] as [string, string][])
         : []),
       ['Canal', esc(o.source)],
       ...(o.firstOrder
