@@ -11,6 +11,9 @@ export const events = [
   // "Reservar" on a content page (ad landing pages), before the form.
   'click_reserve',
   'start_reservation',
+  // Pressing "Confirmar la reserva", and a refusal shown after it.
+  'reservation_submit',
+  'reservation_error',
   'reservation_completed',
   'waitlist_signup',
   'click_instagram',
