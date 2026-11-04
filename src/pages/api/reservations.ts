@@ -1,6 +1,10 @@
 import type { APIRoute } from 'astro';
 import { guard, body, json, langOf, error, issue, after } from '../../lib/http';
-import { reservationSchema, orderItems } from '../../lib/domain';
+import {
+  hasMailbox,
+  reservationSchema,
+  orderItems,
+} from '../../lib/domain';
 import { reserve } from '../../lib/store';
 import { sendConfirmation, notifyOwner } from '../../lib/email';
 import { isDemo, brand } from '../../lib/config';
@@ -19,7 +23,7 @@ export const POST: APIRoute = async (ctx) => {
     // order, and the daily job retries a failed confirmation.
     after(Promise.all([sendConfirmation(order), notifyOwner(order)]));
     // The buyer ticked "tell me when each bake opens".
-    if (result.data.news)
+    if (result.data.news && hasMailbox(order.email))
       after(
         optInFromOrder(order.email, order.source, lang).catch((e) =>
           console.error(

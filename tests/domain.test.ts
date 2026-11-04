@@ -21,6 +21,7 @@ import {
   bakeState,
   assertCapacity,
   reservationSchema,
+  hasMailbox,
   waitlistSchema,
   subscriptionSchema,
   subscriptionAction,
@@ -93,6 +94,34 @@ test('validate and normalize reservation, no unknown products or malicious quant
   );
   assert.equal(
     reservationSchema.safeParse({ ...input, phone: '---------' }).success,
+    false,
+  );
+});
+test('the email is optional on an order: the phone keys it, nothing is mailed', () => {
+  const noEmail = reservationSchema.parse({ ...input, email: '' });
+  assert.equal(noEmail.email, '34612345678@tel.invalid');
+  assert.equal(hasMailbox(noEmail.email), false);
+  const missing = { ...input } as Record<string, unknown>;
+  delete missing.email;
+  assert.equal(reservationSchema.parse(missing).email, noEmail.email);
+  assert.equal(
+    reservationSchema.parse({ ...input, email: '', phone: '612 345 678' })
+      .email,
+    noEmail.email,
+  );
+  assert.equal(hasMailbox(reservationSchema.parse(input).email), true);
+  // A badly typed email is still an error, not a silent fallback.
+  assert.equal(
+    reservationSchema.safeParse({ ...input, email: 'ana@' }).success,
+    false,
+  );
+  // Pa fix still needs one: its private link goes by email.
+  assert.equal(
+    subscriptionSchema.safeParse({
+      ...input,
+      email: '',
+      terms: 'yes',
+    }).success,
     false,
   );
 });
@@ -590,4 +619,10 @@ test('owner cancellation email apologises and points to the next bake', () => {
   const fix = cancelledByOwner({ ...order, subscription: { token: 't' } });
   assert.doesNotMatch(fix.html, /Reservar para la próxima hornada/);
   assert.match(fix.text, /Tu pan fijo sigue activo/);
+});
+
+test('the owner is told to use WhatsApp for an order without email', () => {
+  const text = ownerText({ ...order, email: '34612345678@tel.invalid' });
+  assert.match(text, /sin email \(avísale por WhatsApp\)/);
+  assert.doesNotMatch(text, /tel\.invalid/);
 });

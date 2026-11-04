@@ -601,6 +601,26 @@ form?.addEventListener('submit', async (event) => {
       : 'Guardar o imprimir confirmación';
     save.addEventListener('click', () => window.print());
     result.replaceChildren(heading, intro, details, ref, save);
+    // The confirmation by WhatsApp, without a paid API: the buyer sends the
+    // baker a message with the order already written and gets the reply in
+    // the same chat. It is the only confirmation when no email was given.
+    if (result.dataset.whatsapp && !order.demo) {
+      const name = String(new FormData(form).get('name') || '').trim();
+      const text = isCa
+        ? `Hola! Sóc ${name}. He reservat ${lines.join(', ')} per a ${date}. Codi ${order.code}.`
+        : `¡Hola! Soy ${name}. He reservado ${lines.join(', ')} para el ${date}. Código ${order.code}.`;
+      const chat = document.createElement('a');
+      chat.className = 'button button-ghost confirmation-whatsapp';
+      chat.href = `https://wa.me/${result.dataset.whatsapp}?text=${encodeURIComponent(text)}`;
+      chat.target = '_blank';
+      chat.rel = 'noopener noreferrer';
+      chat.dataset.event = 'click_whatsapp';
+      chat.textContent = isCa
+        ? 'Rebre la confirmació per WhatsApp ↗'
+        : 'Recibir la confirmación por WhatsApp ↗';
+      chat.addEventListener('click', () => track('click_whatsapp'));
+      result.append(chat);
+    }
     if (order.contact) {
       const support = document.createElement('a');
       support.className = 'text-link';
