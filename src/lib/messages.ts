@@ -15,6 +15,7 @@ export const messages = {
     terms: 'Acepta las condiciones del pan fijo para continuar.',
     town: 'Elige tu municipio para la entrega a domicilio.',
     address: 'Escribe la dirección de entrega: calle, número y piso.',
+    notes: 'Las instrucciones de entrega no pueden pasar de 200 caracteres.',
     privacy: 'Necesitamos tu aceptación para gestionar el pedido.',
     capacity:
       'Esta hornada ya no admite esa cantidad. Puedes apuntarte a la próxima.',
@@ -47,6 +48,7 @@ export const messages = {
     terms: 'Accepta les condicions del pa fix per continuar.',
     town: 'Tria el teu municipi per a l’entrega a domicili.',
     address: 'Escriu l’adreça d’entrega: carrer, número i pis.',
+    notes: 'Les instruccions d’entrega no poden passar de 200 caràcters.',
     privacy: 'Necessitem la teva acceptació per gestionar la comanda.',
     capacity:
       'Aquesta fornada ja no admet aquesta quantitat. Pots apuntar-te a la propera.',

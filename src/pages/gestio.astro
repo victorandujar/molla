@@ -193,6 +193,19 @@ const pieces = (orders: Order[], product: string) =>
         .reduce((m, i) => m + i.quantity, 0),
     0,
   );
+// The message for the day: "on my way" for home delivery, "ready" for pickup,
+// in the customer's language, so the baker only has to press send.
+const onTheWay = (o: Order) => {
+  const first = o.name.split(' ')[0];
+  const ca = o.lang === 'ca';
+  if (o.delivery)
+    return ca
+      ? `Hola, ${first}! Sóc el Víctor, de Molla. Surto ara amb la teva comanda; arribo en uns 15 minuts.`
+      : `¡Hola, ${first}! Soy Víctor, de Molla. Salgo ahora con tu pedido; llego en unos 15 minutos.`;
+  return ca
+    ? `Hola, ${first}! Sóc el Víctor, de Molla. La teva comanda ja està a punt per recollir.`
+    : `¡Hola, ${first}! Soy Víctor, de Molla. Tu pedido ya está listo para recoger.`;
+};
 const whatsapp = (phone: string) => {
   const digits = phone.replace(/\D/g, '');
   return `https://wa.me/${digits.length === 9 ? `34${digits}` : digits}`;
@@ -367,6 +380,16 @@ import {
                   >
                     WhatsApp ↗
                   </a>
+                  {o.status === 'CONFIRMED' && (
+                    <a
+                      href={`${whatsapp(o.phone)}?text=${encodeURIComponent(onTheWay(o))}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {o.delivery ? 'Avisar «salgo ahora»' : 'Avisar «ya está listo»'}{' '}
+                      ↗
+                    </a>
+                  )}
                   {hasMailbox(o.email) ? (
                     <a
                       href={`mailto:${o.email}?subject=${encodeURIComponent(`Reserva ${o.code}`)}`}
@@ -388,6 +411,9 @@ import {
                       >
                         {o.delivery.address} ↗
                       </a>
+                    )}
+                    {o.delivery.notes && (
+                      <span>Si no está: {o.delivery.notes}</span>
                     )}
                   </p>
                 )}

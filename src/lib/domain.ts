@@ -57,6 +57,8 @@ export const reservationSchema = z
       .default('')
       .pipe(z.union([z.literal(''), z.email('email')]))
       .transform((v) => v.toLowerCase()),
+    // Home delivery only: "if I'm not in, leave it with the porter".
+    notes: z.string().trim().max(200, 'notes').default(''),
     // Loaves of the weekly bread (0 when the order is only banana bread).
     quantity: z.coerce.number().int().min(0).max(4),
     // Banana bread counted in halves: 1 = half, 2 = whole, 3 = whole + half…
@@ -194,7 +196,11 @@ export const waitlistSchema = z.object({
   source: z.enum(sources).default('direct'),
   lang,
 });
-export type ReservationInput = z.infer<typeof reservationSchema>;
+// Orders built in code (pa fix, tests) may leave the delivery notes out.
+export type ReservationInput = Omit<
+  z.infer<typeof reservationSchema>,
+  'notes'
+> & { notes?: string };
 export type BakeState =
   'UPCOMING' | 'OPEN' | 'SOLD_OUT' | 'CLOSED' | 'COMPLETED';
 export function bakeState(
@@ -396,8 +402,9 @@ export type Order = {
   emailStatus: 'PENDING' | 'SENT' | 'FAILED' | 'DISABLED';
   // Absent on orders created before emails were translated.
   lang?: Lang;
-  // Home delivery; absent on pickup orders. The purge removes `address`.
-  delivery?: { town: string; address?: string };
+  // Home delivery; absent on pickup orders. The purge removes `address` and
+  // `notes`.
+  delivery?: { town: string; address?: string; notes?: string };
   // First order of this customer: the baker adds the welcome gift.
   firstOrder?: boolean;
   // Private one-click cancellation link; absent on orders made before it existed.

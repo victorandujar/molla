@@ -166,6 +166,7 @@ test('a booking without email goes through and is keyed by phone', async ({
   await page.locator('#phone').fill('612 345 678');
   await page.locator('#town').selectOption('sant-boi');
   await page.locator('#address').fill('Carrer Major 1, 2n 1a');
+  await page.locator('#notes').fill('Déjalo en portería');
   await page.locator('input[name=pickup]').check();
   await page.locator('input[name=privacy]').check();
   await page.locator('#reservation-form button[type=submit]').click();
@@ -173,6 +174,19 @@ test('a booking without email goes through and is keyed by phone', async ({
   const d = await readData();
   expect(d.orders).toHaveLength(1);
   expect(d.orders[0].email).toBe('34612345678@tel.invalid');
+  expect(d.orders[0].delivery.notes).toBe('Déjalo en portería');
+  // The panel shows the notes and a ready-written "on my way" message.
+  await page.goto('/gestio');
+  await page.locator('input[name=password]').fill('e2e-password-local');
+  await page.locator('form button[type=submit]').first().click();
+  await expect(page.locator('#pedidos')).toContainText(
+    'Si no está: Déjalo en portería',
+  );
+  await expect(page.locator('#pedidos')).toContainText('Sin email');
+  const onTheWay = page.getByRole('link', { name: /Avisar «salgo ahora»/ });
+  expect(decodeURIComponent((await onTheWay.getAttribute('href'))!)).toContain(
+    'Soy Víctor, de Molla. Salgo ahora con tu pedido',
+  );
 });
 test('every request id is generated in the browser, never in shared HTML', async ({
   page,
