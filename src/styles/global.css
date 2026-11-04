@@ -904,6 +904,15 @@ figure picture {
   min-height: 60px;
   font-size: 14px;
 }
+/* Reservar por WhatsApp, al lado del botón principal. */
+.stub-whatsapp {
+  --bg: transparent;
+  --fg: var(--paper);
+  --sweep: var(--paper);
+  --sweep-fg: var(--cobalt);
+  margin-top: 10px;
+  box-shadow: inset 0 0 0 1.5px var(--paper);
+}
 /* Qui fa el pa i una ressenya, just sota la portada. */
 .baker {
   background: var(--paper);
@@ -4191,4 +4200,13 @@ details[open] p {
   display: flex;
   flex-wrap: wrap;
   gap: 4px 18px;
+}
+.confirmation-whatsapp {
+  margin-top: 10px;
+}
+.field-hint {
+  margin-top: 6px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--ink-2);
 }

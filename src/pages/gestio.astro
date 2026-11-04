@@ -24,6 +24,7 @@ import {
   orderItems,
   orderSummary,
   type Order,
+  hasMailbox,
 } from '../lib/domain';
 import { townById } from '../lib/delivery';
 import { funnelEmailCounts } from '../lib/funnel';
@@ -204,6 +205,7 @@ const steps = [
   ['reservation_submit', 'Pulsan «Confirmar la reserva»'],
   ['reservation_error', 'Les sale un error al reservar'],
   ['reservation_completed', 'Reservan'],
+  ['click_whatsapp', 'Pulsan WhatsApp'],
   ['waitlist_signup', 'Se apuntan al aviso'],
   ['combo_desayuno', 'Añaden «El desayuno»'],
   ['combo_capricho', 'Añaden «El capricho»'],
@@ -365,11 +367,15 @@ import {
                   >
                     WhatsApp ↗
                   </a>
-                  <a
-                    href={`mailto:${o.email}?subject=${encodeURIComponent(`Reserva ${o.code}`)}`}
-                  >
-                    {o.email}
-                  </a>
+                  {hasMailbox(o.email) ? (
+                    <a
+                      href={`mailto:${o.email}?subject=${encodeURIComponent(`Reserva ${o.code}`)}`}
+                    >
+                      {o.email}
+                    </a>
+                  ) : (
+                    <span>Sin email</span>
+                  )}
                 </p>
                 {o.delivery && (
                   <p class="admin-contact">

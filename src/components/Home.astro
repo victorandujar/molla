@@ -316,6 +316,17 @@ const jsonLd = [
                 →
               </span>
             </a>
+            {open && whatsappBook && (
+              <a
+                class="button full stub-whatsapp"
+                data-event="click_whatsapp"
+                href={whatsappBook}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {t.reserve.whatsappCta} <span aria-hidden="true">↗</span>
+              </a>
+            )}
           </div>
           <ul class="hero-proof hero-in" style="--i:5">
             <li>
@@ -1288,9 +1299,10 @@ const jsonLd = [
                     type="email"
                     autocomplete="email"
                     maxlength="254"
-                    required
                     placeholder="tu@email.com"
+                    aria-describedby="email-hint"
                   />
+                  <p id="email-hint" class="field-hint">{t.reserve.emailHint}</p>
                 </div>
                 <div class="field">
                   <label for="phone">{t.reserve.phone}</label>
@@ -1374,7 +1386,13 @@ const jsonLd = [
               </a>
             </div>
           )}
-          <div id="confirmation" hidden tabindex="-1" role="status"></div>
+          <div
+            id="confirmation"
+            hidden
+            tabindex="-1"
+            role="status"
+            data-whatsapp={brand.whatsapp || undefined}
+          ></div>
           <Sticker class="ticket-stamp" />
         </div>
       </div>

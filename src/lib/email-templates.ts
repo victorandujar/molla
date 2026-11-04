@@ -2,6 +2,7 @@ import { brand, money } from './config';
 import {
   bananaSplit,
   giftCroissants,
+  hasMailbox,
   orderSummary,
   type Lang,
   type Order,
@@ -617,7 +618,7 @@ export function ownerText(o: Order) {
 
 ${orderSummary(o)} — ${money(o.total)}
 Nombre: ${o.name}
-Email: ${o.email}
+Email: ${hasMailbox(o.email) ? o.email : 'sin email (avísale por WhatsApp)'}
 Teléfono: ${o.phone}
 ${o.delivery ? 'Entrega a domicilio' : 'Recogida'}: ${pickupDay(o.pickupDate)}, ${o.pickupWindow}${
     o.delivery
@@ -659,7 +660,12 @@ export function ownerHtml(o: Order) {
     ${details([
       ['Nombre', esc(o.name)],
       ['Teléfono', `<a href="tel:${esc(tel)}">${esc(o.phone)}</a>`],
-      ['Email', `<a href="mailto:${esc(o.email)}">${esc(o.email)}</a>`],
+      [
+        'Email',
+        hasMailbox(o.email)
+          ? `<a href="mailto:${esc(o.email)}">${esc(o.email)}</a>`
+          : 'Sin email: avísale por WhatsApp',
+      ],
       ...(o.delivery
         ? ([['Entrega', esc(where(o))]] as [string, string][])
         : []),

@@ -1,6 +1,11 @@
 import { brand, isDemo } from './config';
 import { emailStatus } from './store';
-import { orderSummary, type Order, type Subscription } from './domain';
+import {
+  hasMailbox,
+  orderSummary,
+  type Order,
+  type Subscription,
+} from './domain';
 import { townById } from './delivery';
 import {
   cancelledByOwner,
@@ -31,6 +36,10 @@ async function send(
   },
   key: string,
 ) {
+  // An order without an email: nothing to deliver, and nothing to retry.
+  if (!hasMailbox(payload.to)) return true;
+  if (payload.replyTo && !hasMailbox(payload.replyTo))
+    payload = { ...payload, replyTo: undefined };
   const response = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     signal: AbortSignal.timeout(8000),
@@ -61,7 +70,7 @@ export const emailEnabled = () =>
 export async function sendConfirmation(o: Order, retry = false) {
   if (o.emailStatus !== 'PENDING' && !(retry && o.emailStatus === 'FAILED'))
     return;
-  if (!emailEnabled()) {
+  if (!emailEnabled() || !hasMailbox(o.email)) {
     await emailStatus(o.id, 'DISABLED');
     return;
   }
@@ -255,6 +264,7 @@ export type BatchMessage = {
 // subscribers goes out in seconds instead of one request every 600 ms. Returns
 // whether the provider accepted the whole batch (it is all or nothing).
 export async function sendBatch(messages: BatchMessage[], key: string) {
+  messages = messages.filter((m) => hasMailbox(m.to));
   if (!emailEnabled() || !messages.length) return false;
   try {
     const response = await fetch('https://api.resend.com/emails/batch', {

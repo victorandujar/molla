@@ -22,7 +22,8 @@ export const brand = {
   region: 'Baix Llobregat',
   tagline: 'Pan de aquí. Para el miércoles y el sábado.',
   contact: process.env.CONTACT_EMAIL || '',
-  whatsapp: (process.env.WHATSAPP_NUMBER || '').replace(/\D/g, ''),
+  // The baker's WhatsApp, public on the site (wa.me links). An env value wins.
+  whatsapp: (process.env.WHATSAPP_NUMBER || '34649907912').replace(/\D/g, ''),
   instagram: process.env.INSTAGRAM_URL || '',
   // Only a WhatsApp channel link is accepted: it is shown to every visitor.
   whatsappChannel: /^https:\/\/(www\.)?whatsapp\.com\/channel\/[\w-]+$/.test(

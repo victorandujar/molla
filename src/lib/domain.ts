@@ -9,6 +9,17 @@ import {
 } from './config';
 export type { Lang };
 const lang = z.enum(['es', 'ca']).default('es');
+// A one-off order may come without an email: the customer is then keyed by
+// phone under this reserved domain (RFC 2606), which can never receive mail.
+// Every sender checks `hasMailbox` first.
+export const NO_MAILBOX_DOMAIN = 'tel.invalid';
+// "612 345 678" and "+34 612 345 678" are the same customer.
+export const phoneKey = (phone: string) => {
+  const digits = phone.replace(/\D/g, '');
+  return `${digits.length === 9 ? `34${digits}` : digits}@${NO_MAILBOX_DOMAIN}`;
+};
+export const hasMailbox = (email: string) =>
+  !!email && !email.endsWith(`@${NO_MAILBOX_DOMAIN}`);
 // Who orders and where it goes: shared by one-off orders and "pa fix".
 const contact = {
   name: z.string().trim().min(2, 'name').max(100, 'name'),
@@ -38,6 +49,14 @@ export const reservationSchema = z
     requestId: z.uuid(),
     bakeId: z.string().min(1).max(80),
     ...contact,
+    // Optional here (not for "pa fix", whose private link goes by email).
+    email: z
+      .string()
+      .trim()
+      .max(254)
+      .default('')
+      .pipe(z.union([z.literal(''), z.email('email')]))
+      .transform((v) => v.toLowerCase()),
     // Loaves of the weekly bread (0 when the order is only banana bread).
     quantity: z.coerce.number().int().min(0).max(4),
     // Banana bread counted in halves: 1 = half, 2 = whole, 3 = whole + half…
@@ -78,7 +97,8 @@ export const reservationSchema = z
   .refine((o) => o.delivery === 'pickup' || o.address.length >= 5, {
     message: 'address',
     path: ['address'],
-  });
+  })
+  .transform((o) => (o.email ? o : { ...o, email: phoneKey(o.phone) }));
 // A standing order: the same bread every week (or every other week).
 export const subscriptionSchema = z
   .object({
