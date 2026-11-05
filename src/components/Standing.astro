@@ -25,21 +25,21 @@ const text = {
   es: {
     crumb: 'Pan fijo',
     title: `Pan fijo: tu pan de cada semana, a casa · ${brand.name}`,
-    description: `Suscríbete al pan fijo y recibe cada sábado de ${hours} tu pan artesano en Sant Boi, Sant Just Desvern y Santa Coloma de Cervelló. Salta, pausa o cancela con un clic. Pagas al recibirlo.`,
+    description: `Suscríbete al pan fijo y recibe cada semana, el miércoles o el sábado de ${hours}, tu pan artesano en Sant Boi, Sant Just Desvern y Santa Coloma de Cervelló. Salta, pausa o cancela con un clic. Pagas al recibirlo.`,
     kicker: 'Pan fijo · suscripción semanal',
     h1: 'Tu pan de cada semana, sin pensar en ello.',
-    lede: `Eliges una vez cuánto quieres. Cada semana te preparo el pan y te lo llevo a casa el sábado de ${hours}. Si una semana no lo quieres, lo saltas con un clic.`,
+    lede: `Eliges una vez cuánto quieres y qué día: miércoles o sábado. Cada semana te preparo el pan y te lo llevo de ${hours}. Si una semana no lo quieres, lo saltas con un clic.`,
     howH: 'Cómo funciona',
     how: [
-      'Eliges cuántas hogazas quieres (y banana bread, si te apetece), cada semana o una sí y otra no.',
+      'Eliges cuántas hogazas quieres (y banana bread, si te apetece), el día (miércoles o sábado) y si lo quieres cada semana o una sí y otra no.',
       'Te escribo cada semana para avisarte de lo que te toca. No tienes que hacer nada.',
-      `El sábado, de ${hours}, te lo llevo a casa. Pagas al recibirlo: no hay tarjeta ni cobros por adelantado.`,
+      `El día que elijas, de ${hours}, te lo llevo a casa o al trabajo. Pagas al recibirlo: no hay tarjeta ni cobros por adelantado.`,
       'Cuando quieras, saltas una semana, lo pausas o te das de baja.',
     ],
     cancelH: 'Cancelar es un clic',
     cancel: [
       'Sin llamar, sin escribir y sin explicar por qué. Cada email que te envío lleva un botón.',
-      'Saltar una semana: un clic, hasta el jueves a las 20:00 (cuando cierro los pedidos).',
+      'Saltar una semana: un clic, hasta que cierro los pedidos (el lunes a las 20:00 para el miércoles; el jueves a las 20:00 para el sábado).',
       'Pausar o darte de baja del todo: un clic desde el enlace de tu email de bienvenida.',
       'Puedes volver a apuntarte cuando quieras.',
     ],
@@ -59,10 +59,15 @@ const text = {
     banana: 'Banana bread por entrega',
     bananaOptions: ['Ninguno', '½', '1', '1½', '2'],
     frequency: 'Frecuencia',
-    weekly: 'Cada sábado',
-    biweekly: 'Un sábado sí, otro no',
+    dayH: '¿Qué día?',
+    wed: 'Miércoles',
+    wedHint: 'Ideal para recibirlo en el trabajo',
+    sat: 'Sábado',
+    satHint: 'Para el fin de semana en casa',
+    weekly: 'Cada semana',
+    biweekly: 'Una semana sí, otra no',
     deliveryH: '¿Cómo lo quieres?',
-    home: `A domicilio · sábado de ${hours}`,
+    home: `A domicilio · de ${hours}`,
     homeHint: 'Sant Boi, Sant Just Desvern y Santa Coloma de Cervelló',
     pickup: 'Lo recojo en Sant Boi',
     pickupHint: 'Resto del Baix Llobregat. Te confirmo el punto exacto.',
@@ -94,21 +99,21 @@ const text = {
   ca: {
     crumb: 'Pa fix',
     title: `Pa fix: el teu pa de cada setmana, a casa · ${brand.name}`,
-    description: `Subscriu-te al pa fix i rep cada dissabte de ${hours} el teu pa artesà a Sant Boi, Sant Just Desvern i Santa Coloma de Cervelló. Salta, pausa o cancel·la amb un clic. Pagues en rebre’l.`,
+    description: `Subscriu-te al pa fix i rep cada setmana, dimecres o dissabte de ${hours}, el teu pa artesà a Sant Boi, Sant Just Desvern i Santa Coloma de Cervelló. Salta, pausa o cancel·la amb un clic. Pagues en rebre’l.`,
     kicker: 'Pa fix · subscripció setmanal',
     h1: 'El teu pa de cada setmana, sense pensar-hi.',
-    lede: `Tries una vegada quant en vols. Cada setmana et preparo el pa i te’l porto a casa dissabte de ${hours}. Si una setmana no en vols, el saltes amb un clic.`,
+    lede: `Tries una vegada quant en vols i quin dia: dimecres o dissabte. Cada setmana et preparo el pa i te’l porto de ${hours}. Si una setmana no en vols, el saltes amb un clic.`,
     howH: 'Com funciona',
     how: [
-      'Tries quants pans vols (i banana bread, si et ve de gust), cada setmana o una sí i una no.',
+      'Tries quants pans vols (i banana bread, si et ve de gust), el dia (dimecres o dissabte) i si el vols cada setmana o una sí i una no.',
       'Cada setmana t’escric per avisar-te del que et toca. No has de fer res.',
-      `Dissabte, de ${hours}, te’l porto a casa. Pagues en rebre’l: no hi ha targeta ni cobraments per avançat.`,
+      `El dia que triïs, de ${hours}, te’l porto a casa o a la feina. Pagues en rebre’l: no hi ha targeta ni cobraments per avançat.`,
       'Quan vulguis, saltes una setmana, el pauses o te’n dones de baixa.',
     ],
     cancelH: 'Cancel·lar és un clic',
     cancel: [
       'Sense trucar, sense escriure i sense explicar per què. Cada correu que t’envio porta un botó.',
-      'Saltar una setmana: un clic, fins dijous a les 20:00 (quan tanco les comandes).',
+      'Saltar una setmana: un clic, fins que tanco les comandes (dilluns a les 20:00 per al dimecres; dijous a les 20:00 per al dissabte).',
       'Pausar-lo o donar-te de baixa del tot: un clic des de l’enllaç del teu correu de benvinguda.',
       'Pots tornar a apuntar-t’hi quan vulguis.',
     ],
@@ -128,10 +133,15 @@ const text = {
     banana: 'Banana bread per entrega',
     bananaOptions: ['Cap', '½', '1', '1½', '2'],
     frequency: 'Freqüència',
-    weekly: 'Cada dissabte',
-    biweekly: 'Un dissabte sí, un altre no',
+    dayH: 'Quin dia?',
+    wed: 'Dimecres',
+    wedHint: 'Ideal per rebre’l a la feina',
+    sat: 'Dissabte',
+    satHint: 'Per al cap de setmana a casa',
+    weekly: 'Cada setmana',
+    biweekly: 'Una setmana sí, una altra no',
     deliveryH: 'Com el vols?',
-    home: `A domicili · dissabte de ${hours}`,
+    home: `A domicili · de ${hours}`,
     homeHint: 'Sant Boi, Sant Just Desvern i Santa Coloma de Cervelló',
     pickup: 'El recullo a Sant Boi',
     pickupHint: 'Resta del Baix Llobregat. Et confirmo el punt exacte.',
@@ -278,6 +288,23 @@ const service = {
             </select>
           </div>
         </div>
+        <fieldset class="size-choice delivery-choice">
+          <legend>{text.dayH}</legend>
+          <label>
+            <input type="radio" name="day" value="sat" checked />
+            <span>
+              <strong>{text.sat}</strong>
+              <em>{text.satHint}</em>
+            </span>
+          </label>
+          <label>
+            <input type="radio" name="day" value="wed" />
+            <span>
+              <strong>{text.wed}</strong>
+              <em>{text.wedHint}</em>
+            </span>
+          </label>
+        </fieldset>
         <fieldset class="size-choice delivery-choice">
           <legend>{text.frequency}</legend>
           <label>

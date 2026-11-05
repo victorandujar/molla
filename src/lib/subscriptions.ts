@@ -4,11 +4,13 @@ import { AppError } from './messages';
 import { townById } from './delivery';
 import {
   bakeState,
+  bakeStandingDay,
   cancellable,
-  madridWeekday,
+  standingDayOf,
   subscriptionAction,
   type Lang,
   type Order,
+  type StandingDay,
   type ReservationInput,
   type Subscription,
   type SubscriptionInput,
@@ -36,6 +38,7 @@ const toSubscription = (r: postgres.Row): Subscription => ({
   town: r.town,
   address: r.address,
   frequency: r.frequency,
+  day: r.day === 'wed' ? 'wed' : 'sat',
   status: r.status,
   skipRemaining: r.skip_remaining,
   lastBakeId: r.last_bake_id,
@@ -45,18 +48,25 @@ const toSubscription = (r: postgres.Row): Subscription => ({
 });
 const asStatus = (to: SubscriptionStatus) => to;
 
+// Callers that predate the Wednesday pa fix may leave the day out: Saturday.
+type NewSubscription = Omit<SubscriptionInput, 'day'> & {
+  day?: StandingDay;
+  lang: Lang;
+};
 // A double click or a retried request must not create two subscriptions.
-const recently = (sub: Subscription, input: SubscriptionInput) =>
+const recently = (sub: Subscription, input: NewSubscription & { day: StandingDay }) =>
   sub.email === input.email &&
   sub.status !== 'CANCELLED' &&
   sub.quantity === input.quantity &&
   sub.banana === input.banana &&
   sub.frequency === input.frequency &&
+  standingDayOf(sub) === input.day &&
   Date.now() - Date.parse(sub.createdAt) < 600000;
 
 export async function createSubscription(
-  input: SubscriptionInput & { lang: Lang },
+  request: NewSubscription,
 ): Promise<Subscription> {
+  const input = { ...request, day: request.day ?? ('sat' as const) };
   const fresh: Subscription = {
     id: randomUUID(),
     token: randomUUID(),
@@ -70,6 +80,7 @@ export async function createSubscription(
     town: input.delivery === 'home' ? input.town : '',
     address: input.delivery === 'home' ? input.address : '',
     frequency: input.frequency,
+    day: input.day,
     status: 'ACTIVE',
     skipRemaining: 0,
     lastBakeId: null,
@@ -88,11 +99,11 @@ export async function createSubscription(
   const [prior] = await sql!`
     SELECT * FROM subscriptions WHERE email=${input.email} AND status!='CANCELLED'
       AND quantity=${input.quantity} AND banana=${input.banana} AND frequency=${input.frequency}
-      AND created_at > now() - interval '10 minutes'`;
+      AND day=${input.day} AND created_at > now() - interval '10 minutes'`;
   if (prior) return toSubscription(prior);
   const [row] = await sql!`
-    INSERT INTO subscriptions (id,token,email,name,phone,lang,quantity,banana,delivery,town,address,frequency,status,source)
-    VALUES (${fresh.id},${fresh.token},${fresh.email},${fresh.name},${fresh.phone},${fresh.lang},${fresh.quantity},${fresh.banana},${fresh.delivery},${fresh.town},${fresh.address},${fresh.frequency},'ACTIVE',${fresh.source})
+    INSERT INTO subscriptions (id,token,email,name,phone,lang,quantity,banana,delivery,town,address,frequency,day,status,source)
+    VALUES (${fresh.id},${fresh.token},${fresh.email},${fresh.name},${fresh.phone},${fresh.lang},${fresh.quantity},${fresh.banana},${fresh.delivery},${fresh.town},${fresh.address},${fresh.frequency},${input.day},'ACTIVE',${fresh.source})
     RETURNING *`;
   return toSubscription(row!);
 }
@@ -457,7 +468,7 @@ const isDuplicate = (e: unknown) => (e as { code?: string })?.code === '23505';
 export type PlaceResult =
   | { kind: 'placed'; order: Order }
   | { kind: 'full' }
-  | { kind: 'skip' | 'rest' | 'handled' | 'inactive' }
+  | { kind: 'skip' | 'rest' | 'handled' | 'inactive' | 'otherDay' }
   | { kind: 'failed' };
 
 // Places the order of one subscription for the bake, applying the skip and
@@ -533,8 +544,9 @@ export async function generateSubscriptionOrders(): Promise<GenerationResult> {
   }
   const state = bakeState(bake, bake.reserved);
   if (state !== 'OPEN' && state !== 'SOLD_OUT') return result;
-  // "Pa fix" is Saturday bread: the Wednesday bake takes one-off orders only.
-  if (madridWeekday(bake.pickupDate) !== 6) return result;
+  // Wednesday and Saturday bakes each serve their own pa fix; other dates
+  // (Christmas Thursdays) take one-off orders only.
+  if (!bakeStandingDay(bake.pickupDate)) return result;
   result.bakeId = bake.id;
   for (const sub of await activeSubscriptions()) {
     const r = await placeForSubscription(sub, bake);
