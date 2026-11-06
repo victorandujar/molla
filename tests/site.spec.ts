@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type APIRequestContext } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 const dataPath = '.data/demo.json';
@@ -12,6 +12,17 @@ async function reset() {
   );
 }
 test.beforeEach(reset);
+// The open bake alternates with the week (Wednesday from Thursday night to
+// Monday night, Saturday the rest), and pa fix follows its own day.
+type Day = 'wed' | 'sat';
+async function openDay(request: APIRequestContext): Promise<Day> {
+  const html = await (await request.get('/es/')).text();
+  return /id="bake-title"[^>]*>\s*mi[ée]rcoles/i.test(html) ? 'wed' : 'sat';
+}
+const dayName = {
+  es: { wed: 'miércoles', sat: 'sábado' },
+  ca: { wed: 'dimecres', sat: 'dissabte' },
+};
 test('real photos, keyboard access, responsive layout and accessibility', async ({
   page,
 }) => {
@@ -852,8 +863,14 @@ test('croissants and pains au chocolat share 48 pieces per bake, by the unit', a
 
 test('pa fix: sign up, skip, pause, resume and cancel with one click each', async ({
   page,
+  request,
 }) => {
+  const day = await openDay(request);
   await page.goto('/es/pan-fijo');
+  // The day of the open bake, so the first order is placed right away.
+  await page
+    .locator(`#subscription-form input[name=day][value=${day}]`)
+    .check({ force: true });
   await expect(page.locator('#sub-total')).toContainText('5,00');
   await page.locator('#sub-quantity').selectOption('2');
   await page.locator('#sub-banana').selectOption('1');
@@ -940,11 +957,15 @@ test('pa fix: sign up, skip, pause, resume and cancel with one click each', asyn
   expect(result.violations).toEqual([]);
 });
 
-test('a Wednesday pa fix waits for a Wednesday bake', async ({ page }) => {
+test('a pa fix for the other day waits for a bake of its own day', async ({
+  page,
+  request,
+}) => {
+  const other: Day = (await openDay(request)) === 'sat' ? 'wed' : 'sat';
   await page.goto('/pa-fix');
-  await page.locator('#subscription-form input[name=day][value=wed]').check({
-    force: true,
-  });
+  await page
+    .locator(`#subscription-form input[name=day][value=${other}]`)
+    .check({ force: true });
   await page
     .locator('#subscription-form input[value=pickup]')
     .check({ force: true });
@@ -956,11 +977,13 @@ test('a Wednesday pa fix waits for a Wednesday bake', async ({ page }) => {
   await page.locator('#subscription-form button[type=submit]').click();
   await expect(page.locator('#subscription-result')).toBeVisible();
   const data = await readData();
-  expect(data.subscriptions[0]).toMatchObject({ day: 'wed', status: 'ACTIVE' });
-  // The open bake is a Saturday one: no order for this pa fix yet.
+  expect(data.subscriptions[0]).toMatchObject({ day: other, status: 'ACTIVE' });
+  // The open bake is of the other day: no order for this pa fix yet.
   expect(data.orders).toHaveLength(0);
   await page.locator('#subscription-result [data-manage]').click();
-  await expect(page.locator('.manage-summary')).toContainText('Cada dimecres');
+  await expect(page.locator('.manage-summary')).toContainText(
+    `Cada ${dayName.ca[other]}`,
+  );
 });
 test('pa fix sign-up validation, language and bad links', async ({
   page,
@@ -1076,9 +1099,11 @@ test('owner panel lists pa fix subscribers and can pause, resume and cancel them
   page,
   request,
 }) => {
+  const day = await openDay(request);
   const joined = await request.post('/api/subscriptions?lang=es', {
     headers: origin,
     data: {
+      day,
       name: 'Marta Fija',
       email: 'marta@example.com',
       phone: '612345678',
@@ -1100,7 +1125,7 @@ test('owner panel lists pa fix subscribers and can pause, resume and cancel them
     hasText: 'Marta Fija',
   });
   await expect(card).toContainText('2 × La de cada semana');
-  await expect(card).toContainText('un sábado sí y otro no');
+  await expect(card).toContainText(`un ${dayName.es[day]} sí y otro no`);
   await expect(card).toContainText('Carrer Major 1');
   await expect(card).toContainText('612345678');
   await card.getByRole('button', { name: 'Pausar' }).click();

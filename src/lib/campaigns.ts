@@ -60,7 +60,7 @@ export const campaigns: Campaign[] = [
           ],
           [
             'Entrega',
-            'A domicili a Sant Boi, Sant Just i Santa Coloma, sense cost d’enviament. O recollida a Sant Boi.',
+            'A domicili a Sant Boi, Sant Just, Sant Joan Despí, Sant Feliu i Santa Coloma, sense cost d’enviament. O recollida a Sant Boi.',
           ],
           ['La carta', 'Pa de poolish, banana bread i brioixeria, com sempre.'],
         ],
@@ -87,7 +87,7 @@ export const campaigns: Campaign[] = [
           ],
           [
             'Entrega',
-            'A domicilio en Sant Boi, Sant Just y Santa Coloma, sin coste de envío. O recogida en Sant Boi.',
+            'A domicilio en Sant Boi, Sant Just, Sant Joan Despí, Sant Feliu y Santa Coloma, sin coste de envío. O recogida en Sant Boi.',
           ],
           [
             'La carta',

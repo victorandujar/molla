@@ -28,11 +28,11 @@ const pain = money(productById('pain-au-chocolat')!.price);
 const text = {
   es: {
     crumb: 'Pan a domicilio',
-    title: `Pan a domicilio en Sant Boi, Sant Just y Santa Coloma · ${brand.name}`,
-    description: `Pan artesano de fermentación lenta a domicilio los miércoles y los sábados de ${hours} en Sant Boi de Llobregat, Sant Just Desvern y Santa Coloma de Cervelló. Reserva online, sin coste de envío; pagas al recibirlo.`,
+    title: `Pan a domicilio en Sant Boi, Sant Just, Sant Joan Despí, Sant Feliu y Santa Coloma · ${brand.name}`,
+    description: `Pan artesano de fermentación lenta a domicilio los miércoles y los sábados de ${hours} en Sant Boi de Llobregat, Sant Just Desvern, Sant Joan Despí, Sant Feliu de Llobregat y Santa Coloma de Cervelló. Reserva online, sin coste de envío; pagas al recibirlo.`,
     kicker: `A domicilio · miércoles y sábados de ${hours}`,
     h1: 'Pan artesano a domicilio, miércoles y sábado.',
-    lede: `Reservas durante la semana y el miércoles o el sábado, entre las ${from} y las ${to}, te llevo a casa el pan horneado esa misma mañana. En Sant Boi de Llobregat, Sant Just Desvern y Santa Coloma de Cervelló.`,
+    lede: `Reservas durante la semana y el miércoles o el sábado, entre las ${from} y las ${to}, te llevo a casa el pan horneado esa misma mañana. En Sant Boi de Llobregat, Sant Just Desvern, Sant Joan Despí, Sant Feliu de Llobregat y Santa Coloma de Cervelló.`,
     whenH: 'Cuándo',
     when: (day: string) =>
       `Los miércoles y los sábados, de ${hours}. El próximo reparto es el ${day}.`,
@@ -45,12 +45,16 @@ const text = {
         'Aquí horneo. Reparto a domicilio el miércoles y el sábado y, si lo prefieres, también puedes recogerlo en Sant Boi.',
       'sant-just':
         'Cada miércoles y cada sábado hago la ruta hasta Sant Just Desvern. El pan llega horneado esa misma mañana, todavía con la corteza crujiente.',
+      'sant-joan':
+        'Sant Joan Despí está al lado de Sant Just: entra en la misma ruta del miércoles y del sábado.',
+      'sant-feliu':
+        'Reparto a domicilio en Sant Feliu de Llobregat dentro de la misma franja, miércoles y sábado.',
       'santa-coloma':
         'Reparto a domicilio en Santa Coloma de Cervelló dentro de la misma franja, miércoles y sábado.',
     } as Record<string, string>,
     otherH: '¿Vives en otro municipio del Baix Llobregat?',
     other:
-      'Desde Cornellà, Sant Joan Despí, Sant Feliu de Llobregat, Sant Vicenç dels Horts o Viladecans, lo recoges en Sant Boi de Llobregat.',
+      'Desde Cornellà, Sant Vicenç dels Horts o Viladecans, lo recoges en Sant Boi de Llobregat.',
     otherLink: 'Cómo funciona la recogida',
     howH: 'Cómo funciona',
     how: [
@@ -69,11 +73,11 @@ const text = {
   },
   ca: {
     crumb: 'Pa a domicili',
-    title: `Pa a domicili a Sant Boi, Sant Just i Santa Coloma · ${brand.name}`,
-    description: `Pa artesà de fermentació lenta a domicili els dimecres i els dissabtes de ${hours} a Sant Boi de Llobregat, Sant Just Desvern i Santa Coloma de Cervelló. Reserva en línia, sense cost d’enviament; pagues en rebre’l.`,
+    title: `Pa a domicili a Sant Boi, Sant Just, Sant Joan Despí, Sant Feliu i Santa Coloma · ${brand.name}`,
+    description: `Pa artesà de fermentació lenta a domicili els dimecres i els dissabtes de ${hours} a Sant Boi de Llobregat, Sant Just Desvern, Sant Joan Despí, Sant Feliu de Llobregat i Santa Coloma de Cervelló. Reserva en línia, sense cost d’enviament; pagues en rebre’l.`,
     kicker: `A domicili · dimecres i dissabtes de ${hours}`,
     h1: 'Pa artesà a domicili, dimecres i dissabte.',
-    lede: `Reserves durant la setmana i dimecres o dissabte, entre les ${from} i les ${to}, et porto a casa el pa cuit aquell mateix matí. A Sant Boi de Llobregat, Sant Just Desvern i Santa Coloma de Cervelló.`,
+    lede: `Reserves durant la setmana i dimecres o dissabte, entre les ${from} i les ${to}, et porto a casa el pa cuit aquell mateix matí. A Sant Boi de Llobregat, Sant Just Desvern, Sant Joan Despí, Sant Feliu de Llobregat i Santa Coloma de Cervelló.`,
     whenH: 'Quan',
     when: (day: string) =>
       `Els dimecres i els dissabtes, de ${hours}. El proper repartiment és ${day}.`,
@@ -86,12 +90,16 @@ const text = {
         'Aquí és on faig el pa. Reparteixo a domicili dimecres i dissabte i, si ho prefereixes, també el pots recollir a Sant Boi.',
       'sant-just':
         'Cada dimecres i cada dissabte faig la ruta fins a Sant Just Desvern. El pa arriba cuit aquell mateix matí, encara amb la crosta cruixent.',
+      'sant-joan':
+        'Sant Joan Despí és al costat de Sant Just: entra a la mateixa ruta del dimecres i del dissabte.',
+      'sant-feliu':
+        'Reparteixo a domicili a Sant Feliu de Llobregat dins de la mateixa franja, dimecres i dissabte.',
       'santa-coloma':
         'Reparteixo a domicili a Santa Coloma de Cervelló dins de la mateixa franja, dimecres i dissabte.',
     } as Record<string, string>,
     otherH: 'Vius en un altre municipi del Baix Llobregat?',
     other:
-      'Des de Cornellà, Sant Joan Despí, Sant Feliu de Llobregat, Sant Vicenç dels Horts o Viladecans, el reculls a Sant Boi de Llobregat.',
+      'Des de Cornellà, Sant Vicenç dels Horts o Viladecans, el reculls a Sant Boi de Llobregat.',
     otherLink: 'Com funciona la recollida',
     howH: 'Com funciona',
     how: [

@@ -265,10 +265,10 @@ const followCopy = {
     reviewButton: 'Dejar una reseña →',
     shareH: 'Pásaselo a un vecino',
     shareP:
-      'Si conoces a alguien en Sant Boi, Sant Just o Santa Coloma a quien le guste el buen pan, mándale el enlace.',
+      'Si conoces a alguien en Sant Boi, Sant Just, Sant Joan Despí, Sant Feliu o Santa Coloma a quien le guste el buen pan, mándale el enlace.',
     shareLink: 'Enviar por WhatsApp ↗',
     shareGift:
-      'Si conoces a alguien en Sant Boi, Sant Just o Santa Coloma a quien le guste el buen pan, mándale tu invitación: con su primer pedido tendrá un croissant de regalo, y tú otro en tu siguiente pedido.',
+      'Si conoces a alguien en Sant Boi, Sant Just, Sant Joan Despí, Sant Feliu o Santa Coloma a quien le guste el buen pan, mándale tu invitación: con su primer pedido tendrá un croissant de regalo, y tú otro en tu siguiente pedido.',
     shareText:
       'He probado el pan de Molla, un obrador de Sant Boi: fermentación lenta y te lo llevan a casa. Mira: ',
     newsH: '¿Te aviso cada semana?',
@@ -303,10 +303,10 @@ const followCopy = {
     reviewButton: 'Deixar una ressenya →',
     shareH: 'Passa-ho a un veí',
     shareP:
-      'Si coneixes algú a Sant Boi, Sant Just o Santa Coloma a qui li agradi el bon pa, envia-li l’enllaç.',
+      'Si coneixes algú a Sant Boi, Sant Just, Sant Joan Despí, Sant Feliu o Santa Coloma a qui li agradi el bon pa, envia-li l’enllaç.',
     shareLink: 'Enviar per WhatsApp ↗',
     shareGift:
-      'Si coneixes algú a Sant Boi, Sant Just o Santa Coloma a qui li agradi el bon pa, envia-li la teva invitació: amb la primera comanda tindrà un croissant de regal, i tu un altre a la teva propera comanda.',
+      'Si coneixes algú a Sant Boi, Sant Just, Sant Joan Despí, Sant Feliu o Santa Coloma a qui li agradi el bon pa, envia-li la teva invitació: amb la primera comanda tindrà un croissant de regal, i tu un altre a la teva propera comanda.',
     shareText:
       'He provat el pa de Molla, un obrador de Sant Boi: fermentació lenta i te’l porten a casa. Mira: ',
     newsH: 'T’aviso cada setmana?',
