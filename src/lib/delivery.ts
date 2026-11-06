@@ -4,6 +4,8 @@ export const deliveryWindow = '12:00–14:00';
 export const deliveryTowns = [
   { id: 'sant-boi', name: 'Sant Boi de Llobregat' },
   { id: 'sant-just', name: 'Sant Just Desvern' },
+  { id: 'sant-joan', name: 'Sant Joan Despí' },
+  { id: 'sant-feliu', name: 'Sant Feliu de Llobregat' },
   { id: 'santa-coloma', name: 'Santa Coloma de Cervelló' },
 ] as const;
 export type TownId = (typeof deliveryTowns)[number]['id'];

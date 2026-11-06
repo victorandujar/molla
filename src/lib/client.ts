@@ -731,8 +731,8 @@ form?.addEventListener('submit', async (event) => {
       share.rel = 'noopener noreferrer';
       share.href = `https://wa.me/?text=${encodeURIComponent(
         (isCa
-          ? 'Acabo de fer una comanda a Molla, un obrador de pa i brioixeria artesans de Sant Boi. Te la porten a casa dimecres o dissabte a Sant Boi, Sant Just i Santa Coloma: '
-          : 'Acabo de hacer un pedido en Molla, un obrador de pan y bollería artesanos de Sant Boi. Te lo llevan a casa el miércoles o el sábado en Sant Boi, Sant Just y Santa Coloma: ') +
+          ? 'Acabo de fer una comanda a Molla, un obrador de pa i brioixeria artesans de Sant Boi. Te la porten a casa dimecres o dissabte a Sant Boi, Sant Just, Sant Joan Despí, Sant Feliu i Santa Coloma: '
+          : 'Acabo de hacer un pedido en Molla, un obrador de pan y bollería artesanos de Sant Boi. Te lo llevan a casa el miércoles o el sábado en Sant Boi, Sant Just, Sant Joan Despí, Sant Feliu y Santa Coloma: ') +
           invite.href,
       )}`;
       share.textContent = isCa
