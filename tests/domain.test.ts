@@ -373,7 +373,7 @@ test('home delivery needs a town in the zone and an address; pickup needs neithe
   });
   assert.equal(outside.error?.issues[0]?.message, 'town');
   // Next to Sant Just: delivered to the door too.
-  for (const town of ['sant-joan', 'sant-feliu', 'santa-coloma', 'sant-boi'])
+  for (const town of ['sant-joan', 'sant-feliu', 'santa-coloma', 'sant-vicenc', 'sant-boi'])
     assert.equal(
       reservationSchema.safeParse({ ...home, town, address: 'Carrer Major 1' })
         .success,
