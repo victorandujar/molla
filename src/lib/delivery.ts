@@ -7,6 +7,7 @@ export const deliveryTowns = [
   { id: 'sant-joan', name: 'Sant Joan Despí' },
   { id: 'sant-feliu', name: 'Sant Feliu de Llobregat' },
   { id: 'santa-coloma', name: 'Santa Coloma de Cervelló' },
+  { id: 'sant-vicenc', name: 'Sant Vicenç dels Horts' },
 ] as const;
 export type TownId = (typeof deliveryTowns)[number]['id'];
 export const townById = (id: string) => deliveryTowns.find((t) => t.id === id);
