@@ -9,7 +9,7 @@ Complementa `lanzamiento-30-dias.md`. Mantiene sus reglas: nada de reseñas inve
 
 - **A domicilio**: Sant Boi de Llobregat, Sant Just Desvern, Sant Joan Despí, Sant Feliu de Llobregat y Santa Coloma de Cervelló. Los municipios y la franja están en `src/lib/delivery.ts`; si cambian, se cambian ahí.
 - **Recogida en Sant Boi**: el resto del Baix Llobregat (Cornellà, Sant Joan Despí, Sant Feliu, Sant Vicenç dels Horts, Viladecans…).
-- **Capacidad**: con una sola cocotte, 6–8 hogazas por hornada sin estrés. Con la ruta de 12 a 14 h, cuenta unos 10 minutos por entrega en la misma zona y 20 entre Sant Boi y Sant Just. Más de 10 entregas en dos horas obliga a ordenar bien la ruta o a abrir una segunda franja.
+- **Capacidad**: hasta 20 hogazas por hornada: tandas de 4, cinco tandas en unas 5 horas de mañana. El cupo de cada hornada está en la base de datos y se cambia con `npm run bake:prod -- capacity <hornada> <n> --yes` (las siguientes lo heredan). Con la ruta de 12 a 14 h, cuenta unos 10 minutos por entrega en la misma zona y 20 entre Sant Boi y Sant Just. Más de 10 entregas en dos horas obliga a ordenar bien la ruta o a abrir una segunda franja.
 
 Mensajes que funcionan en local:
 
