@@ -143,15 +143,15 @@ export const products = [
     image: 'crumb',
     available: true,
   },
-  // Recipe, weight and allergens of the two new breads: confirm them with
-  // the baker before publishing more detail (src/lib/i18n.ts, `breads`).
+  // Ingredients as given by the baker (src/lib/i18n.ts, `breads`, for the page).
   {
     id: 'masa-madre',
     name: 'Masa madre',
     subtitle: 'Hogaza de masa madre',
     price: SOURDOUGH_PRICE_CENTS,
     weight: '',
-    ingredients: 'Harina de trigo, agua, sal y masa madre.',
+    ingredients:
+      'Harina de trigo de fuerza, harina integral, masa madre, agua y sal.',
     allergens: 'Contiene trigo (gluten).',
     image: 'loaves',
     available: true,
@@ -162,7 +162,8 @@ export const products = [
     subtitle: 'Hogaza con un 60 % de harina integral',
     price: WHOLEGRAIN_PRICE_CENTS,
     weight: '',
-    ingredients: 'Harina de trigo integral (60 %) y blanca, agua y sal.',
+    ingredients:
+      'Harina integral, levadura, agua, harina de trigo de fuerza y sal.',
     allergens: 'Contiene trigo (gluten).',
     image: 'loaves',
     available: true,

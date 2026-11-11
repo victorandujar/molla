@@ -325,8 +325,10 @@ export const ui = {
         wholegrain: 'Con un 60 % de harina integral.',
       },
       details: {
-        sourdough: 'Harina de trigo, agua, sal y masa madre.',
-        wholegrain: 'Harina de trigo integral (60 %) y blanca, agua y sal.',
+        sourdough:
+          'Harina de trigo de fuerza, harina integral, masa madre, agua y sal.',
+        wholegrain:
+          'Harina integral, levadura, agua, harina de trigo de fuerza y sal.',
       },
       allergens:
         'Contienen trigo (gluten). Si tienes otra alergia, pregúntame antes de reservar.',
@@ -847,8 +849,10 @@ export const ui = {
         wholegrain: 'Amb un 60 % de farina integral.',
       },
       details: {
-        sourdough: 'Farina de blat, aigua, sal i massa mare.',
-        wholegrain: 'Farina de blat integral (60 %) i blanca, aigua i sal.',
+        sourdough:
+          'Farina de blat de força, farina integral, massa mare, aigua i sal.',
+        wholegrain:
+          'Farina integral, llevat, aigua, farina de blat de força i sal.',
       },
       allergens:
         'Contenen blat (gluten). Si tens una altra al·lèrgia, pregunta’m abans de reservar.',
