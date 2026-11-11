@@ -76,8 +76,7 @@ export const madridParts = (lang: Lang, iso: string) => {
 const capital = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
 // Towns outside the delivery zone that pick up in Sant Boi.
-const areaTowns =
-  'Cornellà, Molins de Rei o Viladecans';
+const areaTowns = 'Cornellà, Molins de Rei o Viladecans';
 // "12:00–14:00" reads "de 12 a 14 h" in copy.
 const [fromH, toH] = deliveryWindow
   .split('–')
@@ -132,7 +131,7 @@ export const ui = {
       h1a: 'Pan artesano, recién hecho,',
       h1b: 'en tu puerta',
       sub: `Cada miércoles y cada sábado ${hours.es}, a domicilio en Sant Boi, Sant Just Desvern, Sant Joan Despí, Sant Feliu, Santa Coloma y Sant Vicenç.`,
-      short: `Lo horneo esa misma mañana y te lo llevo a casa o a la oficina, en Sant Boi, Sant Just, Sant Joan Despí, Sant Feliu, Santa Coloma y Sant Vicenç. ${loafPrice} la hogaza. Pagas al recibirlo, sin compromiso.`,
+      short: `Lo horneo esa misma mañana y te lo llevo a casa o a la oficina, cada miércoles y sábado ${hours.es}. ${loafPrice} la hogaza, envío gratis y pagas al recibirlo.`,
       kicker: 'Panadería de barrio · Baix Llobregat',
       keywords: [
         'Harinas ecológicas',
@@ -173,7 +172,8 @@ export const ui = {
     },
     baker: {
       line: 'Soy Víctor. Hago el pan en Sant Boi, hogaza a hogaza, y te lo llevo yo.',
-      photo: 'Víctor, el panadero, sostiene una hogaza recién horneada y sonríe',
+      photo:
+        'Víctor, el panadero, sostiene una hogaza recién horneada y sonríe',
       reviews: 'Ver las reseñas',
     },
     film: {
@@ -243,6 +243,7 @@ export const ui = {
       },
       pill: 'Tu pedido',
       pillCta: 'Reservar',
+      pillDone: 'Terminar →',
       loaves: (n: number) => `${n} ${n === 1 ? 'hogaza' : 'hogazas'}`,
       banana: (halves: number) =>
         halves === 1 ? '½ banana bread' : `${halves / 2} banana bread`,
@@ -265,7 +266,7 @@ export const ui = {
       closed: 'Esta semana ya no acepto pedidos. Te aviso de la próxima.',
       unavailable:
         'No puedo consultar el cupo ahora. Recarga la página antes de reservar.',
-      ctaOpen: 'Hacer mi pedido',
+      ctaOpen: (weekday: string) => `Reservar mi pan del ${weekday}`,
       ctaClosed: 'Avísame de la próxima',
     },
     loaf: {
@@ -325,16 +326,18 @@ export const ui = {
     },
     combos: {
       kicker: 'Combina Molla',
-      bar: 'Tres ideas para empezar',
-      h2a: 'Combina',
-      h2b: 'Molla.',
-      intro: 'Pan artesano y bollería para disfrutar en casa.',
+      bar: 'Para toda la casa',
+      h2a: 'Para',
+      h2b: 'compartir.',
+      intro:
+        'Dos hogazas, un croissant y un pain au chocolat: el pan de la semana y el desayuno del fin de semana, en una sola entrega.',
+      others: '¿Para uno?',
       items: {
         desayuno: 'El desayuno',
         capricho: 'El capricho',
         compartir: 'Para compartir',
       },
-      note: 'Al precio de cada pieza, sumadas. Arriba las tienes también sueltas.',
+      note: 'Al precio de cada pieza, sumadas. Las tienes también sueltas en la carta.',
       add: (name: string) => `Añadir ${name} al pedido`,
       added: 'En tu pedido ✓',
     },
@@ -440,6 +443,8 @@ export const ui = {
       bananaMore: 'Añadir media pieza de banana bread',
       bananaNone: 'Sin banana bread',
       emptyOrder: 'Añade una hogaza, un banana bread o bollería para reservar.',
+      quickPick: '¿Empezamos por aquí?',
+      quickLoaf: (price: string) => `1 hogaza · ${price}`,
       totalLabel: 'Total a pagar al recibirlo',
       pickup: 'Entrega',
       where: 'Dónde',
@@ -458,7 +463,8 @@ export const ui = {
       townPick: 'Elige tu municipio',
       address: 'Dirección de entrega',
       notes: 'Si no estás (opcional)',
-      notesPlaceholder: 'Déjalo en portería, en recepción, a la vecina del 2.º…',
+      notesPlaceholder:
+        'Déjalo en portería, en recepción, a la vecina del 2.º…',
       addressPlaceholder: 'Calle, número, piso y puerta (casa o trabajo)',
       deliveryLabel: (town: string) => `Entrega a domicilio en ${town}`,
       pay: 'Pago',
@@ -480,6 +486,7 @@ export const ui = {
       pickupCheck: (day: string, window: string) =>
         `Te lo entrego el ${day}: en la dirección que pongas ${hours.es} si eliges entrega a domicilio, o en el punto de recogida de Sant Boi de Llobregat${window ? ` (${window})` : ''}.`,
       privacyA: 'He leído la',
+      privacyNote: 'Al reservar aceptas la',
       privacyLink: 'privacidad y las condiciones',
       referralNote:
         '🎁 Vienes invitado por un vecino: con tu primer pedido, un croissant de regalo.',
@@ -496,7 +503,7 @@ export const ui = {
       noscriptMail: 'También puedes escribirme para reservar.',
       closedH3: 'Esta semana ya no quedan hogazas.',
       closedP:
-        'Déjame tu email y te escribo en cuanto abra la próxima hornada.',
+        'Te aviso en cuanto abra la próxima hornada: por WhatsApp o por email.',
       notify: 'Avísame',
     },
     faq: {
@@ -530,7 +537,12 @@ export const ui = {
     },
     waitlist: {
       h2: '¿Te aviso de la próxima hornada?',
-      p: 'Un email cuando abra reservas. Te das de baja cuando quieras.',
+      p: 'Un mensaje cuando abra reservas, y nada más.',
+      whatsapp: 'Avísame por WhatsApp',
+      whatsappText:
+        '¡Hola Víctor! Avísame cuando abras la próxima hornada, por favor.',
+      channelCta: 'Unirme al canal de WhatsApp',
+      emailAlt: '¿Prefieres un email?',
       label: 'Tu email',
       button: 'Avísame',
       honey: 'Deja vacío',
@@ -563,7 +575,7 @@ export const ui = {
       makerBar: 'Baix Llobregat',
       reserveBar: 'Sin tarjeta ni cuenta',
       faqBar: 'Lo que más me preguntan',
-      waitBar: 'Un correo por hornada',
+      waitBar: 'Un aviso por hornada',
       fig2: '(Fig. 2) La de cada semana, recién salida del horno',
       fig3: '(Fig. 3) Banana bread de pepitas de chocolate',
       fig4: '(Fig. 6) Quien hace el pan',
@@ -618,7 +630,7 @@ export const ui = {
       h1a: 'Pa artesà, acabat de fer,',
       h1b: 'a la porta de casa',
       sub: `Cada dimecres i cada dissabte ${hours.ca}, a domicili a Sant Boi, Sant Just Desvern, Sant Joan Despí, Sant Feliu, Santa Coloma i Sant Vicenç.`,
-      short: `El faig aquell mateix matí i te’l porto a casa o a la feina, a Sant Boi, Sant Just, Sant Joan Despí, Sant Feliu, Santa Coloma i Sant Vicenç. ${loafPrice} el pa. Pagues en rebre’l, sense compromís.`,
+      short: `El faig aquell mateix matí i te’l porto a casa o a la feina, cada dimecres i dissabte ${hours.ca}. ${loafPrice} el pa, enviament gratis i pagues en rebre’l.`,
       kicker: 'Fleca de barri · Baix Llobregat',
       keywords: [
         'Farines ecològiques',
@@ -728,6 +740,7 @@ export const ui = {
       },
       pill: 'La teva comanda',
       pillCta: 'Reservar',
+      pillDone: 'Acabar →',
       loaves: (n: number) => `${n} ${n === 1 ? 'pa' : 'pans'}`,
       banana: (halves: number) =>
         halves === 1 ? '½ banana bread' : `${halves / 2} banana bread`,
@@ -750,7 +763,7 @@ export const ui = {
       closed: 'Aquesta setmana ja no accepto comandes. T’aviso de la propera.',
       unavailable:
         'Ara no puc consultar la disponibilitat. Recarrega la pàgina abans de reservar.',
-      ctaOpen: 'Fer la meva comanda',
+      ctaOpen: (weekday: string) => `Reservar el meu pa del ${weekday}`,
       ctaClosed: 'Avisa’m de la propera',
     },
     loaf: {
@@ -808,16 +821,18 @@ export const ui = {
     },
     combos: {
       kicker: 'Combina Molla',
-      bar: 'Tres idees per començar',
-      h2a: 'Combina',
-      h2b: 'Molla.',
-      intro: 'Pa artesà i brioixeria per gaudir a casa.',
+      bar: 'Per a tota la casa',
+      h2a: 'Per',
+      h2b: 'compartir.',
+      intro:
+        'Dos pans, un croissant i un pain au chocolat: el pa de la setmana i l’esmorzar del cap de setmana, en una sola entrega.',
+      others: 'Per a una persona?',
       items: {
         desayuno: 'L’esmorzar',
         capricho: 'El caprici',
         compartir: 'Per compartir',
       },
-      note: 'Al preu de cada peça, sumades. A dalt les tens també soltes.',
+      note: 'Al preu de cada peça, sumades. Les tens també soltes a la carta.',
       add: (name: string) => `Afegir ${name} a la comanda`,
       added: 'A la comanda ✓',
     },
@@ -924,6 +939,8 @@ export const ui = {
       bananaMore: 'Afegir mitja peça de banana bread',
       bananaNone: 'Sense banana bread',
       emptyOrder: 'Afegeix un pa, un banana bread o brioixeria per reservar.',
+      quickPick: 'Comencem per aquí?',
+      quickLoaf: (price: string) => `1 pa · ${price}`,
       totalLabel: 'Total a pagar a l’entrega',
       pickup: 'Entrega',
       where: 'On',
@@ -964,6 +981,7 @@ export const ui = {
       pickupCheck: (day: string, window: string) =>
         `Te l’entrego ${day}: a l’adreça que posis ${hours.ca} si tries entrega a domicili, o al punt de recollida de Sant Boi de Llobregat${window ? ` (${window})` : ''}.`,
       privacyA: 'He llegit la',
+      privacyNote: 'En reservar acceptes la',
       privacyLink: 'privacitat i les condicions',
       referralNote:
         '🎁 Vens convidat per un veí: amb la primera comanda, un croissant de regal.',
@@ -979,7 +997,8 @@ export const ui = {
       noscript: 'Activa JavaScript per veure la confirmació en aquesta pàgina.',
       noscriptMail: 'També em pots escriure per reservar.',
       closedH3: 'Aquesta setmana ja no queden pans.',
-      closedP: 'Deixa’m el teu correu i t’escric quan obri la propera fornada.',
+      closedP:
+        'T’aviso quan obri la propera fornada: per WhatsApp o per correu.',
       notify: 'Avisa’m',
     },
     faq: {
@@ -1013,7 +1032,12 @@ export const ui = {
     },
     waitlist: {
       h2: 'T’aviso de la propera fornada?',
-      p: 'Un correu quan obri reserves. Et dones de baixa quan vulguis.',
+      p: 'Un missatge quan obri reserves, i res més.',
+      whatsapp: 'Avisa’m per WhatsApp',
+      whatsappText:
+        'Hola Víctor! Avisa’m quan obris la propera fornada, si us plau.',
+      channelCta: 'Unir-me al canal de WhatsApp',
+      emailAlt: 'Prefereixes un correu?',
       label: 'El teu correu',
       button: 'Avisa’m',
       honey: 'Deixa-ho buit',
@@ -1047,7 +1071,7 @@ export const ui = {
       makerBar: 'Baix Llobregat',
       reserveBar: 'Sense targeta ni compte',
       faqBar: 'El que més em pregunteu',
-      waitBar: 'Un correu per fornada',
+      waitBar: 'Un avís per fornada',
       fig2: '(Fig. 2) El de cada setmana, acabat de sortir del forn',
       fig3: '(Fig. 3) Banana bread de gotes de xocolata',
       fig4: '(Fig. 6) Qui fa el pa',

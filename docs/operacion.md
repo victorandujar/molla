@@ -18,6 +18,8 @@ Las Preview tienen `LIVE_ORDERS=true` contra `molla_dev` y sin `RESEND_API_KEY`:
 - **Marcar recogido** (con **Deshacer** por si te equivocas).
 - **Cancelar…**: pide confirmación, libera las hogazas y no se puede deshacer.
 
+«Apuntar un pedido» (`#manual`) registra los pedidos que llegan por Instagram, WhatsApp o en persona: elige el canal, las piezas, la entrega y el contacto del cliente. Va a la hornada abierta, ocupa su cupo y aparece en la lista con su canal, pero no envía emails ni suma al embudo de la web (que solo mide lo que pasa en la página).
+
 Debajo, el embudo de los últimos 28 días y los avisos confirmados o pendientes. La sesión dura 12 horas, la cookie solo viaja a `/gestio` y hay 5 intentos de contraseña cada 10 minutos por IP. Cambiar `ADMIN_PASSWORD` (y redesplegar) cierra todas las sesiones.
 
 ## Hornadas: ciclo semanal automático

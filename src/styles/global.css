@@ -739,7 +739,7 @@ figure picture {
   overflow: clip;
   background: var(--cobalt-deep);
   /* Se abre desde la línea donde se parte el pan. */
-  animation: split-open 1.6s var(--ease-in-out) 0.35s both;
+  animation: split-open 0.8s var(--ease-in-out) 0.05s both;
 }
 @keyframes split-open {
   from {
@@ -751,7 +751,7 @@ figure picture {
 }
 .hero-photo-frame img {
   object-position: 50% 46%;
-  animation: settle 2.4s var(--ease-out) 0.35s both;
+  animation: settle 1.6s var(--ease-out) 0.05s both;
   transition: scale 1.4s var(--ease-out);
 }
 @keyframes settle {
@@ -774,10 +774,10 @@ figure picture {
   line-height: 1;
   color: var(--paper);
   text-shadow: 0 2px 30px rgba(0, 0, 0, 0.25);
-  animation: rise 1s var(--ease-out) 1.2s both;
+  animation: rise 0.8s var(--ease-out) 0.5s both;
 }
 .hero-photo .fig-bar {
-  animation: rise 0.9s var(--ease-out) 1.3s both;
+  animation: rise 0.8s var(--ease-out) 0.6s both;
 }
 .hero-info {
   grid-column: 8 / -1;
@@ -786,8 +786,8 @@ figure picture {
   padding-left: clamp(0px, 1.6vw, 24px);
 }
 .hero-in {
-  animation: rise 0.9s var(--ease-out) both;
-  animation-delay: calc(var(--i) * 90ms + 500ms);
+  animation: rise 0.6s var(--ease-out) both;
+  animation-delay: calc(var(--i) * 60ms + 100ms);
 }
 @keyframes rise {
   from {
@@ -1203,6 +1203,34 @@ figure picture {
 }
 .combo-add {
   margin-top: 16px;
+}
+/* «Para compartir» leads, wide; the two for one person follow, smaller. */
+.combo-list:has(.is-featured) {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.combo.is-featured {
+  grid-column: 1 / -1;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-rows: none;
+  box-shadow: inset 0 0 0 2px var(--cobalt);
+}
+.combo.is-featured .combo-photo {
+  aspect-ratio: 4 / 3;
+}
+.combo.is-featured h3 {
+  font-size: clamp(32px, 3.4vw, 54px);
+}
+.combo.is-featured .combo-price {
+  font-size: clamp(42px, 4vw, 64px);
+}
+.combo-others {
+  grid-column: 1 / -1;
+  margin-top: 8px;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
 }
 .combos-note {
   margin-top: 20px;
@@ -2785,6 +2813,30 @@ details.dish-more {
   font-size: 14px;
   color: var(--muted);
 }
+.form-empty[hidden] {
+  display: none;
+}
+/* One tap from an empty ticket: a loaf, or «Para compartir». */
+.quick-label {
+  margin-top: 14px;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--cobalt);
+}
+.quick-picks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+.quick-picks .button {
+  flex: 1 1 200px;
+  min-height: 50px;
+  padding-inline: 16px;
+  font-size: 12px;
+}
 /* Troquel: línea discontinua con dos muescas a los lados. */
 .perforation {
   position: relative;
@@ -2859,8 +2911,20 @@ input::placeholder {
   grid-template-columns: 1fr 1fr;
   gap: 0 14px;
 }
-.waitlist-channel {
-  margin-top: 12px;
+.waitlist-whatsapp {
+  margin-top: 16px;
+}
+.waitlist-whatsapp .button {
+  width: 100%;
+  max-width: 420px;
+}
+.waitlist-alt {
+  margin-top: 18px;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
 }
 .address-columns {
   grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr);
@@ -3690,7 +3754,7 @@ details[open] p {
     margin-bottom: 28px;
   }
   .hero-photo-frame {
-    aspect-ratio: 16 / 11;
+    aspect-ratio: 16 / 10;
   }
   .hero-photo .fig-bar {
     display: none;
@@ -3867,6 +3931,25 @@ details[open] p {
   .combo-add .button-plus {
     margin-right: -6px;
   }
+  .combo-list:has(.is-featured) {
+    grid-template-columns: 1fr;
+  }
+  .combo.is-featured {
+    grid-template-columns: 1fr;
+  }
+  .combo.is-featured .combo-photo {
+    aspect-ratio: 16 / 10;
+    margin: 0;
+  }
+  .combo.is-featured .combo-body {
+    padding: 18px 18px 20px;
+  }
+  .combo.is-featured h3 {
+    font-size: clamp(28px, 8vw, 36px);
+  }
+  .combo.is-featured .combo-price {
+    font-size: 40px;
+  }
   .why-stats {
     grid-template-columns: 1fr;
   }
@@ -3976,6 +4059,23 @@ details[open] p {
 .admin h2 {
   font-size: 1.6rem;
   margin: 40px 0 16px;
+}
+.admin-manual {
+  margin-top: 16px;
+}
+.admin-manual summary {
+  display: inline-flex;
+  cursor: pointer;
+  list-style: none;
+}
+.admin-manual summary::-webkit-details-marker {
+  display: none;
+}
+.admin-manual-form {
+  display: grid;
+  gap: 4px;
+  max-width: 640px;
+  margin-top: 20px;
 }
 .admin-login {
   max-width: 360px;

@@ -89,7 +89,6 @@ test('reservation, validation and waitlist journey', async ({ page }) => {
   await page.locator('#town').selectOption('sant-just');
   await page.locator('#address').fill('Carrer Major 1, 2n 1a');
   await page.locator('input[name=pickup]').check();
-  await page.locator('input[name=privacy]').check();
   // An empty order explains itself instead of reaching the server.
   await page.locator('#reservation-form button[type=submit]').click();
   await expect(page.locator('#reservation-form .form-error')).toContainText(
@@ -157,7 +156,6 @@ test('croissants alone can be booked from the form', async ({ page }) => {
   await page.locator('#town').selectOption('sant-boi');
   await page.locator('#address').fill('Carrer Major 1, 2n 1a');
   await page.locator('input[name=pickup]').check();
-  await page.locator('input[name=privacy]').check();
   await page.locator('#reservation-form button[type=submit]').click();
   await expect(page.locator('#confirmation')).toBeVisible();
   await expect(page.locator('#confirmation')).toContainText('2 × Croissant');
@@ -179,7 +177,6 @@ test('a booking without email goes through and is keyed by phone', async ({
   await page.locator('#address').fill('Carrer Major 1, 2n 1a');
   await page.locator('#notes').fill('Déjalo en portería');
   await page.locator('input[name=pickup]').check();
-  await page.locator('input[name=privacy]').check();
   await page.locator('#reservation-form button[type=submit]').click();
   await expect(page.locator('#confirmation')).toBeVisible();
   const d = await readData();
@@ -216,7 +213,13 @@ test('the panel shows the pa fix goal and whom to offer it to', async ({
     status: 'COLLECTED',
     pickupDate: past,
   });
-  const sub = (name: string, email: string, phone: string, quantity: number, frequency: string) => ({
+  const sub = (
+    name: string,
+    email: string,
+    phone: string,
+    quantity: number,
+    frequency: string,
+  ) => ({
     id: crypto.randomUUID(),
     token: crypto.randomUUID(),
     name,
@@ -262,7 +265,9 @@ test('the panel shows the pa fix goal and whom to offer it to', async ({
   await expect(offer).toContainText('Ana Prueba');
   await expect(offer).toContainText('2 pedidos');
   await expect(offer).not.toContainText('Bea Fija');
-  const link = offer.getByRole('link', { name: /Ofrecer pan fijo por WhatsApp/ });
+  const link = offer.getByRole('link', {
+    name: /Ofrecer pan fijo por WhatsApp/,
+  });
   const href = decodeURIComponent((await link.getAttribute('href'))!);
   expect(href).toContain('wa.me/34612345678');
   expect(href).toContain('Hola, Ana! Sóc el Víctor, de Molla.');
@@ -710,7 +715,7 @@ test('pastries on every bake: the Wednesday bake takes them too', async ({
   await expect(page.locator('#hornada .stub-day')).toContainText('miércoles');
   await expect(page.locator('[data-buy="croissant"]')).toHaveCount(1);
   await expect(page.locator('#croissant')).toHaveCount(1);
-  await expect(page.locator('[data-combo]')).toHaveCount(3);
+  await expect(page.locator('#combina [data-combo]')).toHaveCount(3);
 });
 
 test('Google reviews: verbatim quotes in both languages and exact links', async ({
@@ -1159,7 +1164,7 @@ test('no banana bread gift anywhere; the first order still gets the pa fix vouch
 }) => {
   await page.goto('/es/');
   await expect(page.locator('.hero-lede')).toContainText(
-    'Pagas al recibirlo, sin compromiso.',
+    'envío gratis y pagas al recibirlo.',
   );
   // The banana bread welcome gift is over: not in the hero nor by the ticket.
   await expect(page.locator('.hero-gift')).toHaveCount(0);
@@ -1218,7 +1223,6 @@ test('no banana bread gift anywhere; the first order still gets the pa fix vouch
   await page.locator('#email').fill('bea@example.com');
   await page.locator('#phone').fill('612345678');
   await page.locator('input[name=pickup]').check();
-  await page.locator('input[name=privacy]').check();
   await page.locator('#reservation-form button[type=submit]').click();
   await expect(page.locator('#confirmation')).toBeVisible();
   // No banana bread gift; the only gift is the "invite a neighbour" croissant.
@@ -1244,10 +1248,11 @@ test('Combina Molla: three pairings at the sum of their pieces, counted per pair
   await page.goto('/es/');
   const combos = page.locator('#combina .combo');
   await expect(combos).toHaveCount(3);
-  // No discount: 5 + 2,20 · 5 + 2,50 · 2 × 5 + 2,20 + 2,50.
-  await expect(combos.nth(0)).toContainText('7,20€');
-  await expect(combos.nth(1)).toContainText('7,50€');
-  await expect(combos.nth(2)).toContainText('14,70€');
+  // «Para compartir» leads. No discount: 2 × 5 + 2,20 + 2,50 · 5 + 2,20 · 5 + 2,50.
+  await expect(combos.nth(0)).toHaveClass(/is-featured/);
+  await expect(combos.nth(0)).toContainText('14,70€');
+  await expect(combos.nth(1)).toContainText('7,20€');
+  await expect(combos.nth(2)).toContainText('7,50€');
   await expect(page.locator('#combina')).not.toContainText(
     /descuento|gratis|oferta/i,
   );
@@ -1284,7 +1289,6 @@ test('checkout opt-in: the weekly email is optional and unticked by default', as
       .locator('#reservation-form [data-target=quantity][data-step="1"]')
       .click();
     await page.locator('input[name=pickup]').check();
-    await page.locator('input[name=privacy]').check();
     const box = page.locator('input[name=news]');
     await expect(box).not.toBeChecked();
     await expect(page.locator('#reservation-form')).toContainText(
@@ -1320,7 +1324,6 @@ test('invite a neighbour: personal link, invited note and gift croissant', async
       .locator('#reservation-form [data-target=quantity][data-step="1"]')
       .click();
     await page.locator('input[name=pickup]').check();
-    await page.locator('input[name=privacy]').check();
     await page.locator('#reservation-form button[type=submit]').click();
     await expect(page.locator('#confirmation')).toBeVisible();
   };
@@ -1380,4 +1383,63 @@ test('Christmas page: before December it sends visitors to the shop', async ({
   await page.goto('/es/navidad?dia=24');
   await expect(page).toHaveURL(/\/es\/$/);
   await expect(page.locator('.xmas-strip')).toHaveCount(0);
+});
+test('manual order: an Instagram order is noted in /gestio and counts in the bake', async ({
+  page,
+}) => {
+  await page.goto('/gestio');
+  await page.locator('input[name=password]').fill('e2e-password-local');
+  await page.locator('form button[type=submit]').first().click();
+  const manual = page.locator('#manual');
+  await manual.locator('summary').click();
+  await manual.locator('#m-source').selectOption('instagram');
+  await manual.locator('#m-quantity').fill('2');
+  await manual.locator('#m-croissant').fill('1');
+  await manual.locator('#m-pain').fill('1');
+  await manual.locator('#m-delivery').selectOption('pickup');
+  await manual.locator('#m-name').fill('Clara Insta');
+  await manual.locator('#m-phone').fill('612345678');
+  await manual.getByRole('button', { name: 'Apuntar pedido' }).click();
+  await expect(page.locator('#manual .admin-notice')).toContainText(
+    'Pedido apuntado',
+  );
+  const orders = (await readData()).orders;
+  expect(orders).toHaveLength(1);
+  expect(orders[0].name).toBe('Clara Insta');
+  expect(orders[0].source).toBe('instagram');
+  expect(orders[0].total).toBe(1470);
+  // Home delivery without an address is refused with the reason.
+  await manual.locator('summary').click();
+  await manual.locator('#m-quantity').fill('1');
+  await manual.locator('#m-delivery').selectOption('home');
+  await manual.locator('#m-name').fill('Sense Adreça');
+  await manual.locator('#m-phone').fill('612345679');
+  await manual.getByRole('button', { name: 'Apuntar pedido' }).click();
+  await expect(page.locator('#manual .admin-notice')).toContainText(
+    'No se ha podido apuntar',
+  );
+  expect((await readData()).orders).toHaveLength(1);
+});
+test('the hero button names the delivery day and leads to the order form', async ({
+  page,
+  request,
+}) => {
+  const day = await openDay(request);
+  await page.goto('/es/');
+  const cta = page.locator('[data-bake-cta]');
+  await expect(cta).toContainText(`Reservar mi pan del ${dayName.es[day]}`);
+  await expect(cta).toHaveAttribute('href', '#reservation-form');
+  // An empty ticket offers one tap: a loaf or «Para compartir».
+  await page
+    .locator('#reservation-form [data-empty] [data-combo=compartir]')
+    .click();
+  await expect(page.locator('#total')).toContainText('14,70');
+  await expect(page.locator('#reservation-form [data-empty]')).toBeHidden();
+  // No consent box to tick: the privacy line sits under the button.
+  await expect(
+    page.locator('#reservation-form input[name=privacy][type=checkbox]'),
+  ).toHaveCount(0);
+  await expect(page.locator('#reservation-form .form-footnote')).toContainText(
+    'Al reservar aceptas la',
+  );
 });
