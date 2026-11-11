@@ -2,7 +2,8 @@
 // printed flyers: mono labels between rules, a huge condensed headline,
 // "(FIG. n)" captions, an outlined price, numbered steps and the crumb print
 // with its text border. Five concepts, Catalan and Spanish, 4:5 feed and 9:16
-// story. Real photos only (never the AI-composed pairing scenes).
+// story. Real photos only (never the AI-composed pairing scene, El capricho;
+// El desayuno and Para compartir are the baker's own photos).
 //   npm run ads  →  exports/anuncis/*.png
 import { chromium } from 'playwright';
 import { mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises';
@@ -96,7 +97,7 @@ const copy = {
       days: 'Dimecres i dissabte · 12–14 h',
       price: 'el pa · 750–850 g',
       pay: 'Pagues en rebre’l · Enviament gratuït',
-      fig: '(Fig. 6) Dues fogasses del matí',
+      fig: '(Fig. 6) La fogassa del matí',
     },
     veins: {
       label: 'Nº 07 · Ressenyes',
@@ -181,7 +182,7 @@ const copy = {
       days: 'Miércoles y sábado · 12–14 h',
       price: 'la hogaza · 750–850 g',
       pay: 'Pagas al recibirlo · Envío gratis',
-      fig: '(Fig. 6) Dos hogazas de la mañana',
+      fig: '(Fig. 6) La hogaza de la mañana',
     },
     veins: {
       label: 'Nº 07 · Reseñas',
@@ -379,10 +380,10 @@ const carta = (t, f) => `<body class="paper"><div class="wrap">
 // 6 · The benefit first: fresh bread at the door, the price and the towns.
 const porta = (t, f) => `<body class="cobalt"><div class="wrap">
   <div class="bar mono"><span>${t.porta.label}</span><span>${t.region}</span></div>
-  <p class="cond" style="font-size:${f.story ? 170 : 150}px;margin-top:30px;color:${paper}">${t.porta.title.join('<br>')}</p>
-  <p class="cond" style="font-size:${f.story ? 170 : 150}px;color:${orange}">${t.porta.accent.join('<br>')}</p>
-  <div class="photo fill" style="margin:30px -64px 0;background-image:url(${photo('loaves')});background-position:center 45%">
-    <div style="position:absolute;right:64px;bottom:30px;background:${paper};color:${cobalt};padding:16px 26px 18px;text-align:right">
+  <p class="cond" style="font-size:${f.story ? 132 : 112}px;margin-top:28px;color:${paper};white-space:nowrap">${t.porta.title.join(' ')}</p>
+  <p class="cond" style="font-size:${f.story ? 132 : 112}px;color:${orange};white-space:nowrap">${t.porta.accent.join(' ')}</p>
+  <div class="photo fill" style="margin:28px -64px 0;background-image:url(${root}assets/combos/desayuno.webp);background-size:100% auto;background-position:center 36%">
+    <div style="position:absolute;right:64px;top:30px;background:${paper};color:${cobalt};padding:16px 26px 18px;text-align:right">
       <p class="brico" style="font-size:118px;letter-spacing:-.06em">5 €</p>
       <p class="mono" style="font-size:18px;margin-top:4px">${t.porta.price}</p>
     </div>
