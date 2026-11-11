@@ -38,13 +38,13 @@ const copy = {
       ['Reserva', 'A mollapa.com. Tanca dilluns i dijous, 20 h.'],
       [
         'Entrega',
-        'Gratuïta. Dimecres i dissabte, 12–14 h. Sant Boi, Sant Just, Sant Joan Despí, Sant Feliu, Santa Coloma.',
+        'Gratuïta. Dimecres i dissabte, 12–14 h. Sant Boi, Sant Just, Sant Joan Despí, Sant Feliu, Santa Coloma, Sant Vicenç.',
       ],
       ['A taula', 'Pagues quan el reps, en mà.'],
     ],
     stepsShort: [
       'Reserva a mollapa.com · tanca dilluns i dijous a les 20 h',
-      'Entrega gratuïta dimecres i dissabte, 12–14 h · Sant Boi, Sant Just, Sant Joan Despí, Sant Feliu i Santa Coloma',
+      'Entrega gratuïta dimecres i dissabte, 12–14 h · Sant Boi, Sant Just, Sant Joan Despí, Sant Feliu, Santa Coloma i Sant Vicenç',
       'Pagues quan el reps',
     ],
     encarrec: {
@@ -88,7 +88,7 @@ const copy = {
     },
     handle: '@molla.baixllobregat',
     phone: '649 90 79 12',
-    towns: ['Sant Boi', 'Sant Just', 'Sant Joan Despí', 'Sant Feliu', 'Santa Coloma'],
+    towns: ['Sant Boi', 'Sant Just', 'Sant Joan Despí', 'Sant Feliu', 'Santa Coloma', 'Sant Vicenç'],
     porta: {
       label: 'Nº 06 · A domicili',
       title: ['Acabat', 'de fer,'],
@@ -122,13 +122,13 @@ const copy = {
       ['Reserva', 'En mollapa.com. Cierra lunes y jueves, 20 h.'],
       [
         'Entrega',
-        'Gratis. Miércoles y sábado, 12–14 h. Sant Boi, Sant Just, Sant Joan Despí, Sant Feliu, Santa Coloma.',
+        'Gratis. Miércoles y sábado, 12–14 h. Sant Boi, Sant Just, Sant Joan Despí, Sant Feliu, Santa Coloma, Sant Vicenç.',
       ],
       ['A la mesa', 'Pagas al recibirlo, en mano.'],
     ],
     stepsShort: [
       'Reserva en mollapa.com · cierra lunes y jueves a las 20 h',
-      'Entrega gratis miércoles y sábado, 12–14 h · Sant Boi, Sant Just, Sant Joan Despí, Sant Feliu y Santa Coloma',
+      'Entrega gratis miércoles y sábado, 12–14 h · Sant Boi, Sant Just, Sant Joan Despí, Sant Feliu, Santa Coloma y Sant Vicenç',
       'Pagas al recibirlo',
     ],
     encarrec: {
@@ -173,7 +173,7 @@ const copy = {
     },
     handle: '@molla.baixllobregat',
     phone: '649 90 79 12',
-    towns: ['Sant Boi', 'Sant Just', 'Sant Joan Despí', 'Sant Feliu', 'Santa Coloma'],
+    towns: ['Sant Boi', 'Sant Just', 'Sant Joan Despí', 'Sant Feliu', 'Santa Coloma', 'Sant Vicenç'],
     porta: {
       label: 'Nº 06 · A domicilio',
       title: ['Recién', 'hecho,'],
