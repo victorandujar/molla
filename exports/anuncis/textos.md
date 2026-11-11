@@ -40,11 +40,11 @@ Para los tres conceptos nuevos: `porta`, `veins` y `whatsapp`. La campaña anter
 **Catalán**
 
 - **porta** · Pa artesà acabat de fer, a la porta de casa. El faig aquell mateix matí i te’l porto dimecres o dissabte de 12 a 14 h a Sant Boi, Sant Just Desvern, Sant Joan Despí, Sant Feliu, Santa Coloma i Sant Vicenç. 5 € el pa, enviament gratuït i pagues en rebre’l. Escriu-me i t’ho aparto.
-  Títol: Pa acabat de fer, a casa teva
+  Títol: Pa acabat de fer, a casa teva · Descripció: Dimecres i dissabte · Pagues en rebre’l
 - **veins** · 5/5 a Google. «Crujiente por fuera y una buena molla por dentro», diu el David a la seva ressenya. Fermentació lenta, farina ecològica i fet a mà a Sant Boi. Te’l porto a casa dimecres o dissabte. Escriu-me per WhatsApp i reserva el teu.
-  Títol: Ho diuen els veïns
+  Títol: Ho diuen els veïns · Descripció: 5/5 a Google · Fet a mà a Sant Boi
 - **whatsapp** · Sense webs ni formularis: escriu-me què vols i quin dia, i te’l porto a casa. Pa, croissants i pains au chocolat, dimecres o dissabte de 12 a 14 h. Pagues en rebre’l.
-  Títol: Escriu-me. Te’l porto.
+  Títol: Escriu-me. Te’l porto. · Descripció: Pa i brioixeria a domicili, sense formularis
 
 **Castellano**
 
