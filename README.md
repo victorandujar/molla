@@ -63,6 +63,8 @@ En Bing Webmaster Tools, verifica el mismo dominio con `BING_SITE_VERIFICATION` 
 - `docs/crecimiento-baix-llobregat.md`: propuesta de valor y plan para llegar a Sant Boi, Sant Just Desvern y el Baix Llobregat.
 - `docs/embudo-automatico.md`: embudo de ventas automático (avisos semanales, reseñas, Pan fijo, resumen del domingo) y cómo atraer tráfico con Google y anuncios locales.
 - `docs/verificacion.md`: pruebas realizadas y límites de la entrega.
+- `docs/auditoria-cro-2026-11.md`: auditoría de conversión (noviembre de 2026), problemas priorizados y plan de 30 días.
+- `docs/analitica-ga4.md`: canales, eventos del embudo y cómo activar GA4 con Google Tag Manager.
 
 ## Referencias consultadas
 

@@ -904,14 +904,35 @@ figure picture {
   min-height: 60px;
   font-size: 14px;
 }
-/* Reservar por WhatsApp, al lado del botón principal. */
+/* Precio y condiciones, pegados al botón: lo que decide el clic. En
+   escritorio ya los dice la entradilla, justo encima. */
+.stub-terms {
+  display: none;
+  margin-top: 12px;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--paper);
+}
+/* WhatsApp, canal secundario: un enlace bajo el botón, no otro botón. */
 .stub-whatsapp {
-  --bg: transparent;
-  --fg: var(--paper);
-  --sweep: var(--paper);
-  --sweep-fg: var(--cobalt);
-  margin-top: 10px;
-  box-shadow: inset 0 0 0 1.5px var(--paper);
+  justify-self: center;
+  margin-top: 12px;
+  padding: 6px 2px;
+  font-size: 14px;
+  color: var(--on-cobalt);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.stub-whatsapp:hover {
+  color: var(--paper);
+}
+.form-whatsapp {
+  display: block;
+  width: max-content;
+  max-width: 100%;
+  margin: 14px auto 0;
 }
 /* Qui fa el pa i una ressenya, just sota la portada. */
 .baker {
@@ -3766,6 +3787,7 @@ details[open] p {
     margin-top: 28px;
     padding-left: 0;
   }
+
   .section-head,
   .fix-grid,
   .menu,
@@ -4320,4 +4342,55 @@ details[open] p {
   width: 100%;
   height: 14px;
   margin-top: 8px;
+}
+
+/* Móvil: el botón de reservar dentro de la primera pantalla. La foto se
+   queda (es la prueba del producto) pero más baja, y la entradilla pasa
+   debajo del resguardo de la hornada. */
+@media (max-width: 720px) {
+  /* «Pan artesano por encargo» ya lo dice el titular. */
+  .hero-bar {
+    display: none;
+  }
+  .hero-photo {
+    margin-bottom: 18px;
+  }
+  .hero-photo-frame {
+    aspect-ratio: 12 / 5;
+  }
+  .stub-row {
+    flex-wrap: wrap;
+  }
+  .stub-terms {
+    display: block;
+    font-family: var(--body);
+    font-size: 14px;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+  .hero-info {
+    display: flex;
+    flex-direction: column;
+    margin-top: 14px;
+  }
+  .hero-bake {
+    order: -1;
+    grid-template-columns: minmax(0, 1fr);
+    margin-top: 0;
+    padding: 12px 14px 14px;
+  }
+  .stub-day {
+    font-size: 28px;
+  }
+  .stub-countdown {
+    margin-top: 8px;
+  }
+  .stub-cta {
+    margin-top: 12px;
+    white-space: normal;
+    text-align: center;
+  }
+  .hero-lede {
+    margin-top: 22px;
+  }
 }

@@ -246,7 +246,12 @@ const graph = [organization, website, webpage, ...jsonLd];
               {other.toUpperCase()}
             </a>
           )}
-          <a class="nav-order" href={`${home}#reserva`} data-event="click_reserve">
+          <a
+            class="nav-order"
+            href={`${home}#reserva`}
+            data-event="click_reserve"
+            data-place="header"
+          >
             {t.nav.order}
             <span class="nav-count" data-cart-count hidden>
               0

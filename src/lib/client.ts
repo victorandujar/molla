@@ -12,6 +12,8 @@ type EventName =
   | 'waitlist_signup'
   | 'click_instagram'
   | 'click_whatsapp'
+  | 'click_whatsapp_order'
+  | 'form_start'
   | 'click_channel'
   | 'subscription_completed'
   | 'pickup_info_view'
@@ -34,22 +36,51 @@ const inviteCode = (() => {
     return valid;
   }
 })();
-function source(): Source {
-  const q = new URLSearchParams(location.search)
-    .get('utm_source')
-    ?.toLowerCase();
+// Paid traffic: Meta's default parameters (utm_source=ig/fb/an/msg, from
+// {{site_source_name}}), any paid utm_medium, or Google Ads click ids.
+const paidMedium = /^(paid|paid_?social|cpc|ppc|cpm|ads?|display|meta_ads)$/;
+const paidSource = /^(ig|fb|an|msg|meta|facebook_ads|instagram_ads)$/;
+function landingSource(): Source | '' {
+  const params = new URLSearchParams(location.search);
+  const q = params.get('utm_source')?.toLowerCase() || '';
+  const medium = params.get('utm_medium')?.toLowerCase() || '';
+  if (
+    paidMedium.test(medium) ||
+    paidSource.test(q) ||
+    // Not fbclid: Meta adds it to organic link clicks too (bio, stories).
+    params.has('gclid') ||
+    params.has('gbraid') ||
+    params.has('wbraid')
+  )
+    return 'ads';
   if (q && (sources as readonly string[]).includes(q)) return q as Source;
-  if (new URLSearchParams(location.search).has('ref') && inviteCode)
-    return 'referral';
-  const ref = document.referrer;
+  if (params.has('ref') && inviteCode) return 'referral';
   try {
-    const host = new URL(ref).hostname;
+    const host = new URL(document.referrer).hostname;
+    if (host === location.hostname) return '';
     if (/(^|\.)google\./.test(host)) return 'google';
+    // l.instagram.com and lm.facebook.com are the apps' link shims.
     if (host.endsWith('instagram.com')) return 'instagram';
     if (/(^|\.)facebook\.com$/.test(host)) return 'facebook';
-    if (host !== location.hostname) return 'referral';
+    return 'referral';
   } catch {}
-  return 'direct';
+  // Instagram's and Facebook's in-app browsers often send no referrer.
+  if (/\bInstagram\b/.test(navigator.userAgent)) return 'instagram';
+  if (/\bFBA[NV]\//.test(navigator.userAgent)) return 'facebook';
+  return '';
+}
+// The channel is kept for the whole visit: someone who lands on
+// /pa-a-domicili from an ad and then orders on the home page is still «ads»,
+// not «direct». A new tagged landing in the same tab replaces it.
+function source(): Source {
+  const found = landingSource();
+  try {
+    if (found) sessionStorage.setItem('molla-source', found);
+    const kept = sessionStorage.getItem('molla-source') || '';
+    if (!found && (sources as readonly string[]).includes(kept))
+      return kept as Source;
+  } catch {}
+  return found || 'direct';
 }
 const acquisition = source();
 // Provider-neutral hooks, first-party daily counters (event and channel only)
@@ -67,10 +98,70 @@ if (counted)
       return { ...event, url: url.href };
     },
   });
+/* ---- GA4 vía Google Tag Manager: los mismos pasos con los nombres de GA4,
+   en window.dataLayer. Sin PUBLIC_GTM_ID no se carga nada de Google: el
+   dataLayer se queda en la página y no sale ningún dato. Con él, GTM arranca
+   con el consentimiento denegado (sin cookies) hasta que un banner de
+   consentimiento lo conceda: ver docs/analitica-ga4.md. ---- */
+const w = window as unknown as { dataLayer?: unknown[] };
+const dataLayer = (w.dataLayer ??= []);
+function gtag(..._args: unknown[]) {
+  // gtag needs the arguments object itself, not an array.
+  // eslint-disable-next-line prefer-rest-params
+  dataLayer.push(arguments);
+}
+gtag('consent', 'default', {
+  ad_storage: 'denied',
+  ad_user_data: 'denied',
+  ad_personalization: 'denied',
+  analytics_storage: 'denied',
+});
+type Params = Record<string, unknown>;
+function ga4(event: string, params: Params = {}) {
+  if (!counted) return;
+  // GA4 merges ecommerce objects between pushes unless they are cleared.
+  if ('ecommerce' in params) dataLayer.push({ ecommerce: null });
+  dataLayer.push({ event, traffic_channel: acquisition, ...params });
+}
+dataLayer.push({
+  event: 'molla_context',
+  traffic_channel: acquisition,
+  page_language: document.documentElement.lang,
+});
+const gtmId = String(import.meta.env.PUBLIC_GTM_ID || '');
+if (counted && /^GTM-[A-Z0-9]{4,12}$/.test(gtmId)) {
+  dataLayer.push({ 'gtm.start': Date.now(), event: 'gtm.js' });
+  const tag = document.createElement('script');
+  tag.async = true;
+  tag.src = `https://www.googletagmanager.com/gtm.js?id=${gtmId}`;
+  document.head.append(tag);
+}
+// Clicks and steps that are not ecommerce, in GA4's words. Clicks are
+// intentions, never orders: only `purchase` is an order.
+const ga4Names: Partial<Record<EventName, string>> = {
+  click_reserve: 'cta_reserve_click',
+  form_start: 'form_start',
+  reservation_submit: 'form_submit',
+  reservation_error: 'form_error',
+  click_whatsapp: 'whatsapp_click',
+  click_whatsapp_order: 'whatsapp_click',
+  click_instagram: 'instagram_click',
+  click_channel: 'whatsapp_channel_click',
+  waitlist_signup: 'generate_lead',
+  subscription_completed: 'subscription_signup',
+};
 function track(
   name: EventName,
   properties: Record<string, string | number> = {},
 ) {
+  const ga4Name = ga4Names[name];
+  if (ga4Name)
+    ga4(ga4Name, {
+      ...properties,
+      ...(name.startsWith('click_whatsapp')
+        ? { intent: name === 'click_whatsapp_order' ? 'order' : 'question' }
+        : {}),
+    });
   window.dispatchEvent(
     new CustomEvent('molla:analytics', {
       detail: { event: name, source: acquisition, ...properties },
@@ -93,17 +184,44 @@ document
   .forEach((el) => {
     el.value = acquisition;
   });
-document
-  .querySelectorAll<HTMLElement>('[data-event]')
-  .forEach((el) =>
-    el.addEventListener('click', () => track(el.dataset.event as EventName)),
-  );
+document.querySelectorAll<HTMLElement>('[data-event]').forEach((el) =>
+  el.addEventListener('click', () =>
+    // data-place says which button it was: hero, form, question…
+    track(
+      el.dataset.event as EventName,
+      el.dataset.place ? { placement: el.dataset.place } : {},
+    ),
+  ),
+);
+// GA4 product names and ids, the same ids as the server's products.
+const catalog = {
+  loaf: { item_id: 'clasica', item_name: 'Hogaza de fermentación lenta' },
+  banana: { item_id: 'banana', item_name: 'Banana bread' },
+  croissant: { item_id: 'croissant', item_name: 'Croissant' },
+  pain: { item_id: 'pain-au-chocolat', item_name: 'Pain au chocolat' },
+} as const;
+type ItemKey = keyof typeof catalog;
+let itemsViewed = false;
 const observer = new IntersectionObserver(
   (entries) => {
     for (const entry of entries)
       if (entry.isIntersecting) {
-        track((entry.target as HTMLElement).dataset.eventView as EventName);
+        const name = (entry.target as HTMLElement).dataset
+          .eventView as EventName;
+        track(name);
         observer.unobserve(entry.target);
+        if (name === 'view_product' && !itemsViewed && form) {
+          itemsViewed = true;
+          ga4('view_item', {
+            ecommerce: {
+              currency: 'EUR',
+              items: (Object.keys(catalog) as ItemKey[]).map((k) => ({
+                ...catalog[k],
+                price: priceOf(k) / 100,
+              })),
+            },
+          });
+        }
       }
   },
   { threshold: 0.35 },
@@ -349,6 +467,72 @@ function startOnce() {
   started = true;
   track('start_reservation');
 }
+const priceOf = (k: ItemKey) =>
+  k === 'loaf' ? prices.loaf : k === 'banana' ? prices.half : prices[k];
+const bananaCents = (halves: number) =>
+  Math.floor(halves / 2) * prices.whole + (halves % 2) * prices.half;
+const keyOf = (input: HTMLInputElement): ItemKey =>
+  input === banana
+    ? 'banana'
+    : input === croissant
+      ? 'croissant'
+      : input === pain
+        ? 'pain'
+        : 'loaf';
+// Which list a button belongs to, for GA4's select_item.
+const listOf = (el: Element) =>
+  el.closest('#combina')
+    ? 'combina'
+    : el.closest('#reservation-form')
+      ? 'ticket'
+      : 'carta';
+const selected = new Set<string>();
+function selectOnce(key: ItemKey | string, origin: Element) {
+  if (selected.has(key)) return;
+  selected.add(key);
+  const item = key in catalog ? catalog[key as ItemKey] : null;
+  ga4('select_item', {
+    ecommerce: {
+      item_list_name: listOf(origin),
+      items: [item || { item_id: `combo-${key}`, item_name: key }],
+    },
+  });
+}
+// begin_checkout: the order has something in it and the ticket is in use.
+let checkoutBegun = false;
+function beginCheckout() {
+  const c = cart();
+  if (checkoutBegun || c.total === 0) return;
+  checkoutBegun = true;
+  ga4('begin_checkout', {
+    ecommerce: { currency: 'EUR', value: c.total / 100, items: cartItems() },
+  });
+}
+function cartItems() {
+  const c = cart();
+  return [
+    c.loaves && {
+      ...catalog.loaf,
+      price: prices.loaf / 100,
+      quantity: c.loaves,
+    },
+    c.halves && {
+      ...catalog.banana,
+      price: bananaCents(c.halves) / c.halves / 100,
+      quantity: c.halves,
+    },
+    c.croissants && {
+      ...catalog.croissant,
+      price: prices.croissant / 100,
+      quantity: c.croissants,
+    },
+    c.pains && {
+      ...catalog.pain,
+      price: prices.pain / 100,
+      quantity: c.pains,
+    },
+  ].filter(Boolean);
+}
 function change(
   input: HTMLInputElement | null,
   delta: number,
@@ -357,9 +541,28 @@ function change(
   if (!input) return;
   const next = Math.min(maxOf(input), Math.max(0, read(input) + delta));
   if (next === read(input)) return;
+  const before = cart().total;
+  const units = next - read(input);
   input.value = String(next);
   if (delta > 0) startOnce();
   render(delta > 0 ? origin : null);
+  const value = Math.abs(cart().total - before) / 100;
+  const key = keyOf(input);
+  ga4(units > 0 ? 'add_to_cart' : 'remove_from_cart', {
+    ecommerce: {
+      currency: 'EUR',
+      value,
+      items: [
+        {
+          ...catalog[key],
+          // Banana bread counts in halves (GA4 wants whole quantities).
+          quantity: Math.abs(units),
+          price:
+            key === 'banana' ? value / Math.abs(units) : priceOf(key) / 100,
+        },
+      ],
+    },
+  });
 }
 document
   .querySelectorAll<HTMLButtonElement>('[data-step]')
@@ -374,12 +577,14 @@ document.querySelectorAll<HTMLButtonElement>('[data-add]').forEach((button) =>
     const step = addStep(button);
     // A whole mould when only a half is left: add what remains.
     const room = maxOf(input) - read(input);
+    if (input) selectOnce(keyOf(input), button);
     change(input, Math.min(step, room), button);
   }),
 );
 /* ---- Combina Molla: one button fills the same fields as the cards. ---- */
 combos.forEach((button) =>
   button.addEventListener('click', () => {
+    selectOnce(button.dataset.combo!, button);
     const want = comboItems(button);
     for (const [input, n] of [
       [quantity, want.loaf],
@@ -456,6 +661,43 @@ if (countdown) {
 }
 render();
 form?.addEventListener('focusin', startOnce, { once: true });
+// form_start: the first time someone types their details (town, address,
+// name, email or phone), not the quantity buttons.
+let formStarted = false;
+form?.addEventListener('focusin', (e) => {
+  const el = e.target as HTMLElement;
+  if (formStarted || !el.matches('select, input:not([type=number])')) return;
+  if ((el as HTMLInputElement).type === 'checkbox') return;
+  formStarted = true;
+  beginCheckout();
+  track('form_start');
+});
+// begin_checkout as soon as the ticket is on screen with something in it.
+if (form)
+  new IntersectionObserver(
+    (entries, obs) => {
+      if (entries.some((e) => e.isIntersecting) && cart().total > 0) {
+        beginCheckout();
+        obs.disconnect();
+      }
+    },
+    { threshold: 0.25 },
+  ).observe(form);
+window.addEventListener('molla:cart', () => {
+  // Something added while the ticket is already on screen.
+  const box = form?.getBoundingClientRect();
+  if (!checkoutBegun && box && box.top < innerHeight && box.bottom > 0)
+    beginCheckout();
+});
+// One purchase per order code, even if the confirmation is shown again.
+function purchaseOnce(code: string) {
+  try {
+    const sent = JSON.parse(sessionStorage.getItem('molla-orders') || '[]');
+    if (sent.includes(code)) return false;
+    sessionStorage.setItem('molla-orders', JSON.stringify([...sent, code]));
+  } catch {}
+  return true;
+}
 async function submit(target: HTMLFormElement) {
   const response = await fetch(target.action, {
     method: 'POST',
@@ -600,7 +842,15 @@ form?.addEventListener('submit', async (event) => {
     }
     const ref = document.createElement('p');
     ref.className = 'confirmation-ref';
-    ref.textContent = `${isCa ? 'Codi de recollida' : 'Código de recogida'}: ${order.code}`;
+    // Home delivery has nothing to pick up: it is the order's code.
+    const codeLabel = home
+      ? isCa
+        ? 'Codi de comanda'
+        : 'Código de pedido'
+      : isCa
+        ? 'Codi de recollida'
+        : 'Código de recogida';
+    ref.textContent = `${codeLabel}: ${order.code}`;
     const save = document.createElement('button');
     save.className = 'button';
     save.type = 'button';
@@ -626,7 +876,9 @@ form?.addEventListener('submit', async (event) => {
       chat.textContent = isCa
         ? 'Rebre la confirmació per WhatsApp ↗'
         : 'Recibir la confirmación por WhatsApp ↗';
-      chat.addEventListener('click', () => track('click_whatsapp'));
+      chat.addEventListener('click', () =>
+        track('click_whatsapp', { placement: 'confirmation' }),
+      );
       result.append(chat);
     }
     if (order.contact) {
@@ -767,6 +1019,21 @@ form?.addEventListener('submit', async (event) => {
       quantity: order.quantity,
       total: order.total,
     });
+    // GA4's conversion: a confirmed booking saved in the database (paid on
+    // delivery). Never sent for demo orders or for a code already counted.
+    if (!order.demo && purchaseOnce(order.code)) {
+      beginCheckout();
+      ga4('purchase', {
+        delivery_type: order.delivery ? 'home' : 'pickup',
+        first_order: order.firstOrder ? 'yes' : 'no',
+        ecommerce: {
+          transaction_id: order.code,
+          currency: 'EUR',
+          value: order.total / 100,
+          items: cartItems(),
+        },
+      });
+    }
     const booked = cart();
     if (
       [...combos].some((b) => {

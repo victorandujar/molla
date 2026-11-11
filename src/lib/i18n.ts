@@ -164,7 +164,9 @@ export const ui = {
         'Fins a 35 h de fermentació',
         'Baix Llobregat',
       ],
-      proof: ['Pagas al recibirlo', 'Envío gratis'],
+      // Price and terms sit by the button; the proof line adds who and where.
+      terms: `${loafPrice} la hogaza · Envío gratis · Pagas al recibirlo`,
+      proof: ['Hecho a mano en Sant Boi'],
       scroll: 'Desliza',
       hands: 'Las manos de mi madre',
       sealTop: 'hasta',
@@ -497,6 +499,8 @@ export const ui = {
       footnote:
         'Pagas al recibirlo. Cancelas con un clic hasta el cierre. Sin compromiso.',
       whatsappCta: 'Reservar por WhatsApp',
+      // Secondary: a text link under the main button, not a second button.
+      whatsappAlt: '¿Prefieres pedirlo por WhatsApp?',
       whatsappText: (day: string) =>
         `¡Hola! Quiero reservar pan para el ${day}. Me gustaría: `,
       noscript: 'Activa JavaScript para ver la confirmación en esta página.',
@@ -663,7 +667,8 @@ export const ui = {
         'Fins a 35 h de fermentació',
         'Baix Llobregat',
       ],
-      proof: ['Pagues en rebre’l', 'Enviament gratis'],
+      terms: `${loafPrice} el pa · Enviament gratis · Pagues en rebre’l`,
+      proof: ['Fet a mà a Sant Boi'],
       scroll: 'Llisca',
       hands: 'Les mans de la meva mare',
       sealTop: 'fins a',
@@ -992,6 +997,7 @@ export const ui = {
       footnote:
         'Pagues a l’entrega. Cancel·les amb un clic fins al tancament. Sense compromís.',
       whatsappCta: 'Reservar per WhatsApp',
+      whatsappAlt: 'Prefereixes demanar-lo per WhatsApp?',
       whatsappText: (day: string) =>
         `Hola! Voldria reservar pa per al ${day}. M’agradaria: `,
       noscript: 'Activa JavaScript per veure la confirmació en aquesta pàgina.',
