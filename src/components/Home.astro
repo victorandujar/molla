@@ -114,37 +114,6 @@ const pastries = [
     text: t.pastry.painText,
   },
 ] as const;
-// Combina Molla: three suggested pairings, priced as the sum of their pieces
-// (no discount). They fill the same order fields as the single products.
-// «Para compartir» leads: the one customers actually ask for.
-const combos = (
-  [
-    ['compartir', 'combo-compartir', { loaf: 2, croissant: 1, pain: 1 }],
-    ['desayuno', 'combo-desayuno', { loaf: 1, croissant: 1 }],
-    ['capricho', 'combo-capricho', { loaf: 1, pain: 1 }],
-  ] as const
-).map(([id, photo, items]) => {
-  const n = { croissant: 0, pain: 0, ...items };
-  return {
-    id,
-    photo,
-    items: n,
-    name: t.combos.items[id],
-    lines: [
-      t.catalog.loaves(n.loaf),
-      n.croissant && t.catalog.croissants(n.croissant),
-      n.pain && t.catalog.pains(n.pain),
-    ]
-      .filter(Boolean)
-      .join(' + '),
-    price:
-      n.loaf * loaf.price + n.croissant * croissant.price + n.pain * pain.price,
-    fits:
-      n.loaf <= stock.bread.max &&
-      n.croissant + n.pain <= pastryPool &&
-      Math.max(n.croissant, n.pain) <= pastryMax,
-  };
-});
 // Without the database the configured bake is only a placeholder: never show its date.
 const pickupDay = unavailable
   ? t.bake.dateSoon
@@ -157,7 +126,6 @@ const pickupWeekday = unavailable
       timeZone: 'Europe/Madrid',
       weekday: 'long',
     }).format(new Date(current.pickupDate));
-const shareCombo = combos[0]!;
 // Prices in the flyer's shorthand: "5€", "8€".
 const short = (cents: number) =>
   cents % 100 ? money(cents) : `${cents / 100}€`;
@@ -776,74 +744,6 @@ const jsonLd = [
       </div>
     </section>
 
-    <!-- Combina Molla: tres combinacions, al preu de les peces, sense descompte -->
-    <section
-      id="combina"
-      class="combos"
-      aria-labelledby="combos-title"
-      data-event-view="view_product"
-    >
-      <div class="wrap">
-        <div class="mono-bar" data-bar>
-          <span>Nº 02 · {t.combos.kicker}</span>
-          <span>{t.combos.bar}</span>
-        </div>
-        <header class="combos-head">
-          <h2 id="combos-title" data-split>
-            {t.combos.h2a} <em>{t.combos.h2b}</em>
-          </h2>
-          <p data-reveal>{t.combos.intro}</p>
-        </header>
-        <ul class="combo-list">
-          {combos.map((c, i) => (
-            <>
-              {i === 1 && <li class="combo-others">{t.combos.others}</li>}
-              <li class:list={['combo', { 'is-featured': i === 0 }]}>
-                <figure class="combo-photo">
-                  <Photo
-                    name={c.photo}
-                    alt=""
-                    sizes={
-                      i === 0
-                        ? '(max-width: 720px) calc(100vw - 40px), 46vw'
-                        : '(max-width: 720px) 38vw, 22vw'
-                    }
-                  />
-                </figure>
-                <div class="combo-body">
-                  <h3>{c.name}</h3>
-                  <p class="combo-lines">{c.lines}</p>
-                  <p class="combo-price">
-                    <span aria-hidden="true">{tight(c.price)}</span>
-                    <span class="visually-hidden">{money(c.price)}</span>
-                  </p>
-                  {open && (
-                    <button
-                      type="button"
-                      class="button button-orange combo-add"
-                      data-combo={c.id}
-                      data-combo-loaf={c.items.loaf}
-                      data-combo-croissant={c.items.croissant}
-                      data-combo-pain={c.items.pain}
-                      data-added={t.combos.added}
-                      disabled={!c.fits}
-                      aria-label={t.combos.add(c.name)}
-                    >
-                      {t.pastry.add}
-                      <span class="button-plus" aria-hidden="true">
-                        +
-                      </span>
-                    </button>
-                  )}
-                </div>
-              </li>
-            </>
-          ))}
-        </ul>
-        <p class="combos-note">{open ? t.combos.note : t.catalog.closed}</p>
-      </div>
-    </section>
-
     <!-- 7 · Reserva: el tiquet, sobre el azul del flyer -->
     <section id="reserva" class="reserve" aria-labelledby="reserve-title">
       {(xmasLinks.length > 0 || chosen) && (
@@ -870,7 +770,7 @@ const jsonLd = [
       )}
       <div class="wrap">
         <div class="mono-bar" data-bar>
-          <span>Nº 03 · {t.reserve.kicker}</span>
+          <span>Nº 02 · {t.reserve.kicker}</span>
           <span>{t.ed.reserveBar}</span>
         </div>
       </div>
@@ -1228,14 +1128,11 @@ const jsonLd = [
                   <button
                     type="button"
                     class="button"
-                    data-combo={shareCombo.id}
-                    data-combo-loaf={shareCombo.items.loaf}
-                    data-combo-croissant={shareCombo.items.croissant}
-                    data-combo-pain={shareCombo.items.pain}
-                    data-added={t.combos.added}
-                    disabled={!shareCombo.fits}
+                    data-add="sourdough"
+                    disabled={stock.bread.max < 1}
                   >
-                    {shareCombo.name} · {money(shareCombo.price)}
+                    1 {t.catalog.sourdough.toLowerCase()} ·{' '}
+                    {money(sourdough.price)}
                   </button>
                 </div>
               </div>
@@ -1654,7 +1551,7 @@ const jsonLd = [
     <section id="preguntas" class="faq" aria-labelledby="faq-title">
       <div class="wrap">
         <div class="mono-bar" data-bar>
-          <span>Nº 04 · {t.nav.faq}</span>
+          <span>Nº 03 · {t.nav.faq}</span>
           <span>{t.ed.faqBar}</span>
         </div>
         <div class="faq-grid">
@@ -1689,7 +1586,7 @@ const jsonLd = [
     >
       <div class="wrap">
         <div class="mono-bar" data-bar>
-          <span>Nº 05 · {t.status.UPCOMING}</span>
+          <span>Nº 04 · {t.status.UPCOMING}</span>
           <span>{t.ed.waitBar}</span>
         </div>
       </div>
