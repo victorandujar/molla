@@ -38,13 +38,13 @@ const copy = {
       ['Reserva', 'A mollapa.com. Tanca dilluns i dijous, 20 h.'],
       [
         'Entrega',
-        'Gratuïta. Dimecres i dissabte, 12–14 h. Sant Boi, Sant Just, Santa Coloma.',
+        'Gratuïta. Dimecres i dissabte, 12–14 h. Sant Boi, Sant Just, Sant Joan Despí, Sant Feliu, Santa Coloma.',
       ],
       ['A taula', 'Pagues quan el reps, en mà.'],
     ],
     stepsShort: [
       'Reserva a mollapa.com · tanca dilluns i dijous a les 20 h',
-      'Entrega gratuïta dimecres i dissabte, 12–14 h · Sant Boi, Sant Just Desvern i Santa Coloma de Cervelló',
+      'Entrega gratuïta dimecres i dissabte, 12–14 h · Sant Boi, Sant Just, Sant Joan Despí, Sant Feliu i Santa Coloma',
       'Pagues quan el reps',
     ],
     encarrec: {
@@ -87,6 +87,33 @@ const copy = {
       note: 'Entrega gratuïta dimecres i dissabte · Pagues en rebre-ho',
     },
     handle: '@molla.baixllobregat',
+    phone: '649 90 79 12',
+    towns: ['Sant Boi', 'Sant Just', 'Sant Joan Despí', 'Sant Feliu', 'Santa Coloma'],
+    porta: {
+      label: 'Nº 06 · A domicili',
+      title: ['Acabat', 'de fer,'],
+      accent: ['a la porta', 'de casa.'],
+      days: 'Dimecres i dissabte · 12–14 h',
+      price: 'el pa · 750–850 g',
+      pay: 'Pagues en rebre’l · Enviament gratuït',
+      fig: '(Fig. 6) Dues fogasses del matí',
+    },
+    veins: {
+      label: 'Nº 07 · Ressenyes',
+      title: ['Ho diuen', 'els veïns.'],
+      source: 'Ressenya a Google',
+      count: '7 ressenyes a Google',
+      fig: '(Fig. 7) La molla, oberta',
+    },
+    whatsapp: {
+      label: 'Nº 08 · Per WhatsApp',
+      title: ['Escriu-me.', 'Te’l porto.'],
+      ask: 'Hola! Vull 1 pa i 2 croissants per dissabte 🙂',
+      reply: 'Fet! Dissabte entre les 12 i les 14 h te’ls porto. Són 9,40 € i pagues en rebre’ls.',
+      who: 'Víctor · Molla',
+      cta: 'Escriu-me al',
+      fig: '(Fig. 8) Recent sortit del forn',
+    },
   },
   es: {
     craft: 'Pan artesano por encargo',
@@ -95,13 +122,13 @@ const copy = {
       ['Reserva', 'En mollapa.com. Cierra lunes y jueves, 20 h.'],
       [
         'Entrega',
-        'Gratis. Miércoles y sábado, 12–14 h. Sant Boi, Sant Just, Santa Coloma.',
+        'Gratis. Miércoles y sábado, 12–14 h. Sant Boi, Sant Just, Sant Joan Despí, Sant Feliu, Santa Coloma.',
       ],
       ['A la mesa', 'Pagas al recibirlo, en mano.'],
     ],
     stepsShort: [
       'Reserva en mollapa.com · cierra lunes y jueves a las 20 h',
-      'Entrega gratis miércoles y sábado, 12–14 h · Sant Boi, Sant Just Desvern y Santa Coloma de Cervelló',
+      'Entrega gratis miércoles y sábado, 12–14 h · Sant Boi, Sant Just, Sant Joan Despí, Sant Feliu y Santa Coloma',
       'Pagas al recibirlo',
     ],
     encarrec: {
@@ -145,8 +172,40 @@ const copy = {
       note: 'Entrega gratis miércoles y sábado · Pagas al recibirlo',
     },
     handle: '@molla.baixllobregat',
+    phone: '649 90 79 12',
+    towns: ['Sant Boi', 'Sant Just', 'Sant Joan Despí', 'Sant Feliu', 'Santa Coloma'],
+    porta: {
+      label: 'Nº 06 · A domicilio',
+      title: ['Recién', 'hecho,'],
+      accent: ['en tu', 'puerta.'],
+      days: 'Miércoles y sábado · 12–14 h',
+      price: 'la hogaza · 750–850 g',
+      pay: 'Pagas al recibirlo · Envío gratis',
+      fig: '(Fig. 6) Dos hogazas de la mañana',
+    },
+    veins: {
+      label: 'Nº 07 · Reseñas',
+      title: ['Lo dicen', 'los vecinos.'],
+      source: 'Reseña en Google',
+      count: '7 reseñas en Google',
+      fig: '(Fig. 7) La miga, abierta',
+    },
+    whatsapp: {
+      label: 'Nº 08 · Por WhatsApp',
+      title: ['Escríbeme.', 'Te lo llevo.'],
+      ask: '¡Hola! Quiero 1 pan y 2 croissants para el sábado 🙂',
+      reply: '¡Hecho! El sábado entre las 12 y las 14 h te los llevo. Son 9,40 € y pagas al recibirlos.',
+      who: 'Víctor · Molla',
+      cta: 'Escríbeme al',
+      fig: '(Fig. 8) Recién salido del horno',
+    },
   },
 };
+// Real Google reviews, verbatim (src/lib/config.ts → googleReviews).
+const reviews = [
+  { text: 'TOTALMENTE ESPECTACULAR', author: 'Carlos M.' },
+  { text: 'Crujiente por fuera y una buena molla por dentro.', author: 'David L.' },
+];
 
 // The crumb print: cobalt dough, each alveolus a paper-coloured hole.
 const crumbSvg = (cls = '') =>
@@ -317,14 +376,85 @@ const carta = (t, f) => `<body class="paper"><div class="wrap">
   </div>
 </div></body>`;
 
-const concepts = { encarrec, facil, hores, obrador, carta };
+// 6 · The benefit first: fresh bread at the door, the price and the towns.
+const porta = (t, f) => `<body class="cobalt"><div class="wrap">
+  <div class="bar mono"><span>${t.porta.label}</span><span>${t.region}</span></div>
+  <p class="cond" style="font-size:${f.story ? 170 : 150}px;margin-top:30px;color:${paper}">${t.porta.title.join('<br>')}</p>
+  <p class="cond" style="font-size:${f.story ? 170 : 150}px;color:${orange}">${t.porta.accent.join('<br>')}</p>
+  <div class="photo fill" style="margin:30px -64px 0;background-image:url(${photo('loaves')});background-position:center 45%">
+    <div style="position:absolute;right:64px;bottom:30px;background:${paper};color:${cobalt};padding:16px 26px 18px;text-align:right">
+      <p class="brico" style="font-size:118px;letter-spacing:-.06em">5 €</p>
+      <p class="mono" style="font-size:18px;margin-top:4px">${t.porta.price}</p>
+    </div>
+  </div>
+  <div class="bar mono" style="margin-top:20px;font-size:19px;border-bottom:3px solid ${orange}"><span>${t.porta.fig}</span><span>${t.porta.days}</span></div>
+  <p class="mono" style="margin-top:20px;font-size:21px;line-height:1.7">${t.towns.join(' · ')}</p>
+  <div class="rule" style="margin-top:20px;padding-top:18px;display:flex;justify-content:space-between;align-items:center">
+    <span class="word" style="font-size:66px;color:${paper}">molla.</span>
+    <span class="mono" style="font-size:19px;text-align:right">${t.porta.pay}</span>
+  </div>
+</div></body>`;
+
+// 7 · Social proof: 5/5 on Google and two real reviews over the crumb.
+const veins = (t, f) => `<body class="paper"><div class="wrap">
+  <div class="bar mono"><span>${t.veins.label}</span><span>mollapa.com</span></div>
+  <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-top:30px">
+    <p class="cond" style="font-size:${f.story ? 170 : 150}px">${t.veins.title.join('<br>')}</p>
+    <div style="text-align:right;flex:none">
+      <p class="brico outline" style="font-size:150px;-webkit-text-stroke:3px ${orange};letter-spacing:-.06em">5/5</p>
+      <p style="font-size:40px;letter-spacing:.08em;color:${orange};margin-top:-6px">★★★★★</p>
+    </div>
+  </div>
+  <div class="photo fill" style="margin:30px -64px 0;background-image:url(${photo('crumb')});background-position:center 60%">
+    <div style="position:absolute;left:64px;right:64px;bottom:34px;display:grid;gap:16px">
+      ${reviews
+        .map(
+          (r) => `<div style="background:${paper};color:${ink};padding:20px 26px;box-shadow:0 0 0 2px ${cobalt}">
+        <p class="brico" style="font-size:${f.story ? 50 : 44}px;color:${cobalt}">“${r.text}”</p>
+        <p class="mono" style="font-size:17px;margin-top:10px">${r.author} · ${t.veins.source}</p>
+      </div>`,
+        )
+        .join('')}
+    </div>
+  </div>
+  <div class="bar mono" style="border:0;padding:18px 0 0;font-size:19px"><span>${t.veins.fig}</span><strong>${t.veins.count}</strong></div>
+  <div class="orange-rule" style="margin-top:18px;padding-top:16px;display:flex;justify-content:space-between;align-items:center">
+    <span class="word" style="font-size:72px">molla.</span>
+    <span class="mono" style="font-size:18px">${t.handle} · mollapa.com</span>
+  </div>
+</div></body>`;
+
+// 8 · For the click-to-WhatsApp campaign: a sample order chat over the baker.
+const whatsapp = (t, f) => `<body class="cobalt">
+  <div class="photo" style="position:absolute;inset:0;background-image:url(${photo('smell')});background-position:62% 25%"></div>
+  <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(15,29,85,.6) 0%,rgba(15,29,85,.05) 24%,rgba(15,29,85,.15) 40%,rgba(15,29,85,.94) 66%)"></div>
+  <div class="wrap">
+    <div class="bar mono"><span>${t.whatsapp.label}</span><span>${t.region}</span></div>
+    <div class="fill"></div>
+    <div style="display:grid;gap:14px;margin-bottom:28px">
+      <p style="justify-self:end;max-width:720px;background:${paper};color:${ink};font-size:${f.story ? 34 : 31}px;line-height:1.35;padding:18px 24px;border-radius:22px 22px 4px 22px">${t.whatsapp.ask}</p>
+      <div style="justify-self:start;max-width:780px;background:${orange};color:${ink};padding:18px 24px;border-radius:22px 22px 22px 4px">
+        <p class="mono" style="font-size:16px;font-weight:700">${t.whatsapp.who}</p>
+        <p style="font-size:${f.story ? 34 : 31}px;line-height:1.35;margin-top:6px">${t.whatsapp.reply}</p>
+      </div>
+    </div>
+    <div class="bar mono" style="font-size:19px;border-bottom:3px solid ${orange}"><span>${t.whatsapp.fig}</span><span>${t.porta.days}</span></div>
+    <p class="cond" style="font-size:${f.story ? 168 : 146}px;margin-top:24px;color:${paper}">${t.whatsapp.title[0]}<br><span style="color:${orange}">${t.whatsapp.title[1]}</span></p>
+    <div class="rule" style="margin-top:24px;padding-top:18px;display:flex;justify-content:space-between;align-items:center">
+      <span class="word" style="font-size:66px;color:${paper}">molla.</span>
+      <span class="mono" style="font-size:21px;text-align:right">${t.whatsapp.cta}<br><strong style="font-size:30px;color:${orange}">${t.phone}</strong></span>
+    </div>
+  </div>
+</body>`;
+
+const concepts = { encarrec, facil, hores, obrador, carta, porta, veins, whatsapp };
 // Stories: Instagram covers the top and bottom bands with its own UI, so
 // they carry only the crumb print, never text.
 const bands = (f) =>
   `<div style="position:absolute;left:0;right:0;top:0;height:${f.top - 60}px;overflow:hidden">${crumbSvg('band')}</div>
   <div style="position:absolute;left:0;right:0;bottom:0;height:${f.bottom - 80}px;overflow:hidden">${crumbSvg('band')}</div>
   <style>.band{width:100%;height:100%;display:block}</style>`;
-const withBands = ['encarrec', 'facil', 'carta'];
+const withBands = ['encarrec', 'facil', 'carta', 'porta', 'veins'];
 // Stories keep the top ~250 px and bottom ~300 px clear of Instagram's UI.
 const formats = {
   feed: { w: 1080, h: 1350, top: 64, bottom: 60, story: false },
