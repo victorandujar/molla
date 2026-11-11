@@ -9,7 +9,7 @@
 | `hores`    | «35 hores» sobre el patrón de miga con su marco de texto | Patrón de miga (vector)      |
 | `obrador`  | «Fet per algú del barri.»                                | El panadero en el obrador    |
 | `carta`    | La carta con precios                                     | Banana bread                 |
-| `porta`    | «Acabat de fer, a la porta de casa.», 5 € y los 6 municipios | Hogaza entera sobre la tabla |
+| `porta`    | «Acabat de fer, a la porta de casa.», 5 € y los 6 municipios | Hogaza entera sobre la tabla (assets/photos/hogaza-tabla.jpg) |
 | `veins`    | «Ho diuen els veïns.», 5/5 en Google y dos reseñas reales | Hogaza abierta, la miga       |
 | `whatsapp` | «Escriu-me. Te’l porto.» con un pedido de ejemplo por chat | El panadero oliendo el pan    |
 

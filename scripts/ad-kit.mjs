@@ -377,24 +377,47 @@ const carta = (t, f) => `<body class="paper"><div class="wrap">
   </div>
 </div></body>`;
 
-// 6 · The benefit first: fresh bread at the door, the price and the towns.
-const porta = (t, f) => `<body class="cobalt"><div class="wrap">
-  <div class="bar mono"><span>${t.porta.label}</span><span>${t.region}</span></div>
-  <p class="cond" style="font-size:${f.story ? 132 : 112}px;margin-top:28px;color:${paper};white-space:nowrap">${t.porta.title.join(' ')}</p>
-  <p class="cond" style="font-size:${f.story ? 132 : 112}px;color:${orange};white-space:nowrap">${t.porta.accent.join(' ')}</p>
-  <div class="photo fill" style="margin:28px -64px 0;background-image:url(${root}assets/combos/desayuno.webp);background-size:100% auto;background-position:center 36%">
-    <div style="position:absolute;right:64px;top:30px;background:${paper};color:${cobalt};padding:16px 26px 18px;text-align:right">
-      <p class="brico" style="font-size:118px;letter-spacing:-.06em">5 €</p>
-      <p class="mono" style="font-size:18px;margin-top:4px">${t.porta.price}</p>
+// 6 · The benefit first: the whole loaf on its board (the baker's photo,
+// assets/photos/hogaza-tabla.jpg), the headline over the wall above it, the
+// price, the days and the towns.
+// In the photo the loaf spans 21–72.5 % of the height; the photo is scaled so
+// the whole loaf fits between the headline and the bottom block, and a blurred
+// copy of the same photo fills any side margin.
+const porta = (t, f) => {
+  const src = `${root}assets/photos/hogaza-tabla.jpg`;
+  const ratio = 2000 / 1506;
+  const bottom = (f.story ? f.bottom : f.bottom) + 190; // the cobalt block
+  const area = f.h - bottom; // photo area, from the top edge
+  const head = f.story ? f.top + 330 : 345; // the headline ends here
+  const w = Math.min(1080, (area - head - 24) / (0.515 * ratio));
+  const y = head + 12 - 0.21 * ratio * w; // loaf top just under the headline
+  return `<body class="cobalt">
+  <div style="position:absolute;left:0;right:0;top:0;height:${area}px;overflow:hidden;background:${cobalt}">
+    <div style="position:absolute;inset:-40px;background:url(${src}) center/cover;filter:blur(28px) brightness(.9)"></div>
+    <div style="position:absolute;left:${(1080 - w) / 2}px;top:${y}px;width:${w}px;height:${w * ratio}px;background:url(${src}) center/100% 100%"></div>
+    <div style="position:absolute;left:0;right:0;top:0;height:${head + 30}px;background:linear-gradient(180deg,rgba(15,29,85,.92) 0%,rgba(15,29,85,.75) 60%,rgba(15,29,85,0) 100%)"></div>
+  </div>
+  <div class="wrap">
+    <div class="bar mono"><span>${t.porta.label}</span><span>${t.region}</span></div>
+    <p class="cond" style="font-size:${f.story ? 132 : 104}px;margin-top:26px;color:${paper};white-space:nowrap">${t.porta.title.join(' ')}</p>
+    <p class="cond" style="font-size:${f.story ? 132 : 104}px;color:${orange};white-space:nowrap">${t.porta.accent.join(' ')}</p>
+    <div class="fill"></div>
+    <div class="orange-rule" style="padding-top:14px">
+      <p class="mono" style="font-size:16px;letter-spacing:.1em;white-space:nowrap">${t.towns.join(' · ')}</p>
+    </div>
+    <div class="rule" style="margin-top:14px;padding-top:16px;display:flex;justify-content:space-between;align-items:center;gap:24px">
+      <span class="word" style="font-size:66px;color:${paper}">molla.</span>
+      <div style="display:flex;align-items:center;gap:20px">
+        <span class="mono" style="font-size:17px;text-align:right;line-height:1.6">${t.porta.days}<br>${t.porta.pay}</span>
+        <span style="background:${paper};color:${cobalt};padding:6px 16px 8px;text-align:center">
+          <span class="brico" style="font-size:58px;letter-spacing:-.06em;display:block">5 €</span>
+          <span class="mono" style="font-size:12px;letter-spacing:.12em;display:block">${t.porta.price.split(' · ')[0]}</span>
+        </span>
+      </div>
     </div>
   </div>
-  <div class="bar mono" style="margin-top:20px;font-size:19px;border-bottom:3px solid ${orange}"><span>${t.porta.fig}</span><span>${t.porta.days}</span></div>
-  <p class="mono" style="margin-top:20px;font-size:21px;line-height:1.7">${t.towns.join(' · ')}</p>
-  <div class="rule" style="margin-top:20px;padding-top:18px;display:flex;justify-content:space-between;align-items:center">
-    <span class="word" style="font-size:66px;color:${paper}">molla.</span>
-    <span class="mono" style="font-size:19px;text-align:right">${t.porta.pay}</span>
-  </div>
-</div></body>`;
+</body>`;
+};
 
 // 7 · Social proof: 5/5 on Google and two real reviews over the crumb.
 const veins = (t, f) => `<body class="paper"><div class="wrap">
@@ -455,7 +478,7 @@ const bands = (f) =>
   `<div style="position:absolute;left:0;right:0;top:0;height:${f.top - 60}px;overflow:hidden">${crumbSvg('band')}</div>
   <div style="position:absolute;left:0;right:0;bottom:0;height:${f.bottom - 80}px;overflow:hidden">${crumbSvg('band')}</div>
   <style>.band{width:100%;height:100%;display:block}</style>`;
-const withBands = ['encarrec', 'facil', 'carta', 'porta', 'veins'];
+const withBands = ['encarrec', 'facil', 'carta', 'veins'];
 // Stories keep the top ~250 px and bottom ~300 px clear of Instagram's UI.
 const formats = {
   feed: { w: 1080, h: 1350, top: 64, bottom: 60, story: false },
