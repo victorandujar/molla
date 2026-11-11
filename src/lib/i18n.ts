@@ -353,23 +353,6 @@ export const ui = {
       more: (name: string) => `Añadir un ${name}`,
       notify: 'Avísame cuando haya',
     },
-    combos: {
-      kicker: 'Combina Molla',
-      bar: 'Para toda la casa',
-      h2a: 'Para',
-      h2b: 'compartir.',
-      intro:
-        'Dos hogazas, un croissant y un pain au chocolat: el pan de la semana y el desayuno del fin de semana, en una sola entrega.',
-      others: '¿Para uno?',
-      items: {
-        desayuno: 'El desayuno',
-        capricho: 'El capricho',
-        compartir: 'Para compartir',
-      },
-      note: 'Al precio de cada pieza, sumadas. Las tienes también sueltas en la carta.',
-      add: (name: string) => `Añadir ${name} al pedido`,
-      added: 'En tu pedido ✓',
-    },
     why: {
       kicker: 'Por qué yo',
       bar: 'Y no el horno de al lado',
@@ -876,23 +859,6 @@ export const ui = {
       less: (name: string) => `Treure un ${name}`,
       more: (name: string) => `Afegir un ${name}`,
       notify: 'Avisa’m quan n’hi hagi',
-    },
-    combos: {
-      kicker: 'Combina Molla',
-      bar: 'Per a tota la casa',
-      h2a: 'Per',
-      h2b: 'compartir.',
-      intro:
-        'Dos pans, un croissant i un pain au chocolat: el pa de la setmana i l’esmorzar del cap de setmana, en una sola entrega.',
-      others: 'Per a una persona?',
-      items: {
-        desayuno: 'L’esmorzar',
-        capricho: 'El caprici',
-        compartir: 'Per compartir',
-      },
-      note: 'Al preu de cada peça, sumades. Les tens també soltes a la carta.',
-      add: (name: string) => `Afegir ${name} a la comanda`,
-      added: 'A la comanda ✓',
     },
     why: {
       kicker: 'Per què jo',

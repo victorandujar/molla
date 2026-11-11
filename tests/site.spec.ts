@@ -716,7 +716,8 @@ test('pastries on every bake: the Wednesday bake takes them too', async ({
   await expect(page.locator('#hornada .stub-day')).toContainText('miércoles');
   await expect(page.locator('[data-buy="croissant"]')).toHaveCount(1);
   await expect(page.locator('#croissant')).toHaveCount(1);
-  await expect(page.locator('#combina [data-combo]')).toHaveCount(3);
+  // No pairings section any more.
+  await expect(page.locator('#combina')).toHaveCount(0);
 });
 
 test('Google reviews: verbatim quotes in both languages and exact links', async ({
@@ -1239,42 +1240,6 @@ test('no banana bread gift anywhere; the first order still gets the pa fix vouch
   expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
 });
 
-test('Combina Molla: three pairings at the sum of their pieces, counted per pairing', async ({
-  page,
-}) => {
-  await writeFile(
-    dataPath,
-    JSON.stringify({ orders: [], waitlist: [], limits: {}, bakeDay: 6 }),
-  );
-  await page.goto('/es/');
-  const combos = page.locator('#combina .combo');
-  await expect(combos).toHaveCount(3);
-  // «Para compartir» leads. No discount: 2 × 5 + 2,20 + 2,50 · 5 + 2,20 · 5 + 2,50.
-  await expect(combos.nth(0)).toHaveClass(/is-featured/);
-  await expect(combos.nth(0)).toContainText('14,70€');
-  await expect(combos.nth(1)).toContainText('7,20€');
-  await expect(combos.nth(2)).toContainText('7,50€');
-  await expect(page.locator('#combina')).not.toContainText(
-    /descuento|gratis|oferta/i,
-  );
-  // The single products stay on the page.
-  await expect(page.locator('[data-buy="loaf"]')).toBeVisible();
-  await page
-    .getByRole('button', { name: 'Añadir Para compartir al pedido' })
-    .click();
-  await expect(page.locator('#quantity')).toHaveValue('2');
-  await expect(page.locator('#croissant')).toHaveValue('1');
-  await expect(page.locator('#pain')).toHaveValue('1');
-  await expect(page.locator('#total')).toContainText('14,70');
-  // The trial is measured in /gestio: adds per pairing.
-  await expect
-    .poll(async () =>
-      Object.keys((await readData()).events || {}).some((k) =>
-        k.includes('|combo_compartir|'),
-      ),
-    )
-    .toBe(true);
-});
 test('checkout opt-in: the weekly email is optional and unticked by default', async ({
   page,
 }) => {
@@ -1430,11 +1395,11 @@ test('the hero button names the delivery day and leads to the order form', async
   const cta = page.locator('[data-bake-cta]');
   await expect(cta).toContainText(`Reservar mi pan del ${dayName.es[day]}`);
   await expect(cta).toHaveAttribute('href', '#reservation-form');
-  // An empty ticket offers one tap: a loaf or «Para compartir».
+  // An empty ticket offers one tap: a weekly loaf or a sourdough one.
   await page
-    .locator('#reservation-form [data-empty] [data-combo=compartir]')
+    .locator('#reservation-form [data-empty] [data-add=sourdough]')
     .click();
-  await expect(page.locator('#total')).toContainText('14,70');
+  await expect(page.locator('#total')).toContainText('5,50');
   await expect(page.locator('#reservation-form [data-empty]')).toBeHidden();
   // No consent box to tick: the privacy line sits under the button.
   await expect(

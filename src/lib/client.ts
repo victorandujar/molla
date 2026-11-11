@@ -16,11 +16,7 @@ type EventName =
   | 'form_start'
   | 'click_channel'
   | 'subscription_completed'
-  | 'pickup_info_view'
-  | 'combo_desayuno'
-  | 'combo_capricho'
-  | 'combo_compartir'
-  | 'reservation_with_combo';
+  | 'pickup_info_view';
 // "Convida un veí": a friend's invite code from the link (?ref=K7QMRT), kept
 // for this tab only so it survives moving between pages.
 const refPattern = /^[A-HJKMNP-Z2-9]{6}$/;
@@ -346,15 +342,6 @@ const maxOf = (el: HTMLInputElement | null) => {
     .reduce((n, other) => n + read(other), 0);
   return Math.max(0, Math.min(own, poolLeft(pool) - others));
 };
-const combos = document.querySelectorAll<HTMLButtonElement>('[data-combo]');
-const comboItems = (b: HTMLElement) => ({
-  loaf: Number(b.dataset.comboLoaf || 0),
-  croissant: Number(b.dataset.comboCroissant || 0),
-  pain: Number(b.dataset.comboPain || 0),
-});
-// Pairings added in this visit: a booking counts as «with a combo» only if
-// it still holds every piece of one of them.
-const chosenCombos = new Set<string>();
 type Cart = {
   loaves: number;
   sourdoughs: number;
@@ -436,15 +423,6 @@ function render(origin?: Element | null) {
       const step = up ? addStep(b) : 1;
       b.disabled = up ? n + step > maxOf(input) : n <= 0;
     });
-  // A pairing fits only if all its pieces still fit in what is left.
-  combos.forEach((b) => {
-    const want = comboItems(b);
-    b.disabled =
-      want.loaf > maxOf(quantity) - read(quantity) ||
-      want.croissant > maxOf(croissant) - read(croissant) ||
-      want.pain > maxOf(pain) - read(pain) ||
-      want.croissant + want.pain > pastryLeft() - read(croissant) - read(pain);
-  });
   const items = [
     c.loaves ? words.loaves(c.loaves) : '',
     c.sourdoughs ? words.sourdough(c.sourdoughs) : '',
@@ -535,7 +513,7 @@ function selectOnce(key: ItemKey | string, origin: Element) {
   ga4('select_item', {
     ecommerce: {
       item_list_name: listOf(origin),
-      items: [item || { item_id: `combo-${key}`, item_name: key }],
+      items: [item || { item_id: key, item_name: key }],
     },
   });
 }
@@ -630,24 +608,6 @@ document.querySelectorAll<HTMLButtonElement>('[data-add]').forEach((button) =>
     const room = maxOf(input) - read(input);
     if (input) selectOnce(keyOf(input), button);
     change(input, Math.min(step, room), button);
-  }),
-);
-/* ---- Combina Molla: one button fills the same fields as the cards. ---- */
-combos.forEach((button) =>
-  button.addEventListener('click', () => {
-    selectOnce(button.dataset.combo!, button);
-    const want = comboItems(button);
-    for (const [input, n] of [
-      [quantity, want.loaf],
-      [croissant, want.croissant],
-      [pain, want.pain],
-    ] as const)
-      if (n) change(input, n, button);
-    chosenCombos.add(button.dataset.combo!);
-    track(`combo_${button.dataset.combo}` as EventName);
-    const label = button.innerHTML;
-    button.textContent = button.dataset.added!;
-    setTimeout(() => (button.innerHTML = label), 1600);
   }),
 );
 document
@@ -1093,19 +1053,6 @@ form?.addEventListener('submit', async (event) => {
         },
       });
     }
-    const booked = cart();
-    if (
-      [...combos].some((b) => {
-        if (!chosenCombos.has(b.dataset.combo!)) return false;
-        const want = comboItems(b);
-        return (
-          booked.loaves >= want.loaf &&
-          booked.croissants >= want.croissant &&
-          booked.pains >= want.pain
-        );
-      })
-    )
-      track('reservation_with_combo', { total: order.total });
     void refreshBake();
   } catch (error) {
     track('reservation_error');
