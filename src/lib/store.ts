@@ -20,6 +20,7 @@ import {
   earlyBakes,
   earlyBakesOpen,
   isEarlyBakeDate,
+  loavesOf,
   madridIso,
   madridWeekday,
   pickupCode,
@@ -150,7 +151,7 @@ const demoBake = (d: Demo): ActiveBake => ({
   pastryReserved: pastryIn(d, bake.id),
 });
 const reservedSql = sql
-  ? sql`COALESCE((SELECT SUM(i.quantity) FROM orders o JOIN order_items i ON i.order_id=o.id WHERE o.bake_id=b.id AND o.status!='CANCELLED' AND i.product_id='clasica'),0)::int AS reserved,
+  ? sql`COALESCE((SELECT SUM(i.quantity) FROM orders o JOIN order_items i ON i.order_id=o.id WHERE o.bake_id=b.id AND o.status!='CANCELLED' AND i.product_id IN ('clasica','masa-madre','integral')),0)::int AS reserved,
         COALESCE((SELECT SUM(CASE i.product_id WHEN 'banana' THEN i.quantity*2 WHEN 'banana-mitad' THEN i.quantity ELSE 0 END) FROM orders o JOIN order_items i ON i.order_id=o.id WHERE o.bake_id=b.id AND o.status!='CANCELLED'),0)::int AS banana_reserved,
         COALESCE((SELECT SUM(i.quantity) FROM orders o JOIN order_items i ON i.order_id=o.id WHERE o.bake_id=b.id AND o.status!='CANCELLED' AND i.product_id IN ('croissant','pain-au-chocolat')),0)::int AS pastry_reserved`
   : null;
@@ -243,6 +244,8 @@ function itemsFor(input: ReservationInput, lang: Lang): OrderItem[] {
   const { whole, half } = bananaSplit(input.banana);
   const lines: [string, number, string][] = [
     ['clasica', input.quantity, names.loaf],
+    ['masa-madre', input.sourdough || 0, names.sourdough],
+    ['integral', input.wholegrain || 0, names.wholegrain],
     ['banana', whole, names.bananaWhole],
     ['banana-mitad', half, names.bananaHalf],
     ['croissant', input.croissant, names.croissant],
@@ -280,7 +283,8 @@ export async function reserve(
     name: input.name,
     email: input.email,
     phone: input.phone,
-    quantity: input.quantity,
+    // Loaves of every bread: what the bake's capacity counts.
+    quantity: loavesOf(input),
     product: items[0]!.product,
     productName: items[0]!.name,
     total: items.reduce((n, i) => n + i.unitPrice * i.quantity, 0),
@@ -317,7 +321,7 @@ export async function reserve(
       assertCapacity(
         { ...bake, ...demoDates(d), status: d.bakeStatus || bake.status },
         reservedIn(d, bake.id),
-        input.quantity,
+        loavesOf(input),
       );
       assertBanana(bananaIn(d, bake.id), input.banana);
       assertPastry(pastryIn(d, bake.id), input.croissant + input.pain);
@@ -383,7 +387,7 @@ export async function reserve(
     )
       throw new AppError('bakeChanged');
     const [count] =
-      await tx`SELECT COALESCE(SUM(i.quantity) FILTER (WHERE i.product_id='clasica'),0)::int AS n,
+      await tx`SELECT COALESCE(SUM(i.quantity) FILTER (WHERE i.product_id IN ('clasica','masa-madre','integral')),0)::int AS n,
         COALESCE(SUM(CASE i.product_id WHEN 'banana' THEN i.quantity*2 WHEN 'banana-mitad' THEN i.quantity ELSE 0 END),0)::int AS banana,
         COALESCE(SUM(i.quantity) FILTER (WHERE i.product_id IN ('croissant','pain-au-chocolat')),0)::int AS pastry
         FROM orders o JOIN order_items i ON i.order_id=o.id WHERE o.bake_id=${input.bakeId} AND o.status!='CANCELLED'`;
@@ -395,7 +399,7 @@ export async function reserve(
         deadline: new Date(b.deadline).toISOString(),
       },
       count?.n || 0,
-      input.quantity,
+      loavesOf(input),
     );
     assertBanana(count?.banana || 0, input.banana);
     assertPastry(count?.pastry || 0, input.croissant + input.pain);

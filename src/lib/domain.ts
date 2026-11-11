@@ -4,6 +4,8 @@ import { sources } from './sources';
 import { townById } from './delivery';
 import {
   BANANA_HALVES_PER_BAKE,
+  BREAD_MAX_PER_ORDER,
+  LOAF_MAX_PER_ORDER,
   PASTRY_MAX_PER_ORDER,
   PASTRY_UNITS_PER_BAKE,
 } from './config';
@@ -60,7 +62,20 @@ export const reservationSchema = z
     // Home delivery only: "if I'm not in, leave it with the porter".
     notes: z.string().trim().max(200, 'notes').default(''),
     // Loaves of the weekly bread (0 when the order is only banana bread).
-    quantity: z.coerce.number().int().min(0).max(4),
+    quantity: z.coerce.number().int().min(0).max(LOAF_MAX_PER_ORDER),
+    // Sourdough and 60 % wholegrain loaves: same capacity as the weekly one.
+    sourdough: z.coerce
+      .number()
+      .int()
+      .min(0)
+      .max(LOAF_MAX_PER_ORDER)
+      .default(0),
+    wholegrain: z.coerce
+      .number()
+      .int()
+      .min(0)
+      .max(LOAF_MAX_PER_ORDER)
+      .default(0),
     // Banana bread counted in halves: 1 = half, 2 = whole, 3 = whole + half…
     banana: z.coerce.number().int().min(0).max(4).default(0),
     // Pastries by the unit; both share the bake's pastry quota.
@@ -88,8 +103,12 @@ export const reservationSchema = z
     ...deliveryFields,
     lang,
   })
-  .refine((o) => o.quantity + o.banana + o.croissant + o.pain > 0, {
+  .refine((o) => loavesOf(o) + o.banana + o.croissant + o.pain > 0, {
     message: 'empty',
+    path: ['quantity'],
+  })
+  .refine((o) => loavesOf(o) <= BREAD_MAX_PER_ORDER, {
+    message: 'capacity',
     path: ['quantity'],
   })
   .refine((o) => o.delivery === 'pickup' || townById(o.town), {
@@ -101,6 +120,14 @@ export const reservationSchema = z
     path: ['address'],
   })
   .transform((o) => (o.email ? o : { ...o, email: phoneKey(o.phone) }));
+// Loaves of every bread in an order: they all take room in the same oven.
+export function loavesOf(o: {
+  quantity: number;
+  sourdough?: number;
+  wholegrain?: number;
+}) {
+  return o.quantity + (o.sourdough || 0) + (o.wholegrain || 0);
+}
 // A standing order: the same bread every week (or every other week).
 export const subscriptionSchema = z
   .object({
@@ -211,11 +238,12 @@ export const waitlistSchema = z.object({
   source: z.enum(sources).default('direct'),
   lang,
 });
-// Orders built in code (pa fix, tests) may leave the delivery notes out.
+// Orders built in code (pa fix, tests) may leave the delivery notes and the
+// other breads out.
 export type ReservationInput = Omit<
   z.infer<typeof reservationSchema>,
-  'notes'
-> & { notes?: string };
+  'notes' | 'sourdough' | 'wholegrain'
+> & { notes?: string; sourdough?: number; wholegrain?: number };
 export type BakeState =
   'UPCOMING' | 'OPEN' | 'SOLD_OUT' | 'CLOSED' | 'COMPLETED';
 export function bakeState(
@@ -319,7 +347,11 @@ export function publicStock(b: {
   const halves = Math.max(0, BANANA_HALVES_PER_BAKE - b.bananaReserved);
   const pieces = Math.max(0, PASTRY_UNITS_PER_BAKE - b.pastryReserved);
   return {
-    bread: { level: stockLevel(loaves, b.capacity), max: Math.min(4, loaves) },
+    // The three breads share this pool within one order.
+    bread: {
+      level: stockLevel(loaves, b.capacity),
+      max: Math.min(BREAD_MAX_PER_ORDER, loaves),
+    },
     banana: {
       level: stockLevel(halves, BANANA_HALVES_PER_BAKE),
       max: Math.min(4, halves),

@@ -10,6 +10,7 @@ import {
   launchReady,
   productById,
   PASTRY_MAX_PER_ORDER,
+  LOAF_MAX_PER_ORDER,
   standingVoucher,
   googleReviews,
 } from '../lib/config';
@@ -59,10 +60,38 @@ const open = state === 'OPEN';
 const statusLabel = t.status[state];
 const canSubmit = isDemo || launchReady;
 const loaf = productById('clasica')!;
+const sourdough = productById('masa-madre')!;
+const wholegrain = productById('integral')!;
+// The three breads of the menu, sharing the bake's capacity. `field` is the
+// order form's input; `loaf` keeps its historic name, `quantity`.
+const breads = [
+  {
+    key: 'loaf',
+    field: 'quantity',
+    product: loaf,
+    name: t.catalog.loaf,
+    text: t.breads.items.loaf,
+  },
+  {
+    key: 'sourdough',
+    field: 'sourdough',
+    product: sourdough,
+    name: t.catalog.sourdough,
+    text: t.breads.items.sourdough,
+  },
+  {
+    key: 'wholegrain',
+    field: 'wholegrain',
+    product: wholegrain,
+    name: t.catalog.wholegrain,
+    text: t.breads.items.wholegrain,
+  },
+] as const;
 const bananaWhole = productById('banana')!;
 const bananaHalf = productById('banana-mitad')!;
 // Levels, not counts: the page never says how many are left.
 const stock = publicStock(current);
+const breadMax = Math.min(LOAF_MAX_PER_ORDER, stock.bread.max);
 const stockText = (k: 'bread' | 'banana' | 'pastry') =>
   t.catalog.stock[k][stock[k].level];
 const bananaMax = stock.banana.max;
@@ -199,6 +228,15 @@ const jsonLd = [
       },
     ],
   },
+  ...[sourdough, wholegrain].map((b, i) => ({
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: [t.catalog.sourdough, t.catalog.wholegrain][i],
+    description: [t.breads.items.sourdough, t.breads.items.wholegrain][i],
+    image: [abs('/images/loaves-1100.webp')],
+    brand: { '@type': 'Brand', name: brand.name },
+    offers: offer(b.price, open && stock.bread.max > 0),
+  })),
   ...pastries.map((p) => ({
     '@context': 'https://schema.org',
     '@type': 'Product',
@@ -443,44 +481,63 @@ const jsonLd = [
             <div class="dish-info" data-reveal>
               <p class="dish-index">
                 <span>01</span>
-                {t.loaf.kicker}
+                {t.breads.kicker}
               </p>
-              <h3 id="loaf-title">{t.loaf.name}</h3>
-              <p class="dish-desc">{t.loaf.pitch}.</p>
-              <p class="dish-price">
-                <span class="outline-price" aria-hidden="true">
-                  {short(loaf.price)}
-                </span>
-                <strong class="visually-hidden">{money(loaf.price)}</strong>
-                <span>{loaf.weight}</span>
-              </p>
-              {open ? (
-                <div class="dish-buy" data-buy="loaf">
-                  <button type="button" class="button" data-add="loaf">
-                    {t.catalog.add}
-                    <span class="button-plus" aria-hidden="true">
-                      +
-                    </span>
-                  </button>
-                  <div class="mini-stepper" data-mini="loaf" hidden>
-                    <button
-                      type="button"
-                      data-sub="loaf"
-                      aria-label={t.reserve.less}
-                    >
-                      −
-                    </button>
-                    <output data-count="loaf" aria-live="polite"></output>
-                    <button
-                      type="button"
-                      data-add="loaf"
-                      aria-label={t.reserve.more}
-                    >
-                      +
-                    </button>
-                  </div>
-                </div>
-              ) : (
+              <h3 id="loaf-title">{t.breads.h3}</h3>
+              <p class="dish-desc">{t.breads.intro}</p>
+              <ul class="pastry-list bread-list">
+                {breads.map((b) => (
+                  <li class="pastry-item bread-item">
+                    <div class="pastry-name">
+                      <h4>{b.name}</h4>
+                      <p>{b.text}</p>
+                    </div>
+                    <p class="pastry-price">
+                      <span aria-hidden="true">{tight(b.product.price)}</span>
+                      <span class="visually-hidden">
+                        {money(b.product.price)} · {t.breads.unit}
+                      </span>
+                    </p>
+                    {open ? (
+                      <div class="dish-buy pastry-buy" data-buy={b.key}>
+                        <button
+                          type="button"
+                          class="button"
+                          data-add={b.key}
+                          disabled={breadMax === 0}
+                          aria-label={t.breads.more(b.name)}
+                        >
+                          {t.breads.add}
+                          <span class="button-plus" aria-hidden="true">
+                            +
+                          </span>
+                        </button>
+                        <div class="mini-stepper" data-mini={b.key} hidden>
+                          <button
+                            type="button"
+                            data-sub={b.key}
+                            aria-label={t.breads.less(b.name)}
+                          >
+                            −
+                          </button>
+                          <output
+                            data-count={b.key}
+                            aria-live="polite"
+                          ></output>
+                          <button
+                            type="button"
+                            data-add={b.key}
+                            aria-label={t.breads.more(b.name)}
+                          >
+                            +
+                          </button>
+                        </div>
+                      </div>
+                    ) : null}
+                  </li>
+                ))}
+              </ul>
+              {!open && (
                 <a class="button button-ghost" href="#avisame">
                   {t.loaf.notify}
                 </a>
@@ -489,12 +546,20 @@ const jsonLd = [
                 <summary>{t.catalog.details}</summary>
                 <dl class="spec">
                   <div>
-                    <dt>{t.loaf.ingredients}</dt>
+                    <dt>{t.catalog.loaf}</dt>
                     <dd>{t.loaf.ingredientsValue}</dd>
                   </div>
                   <div>
+                    <dt>{t.catalog.sourdough}</dt>
+                    <dd>{t.breads.details.sourdough}</dd>
+                  </div>
+                  <div>
+                    <dt>{t.catalog.wholegrain}</dt>
+                    <dd>{t.breads.details.wholegrain}</dd>
+                  </div>
+                  <div>
                     <dt>{t.loaf.allergens}</dt>
-                    <dd>{t.loaf.allergensValue}</dd>
+                    <dd>{t.breads.allergens}</dd>
                   </div>
                   <div>
                     <dt>{t.loaf.keeps}</dt>
@@ -857,6 +922,9 @@ const jsonLd = [
               data-banana-half={bananaHalf.price}
               data-croissant={croissant.price}
               data-pain={pain.price}
+              data-sourdough={sourdough.price}
+              data-wholegrain={wholegrain.price}
+              data-bread-pool={stock.bread.max}
               data-pastry-pool={pastryPool}
             >
               <div class="ticket-head" aria-hidden="true">
@@ -899,8 +967,9 @@ const jsonLd = [
                       type="number"
                       inputmode="numeric"
                       min="0"
-                      max={stock.bread.max}
+                      max={breadMax}
                       value="0"
+                      data-pool="bread"
                       required
                     />
                     <button
@@ -908,6 +977,90 @@ const jsonLd = [
                       data-step="1"
                       data-target="quantity"
                       aria-label={t.reserve.more}
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+                <div class="order-line">
+                  <label for="sourdough-view">
+                    <span class="line-name">{t.catalog.sourdough}</span>
+                    <small>
+                      {money(sourdough.price)} · {t.reserve.qtyMax}
+                    </small>
+                  </label>
+                  <div class="stepper">
+                    <button
+                      type="button"
+                      data-step="-1"
+                      data-target="sourdough"
+                      aria-label={t.breads.less(t.catalog.sourdough)}
+                    >
+                      −
+                    </button>
+                    <output
+                      id="sourdough-view"
+                      class="stepper-view"
+                      aria-live="polite"
+                    >
+                      0
+                    </output>
+                    <input
+                      id="sourdough"
+                      name="sourdough"
+                      type="hidden"
+                      value="0"
+                      data-max={breadMax}
+                      data-pool="bread"
+                    />
+                    <button
+                      type="button"
+                      data-step="1"
+                      data-target="sourdough"
+                      aria-label={t.breads.more(t.catalog.sourdough)}
+                      disabled={breadMax === 0}
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+                <div class="order-line">
+                  <label for="wholegrain-view">
+                    <span class="line-name">{t.catalog.wholegrain}</span>
+                    <small>
+                      {money(wholegrain.price)} · {t.reserve.qtyMax}
+                    </small>
+                  </label>
+                  <div class="stepper">
+                    <button
+                      type="button"
+                      data-step="-1"
+                      data-target="wholegrain"
+                      aria-label={t.breads.less(t.catalog.wholegrain)}
+                    >
+                      −
+                    </button>
+                    <output
+                      id="wholegrain-view"
+                      class="stepper-view"
+                      aria-live="polite"
+                    >
+                      0
+                    </output>
+                    <input
+                      id="wholegrain"
+                      name="wholegrain"
+                      type="hidden"
+                      value="0"
+                      data-max={breadMax}
+                      data-pool="bread"
+                    />
+                    <button
+                      type="button"
+                      data-step="1"
+                      data-target="wholegrain"
+                      aria-label={t.breads.more(t.catalog.wholegrain)}
+                      disabled={breadMax === 0}
                     >
                       +
                     </button>

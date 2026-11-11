@@ -1,5 +1,13 @@
 import type { BakeState } from './domain';
 export const WEEKLY_LOAF_PRICE_CENTS = 500;
+// Two more breads on the menu. All three share the bake's capacity (the
+// oven holds loaves, whatever the dough): bakes.capacity counts every loaf.
+export const SOURDOUGH_PRICE_CENTS = 550;
+export const WHOLEGRAIN_PRICE_CENTS = 500;
+export const breadIds = ['clasica', 'masa-madre', 'integral'] as const;
+// Most loaves of each bread in one order, and of all breads together.
+export const LOAF_MAX_PER_ORDER = 4;
+export const BREAD_MAX_PER_ORDER = 6;
 // Banana bread (molde de 3 plátanos, ~140 g de harina ecológica, yogur y
 // 100 g de pepitas de chocolate). Coste aproximado de ingredientes: 8 € el
 // molde entero. Entero a 15 € y mitad a 8 € (la mitad lleva su corte y su
@@ -133,6 +141,30 @@ export const products = [
     ingredients: 'Harina de trigo ecológica, agua, sal y levadura.',
     allergens: 'Contiene trigo (gluten).',
     image: 'crumb',
+    available: true,
+  },
+  // Recipe, weight and allergens of the two new breads: confirm them with
+  // the baker before publishing more detail (src/lib/i18n.ts, `breads`).
+  {
+    id: 'masa-madre',
+    name: 'Masa madre',
+    subtitle: 'Hogaza de masa madre',
+    price: SOURDOUGH_PRICE_CENTS,
+    weight: '',
+    ingredients: 'Harina de trigo, agua, sal y masa madre.',
+    allergens: 'Contiene trigo (gluten).',
+    image: 'loaves',
+    available: true,
+  },
+  {
+    id: 'integral',
+    name: 'Integral 60 %',
+    subtitle: 'Hogaza con un 60 % de harina integral',
+    price: WHOLEGRAIN_PRICE_CENTS,
+    weight: '',
+    ingredients: 'Harina de trigo integral (60 %) y blanca, agua y sal.',
+    allergens: 'Contiene trigo (gluten).',
+    image: 'loaves',
     available: true,
   },
   {

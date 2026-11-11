@@ -670,7 +670,8 @@ test('banana bread is ordered by halves, alone or with bread, within its quota',
   ).toEqual(['banana', 'banana-mitad']);
   // Loaves stay untouched by banana orders.
   const bake = await (await request.get('/api/bake')).json();
-  expect(bake.bread).toEqual({ level: 'ok', max: 4 });
+  // Up to 6 loaves per order, of any of the three breads.
+  expect(bake.bread).toEqual({ level: 'ok', max: 6 });
   expect(bake.banana).toEqual({ level: 'low', max: 1 });
   // Counts never leave the server.
   expect(bake).not.toHaveProperty('reserved');
@@ -1097,7 +1098,7 @@ test('cancel an order with one click from its private link', async ({
   expect(forged.status()).toBe(403);
   // The freed loaves can be booked again.
   const left = await request.get('/api/bake');
-  expect((await left.json()).bread).toEqual({ level: 'ok', max: 4 });
+  expect((await left.json()).bread).toEqual({ level: 'ok', max: 6 });
 });
 
 test('owner panel lists pa fix subscribers and can pause, resume and cancel them', async ({
@@ -1442,4 +1443,57 @@ test('the hero button names the delivery day and leads to the order form', async
   await expect(page.locator('#reservation-form .form-footnote')).toContainText(
     'Al reservar aceptas la',
   );
+});
+
+test('sourdough and 60 % wholegrain: on the menu, in the order and in the oven quota', async ({
+  page,
+  request,
+}) => {
+  await page.goto('/es/');
+  const menu = page.locator('#carta .bread-list');
+  await expect(menu).toContainText('Masa madre');
+  await expect(menu).toContainText('5,50');
+  await expect(menu).toContainText('Integral 60 %');
+  // Four of one bread at most…
+  const addSourdough = page.locator('[data-buy=sourdough] > [data-add]');
+  await addSourdough.click();
+  const moreSourdough = page.locator('[data-mini=sourdough] [data-add]');
+  for (let i = 0; i < 3; i++) await moreSourdough.click();
+  await expect(moreSourdough).toBeDisabled();
+  // …and six loaves in all: the breads share what is left in the oven.
+  await page.locator('[data-buy=wholegrain] > [data-add]').click();
+  await page.locator('[data-mini=wholegrain] [data-add]').click();
+  await expect(page.locator('[data-buy=loaf] > [data-add]')).toBeDisabled();
+  await expect(page.locator('#total')).toContainText('32,00');
+  await page.getByLabel('Tu nombre', { exact: true }).fill('Ana Pan');
+  await page.locator('#phone').fill('612 345 679');
+  await page.locator('#town').selectOption('sant-boi');
+  await page.locator('#address').fill('Carrer Major 2');
+  await page.locator('input[name=pickup]').check();
+  await page.locator('#reservation-form button[type=submit]').click();
+  await expect(page.locator('#confirmation')).toContainText(
+    '4 × Masa madre · 2 × Integral 60 %',
+  );
+  const d = await readData();
+  expect(d.orders[0].quantity).toBe(6);
+  expect(
+    d.orders[0].items.map((i: { product: string; quantity: number }) => [
+      i.product,
+      i.quantity,
+    ]),
+  ).toEqual([
+    ['masa-madre', 4],
+    ['integral', 2],
+  ]);
+  expect(d.orders[0].total).toBe(3200);
+  // Six of the ten loaves are taken: four can still be ordered.
+  const bake = await (await request.get('/api/bake')).json();
+  expect(bake.bread).toEqual({ level: 'ok', max: 4 });
+  // The owner sees how many of each bread to bake.
+  await page.goto('/gestio');
+  await page.locator('input[name=password]').fill('e2e-password-local');
+  await page.locator('form button[type=submit]').first().click();
+  const stats = page.locator('.admin-stats').first();
+  await expect(stats).toContainText('Masa madre4');
+  await expect(stats).toContainText('Integral 60 %2');
 });
