@@ -19,14 +19,22 @@ const cacheable = new Set([
   '/robots.txt',
   '/sitemap.xml',
 ]);
+// Google Tag Manager and GA4 are allowed only when PUBLIC_GTM_ID is set
+// (the same build-time value the page script reads to load GTM).
+const gtm = /^GTM-[A-Z0-9]{4,12}$/.test(
+  String(import.meta.env.PUBLIC_GTM_ID || ''),
+);
+const google = gtm
+  ? ' https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com'
+  : '';
 const csp = [
   "default-src 'self'",
   // Vercel's toolbar only on Preview deployments.
-  `script-src 'self'${process.env.VERCEL_ENV === 'preview' ? ' https://vercel.live' : ''}`,
+  `script-src 'self'${process.env.VERCEL_ENV === 'preview' ? ' https://vercel.live' : ''}${gtm ? ' https://www.googletagmanager.com' : ''}`,
   "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data:",
+  `img-src 'self' data:${google}`,
   "font-src 'self'",
-  "connect-src 'self'",
+  `connect-src 'self'${google}`,
   "object-src 'none'",
   "base-uri 'self'",
   "form-action 'self'",

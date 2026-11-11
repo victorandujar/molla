@@ -280,10 +280,12 @@ const steps = [
   ['view_current_bake', 'Ven la hornada'],
   ['click_reserve', 'Pulsan «Reservar» en una página'],
   ['start_reservation', 'Empiezan a reservar'],
+  ['form_start', 'Empiezan a rellenar sus datos'],
   ['reservation_submit', 'Pulsan «Confirmar la reserva»'],
   ['reservation_error', 'Les sale un error al reservar'],
   ['reservation_completed', 'Reservan'],
-  ['click_whatsapp', 'Pulsan WhatsApp'],
+  ['click_whatsapp_order', 'Pulsan «Reservar por WhatsApp»'],
+  ['click_whatsapp', 'Pulsan WhatsApp (dudas y otros)'],
   ['waitlist_signup', 'Se apuntan al aviso'],
   ['combo_desayuno', 'Añaden «El desayuno»'],
   ['combo_capricho', 'Añaden «El capricho»'],
@@ -574,6 +576,9 @@ import {
                 <select id="m-source" name="source">
                   <option value="instagram">Instagram</option>
                   <option value="whatsapp">WhatsApp</option>
+                  <option value="whatsapp_web">
+                    WhatsApp desde la web («Quiero reservar pan…»)
+                  </option>
                   <option value="facebook">Facebook</option>
                   <option value="referral">Un amigo o vecino</option>
                   <option value="direct">En persona o por teléfono</option>

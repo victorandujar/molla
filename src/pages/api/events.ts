@@ -18,6 +18,10 @@ export const events = [
   'waitlist_signup',
   'click_instagram',
   'click_whatsapp',
+  // «Reservar por WhatsApp»: an order that leaves the web for the chat.
+  'click_whatsapp_order',
+  // First field of the order form filled in (town, address, name…).
+  'form_start',
   'click_channel',
   'subscription_completed',
   'pickup_info_view',

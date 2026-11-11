@@ -5,6 +5,8 @@ export const sources = [
   'instagram',
   'google',
   'whatsapp',
+  // Manual orders whose chat began with the web's pre-written message.
+  'whatsapp_web',
   'facebook',
   'qr',
   'pafix',

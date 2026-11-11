@@ -311,6 +311,7 @@ const jsonLd = [
                 {t.bake.unavailable}
               </p>
             )}
+            {open && <p class="stub-terms">{t.hero.terms}</p>}
             <p
               class="stub-count"
               data-stock="bread"
@@ -333,13 +334,14 @@ const jsonLd = [
             </a>
             {open && whatsappBook && (
               <a
-                class="button full stub-whatsapp"
-                data-event="click_whatsapp"
+                class="stub-whatsapp"
+                data-event="click_whatsapp_order"
+                data-place="hero"
                 href={whatsappBook}
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                {t.reserve.whatsappCta} <span aria-hidden="true">↗</span>
+                {t.reserve.whatsappAlt} <span aria-hidden="true">↗</span>
               </a>
             )}
           </div>
@@ -835,6 +837,7 @@ const jsonLd = [
             <a
               class="text-link"
               data-event="click_whatsapp"
+              data-place="question"
               href={`https://wa.me/${brand.whatsapp}`}
               target="_blank"
               rel="noopener noreferrer"
@@ -1211,13 +1214,14 @@ const jsonLd = [
               </p>
               {whatsappBook && (
                 <a
-                  class="button button-ghost full"
-                  data-event="click_whatsapp"
+                  class="text-link form-whatsapp"
+                  data-event="click_whatsapp_order"
+                  data-place="form"
                   href={whatsappBook}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  {t.reserve.whatsappCta} <span aria-hidden="true">↗</span>
+                  {t.reserve.whatsappAlt} <span aria-hidden="true">↗</span>
                 </a>
               )}
               <noscript>
@@ -1568,6 +1572,7 @@ const jsonLd = [
                 <a
                   class="button button-orange"
                   data-event="click_whatsapp"
+                  data-place="waitlist"
                   href={whatsappNotify}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -1652,7 +1657,7 @@ const jsonLd = [
     <span class="pill-text">
       <strong data-pill-title>{t.catalog.pill}</strong>
       <small data-pill-items>
-        {t.mobile.loaf} · {money(loaf.price)} · {pickupDay}
+        {t.mobile.loaf} {short(loaf.price)} · {pickupWeekday || pickupDay}
       </small>
     </span>
     <span class="pill-total" data-pill-total hidden></span>
