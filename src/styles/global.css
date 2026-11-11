@@ -2136,6 +2136,21 @@ figure picture {
 .card-pastry .mini-stepper button:hover {
   background: rgba(246, 239, 229, 0.14);
 }
+/* La carta de pa: la mateixa llista que la brioixeria, sobre el paper. */
+.bread-list {
+  margin-top: 22px;
+  border-top-color: var(--cobalt);
+  color: var(--cobalt);
+}
+.bread-item {
+  border-bottom-color: var(--line-strong);
+}
+.bread-item .pastry-name p {
+  color: var(--ink-2);
+}
+.bread-item .mini-stepper button:hover {
+  background: rgba(36, 66, 164, 0.1);
+}
 /* Ingredients i al·lèrgens: a un clic, no a la cara. */
 details.dish-more {
   align-self: stretch;

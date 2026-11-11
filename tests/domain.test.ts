@@ -37,6 +37,7 @@ import {
   orderSummary,
   stockLevel,
   publicStock,
+  loavesOf,
   type Order,
 } from '../src/lib/domain';
 const b = {
@@ -373,7 +374,13 @@ test('home delivery needs a town in the zone and an address; pickup needs neithe
   });
   assert.equal(outside.error?.issues[0]?.message, 'town');
   // Next to Sant Just: delivered to the door too.
-  for (const town of ['sant-joan', 'sant-feliu', 'santa-coloma', 'sant-vicenc', 'sant-boi'])
+  for (const town of [
+    'sant-joan',
+    'sant-feliu',
+    'santa-coloma',
+    'sant-vicenc',
+    'sant-boi',
+  ])
     assert.equal(
       reservationSchema.safeParse({ ...home, town, address: 'Carrer Major 1' })
         .success,
@@ -482,9 +489,18 @@ test('the weekly job places, skips or rests each subscription once per bake', ()
   assert.equal(subscriptionAction(fortnight, bake, null), 'place');
 });
 test('each pa fix only takes the bakes of its own day', () => {
-  const saturday = { id: 'hornada-010', pickupDate: '2026-10-24T10:00:00.000Z' };
-  const wednesday = { id: 'hornada-011', pickupDate: '2026-10-28T11:00:00.000Z' };
-  const christmas = { id: 'hornada-xmas', pickupDate: '2026-12-24T11:00:00.000Z' };
+  const saturday = {
+    id: 'hornada-010',
+    pickupDate: '2026-10-24T10:00:00.000Z',
+  };
+  const wednesday = {
+    id: 'hornada-011',
+    pickupDate: '2026-10-28T11:00:00.000Z',
+  };
+  const christmas = {
+    id: 'hornada-xmas',
+    pickupDate: '2026-12-24T11:00:00.000Z',
+  };
   const sub = {
     status: 'ACTIVE' as const,
     frequency: 'weekly' as const,
@@ -675,7 +691,11 @@ test('delivery notes: optional, capped and shown to the owner', () => {
   );
   const text = ownerText({
     ...order,
-    delivery: { town: 'Sant Boi de Llobregat', address: 'Major 1', notes: 'Portería' },
+    delivery: {
+      town: 'Sant Boi de Llobregat',
+      address: 'Major 1',
+      notes: 'Portería',
+    },
   });
   assert.match(text, /Si no está: Portería/);
 });
@@ -684,7 +704,9 @@ test('order emails do not assume there is bread in the order', () => {
   const pastries: Order = {
     ...order,
     quantity: 0,
-    items: [{ product: 'croissant', name: 'Croissant', quantity: 2, unitPrice: 220 }],
+    items: [
+      { product: 'croissant', name: 'Croissant', quantity: 2, unitPrice: 220 },
+    ],
   };
   for (const lang of ['es', 'ca'] as const) {
     const o = { ...pastries, lang };
@@ -697,7 +719,10 @@ test('order emails do not assume there is bread in the order', () => {
       cancelledByOwner(o).subject,
       cancelledByOwner(o).html,
     ].join('\n');
-    assert.doesNotMatch(all, /tu pan\b|Tu pan\b|teu pa\b|no hay pan|no hi ha pa\b|hogaza|el pa no|No el podràs/);
+    assert.doesNotMatch(
+      all,
+      /tu pan\b|Tu pan\b|teu pa\b|no hay pan|no hi ha pa\b|hogaza|el pa no|No el podràs/,
+    );
   }
 });
 
@@ -712,4 +737,45 @@ test('pa fix loaves a week: a fortnightly one counts half, paused ones not', asy
     ]),
     2,
   );
+});
+
+test('three breads share the oven: sourdough and 60 % wholegrain count as loaves', () => {
+  const order = reservationSchema.parse({
+    ...input,
+    quantity: 1,
+    sourdough: 2,
+    wholegrain: 1,
+  });
+  assert.equal(loavesOf(order), 4);
+  // Only the new breads is a valid order too.
+  assert.equal(
+    reservationSchema.safeParse({ ...input, quantity: 0, sourdough: 1 })
+      .success,
+    true,
+  );
+  // At most 4 of each and 6 loaves in all per order.
+  assert.equal(
+    reservationSchema.safeParse({ ...input, quantity: 0, sourdough: 5 })
+      .success,
+    false,
+  );
+  assert.equal(
+    reservationSchema.safeParse({
+      ...input,
+      quantity: 3,
+      sourdough: 2,
+      wholegrain: 2,
+    }).success,
+    false,
+  );
+  // Older callers (pa fix) leave the new breads out.
+  assert.equal(loavesOf({ quantity: 2 }), 2);
+  // The page may offer up to 6 loaves while the bake has room.
+  const stock = publicStock({
+    capacity: 16,
+    reserved: 2,
+    bananaReserved: 0,
+    pastryReserved: 0,
+  });
+  assert.deepEqual(stock.bread, { level: 'ok', max: 6 });
 });

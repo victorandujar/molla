@@ -365,10 +365,22 @@ import {
         )}
         <dl class="admin-stats">
           <div>
-            <dt>Reservadas</dt>
+            <dt>Pan reservado (los tres)</dt>
             <dd>
               {data.bake.reserved} / {data.bake.capacity}
             </dd>
+          </div>
+          <div>
+            <dt>La de cada semana</dt>
+            <dd>{pieces(live, 'clasica')}</dd>
+          </div>
+          <div>
+            <dt>Masa madre</dt>
+            <dd>{pieces(live, 'masa-madre')}</dd>
+          </div>
+          <div>
+            <dt>Integral 60 %</dt>
+            <dd>{pieces(live, 'integral')}</dd>
           </div>
           <div>
             <dt>Banana bread</dt>
@@ -586,10 +598,34 @@ import {
               </div>
               <div class="form-columns">
                 <div class="field">
-                  <label for="m-quantity">Hogazas</label>
+                  <label for="m-quantity">La de cada semana</label>
                   <input
                     id="m-quantity"
                     name="quantity"
+                    type="number"
+                    inputmode="numeric"
+                    min="0"
+                    max="4"
+                    value="0"
+                  />
+                </div>
+                <div class="field">
+                  <label for="m-sourdough">Masa madre</label>
+                  <input
+                    id="m-sourdough"
+                    name="sourdough"
+                    type="number"
+                    inputmode="numeric"
+                    min="0"
+                    max="4"
+                    value="0"
+                  />
+                </div>
+                <div class="field">
+                  <label for="m-wholegrain">Integral 60 %</label>
+                  <input
+                    id="m-wholegrain"
+                    name="wholegrain"
                     type="number"
                     inputmode="numeric"
                     min="0"

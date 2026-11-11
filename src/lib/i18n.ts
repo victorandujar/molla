@@ -131,7 +131,7 @@ export const ui = {
       h1a: 'Pan artesano, recién hecho,',
       h1b: 'en tu puerta',
       sub: `Cada miércoles y cada sábado ${hours.es}, a domicilio en Sant Boi, Sant Just Desvern, Sant Joan Despí, Sant Feliu, Santa Coloma y Sant Vicenç.`,
-      short: `Lo horneo esa misma mañana y te lo llevo a casa o a la oficina, cada miércoles y sábado ${hours.es}. ${loafPrice} la hogaza, envío gratis y pagas al recibirlo.`,
+      short: `Lo horneo esa misma mañana y te lo llevo a casa o a la oficina, cada miércoles y sábado ${hours.es}. Pan desde ${loafPrice}, envío gratis y pagas al recibirlo.`,
       kicker: 'Panadería de barrio · Baix Llobregat',
       keywords: [
         'Harinas ecológicas',
@@ -165,7 +165,7 @@ export const ui = {
         'Baix Llobregat',
       ],
       // Price and terms sit by the button; the proof line adds who and where.
-      terms: `${loafPrice} la hogaza · Envío gratis · Pagas al recibirlo`,
+      terms: `Pan desde ${loafPrice} · Envío gratis · Pagas al recibirlo`,
       proof: ['Hecho a mano en Sant Boi'],
       scroll: 'Desliza',
       hands: 'Las manos de mi madre',
@@ -219,6 +219,8 @@ export const ui = {
       h2b: 'hecha sin prisa.',
       details: 'Ingredientes y alérgenos',
       loaf: 'La de cada semana',
+      sourdough: 'Masa madre',
+      wholegrain: 'Integral 60 %',
       bananaWhole: 'Banana bread entero',
       bananaHalf: 'Medio banana bread',
       add: 'Añadir al pedido',
@@ -308,6 +310,29 @@ export const ui = {
         'Detalle de la corteza del banana bread con pepitas de chocolate',
       ask: 'Pedir banana bread',
       notify: 'Avísame cuando haya',
+    },
+    // La carta de pan: tres panes en una lista, con una sola foto.
+    breads: {
+      kicker: 'El pan',
+      h3: 'Tres panes, una hornada.',
+      intro:
+        'Elige uno o combínalos: salen del mismo horno el miércoles y el sábado.',
+      from: 'desde',
+      unit: 'La hogaza',
+      items: {
+        loaf: 'Poolish y hasta 35 h de fermentación. Suave, miga abierta y corteza que cruje.',
+        sourdough: 'Fermentada con masa madre.',
+        wholegrain: 'Con un 60 % de harina integral.',
+      },
+      details: {
+        sourdough: 'Harina de trigo, agua, sal y masa madre.',
+        wholegrain: 'Harina de trigo integral (60 %) y blanca, agua y sal.',
+      },
+      allergens:
+        'Contienen trigo (gluten). Si tienes otra alergia, pregúntame antes de reservar.',
+      add: 'Añadir',
+      less: (name: string) => `Quitar ${name}`,
+      more: (name: string) => `Añadir ${name}`,
     },
     pastry: {
       kicker: 'Bollería',
@@ -515,7 +540,7 @@ export const ui = {
       items: [
         [
           '¿Es pan de masa madre?',
-          'Es pan de fermentación lenta, como el de masa madre, pero hecho con poolish: una masa previa de harina, agua y muy poca levadura que fermenta durante la noche. En total, hasta 35 horas de fermentación. El resultado: mucho sabor, miga abierta y corteza que cruje, con un gusto suave y nada ácido.',
+          'Hay de los dos. La de cada semana es de poolish: una masa previa de harina, agua y muy poca levadura que fermenta durante la noche, con hasta 35 horas de fermentación en total; sabor suave y nada ácido. Si prefieres masa madre, la hogaza de masa madre también está en la carta.',
         ],
         [
           '¿Qué lleva la hogaza?',
@@ -634,7 +659,7 @@ export const ui = {
       h1a: 'Pa artesà, acabat de fer,',
       h1b: 'a la porta de casa',
       sub: `Cada dimecres i cada dissabte ${hours.ca}, a domicili a Sant Boi, Sant Just Desvern, Sant Joan Despí, Sant Feliu, Santa Coloma i Sant Vicenç.`,
-      short: `El faig aquell mateix matí i te’l porto a casa o a la feina, cada dimecres i dissabte ${hours.ca}. ${loafPrice} el pa, enviament gratis i pagues en rebre’l.`,
+      short: `El faig aquell mateix matí i te’l porto a casa o a la feina, cada dimecres i dissabte ${hours.ca}. Pa des de ${loafPrice}, enviament gratis i pagues en rebre’l.`,
       kicker: 'Fleca de barri · Baix Llobregat',
       keywords: [
         'Farines ecològiques',
@@ -667,7 +692,7 @@ export const ui = {
         'Fins a 35 h de fermentació',
         'Baix Llobregat',
       ],
-      terms: `${loafPrice} el pa · Enviament gratis · Pagues en rebre’l`,
+      terms: `Pa des de ${loafPrice} · Enviament gratis · Pagues en rebre’l`,
       proof: ['Fet a mà a Sant Boi'],
       scroll: 'Llisca',
       hands: 'Les mans de la meva mare',
@@ -720,6 +745,8 @@ export const ui = {
       h2b: 'feta sense pressa.',
       details: 'Ingredients i al·lèrgens',
       loaf: 'El de cada setmana',
+      sourdough: 'Massa mare',
+      wholegrain: 'Integral 60 %',
       bananaWhole: 'Banana bread sencer',
       bananaHalf: 'Mig banana bread',
       add: 'Afegir a la comanda',
@@ -806,6 +833,28 @@ export const ui = {
       altDetail: 'Detall de la crosta del banana bread amb xips de xocolata',
       ask: 'Demanar banana bread',
       notify: 'Avisa’m quan n’hi hagi',
+    },
+    breads: {
+      kicker: 'El pa',
+      h3: 'Tres pans, una fornada.',
+      intro:
+        'Tria’n un o combina’ls: surten del mateix forn el dimecres i el dissabte.',
+      from: 'des de',
+      unit: 'El pa',
+      items: {
+        loaf: 'Poolish i fins a 35 h de fermentació. Suau, molla oberta i crosta que cruix.',
+        sourdough: 'Fermentat amb massa mare.',
+        wholegrain: 'Amb un 60 % de farina integral.',
+      },
+      details: {
+        sourdough: 'Farina de blat, aigua, sal i massa mare.',
+        wholegrain: 'Farina de blat integral (60 %) i blanca, aigua i sal.',
+      },
+      allergens:
+        'Contenen blat (gluten). Si tens una altra al·lèrgia, pregunta’m abans de reservar.',
+      add: 'Afegir',
+      less: (name: string) => `Treure ${name}`,
+      more: (name: string) => `Afegir ${name}`,
     },
     pastry: {
       kicker: 'Brioixeria',
@@ -1012,7 +1061,7 @@ export const ui = {
       items: [
         [
           'És pa de massa mare?',
-          'És pa de fermentació lenta, com el de massa mare, però fet amb poolish: una massa prèvia de farina, aigua i molt poc llevat que fermenta durant la nit. En total, fins a 35 hores de fermentació. El resultat: molt de gust, molla oberta i crosta que cruix, amb un sabor suau i gens àcid.',
+          'N’hi ha de tots dos. El de cada setmana és de poolish: una massa prèvia de farina, aigua i molt poc llevat que fermenta durant la nit, amb fins a 35 hores de fermentació en total; sabor suau i gens àcid. Si prefereixes massa mare, el pa de massa mare també és a la carta.',
         ],
         [
           'Què porta el pa?',

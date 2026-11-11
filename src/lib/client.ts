@@ -195,7 +195,9 @@ document.querySelectorAll<HTMLElement>('[data-event]').forEach((el) =>
 );
 // GA4 product names and ids, the same ids as the server's products.
 const catalog = {
-  loaf: { item_id: 'clasica', item_name: 'Hogaza de fermentación lenta' },
+  loaf: { item_id: 'clasica', item_name: 'La de cada semana (poolish)' },
+  sourdough: { item_id: 'masa-madre', item_name: 'Masa madre' },
+  wholegrain: { item_id: 'integral', item_name: 'Integral 60 %' },
   banana: { item_id: 'banana', item_name: 'Banana bread' },
   croissant: { item_id: 'croissant', item_name: 'Croissant' },
   pain: { item_id: 'pain-au-chocolat', item_name: 'Pain au chocolat' },
@@ -254,12 +256,16 @@ if (refInput && inviteCode) {
 /* ---- El pedido: el formulario es la única fuente de verdad. La carta, el
    tiquet y la píldora flotante leen y escriben los mismos campos. ---- */
 const quantity = document.querySelector<HTMLInputElement>('#quantity');
+const sourdough = document.querySelector<HTMLInputElement>('#sourdough');
+const wholegrain = document.querySelector<HTMLInputElement>('#wholegrain');
 const banana = document.querySelector<HTMLInputElement>('#banana');
 const croissant = document.querySelector<HTMLInputElement>('#croissant');
 const pain = document.querySelector<HTMLInputElement>('#pain');
 const total = document.querySelector<HTMLOutputElement>('#total');
 const prices = {
   loaf: Number(form?.dataset.price || 0),
+  sourdough: Number(form?.dataset.sourdough || 0),
+  wholegrain: Number(form?.dataset.wholegrain || 0),
   whole: Number(form?.dataset.bananaWhole || 0),
   half: Number(form?.dataset.bananaHalf || 0),
   croissant: Number(form?.dataset.croissant || 0),
@@ -269,6 +275,8 @@ const prices = {
 const fields: Record<string, HTMLInputElement | null> = {
   loaf: quantity,
   quantity,
+  sourdough,
+  wholegrain,
   banana,
   croissant,
   pain,
@@ -280,6 +288,8 @@ const words = isCa
   ? {
       inOrder: (n: string) => `${n} a la comanda`,
       loaves: (n: number) => `${n} ${n === 1 ? 'pa' : 'pans'}`,
+      sourdough: (n: number) => `${n} massa mare`,
+      wholegrain: (n: number) => `${n} integral${n === 1 ? '' : 's'}`,
       empty: 'Afegeix un pa, un banana bread o brioixeria per reservar.',
       stock: {
         bread: { ok: '', low: 'Queden pocs pans', out: 'Fornada exhaurida' },
@@ -298,6 +308,8 @@ const words = isCa
   : {
       inOrder: (n: string) => `${n} en tu pedido`,
       loaves: (n: number) => `${n} ${n === 1 ? 'hogaza' : 'hogazas'}`,
+      sourdough: (n: number) => `${n} masa madre`,
+      wholegrain: (n: number) => `${n} integral${n === 1 ? '' : 'es'}`,
       empty: 'Añade una hogaza, un banana bread o bollería para reservar.',
       stock: {
         bread: { ok: '', low: 'Quedan pocas hogazas', out: 'Hornada agotada' },
@@ -318,14 +330,21 @@ const halvesLabel = (h: number) =>
   h === 1 ? '½' : `${Math.floor(h / 2)}${h % 2 ? '½' : ''}`;
 const read = (el: HTMLInputElement | null) =>
   Math.max(0, Math.floor(Number(el?.value) || 0));
-// Croissants and pains au chocolat share the pieces left in the bake: each
-// can grow only into what the other one leaves free.
-const pastryLeft = () => Number(form?.dataset.pastryPool || 0);
+// Products that share what is left in the bake: the three breads (one oven)
+// and croissants with pains au chocolat. Each can grow only into what the
+// others leave free.
+const poolLeft = (pool: string) => Number(form?.dataset[`${pool}Pool`] || 0);
+const pastryLeft = () => poolLeft('pastry');
 const maxOf = (el: HTMLInputElement | null) => {
   const own = Number(el?.max || el?.dataset.max || 0);
-  if (el?.dataset.pool !== 'pastry') return own;
-  const other = el === croissant ? pain : croissant;
-  return Math.max(0, Math.min(own, pastryLeft() - read(other)));
+  const pool = el?.dataset.pool;
+  if (!pool || !form) return own;
+  const others = [
+    ...form.querySelectorAll<HTMLInputElement>(`input[data-pool="${pool}"]`),
+  ]
+    .filter((other) => other !== el)
+    .reduce((n, other) => n + read(other), 0);
+  return Math.max(0, Math.min(own, poolLeft(pool) - others));
 };
 const combos = document.querySelectorAll<HTMLButtonElement>('[data-combo]');
 const comboItems = (b: HTMLElement) => ({
@@ -338,6 +357,8 @@ const comboItems = (b: HTMLElement) => ({
 const chosenCombos = new Set<string>();
 type Cart = {
   loaves: number;
+  sourdoughs: number;
+  wholegrains: number;
   halves: number;
   croissants: number;
   pains: number;
@@ -345,16 +366,22 @@ type Cart = {
 };
 function cart(): Cart {
   const loaves = read(quantity);
+  const sourdoughs = read(sourdough);
+  const wholegrains = read(wholegrain);
   const halves = read(banana);
   const croissants = read(croissant);
   const pains = read(pain);
   return {
     loaves,
+    sourdoughs,
+    wholegrains,
     halves,
     croissants,
     pains,
     total:
       loaves * prices.loaf +
+      sourdoughs * prices.sourdough +
+      wholegrains * prices.wholegrain +
       Math.floor(halves / 2) * prices.whole +
       (halves % 2) * prices.half +
       croissants * prices.croissant +
@@ -374,6 +401,8 @@ function render(origin?: Element | null) {
   const view = document.querySelector('#banana-view');
   if (view) view.textContent = c.halves ? halvesLabel(c.halves) : '0';
   for (const [id, n] of [
+    ['#sourdough-view', c.sourdoughs],
+    ['#wholegrain-view', c.wholegrains],
     ['#croissant-view', c.croissants],
     ['#pain-view', c.pains],
   ] as const) {
@@ -382,6 +411,8 @@ function render(origin?: Element | null) {
   }
   for (const [key, n, label] of [
     ['loaf', c.loaves, String(c.loaves)],
+    ['sourdough', c.sourdoughs, String(c.sourdoughs)],
+    ['wholegrain', c.wholegrains, String(c.wholegrains)],
     ['banana', c.halves, halvesLabel(c.halves)],
     ['croissant', c.croissants, String(c.croissants)],
     ['pain', c.pains, String(c.pains)],
@@ -416,12 +447,20 @@ function render(origin?: Element | null) {
   });
   const items = [
     c.loaves ? words.loaves(c.loaves) : '',
+    c.sourdoughs ? words.sourdough(c.sourdoughs) : '',
+    c.wholegrains ? words.wholegrain(c.wholegrains) : '',
     c.halves ? `${halvesLabel(c.halves)} banana bread` : '',
     c.croissants ? pastryWords.croissants(c.croissants) : '',
     c.pains ? pastryWords.pains(c.pains) : '',
   ].filter(Boolean);
   // Pieces to carry home: a half banana bread is still one piece.
-  const count = c.loaves + Math.ceil(c.halves / 2) + c.croissants + c.pains;
+  const count =
+    c.loaves +
+    c.sourdoughs +
+    c.wholegrains +
+    Math.ceil(c.halves / 2) +
+    c.croissants +
+    c.pains;
   document.querySelectorAll<HTMLElement>('[data-cart-count]').forEach((el) => {
     el.hidden = count === 0;
     el.textContent = String(count);
@@ -472,13 +511,15 @@ const priceOf = (k: ItemKey) =>
 const bananaCents = (halves: number) =>
   Math.floor(halves / 2) * prices.whole + (halves % 2) * prices.half;
 const keyOf = (input: HTMLInputElement): ItemKey =>
-  input === banana
-    ? 'banana'
-    : input === croissant
-      ? 'croissant'
-      : input === pain
-        ? 'pain'
-        : 'loaf';
+  (
+    [
+      [banana, 'banana'],
+      [sourdough, 'sourdough'],
+      [wholegrain, 'wholegrain'],
+      [croissant, 'croissant'],
+      [pain, 'pain'],
+    ] as const
+  ).find(([el]) => el === input)?.[1] ?? 'loaf';
 // Which list a button belongs to, for GA4's select_item.
 const listOf = (el: Element) =>
   el.closest('#combina')
@@ -515,6 +556,16 @@ function cartItems() {
       ...catalog.loaf,
       price: prices.loaf / 100,
       quantity: c.loaves,
+    },
+    c.sourdoughs && {
+      ...catalog.sourdough,
+      price: prices.sourdough / 100,
+      quantity: c.sourdoughs,
+    },
+    c.wholegrains && {
+      ...catalog.wholegrain,
+      price: prices.wholegrain / 100,
+      quantity: c.wholegrains,
     },
     c.halves && {
       ...catalog.banana,
@@ -767,7 +818,15 @@ form?.addEventListener('submit', async (event) => {
   if (button.disabled) return;
   const c = cart();
   // Pastries alone are a valid order (the server accepts them too).
-  if (c.loaves + c.halves + c.croissants + c.pains === 0) {
+  if (
+    c.loaves +
+      c.sourdoughs +
+      c.wholegrains +
+      c.halves +
+      c.croissants +
+      c.pains ===
+    0
+  ) {
     track('reservation_error');
     showError(form, new Error(words.empty));
     return;
@@ -1144,11 +1203,18 @@ async function refreshBake() {
           ),
         );
       }
-    } else if (quantity && b.bread) {
-      quantity.max = String(b.bread.max);
+    } else if (form && b.bread) {
+      form.dataset.breadPool = String(b.bread.max);
     }
     // Keep the order within what is left after other people's reservations.
-    for (const input of [quantity, banana, croissant, pain])
+    for (const input of [
+      quantity,
+      sourdough,
+      wholegrain,
+      banana,
+      croissant,
+      pain,
+    ])
       if (input && read(input) > maxOf(input))
         input.value = String(maxOf(input));
     render();

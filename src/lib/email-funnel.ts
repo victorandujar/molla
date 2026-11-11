@@ -109,6 +109,8 @@ const broadcastCopy = {
       `Si quieres pan, banana bread o bollería para el ${day}, aún estás a tiempo. Después ya no puedo añadir nada a la hornada.`,
     menu: 'La carta',
     loaf: 'Hogaza de poolish · 750–850 g',
+    sourdough: 'Masa madre',
+    wholegrain: 'Integral 60 %',
     banana: 'Banana bread · entero o medio',
     pastries: 'Croissant · Pain au chocolat',
     delivery: 'Entrega',
@@ -134,6 +136,8 @@ const broadcastCopy = {
       `Si vols pa, banana bread o brioixeria per a ${day}, encara hi ets a temps. Després ja no puc afegir res a la fornada.`,
     menu: 'La carta',
     loaf: 'Pa de poolish · 750–850 g',
+    sourdough: 'Massa mare',
+    wholegrain: 'Integral 60 %',
     banana: 'Banana bread · sencer o mig',
     pastries: 'Croissant · Pain au chocolat',
     delivery: 'Entrega',
@@ -201,6 +205,7 @@ export function broadcastEmail(
       t.menu,
       [
         `${esc(t.loaf)} · <strong>${price('clasica')}</strong>`,
+        `${esc(t.sourdough)} · <strong>${price('masa-madre')}</strong> · ${esc(t.wholegrain)} · <strong>${price('integral')}</strong>`,
         `${esc(t.banana)} · <strong>${price('banana')}</strong> / ${price('banana-mitad')}`,
         `${esc(t.pastries)} · <strong>${price('croissant')}</strong> / ${price('pain-au-chocolat')}`,
       ].join('<br>'),
@@ -232,6 +237,7 @@ ${text}
 
 ${t.menu}:
 - ${t.loaf}: ${price('clasica')}
+- ${t.sourdough}: ${price('masa-madre')} · ${t.wholegrain}: ${price('integral')}
 - ${t.banana}: ${price('banana')} / ${price('banana-mitad')}
 - ${t.pastries}: ${price('croissant')} / ${price('pain-au-chocolat')}
 
