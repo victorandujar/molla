@@ -8,10 +8,12 @@ import {
   sessionCookie,
   sessionHours,
 } from '../lib/admin';
+import { randomUUID } from 'node:crypto';
 import {
   currentBake,
   listBakes,
   ordersForBake,
+  reserve,
   setOrderStatus,
   waitlistCounts,
   funnel,
@@ -26,7 +28,10 @@ import {
   type Order,
   hasMailbox,
   standingDayOf,
+  reservationSchema,
 } from '../lib/domain';
+import { deliveryTowns } from '../lib/delivery';
+import { AppError, messages, isMessageKey } from '../lib/messages';
 import { townById } from '../lib/delivery';
 import { funnelEmailCounts } from '../lib/funnel';
 import {
@@ -37,7 +42,7 @@ import {
 } from '../lib/config';
 import { pickupDay } from '../lib/email-templates';
 import { routes, standingFrequency, ui } from '../lib/i18n';
-import { clientIp, after } from '../lib/http';
+import { clientIp, after, issue } from '../lib/http';
 import { sendCancelledByOwner } from '../lib/email';
 // Owner's panel for the pickup point: today's orders, mark collected or
 // cancelled from the phone. Spanish only; it is not a public page.
@@ -81,6 +86,37 @@ if (Astro.request.method === 'POST') {
     }
     const query = new URLSearchParams({ subdone: ok ? to : 'none' });
     return Astro.redirect(`/gestio?${query.toString()}#panfijo`, 303);
+  } else if (signedIn && action === 'manual') {
+    // An order taken by Instagram, WhatsApp or in person, so the panel and
+    // the bake count every loaf. No emails go out: the customer already
+    // talked to the baker.
+    let why = '';
+    let bakeId = '';
+    try {
+      const active = await currentBake();
+      bakeId = active.id;
+      const fields = Object.fromEntries(
+        [...form.entries()].map(([k, v]) => [k, String(v)]),
+      );
+      const parsed = reservationSchema.safeParse({
+        ...fields,
+        requestId: randomUUID(),
+        bakeId: active.id,
+        privacy: 'yes',
+        lang: 'es',
+      });
+      if (!parsed.success) why = issue(parsed.error, 'invalid');
+      else await reserve({ ...parsed.data, lang: 'es' });
+    } catch (e) {
+      why = e instanceof AppError ? e.key : 'reservationFailed';
+      if (!(e instanceof AppError))
+        console.error(
+          'Manual order failed',
+          e instanceof Error ? e.message : e,
+        );
+    }
+    const query = new URLSearchParams({ bake: bakeId, manual: why || 'ok' });
+    return Astro.redirect(`/gestio?${query.toString()}#manual`, 303);
   } else if (signedIn && action === 'status') {
     const to = String(form.get('to'));
     const id = String(form.get('id'));
@@ -168,6 +204,12 @@ const notice =
         ? 'Pedido cancelado. El cliente recibirá un email avisándole.'
         : `Pedido marcado como ${labels[done as Order['status']]?.toLowerCase() || 'actualizado'}.`
       : '';
+const manual = Astro.url.searchParams.get('manual');
+const manualNotice = !manual
+  ? ''
+  : manual === 'ok'
+    ? 'Pedido apuntado. Ya cuenta en la hornada y en la lista de pedidos.'
+    : `No se ha podido apuntar: ${isMessageKey(manual) ? messages.es[manual] : 'revisa los datos.'}`;
 const subDone = Astro.url.searchParams.get('subdone');
 const subNotice =
   subDone === 'none'
@@ -412,7 +454,9 @@ import {
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      {o.delivery ? 'Avisar «salgo ahora»' : 'Avisar «ya está listo»'}{' '}
+                      {o.delivery
+                        ? 'Avisar «salgo ahora»'
+                        : 'Avisar «ya está listo»'}{' '}
                       ↗
                     </a>
                   )}
@@ -509,6 +553,141 @@ import {
             ))}
           </ul>
         </section>
+        <section id="manual" aria-labelledby="manual-title">
+          <h2 id="manual-title">Apuntar un pedido</h2>
+          <p class="admin-meta">
+            Para los pedidos que te llegan por Instagram, WhatsApp o en persona.
+            Va a la hornada que está abierta ({data.bake.number}) y no envía
+            ningún email.
+          </p>
+          {manualNotice && (
+            <p class="admin-notice" role="status">
+              {manualNotice}
+            </p>
+          )}
+          <details class="admin-manual" open={!!manual && manual !== 'ok'}>
+            <summary class="button">+ Pedido manual</summary>
+            <form method="post" class="admin-manual-form">
+              <input type="hidden" name="action" value="manual" />
+              <div class="field">
+                <label for="m-source">Por dónde llegó</label>
+                <select id="m-source" name="source">
+                  <option value="instagram">Instagram</option>
+                  <option value="whatsapp">WhatsApp</option>
+                  <option value="facebook">Facebook</option>
+                  <option value="referral">Un amigo o vecino</option>
+                  <option value="direct">En persona o por teléfono</option>
+                </select>
+              </div>
+              <div class="form-columns">
+                <div class="field">
+                  <label for="m-quantity">Hogazas</label>
+                  <input
+                    id="m-quantity"
+                    name="quantity"
+                    type="number"
+                    inputmode="numeric"
+                    min="0"
+                    max="4"
+                    value="0"
+                  />
+                </div>
+                <div class="field">
+                  <label for="m-banana">Banana bread (mitades)</label>
+                  <input
+                    id="m-banana"
+                    name="banana"
+                    type="number"
+                    inputmode="numeric"
+                    min="0"
+                    max="4"
+                    value="0"
+                  />
+                </div>
+                <div class="field">
+                  <label for="m-croissant">Croissants</label>
+                  <input
+                    id="m-croissant"
+                    name="croissant"
+                    type="number"
+                    inputmode="numeric"
+                    min="0"
+                    max="12"
+                    value="0"
+                  />
+                </div>
+                <div class="field">
+                  <label for="m-pain">Pains au chocolat</label>
+                  <input
+                    id="m-pain"
+                    name="pain"
+                    type="number"
+                    inputmode="numeric"
+                    min="0"
+                    max="12"
+                    value="0"
+                  />
+                </div>
+              </div>
+              <div class="field">
+                <label for="m-delivery">Entrega</label>
+                <select id="m-delivery" name="delivery">
+                  <option value="home">A domicilio</option>
+                  <option value="pickup">Recoge en Sant Boi</option>
+                </select>
+              </div>
+              <div class="form-columns">
+                <div class="field">
+                  <label for="m-town">Municipio (a domicilio)</label>
+                  <select id="m-town" name="town">
+                    <option value="">—</option>
+                    {deliveryTowns.map((town) => (
+                      <option value={town.id}>{town.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="m-address">Dirección (a domicilio)</label>
+                  <input id="m-address" name="address" maxlength="160" />
+                </div>
+              </div>
+              <div class="field">
+                <label for="m-notes">Notas de entrega (opcional)</label>
+                <input id="m-notes" name="notes" maxlength="200" />
+              </div>
+              <div class="form-columns">
+                <div class="field">
+                  <label for="m-name">Nombre</label>
+                  <input
+                    id="m-name"
+                    name="name"
+                    minlength="2"
+                    maxlength="100"
+                    required
+                  />
+                </div>
+                <div class="field">
+                  <label for="m-phone">Móvil</label>
+                  <input
+                    id="m-phone"
+                    name="phone"
+                    type="tel"
+                    minlength="9"
+                    maxlength="22"
+                    required
+                  />
+                </div>
+              </div>
+              <div class="field">
+                <label for="m-email">Email (opcional)</label>
+                <input id="m-email" name="email" type="email" maxlength="254" />
+              </div>
+              <button class="button full" type="submit">
+                Apuntar pedido
+              </button>
+            </form>
+          </details>
+        </section>
         <section id="panfijo" aria-labelledby="panfijo-title">
           <h2 id="panfijo-title">
             Pan fijo ({data.standing.active} activos
@@ -522,7 +701,10 @@ import {
             return (
               <div class="admin-goal">
                 <p>
-                  Objetivo: <strong>{shown} / {STANDING_GOAL_LOAVES}</strong>{' '}
+                  Objetivo:{' '}
+                  <strong>
+                    {shown} / {STANDING_GOAL_LOAVES}
+                  </strong>{' '}
                   panes fijos por semana
                 </p>
                 <meter
@@ -556,7 +738,11 @@ import {
                 </div>
                 <p class="admin-name">
                   {subItems(s)} ·{' '}
-                  {standingFrequency('es', s.frequency, standingDayOf(s)).toLowerCase()}
+                  {standingFrequency(
+                    'es',
+                    s.frequency,
+                    standingDayOf(s),
+                  ).toLowerCase()}
                   {s.skipRemaining > 0 && ' · salta la próxima entrega'}
                 </p>
                 <p class="admin-contact">
@@ -625,9 +811,7 @@ import {
             Ya te han comprado y todavía no tienen pan fijo. El botón abre
             WhatsApp con la propuesta escrita en su idioma.
           </p>
-          {data.candidates.length === 0 && (
-            <p>Nadie pendiente por ahora.</p>
-          )}
+          {data.candidates.length === 0 && <p>Nadie pendiente por ahora.</p>}
           <ul class="admin-orders">
             {data.candidates.map((c) => (
               <li data-status="CONFIRMED">
@@ -638,7 +822,8 @@ import {
                   </span>
                 </div>
                 <p class="admin-meta">
-                  Último: {pickupDay(c.lastDate)} · {c.lang === 'ca' ? 'catalán' : 'castellano'}
+                  Último: {pickupDay(c.lastDate)} ·{' '}
+                  {c.lang === 'ca' ? 'catalán' : 'castellano'}
                 </p>
                 <p class="admin-contact">
                   <a

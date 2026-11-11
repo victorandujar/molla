@@ -87,11 +87,12 @@ const pastries = [
 ] as const;
 // Combina Molla: three suggested pairings, priced as the sum of their pieces
 // (no discount). They fill the same order fields as the single products.
+// «Para compartir» leads: the one customers actually ask for.
 const combos = (
   [
+    ['compartir', 'combo-compartir', { loaf: 2, croissant: 1, pain: 1 }],
     ['desayuno', 'combo-desayuno', { loaf: 1, croissant: 1 }],
     ['capricho', 'combo-capricho', { loaf: 1, pain: 1 }],
-    ['compartir', 'combo-compartir', { loaf: 2, croissant: 1, pain: 1 }],
   ] as const
 ).map(([id, photo, items]) => {
   const n = { croissant: 0, pain: 0, ...items };
@@ -119,7 +120,15 @@ const combos = (
 const pickupDay = unavailable
   ? t.bake.dateSoon
   : dayFormat(lang, current.pickupDate);
-const orderHref = open ? '#reserva' : '#avisame';
+const orderHref = open ? '#reservation-form' : '#avisame';
+// «sábado» or «miércoles»: the button names the day the bread arrives.
+const pickupWeekday = unavailable
+  ? ''
+  : new Intl.DateTimeFormat(lang === 'ca' ? 'ca-ES' : 'es-ES', {
+      timeZone: 'Europe/Madrid',
+      weekday: 'long',
+    }).format(new Date(current.pickupDate));
+const shareCombo = combos[0]!;
 // Prices in the flyer's shorthand: "5€", "8€".
 const short = (cents: number) =>
   cents % 100 ? money(cents) : `${cents / 100}€`;
@@ -131,6 +140,10 @@ const pad = (n: number | string) => String(n).padStart(2, '0');
 // prefer a chat to a form.
 const whatsappBook = brand.whatsapp
   ? `https://wa.me/${brand.whatsapp}?text=${encodeURIComponent(t.reserve.whatsappText(pickupDay))}`
+  : '';
+// "Tell me about the next bake" as a chat message: easier than an email.
+const whatsappNotify = brand.whatsapp
+  ? `https://wa.me/${brand.whatsapp}?text=${encodeURIComponent(t.waitlist.whatsappText)}`
   : '';
 const abs = (path: string) =>
   brand.site ? new URL(path, brand.site).href : undefined;
@@ -308,10 +321,12 @@ const jsonLd = [
             </p>
             <a
               class="button button-orange full stub-cta"
-              href={open ? '#carta' : '#avisame'}
+              href={orderHref}
               data-bake-cta
             >
-              {open ? t.bake.ctaOpen : t.bake.ctaClosed}
+              {open && pickupWeekday
+                ? t.bake.ctaOpen(pickupWeekday)
+                : t.bake.ctaClosed}
               <span class="button-arrow" aria-hidden="true">
                 →
               </span>
@@ -358,7 +373,9 @@ const jsonLd = [
               <p>“{googleReviews.quotes[1].text}”</p>
             </blockquote>
             <figcaption>
-              <span class="hero-stars" aria-hidden="true">★★★★★</span>{' '}
+              <span class="hero-stars" aria-hidden="true">
+                ★★★★★
+              </span>{' '}
               {googleReviews.quotes[1].author} ·{' '}
               <a href="#resenas">
                 {googleReviews.score} · {t.reviews.count(googleReviews.count)}
@@ -711,247 +728,52 @@ const jsonLd = [
           <p data-reveal>{t.combos.intro}</p>
         </header>
         <ul class="combo-list">
-          {combos.map((c) => (
-            <li class="combo">
-              <figure class="combo-photo">
-                <Photo
-                  name={c.photo}
-                  alt=""
-                  sizes="(max-width: 720px) 38vw, 30vw"
-                />
-              </figure>
-              <div class="combo-body">
-                <h3>{c.name}</h3>
-                <p class="combo-lines">{c.lines}</p>
-                <p class="combo-price">
-                  <span aria-hidden="true">{tight(c.price)}</span>
-                  <span class="visually-hidden">{money(c.price)}</span>
-                </p>
-                {open && (
-                  <button
-                    type="button"
-                    class="button button-orange combo-add"
-                    data-combo={c.id}
-                    data-combo-loaf={c.items.loaf}
-                    data-combo-croissant={c.items.croissant}
-                    data-combo-pain={c.items.pain}
-                    data-added={t.combos.added}
-                    disabled={!c.fits}
-                    aria-label={t.combos.add(c.name)}
-                  >
-                    {t.pastry.add}
-                    <span class="button-plus" aria-hidden="true">
-                      +
-                    </span>
-                  </button>
-                )}
-              </div>
-            </li>
+          {combos.map((c, i) => (
+            <>
+              {i === 1 && <li class="combo-others">{t.combos.others}</li>}
+              <li class:list={['combo', { 'is-featured': i === 0 }]}>
+                <figure class="combo-photo">
+                  <Photo
+                    name={c.photo}
+                    alt=""
+                    sizes={
+                      i === 0
+                        ? '(max-width: 720px) calc(100vw - 40px), 46vw'
+                        : '(max-width: 720px) 38vw, 22vw'
+                    }
+                  />
+                </figure>
+                <div class="combo-body">
+                  <h3>{c.name}</h3>
+                  <p class="combo-lines">{c.lines}</p>
+                  <p class="combo-price">
+                    <span aria-hidden="true">{tight(c.price)}</span>
+                    <span class="visually-hidden">{money(c.price)}</span>
+                  </p>
+                  {open && (
+                    <button
+                      type="button"
+                      class="button button-orange combo-add"
+                      data-combo={c.id}
+                      data-combo-loaf={c.items.loaf}
+                      data-combo-croissant={c.items.croissant}
+                      data-combo-pain={c.items.pain}
+                      data-added={t.combos.added}
+                      disabled={!c.fits}
+                      aria-label={t.combos.add(c.name)}
+                    >
+                      {t.pastry.add}
+                      <span class="button-plus" aria-hidden="true">
+                        +
+                      </span>
+                    </button>
+                  )}
+                </div>
+              </li>
+            </>
           ))}
         </ul>
         <p class="combos-note">{open ? t.combos.note : t.catalog.closed}</p>
-      </div>
-    </section>
-
-    <!-- Ressenyes de Google: un cartell amb l'índex al costat, com la taula
-         del flyer. Una ressenya a la vegada. Cites textuals, en el seu idioma. -->
-    <section
-      id="resenas"
-      class="reviews"
-      aria-labelledby="reviews-title"
-      data-reviews
-    >
-      <div class="wrap">
-        <div class="mono-bar" data-bar>
-          <span>{t.reviews.kicker}</span>
-          <span>{t.reviews.fig}</span>
-        </div>
-        <h2 id="reviews-title" class="reviews-score">
-          <span class="reviews-big">{googleReviews.score}</span>{' '}
-          <span class="reviews-count">
-            {t.reviews.count(googleReviews.count)}
-          </span>
-        </h2>
-        <div class="reviews-board">
-          <div class="reviews-stage" data-reviews-stage>
-            {googleReviews.quotes.map((r, i) => {
-              const [before, after] = r.highlight.split(r.accent);
-              return (
-                <div
-                  class="review-slide"
-                  id={`review-${i}`}
-                  role="tabpanel"
-                  aria-labelledby={`review-tab-${i}`}
-                  data-review={i}
-                >
-                  <figure>
-                    <p class="review-top" aria-hidden="true">
-                      <span>(Fig. 7.{i + 1})</span>
-                      <span>Google · {googleReviews.score}</span>
-                    </p>
-                    <p class="review-headline" aria-hidden="true">
-                      <span class="review-mark">“</span>
-                      <span class="review-line">
-                        {before}
-                        <em>{r.accent}</em>
-                        {after}
-                      </span>
-                    </p>
-                    <div class="review-body">
-                      <blockquote lang={r.lang}>
-                        <p>{r.text}</p>
-                      </blockquote>
-                      <figcaption class="review-by">
-                        <cite>{r.author}</cite>
-                        <span>{t.reviews.source}</span>
-                      </figcaption>
-                    </div>
-                  </figure>
-                </div>
-              );
-            })}
-          </div>
-          <div class="reviews-nav">
-            <div
-              class="reviews-index"
-              role="tablist"
-              aria-label={t.reviews.label}
-            >
-              {googleReviews.quotes.map((r, i) => (
-                <button
-                  type="button"
-                  role="tab"
-                  id={`review-tab-${i}`}
-                  aria-controls={`review-${i}`}
-                  aria-selected={i === 0 ? 'true' : 'false'}
-                  tabindex={i === 0 ? 0 : -1}
-                  data-review-tab={i}
-                >
-                  <span class="review-tab-num">{pad(i + 1)}</span>
-                  <span class="review-tab-name">{r.author}</span>
-                </button>
-              ))}
-            </div>
-            <div class="reviews-arrows" data-reviews-arrows hidden>
-              <button
-                type="button"
-                class="reviews-arrow"
-                data-reviews-prev
-                aria-label={t.reviews.prev}
-              >
-                ←
-              </button>
-              <button
-                type="button"
-                class="reviews-arrow"
-                data-reviews-next
-                aria-label={t.reviews.next}
-              >
-                →
-              </button>
-            </div>
-          </div>
-        </div>
-        <div class="reviews-actions">
-          <a
-            class="button button-light"
-            href={googleReviews.profileUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            {t.reviews.all(googleReviews.count)}
-            <span aria-hidden="true">↗</span>
-            <span class="visually-hidden">{t.reviews.newTab}</span>
-          </a>
-          <a
-            class="button button-ghost reviews-leave"
-            href={googleReviews.reviewUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            {t.reviews.leave}
-            <span aria-hidden="true">↗</span>
-            <span class="visually-hidden">{t.reviews.newTab}</span>
-          </a>
-        </div>
-      </div>
-    </section>
-
-    <!-- Per què jo i no el forn: tres xifres, sense discurs -->
-    <section class="why" aria-labelledby="why-title">
-      <div class="wrap">
-        <div class="mono-bar" data-bar>
-          <span>{t.why.kicker}</span>
-          <span>{t.why.bar}</span>
-        </div>
-        <div class="why-grid">
-          <h2 id="why-title" data-split>
-            {t.why.h2a} <em>{t.why.h2b}</em>
-          </h2>
-          <ul class="why-stats" data-reveal>
-            {t.why.stats.map(([value, label]) => (
-              <li>
-                <strong>{value}</strong>
-                <span>{label}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
-    </section>
-
-    <!-- 2 · Diari de l'obrador: las fotos de la cocina, como un reel -->
-    <section class="diary" aria-label={t.film.label} data-diary>
-      <div class="diary-pin">
-        <div class="wrap mono-bar diary-bar">
-          <span>{t.ed.diary}</span>
-          <span>
-            (Fig. <span data-diary-index>1</span> / {t.film.items.length})
-          </span>
-        </div>
-        <div class="wrap diary-progress" aria-hidden="true">
-          {t.film.items.map(() => (
-            <span>
-              <i />
-            </span>
-          ))}
-        </div>
-        <div
-          class="diary-track"
-          data-film
-          tabindex="0"
-          role="group"
-          aria-label={t.film.label}
-        >
-          {t.film.items.map(([name, title, text, alt], i) => (
-            <figure class:list={['story', { 'story-outline': i % 2 }]}>
-              <div class="story-photo">
-                <Photo
-                  name={name}
-                  alt={alt}
-                  sizes="(max-width: 720px) 78vw, 34vh"
-                />
-              </div>
-              <span class="story-word" aria-hidden="true">
-                {title}
-              </span>
-              <span class="story-num" aria-hidden="true">
-                {i + 1}
-              </span>
-              <figcaption>
-                <strong>{title}</strong>
-                <span>{text}</span>
-              </figcaption>
-              <span class="story-foot" aria-hidden="true">
-                <b>molla.</b>
-                <span>Baix Llobregat</span>
-              </span>
-            </figure>
-          ))}
-        </div>
-        <p class="wrap diary-hint" aria-hidden="true">
-          {t.ed.swipe} →
-        </p>
       </div>
     </section>
 
@@ -1235,9 +1057,32 @@ const jsonLd = [
                   </output>
                 </div>
               </div>
-              <p class="form-empty" data-empty>
-                {t.reserve.emptyOrder}
-              </p>
+              <div class="form-empty" data-empty>
+                <p>{t.reserve.emptyOrder}</p>
+                <p class="quick-label">{t.reserve.quickPick}</p>
+                <div class="quick-picks">
+                  <button
+                    type="button"
+                    class="button button-orange"
+                    data-add="loaf"
+                    disabled={stock.bread.max < 1}
+                  >
+                    {t.reserve.quickLoaf(money(loaf.price))}
+                  </button>
+                  <button
+                    type="button"
+                    class="button"
+                    data-combo={shareCombo.id}
+                    data-combo-loaf={shareCombo.items.loaf}
+                    data-combo-croissant={shareCombo.items.croissant}
+                    data-combo-pain={shareCombo.items.pain}
+                    data-added={t.combos.added}
+                    disabled={!shareCombo.fits}
+                  >
+                    {shareCombo.name} · {money(shareCombo.price)}
+                  </button>
+                </div>
+              </div>
               <div class="perforation" aria-hidden="true"></div>
               <fieldset class="size-choice delivery-choice">
                 <legend>{t.reserve.deliveryH}</legend>
@@ -1312,7 +1157,9 @@ const jsonLd = [
                     placeholder="tu@email.com"
                     aria-describedby="email-hint"
                   />
-                  <p id="email-hint" class="field-hint">{t.reserve.emailHint}</p>
+                  <p id="email-hint" class="field-hint">
+                    {t.reserve.emailHint}
+                  </p>
                 </div>
                 <div class="field">
                   <label for="phone">{t.reserve.phone}</label>
@@ -1345,16 +1192,8 @@ const jsonLd = [
                   {t.reserve.pickupCheck(pickupDay, current.pickupWindow)}
                 </p>
               )}
-              <label class="check">
-                <input type="checkbox" name="privacy" value="yes" required />
-                <span>
-                  {t.reserve.privacyA}{' '}
-                  <a href={routes.privacy[lang]} target="_blank">
-                    {t.reserve.privacyLink}
-                  </a>
-                  .
-                </span>
-              </label>
+              <!-- Ordering is the consent: a line to read, not a box to tick. -->
+              <input type="hidden" name="privacy" value="yes" />
               <label class="check">
                 <input type="checkbox" name="news" value="yes" />
                 <span>{t.reserve.newsCheck}</span>
@@ -1363,7 +1202,13 @@ const jsonLd = [
               <button type="submit" class="button full">
                 {isDemo ? t.reserve.submitDemo : t.reserve.submit}
               </button>
-              <p class="form-footnote">{t.reserve.footnote}</p>
+              <p class="form-footnote">
+                {t.reserve.footnote} {t.reserve.privacyNote}{' '}
+                <a href={routes.privacy[lang]} target="_blank">
+                  {t.reserve.privacyLink}
+                </a>
+                .
+              </p>
               {whatsappBook && (
                 <a
                   class="button button-ghost full"
@@ -1405,6 +1250,208 @@ const jsonLd = [
           ></div>
           <Sticker class="ticket-stamp" />
         </div>
+      </div>
+    </section>
+
+    <!-- Ressenyes de Google: un cartell amb l'índex al costat, com la taula
+         del flyer. Una ressenya a la vegada. Cites textuals, en el seu idioma. -->
+    <section
+      id="resenas"
+      class="reviews"
+      aria-labelledby="reviews-title"
+      data-reviews
+    >
+      <div class="wrap">
+        <div class="mono-bar" data-bar>
+          <span>{t.reviews.kicker}</span>
+          <span>{t.reviews.fig}</span>
+        </div>
+        <h2 id="reviews-title" class="reviews-score">
+          <span class="reviews-big">{googleReviews.score}</span>{' '}
+          <span class="reviews-count">
+            {t.reviews.count(googleReviews.count)}
+          </span>
+        </h2>
+        <div class="reviews-board">
+          <div class="reviews-stage" data-reviews-stage>
+            {googleReviews.quotes.map((r, i) => {
+              const [before, after] = r.highlight.split(r.accent);
+              return (
+                <div
+                  class="review-slide"
+                  id={`review-${i}`}
+                  role="tabpanel"
+                  aria-labelledby={`review-tab-${i}`}
+                  data-review={i}
+                >
+                  <figure>
+                    <p class="review-top" aria-hidden="true">
+                      <span>(Fig. 7.{i + 1})</span>
+                      <span>Google · {googleReviews.score}</span>
+                    </p>
+                    <p class="review-headline" aria-hidden="true">
+                      <span class="review-mark">“</span>
+                      <span class="review-line">
+                        {before}
+                        <em>{r.accent}</em>
+                        {after}
+                      </span>
+                    </p>
+                    <div class="review-body">
+                      <blockquote lang={r.lang}>
+                        <p>{r.text}</p>
+                      </blockquote>
+                      <figcaption class="review-by">
+                        <cite>{r.author}</cite>
+                        <span>{t.reviews.source}</span>
+                      </figcaption>
+                    </div>
+                  </figure>
+                </div>
+              );
+            })}
+          </div>
+          <div class="reviews-nav">
+            <div
+              class="reviews-index"
+              role="tablist"
+              aria-label={t.reviews.label}
+            >
+              {googleReviews.quotes.map((r, i) => (
+                <button
+                  type="button"
+                  role="tab"
+                  id={`review-tab-${i}`}
+                  aria-controls={`review-${i}`}
+                  aria-selected={i === 0 ? 'true' : 'false'}
+                  tabindex={i === 0 ? 0 : -1}
+                  data-review-tab={i}
+                >
+                  <span class="review-tab-num">{pad(i + 1)}</span>
+                  <span class="review-tab-name">{r.author}</span>
+                </button>
+              ))}
+            </div>
+            <div class="reviews-arrows" data-reviews-arrows hidden>
+              <button
+                type="button"
+                class="reviews-arrow"
+                data-reviews-prev
+                aria-label={t.reviews.prev}
+              >
+                ←
+              </button>
+              <button
+                type="button"
+                class="reviews-arrow"
+                data-reviews-next
+                aria-label={t.reviews.next}
+              >
+                →
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="reviews-actions">
+          <a
+            class="button button-light"
+            href={googleReviews.profileUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {t.reviews.all(googleReviews.count)}
+            <span aria-hidden="true">↗</span>
+            <span class="visually-hidden">{t.reviews.newTab}</span>
+          </a>
+          <a
+            class="button button-ghost reviews-leave"
+            href={googleReviews.reviewUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {t.reviews.leave}
+            <span aria-hidden="true">↗</span>
+            <span class="visually-hidden">{t.reviews.newTab}</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Per què jo i no el forn: tres xifres, sense discurs -->
+    <section class="why" aria-labelledby="why-title">
+      <div class="wrap">
+        <div class="mono-bar" data-bar>
+          <span>{t.why.kicker}</span>
+          <span>{t.why.bar}</span>
+        </div>
+        <div class="why-grid">
+          <h2 id="why-title" data-split>
+            {t.why.h2a} <em>{t.why.h2b}</em>
+          </h2>
+          <ul class="why-stats" data-reveal>
+            {t.why.stats.map(([value, label]) => (
+              <li>
+                <strong>{value}</strong>
+                <span>{label}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2 · Diari de l'obrador: las fotos de la cocina, como un reel -->
+    <section class="diary" aria-label={t.film.label} data-diary>
+      <div class="diary-pin">
+        <div class="wrap mono-bar diary-bar">
+          <span>{t.ed.diary}</span>
+          <span>
+            (Fig. <span data-diary-index>1</span> / {t.film.items.length})
+          </span>
+        </div>
+        <div class="wrap diary-progress" aria-hidden="true">
+          {t.film.items.map(() => (
+            <span>
+              <i />
+            </span>
+          ))}
+        </div>
+        <div
+          class="diary-track"
+          data-film
+          tabindex="0"
+          role="group"
+          aria-label={t.film.label}
+        >
+          {t.film.items.map(([name, title, text, alt], i) => (
+            <figure class:list={['story', { 'story-outline': i % 2 }]}>
+              <div class="story-photo">
+                <Photo
+                  name={name}
+                  alt={alt}
+                  sizes="(max-width: 720px) 78vw, 34vh"
+                />
+              </div>
+              <span class="story-word" aria-hidden="true">
+                {title}
+              </span>
+              <span class="story-num" aria-hidden="true">
+                {i + 1}
+              </span>
+              <figcaption>
+                <strong>{title}</strong>
+                <span>{text}</span>
+              </figcaption>
+              <span class="story-foot" aria-hidden="true">
+                <b>molla.</b>
+                <span>Baix Llobregat</span>
+              </span>
+            </figure>
+          ))}
+        </div>
+        <p class="wrap diary-hint" aria-hidden="true">
+          {t.ed.swipe} →
+        </p>
       </div>
     </section>
 
@@ -1505,18 +1552,31 @@ const jsonLd = [
         <div class="waitlist-body" data-reveal>
           <h2 id="waitlist-title">{t.waitlist.h2}</h2>
           <p>{t.waitlist.p}</p>
-          {brand.whatsappChannel && (
-            <p class="waitlist-channel">
-              <a
-                class="text-link"
-                data-event="click_channel"
-                href={brand.whatsappChannel}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {t.waitlist.channel} ↗
-              </a>
-            </p>
+          {(brand.whatsappChannel || whatsappNotify) && (
+            <div class="waitlist-whatsapp">
+              {brand.whatsappChannel ? (
+                <a
+                  class="button button-orange"
+                  data-event="click_channel"
+                  href={brand.whatsappChannel}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {t.waitlist.channelCta} <span aria-hidden="true">↗</span>
+                </a>
+              ) : (
+                <a
+                  class="button button-orange"
+                  data-event="click_whatsapp"
+                  href={whatsappNotify}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {t.waitlist.whatsapp} <span aria-hidden="true">↗</span>
+                </a>
+              )}
+              <p class="waitlist-alt">{t.waitlist.emailAlt}</p>
+            </div>
           )}
           <form
             id="waitlist-form"
@@ -1596,7 +1656,12 @@ const jsonLd = [
       </small>
     </span>
     <span class="pill-total" data-pill-total hidden></span>
-    <a class="button button-light" href={orderHref} data-pill-cta>
+    <a
+      class="button button-light"
+      href={orderHref}
+      data-pill-cta
+      data-done={open ? t.catalog.pillDone : undefined}
+    >
       {open ? t.catalog.pillCta : t.mobile.notify}
     </a>
   </div>

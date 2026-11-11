@@ -315,6 +315,12 @@ function render(origin?: Element | null) {
     if (badge) badge.textContent = String(count);
     const list = pill.querySelector('[data-pill-items]');
     if (list && count) list.textContent = items.join(' · ');
+    // With something in the order the button says what is left to do.
+    const cta = pill.querySelector<HTMLElement>('[data-pill-cta]');
+    if (cta?.dataset.done) {
+      cta.dataset.empty ??= cta.textContent?.trim() || '';
+      cta.textContent = count > 0 ? cta.dataset.done : cta.dataset.empty;
+    }
     const sum = pill.querySelector<HTMLElement>('[data-pill-total]');
     if (sum) {
       sum.hidden = count === 0;
@@ -410,15 +416,17 @@ function updatePill() {
   pill.classList.toggle('is-visible', show);
 }
 if (pill) {
+  // The pill steps aside once the ticket itself is on screen (not just the
+  // heading of its section), so it keeps pointing to the form until then.
+  const reserve = form || document.querySelector('#reserva');
   const watch = new IntersectionObserver((entries) => {
     for (const e of entries) {
-      if (e.target.id === 'reserva') seen.reserve = e.isIntersecting;
+      if (e.target === reserve) seen.reserve = e.isIntersecting;
       else seen.hero = e.isIntersecting;
     }
     updatePill();
   });
   const hero = document.querySelector('.hero');
-  const reserve = document.querySelector('#reserva');
   if (hero) watch.observe(hero);
   if (reserve) watch.observe(reserve);
 }
