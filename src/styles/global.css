@@ -2862,6 +2862,18 @@ input::placeholder {
 .delivery-choice strong {
   font-size: 16px;
 }
+/* Wednesday's slot sits in the address grid, across both columns. */
+.slot-choice {
+  grid-column: 1 / -1;
+  margin-top: 8px;
+}
+.slot-choice label {
+  flex: 1 1 160px;
+}
+.slot-choice label > span {
+  min-width: 0;
+  height: 100%;
+}
 .check {
   display: grid;
   grid-template-columns: 22px 1fr;

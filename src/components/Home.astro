@@ -17,7 +17,7 @@ import {
 import { ui, routes, dayFormat, type Lang } from '../lib/i18n';
 import { currentBake, type ActiveBake } from '../lib/store';
 import { bakeState, earlyBakesOpen, publicStock } from '../lib/domain';
-import { deliveryTowns } from '../lib/delivery';
+import { deliveryTowns, isWednesday } from '../lib/delivery';
 interface Props {
   lang: Lang;
   // An early bake (Christmas) shown on its own page instead of the weekly one.
@@ -115,6 +115,8 @@ const pastries = [
   },
 ] as const;
 // Without the database the configured bake is only a placeholder: never show its date.
+// Wednesday bakes also deliver in the evening: the form offers the choice.
+const wed = !unavailable && isWednesday(current.pickupDate);
 const pickupDay = unavailable
   ? t.bake.dateSoon
   : dayFormat(lang, current.pickupDate);
@@ -1142,7 +1144,7 @@ const jsonLd = [
                 <label>
                   <input type="radio" name="delivery" value="home" checked />
                   <span>
-                    <strong>{t.reserve.deliveryHome}</strong>
+                    <strong>{t.reserve.deliveryHome(wed)}</strong>
                     <em>{t.reserve.deliveryHomeHint}</em>
                   </span>
                 </label>
@@ -1155,6 +1157,24 @@ const jsonLd = [
                 </label>
               </fieldset>
               <div class="form-columns address-columns" data-home-fields>
+                {wed && (
+                  <fieldset class="size-choice slot-choice">
+                    <legend>{t.reserve.slotH}</legend>
+                    <label>
+                      <input type="radio" name="slot" value="midday" checked />
+                      <span>
+                        <strong>{t.reserve.slotMidday}</strong>
+                      </span>
+                    </label>
+                    <label>
+                      <input type="radio" name="slot" value="evening" />
+                      <span>
+                        <strong>{t.reserve.slotEvening}</strong>
+                        <em>{t.reserve.slotEveningHint}</em>
+                      </span>
+                    </label>
+                  </fieldset>
+                )}
                 <div class="field">
                   <label for="town">{t.reserve.town}</label>
                   <select id="town" name="town" required>
@@ -1242,7 +1262,7 @@ const jsonLd = [
                 </label>
               ) : (
                 <p class="check-note">
-                  {t.reserve.pickupCheck(pickupDay, current.pickupWindow)}
+                  {t.reserve.pickupCheck(pickupDay, current.pickupWindow, wed)}
                 </p>
               )}
               <!-- Ordering is the consent: a line to read, not a box to tick. -->

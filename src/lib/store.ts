@@ -11,7 +11,7 @@ import {
   PASTRY_UNITS_PER_BAKE,
 } from './config';
 import { ui } from './i18n';
-import { deliveryWindow, townById } from './delivery';
+import { isWednesday, slotWindow, townById } from './delivery';
 import { AppError } from './messages';
 import {
   assertCapacity,
@@ -268,6 +268,15 @@ const assertPastry = (reserved: number, units: number) => {
   if (units > 0 && reserved + units > PASTRY_UNITS_PER_BAKE)
     throw new AppError('pastryCapacity');
 };
+// The evening round only runs on Wednesdays, and only for home delivery.
+const assertSlot = (
+  input: { slot?: string },
+  town: unknown,
+  pickupDate: string,
+) => {
+  if (town && input.slot === 'evening' && !isWednesday(pickupDate))
+    throw new AppError('slot');
+};
 export async function reserve(
   input: ReservationInput & { lang: Lang },
   // Set when the weekly job places the order of a "pa fix".
@@ -293,7 +302,9 @@ export async function reserve(
     pickupAddress: town
       ? ui[input.lang].reserve.deliveryLabel(town.name)
       : brand.pickupLabel[input.lang],
-    pickupWindow: town ? deliveryWindow : bake.pickupWindow,
+    pickupWindow: town
+      ? slotWindow(input.slot ?? 'midday', bake.pickupDate)
+      : bake.pickupWindow,
     delivery: town
       ? {
           town: town.name,
@@ -318,6 +329,12 @@ export async function reserve(
       }
       if (input.bakeId !== bake.id) throw new AppError('bakeChanged');
       order.pickupDate = demoDates(d).pickupDate;
+      assertSlot(input, town, order.pickupDate);
+      if (town)
+        order.pickupWindow = slotWindow(
+          input.slot ?? 'midday',
+          order.pickupDate,
+        );
       assertCapacity(
         { ...bake, ...demoDates(d), status: d.bakeStatus || bake.status },
         reservedIn(d, bake.id),
@@ -407,7 +424,10 @@ export async function reserve(
       await tx`SELECT 1 FROM orders o JOIN customers c ON c.id=o.customer_id WHERE c.email=${input.email} AND o.status!='CANCELLED' LIMIT 1`;
     order.firstOrder = standingVoucher.active && !seen;
     order.pickupDate = new Date(b.pickup_date).toISOString();
-    if (!town) order.pickupWindow = b.pickup_window || brand.pickupWindow;
+    assertSlot(input, town, order.pickupDate);
+    order.pickupWindow = town
+      ? slotWindow(input.slot ?? 'midday', order.pickupDate)
+      : b.pickup_window || brand.pickupWindow;
     // The bake row is locked, so no concurrent reservation can take the same code.
     do order.code = pickupCode(b.number, randomBytes(4));
     while ((await tx`SELECT 1 FROM orders WHERE code=${order.code}`).length);

@@ -32,7 +32,7 @@ import {
 } from '../lib/domain';
 import { deliveryTowns } from '../lib/delivery';
 import { AppError, messages, isMessageKey } from '../lib/messages';
-import { townById } from '../lib/delivery';
+import { townById, deliveryWindow, eveningWindow } from '../lib/delivery';
 import { funnelEmailCounts } from '../lib/funnel';
 import {
   money,
@@ -482,7 +482,9 @@ import {
                 </p>
                 {o.delivery && (
                   <p class="admin-contact">
-                    <strong>A domicilio · {o.delivery.town}</strong>
+                    <strong>
+                      A domicilio · {o.delivery.town} · {o.pickupWindow}
+                    </strong>
                     {o.delivery.address && (
                       <a
                         href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${o.delivery.address}, ${o.delivery.town}`)}`}
@@ -671,6 +673,15 @@ import {
                 <select id="m-delivery" name="delivery">
                   <option value="home">A domicilio</option>
                   <option value="pickup">Recoge en Sant Boi</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="m-slot">Franja (a domicilio)</label>
+                <select id="m-slot" name="slot">
+                  <option value="midday">Mediodía · {deliveryWindow}</option>
+                  <option value="evening">
+                    Tarde · {eveningWindow} (solo miércoles)
+                  </option>
                 </select>
               </div>
               <div class="form-columns">

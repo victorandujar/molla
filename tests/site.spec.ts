@@ -720,6 +720,62 @@ test('pastries on every bake: the Wednesday bake takes them too', async ({
   await expect(page.locator('#combina')).toHaveCount(0);
 });
 
+test('Wednesday offers an evening round; Saturday does not', async ({
+  page,
+  request,
+}) => {
+  await writeFile(
+    dataPath,
+    JSON.stringify({ orders: [], waitlist: [], limits: {}, bakeDay: 3 }),
+  );
+  await page.goto('/es/');
+  await page
+    .locator('#reservation-form [data-target=quantity][data-step="1"]')
+    .click();
+  await expect(page.locator('input[name=slot][value=midday]')).toBeChecked();
+  await page.getByText('Tarde · de 18 a 20 h').click();
+  await page.getByLabel('Tu nombre', { exact: true }).fill('Ana Prueba');
+  await page.locator('#phone').fill('612345678');
+  await page.locator('#town').selectOption('sant-boi');
+  await page.locator('#address').fill('Carrer Major 1, 2n 1a');
+  await page.locator('input[name=pickup]').check();
+  await page.locator('#reservation-form button[type=submit]').click();
+  await expect(page.locator('#confirmation')).toBeVisible();
+  await expect(page.locator('#confirmation')).toContainText('18:00–20:00');
+  expect((await readData()).orders[0].pickupWindow).toBe('18:00–20:00');
+  // Pickup in Sant Boi hides the slot along with the address.
+  await page.goto('/es/');
+  await page
+    .locator('input[name=delivery][value=pickup]')
+    .check({ force: true });
+  await expect(page.locator('input[name=slot]').first()).toBeHidden();
+
+  await writeFile(
+    dataPath,
+    JSON.stringify({ orders: [], waitlist: [], limits: {}, bakeDay: 6 }),
+  );
+  await page.goto('/es/');
+  await expect(page.locator('input[name=slot]')).toHaveCount(0);
+  const post = await request.post('/api/reservations', {
+    headers: origin,
+    data: {
+      requestId: crypto.randomUUID(),
+      bakeId: 'hornada-001',
+      name: 'Nil',
+      phone: '612345678',
+      quantity: 1,
+      delivery: 'home',
+      town: 'sant-boi',
+      address: 'Carrer Major 1',
+      slot: 'evening',
+      pickup: 'yes',
+      privacy: 'yes',
+    },
+  });
+  expect(post.status()).toBe(409);
+  expect((await post.json()).error).toContain('miércoles');
+});
+
 test('Google reviews: verbatim quotes in both languages and exact links', async ({
   page,
 }) => {

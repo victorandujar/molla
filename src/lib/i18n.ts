@@ -1,5 +1,5 @@
 import { bake, brand, money, productById } from './config';
-import { deliveryWindow } from './delivery';
+import { deliveryWindow, eveningWindow, windowHours } from './delivery';
 import type { Lang } from './messages';
 export type { Lang };
 
@@ -87,6 +87,8 @@ const hours = {
   es: `de ${fromH}\u00a0a\u00a0${toH}\u00a0h`,
   ca: `de ${fromH}\u00a0a\u00a0${toH}\u00a0h`,
 };
+// Wednesday's second round, for people who work at midday.
+const evening = windowHours(eveningWindow);
 
 export const ui = {
   es: {
@@ -105,14 +107,14 @@ export const ui = {
     switchAria: 'Llegeix aquesta pàgina en català',
     footer: {
       line: 'Pan artesanal de fermentación lenta, por encargo.',
-      area: `Pan a domicilio los miércoles y los sábados ${hours.es} en Sant Boi, Sant Just Desvern, Sant Joan Despí, Sant Feliu de Llobregat, Santa Coloma de Cervelló y Sant Vicenç dels Horts · Recogida en Sant Boi de Llobregat`,
+      area: `Pan a domicilio los miércoles ${hours.es} o ${evening} y los sábados ${hours.es} en Sant Boi, Sant Just Desvern, Sant Joan Despí, Sant Feliu de Llobregat, Santa Coloma de Cervelló y Sant Vicenç dels Horts · Recogida en Sant Boi de Llobregat`,
       privacy: 'Privacidad y condiciones',
       write: 'Escríbeme ↗',
       channel: 'Canal de WhatsApp',
     },
     meta: {
       title: `Pan artesano a domicilio en Sant Boi y Sant Just Desvern · ${brand.name}`,
-      description: `Pan de fermentación lenta y banana bread con harina ecológica, hechos a mano en el Baix Llobregat. Reserva online y te lo llevo a casa el miércoles o el sábado ${hours.es} en Sant Boi, Sant Just Desvern, Sant Joan Despí, Sant Feliu, Santa Coloma y Sant Vicenç.`,
+      description: `Pan de fermentación lenta y banana bread con harina ecológica, hechos a mano en el Baix Llobregat. Reserva online y te lo llevo a casa el miércoles (${hours.es} o ${evening}) o el sábado (${hours.es}) en Sant Boi, Sant Just Desvern, Sant Joan Despí, Sant Feliu, Santa Coloma y Sant Vicenç.`,
       ogAlt: 'Hogazas de corteza tostada recién cortadas',
     },
     xmas: {
@@ -130,8 +132,8 @@ export const ui = {
     hero: {
       h1a: 'Pan artesano, recién hecho,',
       h1b: 'en tu puerta',
-      sub: `Cada miércoles y cada sábado ${hours.es}, a domicilio en Sant Boi, Sant Just Desvern, Sant Joan Despí, Sant Feliu, Santa Coloma y Sant Vicenç.`,
-      short: `Lo horneo esa misma mañana y te lo llevo a casa o a la oficina, cada miércoles y sábado ${hours.es}. Pan desde ${loafPrice}, envío gratis y pagas al recibirlo.`,
+      sub: `Cada miércoles y cada sábado ${hours.es}, y los miércoles también ${evening}, a domicilio en Sant Boi, Sant Just Desvern, Sant Joan Despí, Sant Feliu, Santa Coloma y Sant Vicenç.`,
+      short: `Lo horneo esa misma mañana y te lo llevo a casa o a la oficina, cada miércoles y sábado ${hours.es} (el miércoles, también ${evening}). Pan desde ${loafPrice}, envío gratis y pagas al recibirlo.`,
       kicker: 'Panadería de barrio · Baix Llobregat',
       keywords: [
         'Harinas ecológicas',
@@ -154,7 +156,7 @@ export const ui = {
         ['Hornada pequeña', 'Pocas hogazas, hechas de una en una.'],
         [
           'A domicilio',
-          `Miércoles y sábados ${hours.es} en Sant Boi, Sant Just, Sant Joan Despí, Sant Feliu, Santa Coloma y Sant Vicenç.`,
+          `Miércoles y sábados ${hours.es}; miércoles también ${evening}. En Sant Boi, Sant Just, Sant Joan Despí, Sant Feliu, Santa Coloma y Sant Vicenç.`,
         ],
       ],
       nextBake: 'Próxima hornada',
@@ -434,7 +436,7 @@ export const ui = {
         {
           when: 'Miércoles o sábado',
           title: 'A tu casa',
-          text: `Te lo llevo ${hours.es} a Sant Boi, Sant Just, Sant Joan Despí, Sant Feliu, Santa Coloma o Sant Vicenç, o lo recoges en Sant Boi. Pagas al recibirlo.`,
+          text: `Te lo llevo ${hours.es} (el miércoles, también ${evening}) a Sant Boi, Sant Just, Sant Joan Despí, Sant Feliu, Santa Coloma o Sant Vicenç, o lo recoges en Sant Boi. Pagas al recibirlo.`,
         },
       ],
     },
@@ -460,12 +462,17 @@ export const ui = {
       totalLabel: 'Total a pagar al recibirlo',
       pickup: 'Entrega',
       where: 'Dónde',
-      pickupLocation: `A domicilio, ${hours.es}`,
+      pickupLocation: `A domicilio, ${hours.es} · miércoles también ${evening}`,
       pickupDetails:
         'Sant Boi, Sant Just Desvern, Sant Joan Despí, Sant Feliu de Llobregat, Santa Coloma de Cervelló y Sant Vicenç dels Horts. ¿Otro municipio? Lo recoges en Sant Boi.',
       pickupInfo: 'Zonas y horario de reparto',
       deliveryH: '¿Cómo lo quieres?',
-      deliveryHome: `A domicilio · ${hours.es}`,
+      deliveryHome: (wed: boolean) =>
+        wed ? 'A domicilio · mediodía o tarde' : `A domicilio · ${hours.es}`,
+      slotH: '¿A qué hora te lo llevo?',
+      slotMidday: `Mediodía · ${hours.es}`,
+      slotEvening: `Tarde · ${evening}`,
+      slotEveningHint: 'Si a mediodía no estás en casa',
       deliveryHomeHint:
         'Sant Boi, Sant Just Desvern, Sant Joan Despí, Sant Feliu de Llobregat, Santa Coloma de Cervelló y Sant Vicenç dels Horts',
       deliveryPickup: 'Lo recojo en Sant Boi',
@@ -495,8 +502,8 @@ export const ui = {
       phone: 'Móvil o WhatsApp',
       honey: 'Deja este campo vacío',
       demoCheck: 'Entiendo que estoy probando una reserva ficticia.',
-      pickupCheck: (day: string, window: string) =>
-        `Te lo entrego el ${day}: en la dirección que pongas ${hours.es} si eliges entrega a domicilio, o en el punto de recogida de Sant Boi de Llobregat${window ? ` (${window})` : ''}.`,
+      pickupCheck: (day: string, window: string, wed = false) =>
+        `Te lo entrego el ${day}: en la dirección que pongas ${wed ? `${hours.es} o ${evening}, según la franja que elijas,` : hours.es} si eliges entrega a domicilio, o en el punto de recogida de Sant Boi de Llobregat${window ? ` (${window})` : ''}.`,
       privacyA: 'He leído la',
       privacyNote: 'Al reservar aceptas la',
       privacyLink: 'privacidad y las condiciones',
@@ -537,11 +544,11 @@ export const ui = {
         ],
         [
           '¿Hacéis entrega a domicilio?',
-          `Sí, los miércoles y los sábados ${hours.es} en Sant Boi de Llobregat, Sant Just Desvern, Sant Joan Despí, Sant Feliu de Llobregat, Santa Coloma de Cervelló y Sant Vicenç dels Horts, sin coste de envío. Al reservar eliges «A domicilio» y escribes tu dirección. Pagas al recibirlo.`,
+          `Sí, los miércoles ${hours.es} o ${evening} y los sábados ${hours.es} en Sant Boi de Llobregat, Sant Just Desvern, Sant Joan Despí, Sant Feliu de Llobregat, Santa Coloma de Cervelló y Sant Vicenç dels Horts, sin coste de envío. Al reservar eliges «A domicilio», la franja si es miércoles, y escribes tu dirección. Pagas al recibirlo.`,
         ],
         [
           '¿Lleváis pan a Sant Just Desvern?',
-          `Sí. Cada miércoles y cada sábado reparto en Sant Just Desvern ${hours.es}, igual que en Sant Boi, Sant Joan Despí, Sant Feliu de Llobregat, Santa Coloma de Cervelló y Sant Vicenç dels Horts. Reserva antes del cierre de pedidos: el lunes para el miércoles y el jueves para el sábado, a las 20:00.`,
+          `Sí. Cada miércoles y cada sábado reparto en Sant Just Desvern ${hours.es} (el miércoles, también ${evening}), igual que en Sant Boi, Sant Joan Despí, Sant Feliu de Llobregat, Santa Coloma de Cervelló y Sant Vicenç dels Horts. Reserva antes del cierre de pedidos: el lunes para el miércoles y el jueves para el sábado, a las 20:00.`,
         ],
         [
           '¿Y si no voy a estar?',
@@ -618,14 +625,14 @@ export const ui = {
     switchAria: 'Lee esta página en castellano',
     footer: {
       line: 'Pa artesà de fermentació lenta, per encàrrec.',
-      area: `Pa a domicili els dimecres i els dissabtes ${hours.ca} a Sant Boi, Sant Just Desvern, Sant Joan Despí, Sant Feliu de Llobregat, Santa Coloma de Cervelló i Sant Vicenç dels Horts · Recollida a Sant Boi de Llobregat`,
+      area: `Pa a domicili els dimecres ${hours.ca} o ${evening} i els dissabtes ${hours.ca} a Sant Boi, Sant Just Desvern, Sant Joan Despí, Sant Feliu de Llobregat, Santa Coloma de Cervelló i Sant Vicenç dels Horts · Recollida a Sant Boi de Llobregat`,
       privacy: 'Privacitat i condicions',
       write: 'Escriu-me ↗',
       channel: 'Canal de WhatsApp',
     },
     meta: {
       title: `Pa artesà a domicili a Sant Boi i Sant Just Desvern · ${brand.name}`,
-      description: `Pa de fermentació lenta i banana bread amb farina ecològica, fets a mà al Baix Llobregat. Reserva en línia i te’l porto a casa dimecres o dissabte ${hours.ca} a Sant Boi, Sant Just Desvern, Sant Joan Despí, Sant Feliu, Santa Coloma i Sant Vicenç.`,
+      description: `Pa de fermentació lenta i banana bread amb farina ecològica, fets a mà al Baix Llobregat. Reserva en línia i te’l porto a casa dimecres (${hours.ca} o ${evening}) o dissabte (${hours.ca}) a Sant Boi, Sant Just Desvern, Sant Joan Despí, Sant Feliu, Santa Coloma i Sant Vicenç.`,
       ogAlt: 'Pans de crosta torrada acabats de tallar',
     },
     xmas: {
@@ -643,8 +650,8 @@ export const ui = {
     hero: {
       h1a: 'Pa artesà, acabat de fer,',
       h1b: 'a la porta de casa',
-      sub: `Cada dimecres i cada dissabte ${hours.ca}, a domicili a Sant Boi, Sant Just Desvern, Sant Joan Despí, Sant Feliu, Santa Coloma i Sant Vicenç.`,
-      short: `El faig aquell mateix matí i te’l porto a casa o a la feina, cada dimecres i dissabte ${hours.ca}. Pa des de ${loafPrice}, enviament gratis i pagues en rebre’l.`,
+      sub: `Cada dimecres i cada dissabte ${hours.ca}, i els dimecres també ${evening}, a domicili a Sant Boi, Sant Just Desvern, Sant Joan Despí, Sant Feliu, Santa Coloma i Sant Vicenç.`,
+      short: `El faig aquell mateix matí i te’l porto a casa o a la feina, cada dimecres i dissabte ${hours.ca} (el dimecres, també ${evening}). Pa des de ${loafPrice}, enviament gratis i pagues en rebre’l.`,
       kicker: 'Fleca de barri · Baix Llobregat',
       keywords: [
         'Farines ecològiques',
@@ -667,7 +674,7 @@ export const ui = {
         ['Fornada petita', 'Pocs pans, fets d’un en un.'],
         [
           'A domicili',
-          `Dimecres i dissabtes ${hours.ca} a Sant Boi, Sant Just, Sant Joan Despí, Sant Feliu, Santa Coloma i Sant Vicenç.`,
+          `Dimecres i dissabtes ${hours.ca}; dimecres també ${evening}. A Sant Boi, Sant Just, Sant Joan Despí, Sant Feliu, Santa Coloma i Sant Vicenç.`,
         ],
       ],
       nextBake: 'Propera fornada',
@@ -941,7 +948,7 @@ export const ui = {
         {
           when: 'Dimecres o dissabte',
           title: 'A casa teva',
-          text: `Te’l porto ${hours.ca} a Sant Boi, Sant Just, Sant Joan Despí, Sant Feliu, Santa Coloma o Sant Vicenç, o el reculls a Sant Boi. Pagues en rebre’l.`,
+          text: `Te’l porto ${hours.ca} (el dimecres, també ${evening}) a Sant Boi, Sant Just, Sant Joan Despí, Sant Feliu, Santa Coloma o Sant Vicenç, o el reculls a Sant Boi. Pagues en rebre’l.`,
         },
       ],
     },
@@ -968,12 +975,17 @@ export const ui = {
       totalLabel: 'Total a pagar a l’entrega',
       pickup: 'Entrega',
       where: 'On',
-      pickupLocation: `A domicili, ${hours.ca}`,
+      pickupLocation: `A domicili, ${hours.ca} · dimecres també ${evening}`,
       pickupDetails:
         'Sant Boi, Sant Just Desvern, Sant Joan Despí, Sant Feliu de Llobregat, Santa Coloma de Cervelló i Sant Vicenç dels Horts. Un altre municipi? El reculls a Sant Boi.',
       pickupInfo: 'Zones i horari de repartiment',
       deliveryH: 'Com el vols?',
-      deliveryHome: `A domicili · ${hours.ca}`,
+      deliveryHome: (wed: boolean) =>
+        wed ? 'A domicili · migdia o tarda' : `A domicili · ${hours.ca}`,
+      slotH: 'A quina hora te’l porto?',
+      slotMidday: `Migdia · ${hours.ca}`,
+      slotEvening: `Tarda · ${evening}`,
+      slotEveningHint: 'Si al migdia no ets a casa',
       deliveryHomeHint:
         'Sant Boi, Sant Just Desvern, Sant Joan Despí, Sant Feliu de Llobregat, Santa Coloma de Cervelló i Sant Vicenç dels Horts',
       deliveryPickup: 'El recullo a Sant Boi',
@@ -1002,8 +1014,8 @@ export const ui = {
       phone: 'Mòbil o WhatsApp',
       honey: 'Deixa aquest camp buit',
       demoCheck: 'Entenc que estic provant una reserva fictícia.',
-      pickupCheck: (day: string, window: string) =>
-        `Te l’entrego ${day}: a l’adreça que posis ${hours.ca} si tries entrega a domicili, o al punt de recollida de Sant Boi de Llobregat${window ? ` (${window})` : ''}.`,
+      pickupCheck: (day: string, window: string, wed = false) =>
+        `Te l’entrego ${day}: a l’adreça que posis ${wed ? `${hours.ca} o ${evening}, segons la franja que triïs,` : hours.ca} si tries entrega a domicili, o al punt de recollida de Sant Boi de Llobregat${window ? ` (${window})` : ''}.`,
       privacyA: 'He llegit la',
       privacyNote: 'En reservar acceptes la',
       privacyLink: 'privacitat i les condicions',
@@ -1043,11 +1055,11 @@ export const ui = {
         ],
         [
           'Feu entrega a domicili?',
-          `Sí, els dimecres i els dissabtes ${hours.ca} a Sant Boi de Llobregat, Sant Just Desvern, Sant Joan Despí, Sant Feliu de Llobregat, Santa Coloma de Cervelló i Sant Vicenç dels Horts, sense cost d’enviament. En reservar tries «A domicili» i escrius la teva adreça. Pagues en rebre’l.`,
+          `Sí, els dimecres ${hours.ca} o ${evening} i els dissabtes ${hours.ca} a Sant Boi de Llobregat, Sant Just Desvern, Sant Joan Despí, Sant Feliu de Llobregat, Santa Coloma de Cervelló i Sant Vicenç dels Horts, sense cost d’enviament. En reservar tries «A domicili», la franja si és dimecres, i escrius la teva adreça. Pagues en rebre’l.`,
         ],
         [
           'Porteu pa a Sant Just Desvern?',
-          `Sí. Cada dimecres i cada dissabte reparteixo a Sant Just Desvern ${hours.ca}, igual que a Sant Boi, Sant Joan Despí, Sant Feliu de Llobregat, Santa Coloma de Cervelló i Sant Vicenç dels Horts. Reserva abans del tancament de comandes: dilluns per al dimecres i dijous per al dissabte, a les 20:00.`,
+          `Sí. Cada dimecres i cada dissabte reparteixo a Sant Just Desvern ${hours.ca} (el dimecres, també ${evening}), igual que a Sant Boi, Sant Joan Despí, Sant Feliu de Llobregat, Santa Coloma de Cervelló i Sant Vicenç dels Horts. Reserva abans del tancament de comandes: dilluns per al dimecres i dijous per al dissabte, a les 20:00.`,
         ],
         [
           'I si no hi seré?',
