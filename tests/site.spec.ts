@@ -12,6 +12,11 @@ async function reset() {
   );
 }
 test.beforeEach(reset);
+// The ticket lists only what is in the order; this opens every product line.
+async function showLines(page: import('@playwright/test').Page) {
+  const more = page.locator('#reservation-form [data-more-products]');
+  if (await more.isVisible()) await more.click();
+}
 // The open bake alternates with the week (Wednesday from Thursday night to
 // Monday night, Saturday the rest), and pa fix follows its own day.
 type Day = 'wed' | 'sat';
@@ -91,6 +96,7 @@ test('reservation, validation and waitlist journey', async ({ page }) => {
   await page.locator('input[name=pickup]').check();
   // An empty order explains itself instead of reaching the server.
   await page.locator('#reservation-form button[type=submit]').click();
+  await showLines(page);
   await expect(page.locator('#reservation-form .form-error')).toContainText(
     'Añade una hogaza, un banana bread o bollería',
   );
@@ -142,6 +148,7 @@ test('reservation, validation and waitlist journey', async ({ page }) => {
 });
 test('croissants alone can be booked from the form', async ({ page }) => {
   await page.goto('/es/');
+  await showLines(page);
   await page
     .locator('#reservation-form [data-target=croissant][data-step="1"]')
     .click();
@@ -168,6 +175,7 @@ test('a booking without email goes through and is keyed by phone', async ({
 }) => {
   await page.goto('/es/');
   await expect(page.locator('#email')).not.toHaveAttribute('required', /.*/);
+  await showLines(page);
   await page
     .locator('#reservation-form [data-target=quantity][data-step="1"]')
     .click();
@@ -175,6 +183,7 @@ test('a booking without email goes through and is keyed by phone', async ({
   await page.locator('#phone').fill('612 345 678');
   await page.locator('#town').selectOption('sant-boi');
   await page.locator('#address').fill('Carrer Major 1, 2n 1a');
+  await page.locator('.notes-more > summary').click();
   await page.locator('#notes').fill('Déjalo en portería');
   await page.locator('input[name=pickup]').check();
   await page.locator('#reservation-form button[type=submit]').click();
@@ -729,6 +738,7 @@ test('Wednesday offers an evening round; Saturday does not', async ({
     JSON.stringify({ orders: [], waitlist: [], limits: {}, bakeDay: 3 }),
   );
   await page.goto('/es/');
+  await showLines(page);
   await page
     .locator('#reservation-form [data-target=quantity][data-step="1"]')
     .click();
@@ -908,6 +918,7 @@ test('croissants and pains au chocolat share 48 pieces per bake, by the unit', a
   await expect(page.locator('body')).not.toContainText(/Quedan \d|libres de/);
   await page.locator('[data-buy="croissant"] > [data-add]').click();
   await expect(page.locator('#croissant')).toHaveValue('1');
+  await showLines(page);
   await expect(page.locator('[data-count="croissant"]')).toHaveText(
     '1 en tu pedido',
   );
@@ -1272,6 +1283,7 @@ test('no banana bread gift anywhere; the first order still gets the pa fix vouch
   // The on-screen confirmation offers the pa fix, without any gift.
   await reset();
   await page.goto('/es/');
+  await showLines(page);
   await page
     .locator('#reservation-form [data-target=quantity][data-step="1"]')
     .click();
@@ -1307,6 +1319,7 @@ test('checkout opt-in: the weekly email is optional and unticked by default', as
     await page.locator('input[name=delivery][value=pickup]').check({
       force: true,
     });
+    await showLines(page);
     await page
       .locator('#reservation-form [data-target=quantity][data-step="1"]')
       .click();
@@ -1342,6 +1355,7 @@ test('invite a neighbour: personal link, invited note and gift croissant', async
     await page.locator('input[name=delivery][value=pickup]').check({
       force: true,
     });
+    await showLines(page);
     await page
       .locator('#reservation-form [data-target=quantity][data-step="1"]')
       .click();
@@ -1442,20 +1456,39 @@ test('manual order: an Instagram order is noted in /gestio and counts in the bak
   );
   expect((await readData()).orders).toHaveLength(1);
 });
-test('the hero button names the delivery day and leads to the order form', async ({
+test('the hero button books one loaf in one tap and opens the order form', async ({
   page,
   request,
 }) => {
   const day = await openDay(request);
   await page.goto('/es/');
+  await expect(page.locator('#bake-title')).toContainText(dayName.es[day]);
   const cta = page.locator('[data-bake-cta]');
-  await expect(cta).toContainText(`Reservar mi pan del ${dayName.es[day]}`);
+  await expect(cta).toContainText('Reservar 1 hogaza · 5,00 €');
+  // Without JavaScript it is still a link to the form.
   await expect(cta).toHaveAttribute('href', '#reservation-form');
-  // An empty ticket offers one tap: a weekly loaf or a sourdough one.
-  await page
-    .locator('#reservation-form [data-empty] [data-add=sourdough]')
-    .click();
-  await expect(page.locator('#total')).toContainText('5,50');
+  await expect(page.locator('.stub-trust')).toContainText('5/5 en Google');
+  // An empty ticket lists nothing at zero and offers one tap instead.
+  await expect(
+    page.locator('#reservation-form [data-line]:visible'),
+  ).toHaveCount(0);
+  await cta.click();
+  await expect(page.locator('#quantity')).toHaveValue('1');
+  await expect(page.locator('#total')).toContainText('5,00');
+  await expect(
+    page.locator('#reservation-form [data-line=loaf]'),
+  ).toBeVisible();
+  await expect(page.locator('#reservation-form [data-line=pain]')).toBeHidden();
+  await expect(
+    page.locator('#reservation-form button[type=submit]'),
+  ).toContainText('· 5,00 €');
+  // A second tap does not add a second loaf.
+  await cta.click();
+  await expect(page.locator('#quantity')).toHaveValue('1');
+  await page.locator('#reservation-form [data-more-products]').click();
+  await expect(
+    page.locator('#reservation-form [data-line=pain]'),
+  ).toBeVisible();
   await expect(page.locator('#reservation-form [data-empty]')).toBeHidden();
   // No consent box to tick: the privacy line sits under the button.
   await expect(

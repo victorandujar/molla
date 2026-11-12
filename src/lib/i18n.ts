@@ -169,6 +169,13 @@ export const ui = {
       // Price and terms sit by the button; the proof line adds who and where.
       terms: `Pan desde ${loafPrice} · Envío gratis · Pagas al recibirlo`,
       proof: ['Hecho a mano en Sant Boi'],
+      // Next to the button: who makes it and what people say.
+      trust: (score: string, count: number) =>
+        `${score} en Google (${count} reseñas) · Lo hago yo, Víctor, en Sant Boi`,
+      when: (wed: boolean) =>
+        wed
+          ? `Te lo llevo ${hours.es} o ${evening}`
+          : `Te lo llevo ${hours.es}`,
       scroll: 'Desliza',
       hands: 'Las manos de mi madre',
       sealTop: 'hasta',
@@ -273,6 +280,9 @@ export const ui = {
       unavailable:
         'No puedo consultar el cupo ahora. Recarga la página antes de reservar.',
       ctaOpen: (weekday: string) => `Reservar mi pan del ${weekday}`,
+      // One tap: a loaf goes into the order and the form opens at delivery.
+      ctaQuick: (price: string) => `Reservar 1 hogaza · ${price}`,
+      ctaMenu: 'Ver toda la carta',
       ctaClosed: 'Avísame de la próxima',
     },
     loaf: {
@@ -466,7 +476,7 @@ export const ui = {
       pickupDetails:
         'Sant Boi, Sant Just Desvern, Sant Joan Despí, Sant Feliu de Llobregat, Santa Coloma de Cervelló y Sant Vicenç dels Horts. ¿Otro municipio? Lo recoges en Sant Boi.',
       pickupInfo: 'Zonas y horario de reparto',
-      deliveryH: '¿Cómo lo quieres?',
+      deliveryH: '2 · ¿Cómo te llega?',
       deliveryHome: (wed: boolean) =>
         wed ? 'A domicilio · mediodía o tarde' : `A domicilio · ${hours.es}`,
       slotH: '¿A qué hora te lo llevo?',
@@ -490,6 +500,11 @@ export const ui = {
       payValue: 'Al recibirlo o recogerlo. Sin tarjeta ni cuenta.',
       question: 'Tengo una pregunta ↗',
       yourOrder: 'Tu pedido',
+      step1: '1 · Qué quieres',
+      step3: '3 · Tus datos',
+      moreProducts: '+ Añadir otro producto',
+      notesToggle: '+ Añadir una nota para la entrega',
+      submitTotal: (total: string) => `Confirmar reserva · ${total}`,
       demoIntro:
         'Modo de prueba: usa datos ficticios. No se envían emails ni se encarga pan.',
       qty: 'Hogazas',
@@ -686,6 +701,10 @@ export const ui = {
       ],
       terms: `Pa des de ${loafPrice} · Enviament gratis · Pagues en rebre’l`,
       proof: ['Fet a mà a Sant Boi'],
+      trust: (score: string, count: number) =>
+        `${score} a Google (${count} ressenyes) · El faig jo, el Víctor, a Sant Boi`,
+      when: (wed: boolean) =>
+        wed ? `Te’l porto ${hours.ca} o ${evening}` : `Te’l porto ${hours.ca}`,
       scroll: 'Llisca',
       hands: 'Les mans de la meva mare',
       sealTop: 'fins a',
@@ -788,6 +807,8 @@ export const ui = {
       unavailable:
         'Ara no puc consultar la disponibilitat. Recarrega la pàgina abans de reservar.',
       ctaOpen: (weekday: string) => `Reservar el meu pa del ${weekday}`,
+      ctaQuick: (price: string) => `Reservar 1 pa · ${price}`,
+      ctaMenu: 'Veure tota la carta',
       ctaClosed: 'Avisa’m de la propera',
     },
     loaf: {
@@ -979,7 +1000,7 @@ export const ui = {
       pickupDetails:
         'Sant Boi, Sant Just Desvern, Sant Joan Despí, Sant Feliu de Llobregat, Santa Coloma de Cervelló i Sant Vicenç dels Horts. Un altre municipi? El reculls a Sant Boi.',
       pickupInfo: 'Zones i horari de repartiment',
-      deliveryH: 'Com el vols?',
+      deliveryH: '2 · Com t’arriba?',
       deliveryHome: (wed: boolean) =>
         wed ? 'A domicili · migdia o tarda' : `A domicili · ${hours.ca}`,
       slotH: 'A quina hora te’l porto?',
@@ -1002,6 +1023,11 @@ export const ui = {
       payValue: 'En rebre o recollir la comanda. Sense targeta ni compte.',
       question: 'Tinc una pregunta ↗',
       yourOrder: 'La teva comanda',
+      step1: '1 · Què vols',
+      step3: '3 · Les teves dades',
+      moreProducts: '+ Afegir un altre producte',
+      notesToggle: '+ Afegir una nota per a l’entrega',
+      submitTotal: (total: string) => `Confirmar la reserva · ${total}`,
       demoIntro:
         'Mode de prova: fes servir dades fictícies. No s’envien correus ni s’encarrega pa.',
       qty: 'Pans',
