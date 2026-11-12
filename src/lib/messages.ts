@@ -15,6 +15,7 @@ export const messages = {
     terms: 'Acepta las condiciones del pan fijo para continuar.',
     town: 'Elige tu municipio para la entrega a domicilio.',
     address: 'Escribe la dirección de entrega: calle, número y piso.',
+    slot: 'La franja de tarde solo existe los miércoles. Elige mediodía.',
     notes: 'Las instrucciones de entrega no pueden pasar de 200 caracteres.',
     privacy: 'Necesitamos tu aceptación para gestionar el pedido.',
     capacity:
@@ -48,6 +49,7 @@ export const messages = {
     terms: 'Accepta les condicions del pa fix per continuar.',
     town: 'Tria el teu municipi per a l’entrega a domicili.',
     address: 'Escriu l’adreça d’entrega: carrer, número i pis.',
+    slot: 'La franja de tarda només existeix els dimecres. Tria migdia.',
     notes: 'Les instruccions d’entrega no poden passar de 200 caràcters.',
     privacy: 'Necessitem la teva acceptació per gestionar la comanda.',
     capacity:

@@ -464,11 +464,71 @@ function render(origin?: Element | null) {
   }
   const empty = form.querySelector<HTMLElement>('[data-empty]');
   if (empty) empty.hidden = count > 0;
+  // The ticket lists what is in the order, not every product at zero. A line
+  // stays once shown, so it does not vanish under the finger at zero.
+  const counts: Record<string, number> = {
+    loaf: c.loaves,
+    sourdough: c.sourdoughs,
+    wholegrain: c.wholegrains,
+    banana: c.halves,
+    croissant: c.croissants,
+    pain: c.pains,
+  };
+  const showAll = form.classList.contains('show-all');
+  let hiddenLines = 0;
+  form.querySelectorAll<HTMLElement>('[data-line]').forEach((line) => {
+    const key = line.dataset.line!;
+    if (counts[key]) shownLines.add(key);
+    line.hidden = !showAll && !shownLines.has(key);
+    if (line.hidden) hiddenLines++;
+  });
+  const more = form.querySelector<HTMLElement>('[data-more-products]');
+  if (more) more.hidden = hiddenLines === 0;
+  const totalRow = form.querySelector<HTMLElement>('.order-total');
+  if (totalRow) totalRow.hidden = count === 0;
+  // The button carries the total, so the price is never a surprise.
+  const submitButton = form.querySelector<HTMLButtonElement>(
+    'button[type=submit][data-label]',
+  );
+  if (submitButton && !submitButton.disabled)
+    submitButton.textContent =
+      count > 0
+        ? `${submitButton.dataset.label} · ${money(c.total)}`
+        : submitButton.dataset.label!;
   window.dispatchEvent(
     new CustomEvent('molla:cart', { detail: { ...c, origin } }),
   );
   updatePill();
 }
+const shownLines = new Set<string>();
+form?.querySelector('[data-more-products]')?.addEventListener('click', () => {
+  form.classList.add('show-all');
+  render();
+  form.querySelector<HTMLElement>('[data-line] button[data-step="1"]')?.focus();
+});
+// The hero button: one loaf in the order (if it is empty) and straight to
+// how it gets delivered. Without JavaScript it is a plain link to the form.
+document
+  .querySelector<HTMLAnchorElement>('[data-quick-loaf]')
+  ?.addEventListener('click', (event) => {
+    if (!form || !quantity) return;
+    event.preventDefault();
+    const c = cart();
+    const empty =
+      c.loaves +
+        c.sourdoughs +
+        c.wholegrains +
+        c.halves +
+        c.croissants +
+        c.pains ===
+      0;
+    if (empty) {
+      selectOnce('loaf', event.currentTarget as Element);
+      change(quantity, 1, event.currentTarget as Element);
+    }
+    const target = form.querySelector<HTMLElement>('.delivery-choice') || form;
+    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
 // The product card adds the size picked (whole = 2 halves, half = 1).
 function addStep(button: HTMLElement) {
   if (button.dataset.add !== 'banana') return 1;
@@ -628,7 +688,10 @@ function updatePill() {
   if (!pill) return;
   const hasItems = pill.classList.contains('has-items');
   const mobile = matchMedia('(max-width: 720px)').matches;
-  const show = !seen.reserve && (hasItems || (mobile && !seen.hero));
+  // With the bake open it shows up once there is something in the order; when
+  // closed, on the phone, it keeps the "notify me" link at hand.
+  const nudge = pill.dataset.open !== 'true' && mobile && !seen.hero;
+  const show = !seen.reserve && (hasItems || nudge);
   pill.classList.toggle('is-visible', show);
 }
 if (pill) {

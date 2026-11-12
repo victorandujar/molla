@@ -762,20 +762,6 @@ figure picture {
 .hero-photo:hover .hero-photo-frame img {
   scale: 1.04;
 }
-.hero-logo {
-  position: absolute;
-  left: clamp(16px, 2.4vw, 32px);
-  bottom: clamp(12px, 2vw, 28px);
-  font-family: var(--display);
-  font-weight: 800;
-  font-stretch: 86%;
-  font-size: clamp(44px, 5.4vw, 88px);
-  letter-spacing: -0.05em;
-  line-height: 1;
-  color: var(--paper);
-  text-shadow: 0 2px 30px rgba(0, 0, 0, 0.25);
-  animation: rise 0.8s var(--ease-out) 0.5s both;
-}
 .hero-photo .fig-bar {
   animation: rise 0.8s var(--ease-out) 0.6s both;
 }
@@ -915,6 +901,37 @@ figure picture {
   text-transform: uppercase;
   color: var(--paper);
 }
+/* Cuándo llega, en la propia portada: el miércoles, también por la tarde. */
+.stub-when {
+  margin-top: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--paper);
+}
+/* La carta, para quien quiere algo más que una hogaza. */
+.stub-menu {
+  justify-self: center;
+  margin-top: 14px;
+  padding: 6px 2px;
+  font-size: 15px;
+  color: var(--paper);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+/* Confianza junto al botón: reseñas y quién lo hace. */
+.stub-trust {
+  display: block;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px dashed rgba(246, 239, 229, 0.35);
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--on-cobalt);
+  text-decoration: none;
+}
+.stub-trust:hover {
+  color: var(--paper);
+}
 /* WhatsApp, canal secundario: un enlace bajo el botón, no otro botón. */
 .stub-whatsapp {
   justify-self: center;
@@ -990,39 +1007,6 @@ figure picture {
   font-size: 14px;
   line-height: 1.5;
   color: var(--ink-2);
-}
-/* Prova social sota el botó: les estrelles i el que treu la por. */
-.hero-proof {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 22px;
-  margin: 20px 0 0;
-  padding: 0;
-  list-style: none;
-  font-family: var(--mono);
-  font-size: 12px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--on-cobalt);
-}
-.hero-proof li {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-.hero-proof li + li::before {
-  content: '✷';
-  color: var(--orange);
-}
-.hero-proof a {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--paper);
-  text-decoration: none;
-}
-.hero-proof a:hover {
-  text-decoration: underline;
 }
 .hero-stars {
   color: var(--orange);
@@ -2862,6 +2846,18 @@ input::placeholder {
 .delivery-choice strong {
   font-size: 16px;
 }
+/* Wednesday's slot sits in the address grid, across both columns. */
+.slot-choice {
+  grid-column: 1 / -1;
+  margin-top: 8px;
+}
+.slot-choice label {
+  flex: 1 1 160px;
+}
+.slot-choice label > span {
+  min-width: 0;
+  height: 100%;
+}
 .check {
   display: grid;
   grid-template-columns: 22px 1fr;
@@ -4229,5 +4225,133 @@ details[open] p {
   }
   .hero-lede {
     margin-top: 22px;
+  }
+}
+
+/* El tiquet en tres pasos, con etiquetas que se leen sin esfuerzo. */
+.step-label {
+  margin: 22px 0 4px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--cobalt);
+}
+.ticket .delivery-choice > legend {
+  font-family: var(--sans);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--cobalt);
+}
+.ticket .field label,
+.ticket .slot-choice > legend,
+.ticket .order-total span {
+  font-family: var(--sans);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+}
+.order-line[hidden],
+.order-total[hidden],
+.more-products[hidden] {
+  display: none;
+}
+.more-products {
+  display: block;
+  margin: 14px 0 0;
+  padding: 6px 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--cobalt);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  cursor: pointer;
+}
+/* La nota de entrega, plegada: el formulario parece (y es) más corto. */
+.notes-more {
+  grid-column: 1 / -1;
+  margin-top: 4px;
+}
+.notes-more > summary {
+  width: max-content;
+  max-width: 100%;
+  padding: 6px 0;
+  font-size: 15px;
+  color: var(--cobalt);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  cursor: pointer;
+  list-style: none;
+}
+.notes-more > summary::-webkit-details-marker {
+  display: none;
+}
+
+/* En el móvil, el camino hasta el pedido se acorta: la carta más compacta y
+   el tiquet antes del resumen de entrega, que repite lo que ya dice el tiquet. */
+@media screen and (max-width: 720px) {
+  .catalog {
+    padding-top: 44px;
+  }
+  .catalog-title {
+    margin: 16px 0 24px;
+  }
+  .dish-loaf {
+    margin-bottom: 20px;
+  }
+  .dish-photo {
+    aspect-ratio: 16 / 9;
+  }
+  .dish-inset {
+    display: none;
+  }
+  .card-photo {
+    aspect-ratio: 16 / 9;
+  }
+  .card-body {
+    padding: 20px;
+  }
+  .reserve {
+    padding-top: 44px;
+  }
+  .reserve-grid {
+    display: flex;
+    flex-direction: column;
+    margin-top: 20px;
+    gap: 40px;
+  }
+  .reserve-intro {
+    order: 2;
+  }
+  /* «Añadir» al lado del precio, no en una fila propia. Con el producto ya
+     en el pedido, el contador vuelve a ocupar la fila entera. */
+  .pastry-item {
+    padding: 14px 0;
+  }
+  .pastry-name {
+    grid-row: 1 / span 2;
+  }
+  .pastry-price {
+    justify-self: end;
+  }
+  .pastry-buy,
+  .pastry-buy.dish-buy {
+    grid-column: 2;
+    grid-row: 2;
+    justify-self: end;
+    margin-top: 8px;
+  }
+  .pastry-buy .button {
+    min-height: 44px;
+    padding: 0 14px;
+  }
+  .pastry-buy:has(.mini-stepper:not([hidden])) {
+    grid-column: 1 / -1;
+    grid-row: 3;
+    justify-self: stretch;
   }
 }

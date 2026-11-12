@@ -2,7 +2,12 @@
 // subscribers, the follow-ups after a delivery and the baker's weekly summary.
 // Same identity and helpers as the transactional emails.
 import { brand, googleReviews, money, productById } from './config';
-import { deliveryTowns, deliveryWindow } from './delivery';
+import {
+  deliveryTowns,
+  deliveryWindow,
+  eveningWindow,
+  isWednesday,
+} from './delivery';
 import { routes } from './i18n';
 import type { Lang, Order } from './domain';
 import type { Campaign } from './campaigns';
@@ -114,8 +119,8 @@ const broadcastCopy = {
     banana: 'Banana bread · entero o medio',
     pastries: 'Croissant · Pain au chocolat',
     delivery: 'Entrega',
-    deliveryText: (day: string) =>
-      `${day}, ${deliveryWindow}, a domicilio en ${towns('es')}, sin coste de envío. O recogida en Sant Boi para el resto del Baix Llobregat.`,
+    deliveryText: (day: string, window: string) =>
+      `${day}, ${window}, a domicilio en ${towns('es')}, sin coste de envío. O recogida en Sant Boi para el resto del Baix Llobregat.`,
     pay: 'Pago',
     payText: 'Al recibirlo. Cancelas con un clic hasta el cierre.',
     button: 'Hacer mi pedido →',
@@ -141,8 +146,8 @@ const broadcastCopy = {
     banana: 'Banana bread · sencer o mig',
     pastries: 'Croissant · Pain au chocolat',
     delivery: 'Entrega',
-    deliveryText: (day: string) =>
-      `${day}, ${deliveryWindow}, a domicili a ${towns('ca')}, sense cost d’enviament. O recollida a Sant Boi per a la resta del Baix Llobregat.`,
+    deliveryText: (day: string, window: string) =>
+      `${day}, ${window}, a domicili a ${towns('ca')}, sense cost d’enviament. O recollida a Sant Boi per a la resta del Baix Llobregat.`,
     pay: 'Pagament',
     payText: 'En rebre-la. Cancel·les amb un clic fins al tancament.',
     button: 'Fer la meva comanda →',
@@ -191,6 +196,10 @@ export function broadcastEmail(
   const invite = inviteCode ? inviteSection(lang, inviteCode) : null;
   const day = pickupDay(bake.pickupDate, lang).toLowerCase();
   const dayName = weekday(bake.pickupDate, lang);
+  // Wednesday bakes also deliver in the evening.
+  const deliveryHours = isWednesday(bake.pickupDate)
+    ? `${deliveryWindow} o ${eveningWindow}`
+    : deliveryWindow;
   const close = `${weekday(bake.deadline, lang)} ${lang === 'ca' ? 'a les' : 'a las'} ${clock(bake.deadline)}`;
   const campaign = `${kind}-${bake.number}`;
   const url = shopUrl(lang, campaign);
@@ -210,7 +219,7 @@ export function broadcastEmail(
         `${esc(t.pastries)} · <strong>${price('croissant')}</strong> / ${price('pain-au-chocolat')}`,
       ].join('<br>'),
     ],
-    [t.delivery, esc(t.deliveryText(deliveryDay))],
+    [t.delivery, esc(t.deliveryText(deliveryDay, deliveryHours))],
     [t.pay, esc(t.payText)],
   ];
   const content =
@@ -241,7 +250,7 @@ ${t.menu}:
 - ${t.banana}: ${price('banana')} / ${price('banana-mitad')}
 - ${t.pastries}: ${price('croissant')} / ${price('pain-au-chocolat')}
 
-${t.delivery}: ${t.deliveryText(deliveryDay)}
+${t.delivery}: ${t.deliveryText(deliveryDay, deliveryHours)}
 ${t.pay}: ${t.payText}
 
 ${t.button} ${url}

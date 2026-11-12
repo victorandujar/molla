@@ -17,7 +17,7 @@ import {
 import { ui, routes, dayFormat, type Lang } from '../lib/i18n';
 import { currentBake, type ActiveBake } from '../lib/store';
 import { bakeState, earlyBakesOpen, publicStock } from '../lib/domain';
-import { deliveryTowns } from '../lib/delivery';
+import { deliveryTowns, isWednesday } from '../lib/delivery';
 interface Props {
   lang: Lang;
   // An early bake (Christmas) shown on its own page instead of the weekly one.
@@ -115,6 +115,10 @@ const pastries = [
   },
 ] as const;
 // Without the database the configured bake is only a placeholder: never show its date.
+// Wednesday bakes also deliver in the evening: the form offers the choice.
+const wed = !unavailable && isWednesday(current.pickupDate);
+// The hero button puts a loaf in the order and opens the form at delivery.
+const quickLoaf = open && stock.bread.max > 0;
 const pickupDay = unavailable
   ? t.bake.dateSoon
   : dayFormat(lang, current.pickupDate);
@@ -238,9 +242,7 @@ const jsonLd = [
     <section class="hero" aria-labelledby="hero-title">
       <div class="wrap mono-bar hero-bar hero-in" style="--i:0">
         <span>{t.ed.bar}</span>
-        <span>
-          {t.bake.number} Nº {pad(current.number)} · Baix Llobregat
-        </span>
+        <span>Sant Boi · Baix Llobregat</span>
       </div>
       <div class="wrap hero-grid">
         <h1 id="hero-title" class="hero-title">
@@ -263,9 +265,6 @@ const jsonLd = [
               eager
               sizes="(max-width: 960px) calc(100vw - 40px), 56vw"
             />
-            <span class="hero-logo" aria-hidden="true">
-              molla<span>.</span>
-            </span>
           </div>
           <figcaption class="fig-bar">
             <span>{t.ed.fig}</span>
@@ -289,9 +288,6 @@ const jsonLd = [
               <span class="status">
                 <span class="status-dot" aria-hidden="true"></span>
                 <span data-bake-label>{statusLabel}</span>
-              </span>
-              <span class="stub-number">
-                {t.bake.number} {current.number}
               </span>
             </div>
             <h2 id="bake-title" class="stub-day">
@@ -317,6 +313,7 @@ const jsonLd = [
                 {t.bake.unavailable}
               </p>
             )}
+            {open && <p class="stub-when">{t.hero.when(wed)}</p>}
             {open && <p class="stub-terms">{t.hero.terms}</p>}
             <p
               class="stub-count"
@@ -330,13 +327,27 @@ const jsonLd = [
               class="button button-orange full stub-cta"
               href={orderHref}
               data-bake-cta
+              data-quick-loaf={quickLoaf ? '' : undefined}
             >
-              {open && pickupWeekday
-                ? t.bake.ctaOpen(pickupWeekday)
-                : t.bake.ctaClosed}
+              {quickLoaf
+                ? t.bake.ctaQuick(money(loaf.price))
+                : open && pickupWeekday
+                  ? t.bake.ctaOpen(pickupWeekday)
+                  : t.bake.ctaClosed}
               <span class="button-arrow" aria-hidden="true">
                 →
               </span>
+            </a>
+            {open && (
+              <a class="stub-menu" href="#carta">
+                {t.bake.ctaMenu} <span aria-hidden="true">↓</span>
+              </a>
+            )}
+            <a class="stub-trust" href="#resenas">
+              <span class="hero-stars" aria-hidden="true">
+                ★★★★★
+              </span>{' '}
+              {t.hero.trust(googleReviews.score, googleReviews.count)}
             </a>
             {open && whatsappBook && (
               <a
@@ -351,19 +362,6 @@ const jsonLd = [
               </a>
             )}
           </div>
-          <ul class="hero-proof hero-in" style="--i:5">
-            <li>
-              <a href="#resenas">
-                <span class="hero-stars" aria-hidden="true">
-                  ★★★★★
-                </span>
-                {googleReviews.score} · {t.reviews.count(googleReviews.count)}
-              </a>
-            </li>
-            {t.hero.proof.map((p) => (
-              <li>{p}</li>
-            ))}
-          </ul>
         </div>
       </div>
     </section>
@@ -393,24 +391,6 @@ const jsonLd = [
         </div>
       </div>
     </section>
-
-    <!-- La cinta: palabras del obrador que corren con el scroll -->
-    <div class="marquee" aria-hidden="true" data-marquee>
-      {[0, 1].map((row) => (
-        <div class:list={['marquee-row', { 'marquee-reverse': row === 1 }]}>
-          {[0, 1].map(() => (
-            <span class="marquee-track">
-              {[...t.hero.keywords, ...t.hero.keywords].map((w, i) => (
-                <span class:list={['marquee-word', { outline: (i + row) % 2 }]}>
-                  {w}
-                  <span class="star">✷</span>
-                </span>
-              ))}
-            </span>
-          ))}
-        </div>
-      ))}
-    </div>
 
     <!-- 3 · La carta: tres piezas, la foto manda y el botón está a mano -->
     <section
@@ -844,8 +824,9 @@ const jsonLd = [
                 hidden
                 data-text={t.reserve.referralNote}
               ></p>
+              <p class="step-label">{t.reserve.step1}</p>
               <div class="order-lines">
-                <div class="order-line">
+                <div class="order-line" data-line="loaf">
                   <label for="quantity">
                     <span class="line-name">{t.catalog.loaf}</span>
                     <small>
@@ -882,7 +863,7 @@ const jsonLd = [
                     </button>
                   </div>
                 </div>
-                <div class="order-line">
+                <div class="order-line" data-line="sourdough">
                   <label for="sourdough-view">
                     <span class="line-name">{t.catalog.sourdough}</span>
                     <small>
@@ -924,7 +905,7 @@ const jsonLd = [
                     </button>
                   </div>
                 </div>
-                <div class="order-line">
+                <div class="order-line" data-line="wholegrain">
                   <label for="wholegrain-view">
                     <span class="line-name">{t.catalog.wholegrain}</span>
                     <small>
@@ -966,7 +947,7 @@ const jsonLd = [
                     </button>
                   </div>
                 </div>
-                <div class="order-line">
+                <div class="order-line" data-line="banana">
                   <label for="banana-view">
                     <span class="line-name">{t.reserve.bananaQty}</span>
                     <small>
@@ -1015,7 +996,7 @@ const jsonLd = [
                     </button>
                   </div>
                 </div>
-                <div class="order-line">
+                <div class="order-line" data-line="croissant">
                   <label for="croissant-view">
                     <span class="line-name">{t.catalog.croissant}</span>
                     <small>
@@ -1057,7 +1038,7 @@ const jsonLd = [
                     </button>
                   </div>
                 </div>
-                <div class="order-line">
+                <div class="order-line" data-line="pain">
                   <label for="pain-view">
                     <span class="line-name">{t.catalog.pain}</span>
                     <small>
@@ -1136,13 +1117,16 @@ const jsonLd = [
                   </button>
                 </div>
               </div>
+              <button type="button" class="more-products" data-more-products>
+                {t.reserve.moreProducts}
+              </button>
               <div class="perforation" aria-hidden="true"></div>
               <fieldset class="size-choice delivery-choice">
                 <legend>{t.reserve.deliveryH}</legend>
                 <label>
                   <input type="radio" name="delivery" value="home" checked />
                   <span>
-                    <strong>{t.reserve.deliveryHome}</strong>
+                    <strong>{t.reserve.deliveryHome(wed)}</strong>
                     <em>{t.reserve.deliveryHomeHint}</em>
                   </span>
                 </label>
@@ -1155,6 +1139,24 @@ const jsonLd = [
                 </label>
               </fieldset>
               <div class="form-columns address-columns" data-home-fields>
+                {wed && (
+                  <fieldset class="size-choice slot-choice">
+                    <legend>{t.reserve.slotH}</legend>
+                    <label>
+                      <input type="radio" name="slot" value="midday" checked />
+                      <span>
+                        <strong>{t.reserve.slotMidday}</strong>
+                      </span>
+                    </label>
+                    <label>
+                      <input type="radio" name="slot" value="evening" />
+                      <span>
+                        <strong>{t.reserve.slotEvening}</strong>
+                        <em>{t.reserve.slotEveningHint}</em>
+                      </span>
+                    </label>
+                  </fieldset>
+                )}
                 <div class="field">
                   <label for="town">{t.reserve.town}</label>
                   <select id="town" name="town" required>
@@ -1176,17 +1178,21 @@ const jsonLd = [
                     placeholder={t.reserve.addressPlaceholder}
                   />
                 </div>
-                <div class="field">
-                  <label for="notes">{t.reserve.notes}</label>
-                  <input
-                    id="notes"
-                    name="notes"
-                    maxlength="200"
-                    autocomplete="off"
-                    placeholder={t.reserve.notesPlaceholder}
-                  />
-                </div>
+                <details class="notes-more">
+                  <summary>{t.reserve.notesToggle}</summary>
+                  <div class="field">
+                    <label for="notes">{t.reserve.notes}</label>
+                    <input
+                      id="notes"
+                      name="notes"
+                      maxlength="200"
+                      autocomplete="off"
+                      placeholder={t.reserve.notesPlaceholder}
+                    />
+                  </div>
+                </details>
               </div>
+              <p class="step-label">{t.reserve.step3}</p>
               <div class="field">
                 <label for="name">{t.reserve.name}</label>
                 <input
@@ -1242,7 +1248,7 @@ const jsonLd = [
                 </label>
               ) : (
                 <p class="check-note">
-                  {t.reserve.pickupCheck(pickupDay, current.pickupWindow)}
+                  {t.reserve.pickupCheck(pickupDay, current.pickupWindow, wed)}
                 </p>
               )}
               <!-- Ordering is the consent: a line to read, not a box to tick. -->
@@ -1252,7 +1258,11 @@ const jsonLd = [
                 <span>{t.reserve.newsCheck}</span>
               </label>
               <p class="form-error" role="alert" tabindex="-1" hidden></p>
-              <button type="submit" class="button full">
+              <button
+                type="submit"
+                class="button full"
+                data-label={isDemo ? t.reserve.submitDemo : t.reserve.submit}
+              >
                 {isDemo ? t.reserve.submitDemo : t.reserve.submit}
               </button>
               <p class="form-footnote">
@@ -1306,6 +1316,24 @@ const jsonLd = [
         </div>
       </div>
     </section>
+
+    <!-- La cinta: palabras del obrador, después del pedido para no alargar el camino -->
+    <div class="marquee" aria-hidden="true" data-marquee>
+      {[0, 1].map((row) => (
+        <div class:list={['marquee-row', { 'marquee-reverse': row === 1 }]}>
+          {[0, 1].map(() => (
+            <span class="marquee-track">
+              {[...t.hero.keywords, ...t.hero.keywords].map((w, i) => (
+                <span class:list={['marquee-word', { outline: (i + row) % 2 }]}>
+                  {w}
+                  <span class="star">✷</span>
+                </span>
+              ))}
+            </span>
+          ))}
+        </div>
+      ))}
+    </div>
 
     <!-- Ressenyes de Google: un cartell amb l'índex al costat, com la taula
          del flyer. Una ressenya a la vegada. Cites textuals, en el seu idioma. -->

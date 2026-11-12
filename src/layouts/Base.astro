@@ -15,7 +15,7 @@ import Ribbon from '../components/Ribbon.astro';
 import Crumb from '../components/Crumb.astro';
 import { brand, searchIndexable, isDemo } from '../lib/config';
 import { ui, routes, type Lang, type RouteKey } from '../lib/i18n';
-import { deliveryTowns, deliveryWindow } from '../lib/delivery';
+import { deliveryTowns, deliveryWindow, eveningWindow } from '../lib/delivery';
 interface Props {
   lang?: Lang;
   route?: RouteKey;
@@ -77,12 +77,23 @@ const organization = {
     ...deliveryTowns.map((town) => ({ '@type': 'City', name: town.name })),
     { '@type': 'AdministrativeArea', name: 'Baix Llobregat' },
   ],
-  openingHoursSpecification: {
-    '@type': 'OpeningHoursSpecification',
-    dayOfWeek: ['https://schema.org/Wednesday', 'https://schema.org/Saturday'],
-    opens: deliveryWindow.split('–')[0],
-    closes: deliveryWindow.split('–')[1],
-  },
+  openingHoursSpecification: [
+    {
+      '@type': 'OpeningHoursSpecification',
+      dayOfWeek: [
+        'https://schema.org/Wednesday',
+        'https://schema.org/Saturday',
+      ],
+      opens: deliveryWindow.split('–')[0],
+      closes: deliveryWindow.split('–')[1],
+    },
+    {
+      '@type': 'OpeningHoursSpecification',
+      dayOfWeek: 'https://schema.org/Wednesday',
+      opens: eveningWindow.split('–')[0],
+      closes: eveningWindow.split('–')[1],
+    },
+  ],
 };
 const website = {
   '@context': 'https://schema.org',

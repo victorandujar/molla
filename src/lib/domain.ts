@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { AppError, type Lang } from './messages';
 import { sources } from './sources';
-import { townById } from './delivery';
+import { deliverySlots, townById, type DeliverySlot } from './delivery';
 import {
   BANANA_HALVES_PER_BAKE,
   BREAD_MAX_PER_ORDER,
@@ -61,6 +61,8 @@ export const reservationSchema = z
       .transform((v) => v.toLowerCase()),
     // Home delivery only: "if I'm not in, leave it with the porter".
     notes: z.string().trim().max(200, 'notes').default(''),
+    // Home delivery only: Wednesday's evening round or the midday one.
+    slot: z.enum(deliverySlots).default('midday'),
     // Loaves of the weekly bread (0 when the order is only banana bread).
     quantity: z.coerce.number().int().min(0).max(LOAF_MAX_PER_ORDER),
     // Sourdough and 60 % wholegrain loaves: same capacity as the weekly one.
@@ -242,8 +244,14 @@ export const waitlistSchema = z.object({
 // other breads out.
 export type ReservationInput = Omit<
   z.infer<typeof reservationSchema>,
-  'notes' | 'sourdough' | 'wholegrain'
-> & { notes?: string; sourdough?: number; wholegrain?: number };
+  'notes' | 'sourdough' | 'wholegrain' | 'slot'
+> & {
+  notes?: string;
+  sourdough?: number;
+  wholegrain?: number;
+  // Absent means midday (the "pa fix" and every Saturday).
+  slot?: DeliverySlot;
+};
 export type BakeState =
   'UPCOMING' | 'OPEN' | 'SOLD_OUT' | 'CLOSED' | 'COMPLETED';
 export function bakeState(
