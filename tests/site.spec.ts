@@ -1551,3 +1551,34 @@ test('sourdough and 60 % wholegrain: on the menu, in the order and in the oven q
   await expect(stats).toContainText('Masa madre4');
   await expect(stats).toContainText('Integral 60 %2');
 });
+
+test('search snippets fit: titles up to 60 characters, descriptions up to 160', async ({
+  page,
+}) => {
+  for (const path of [
+    '/',
+    '/es/',
+    '/pa-a-domicili',
+    '/es/pan-a-domicilio',
+    '/pa-fix',
+    '/es/pan-fijo',
+    '/recollida',
+    '/es/recogida',
+    '/poolish',
+    '/es/poolish',
+  ]) {
+    await page.goto(path);
+    const title = await page.title();
+    const description =
+      (await page
+        .locator('meta[name="description"]')
+        .getAttribute('content')) || '';
+    expect(title.length, `${path}: ${title}`).toBeLessThanOrEqual(60);
+    expect(description.length, `${path}: ${description}`).toBeGreaterThan(100);
+    expect(description.length, `${path}: ${description}`).toBeLessThanOrEqual(
+      160,
+    );
+  }
+  await page.goto('/es/');
+  expect(await page.title()).toContain('Masa madre');
+});

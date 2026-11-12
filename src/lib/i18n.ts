@@ -113,8 +113,8 @@ export const ui = {
       channel: 'Canal de WhatsApp',
     },
     meta: {
-      title: `Pan artesano a domicilio en Sant Boi y Sant Just Desvern · ${brand.name}`,
-      description: `Pan de fermentación lenta y banana bread con harina ecológica, hechos a mano en el Baix Llobregat. Reserva online y te lo llevo a casa el miércoles (${hours.es} o ${evening}) o el sábado (${hours.es}) en Sant Boi, Sant Just Desvern, Sant Joan Despí, Sant Feliu, Santa Coloma y Sant Vicenç.`,
+      title: `Panadería artesana en Sant Boi · Masa madre · ${brand.name}`,
+      description: `Pan de masa madre y poolish con harina ecológica, hecho a mano en Sant Boi. Te lo llevo a casa miércoles y sábado. Desde ${loafPrice}, pagas al recibirlo.`,
       ogAlt: 'Hogazas de corteza tostada recién cortadas',
     },
     xmas: {
@@ -646,8 +646,8 @@ export const ui = {
       channel: 'Canal de WhatsApp',
     },
     meta: {
-      title: `Pa artesà a domicili a Sant Boi i Sant Just Desvern · ${brand.name}`,
-      description: `Pa de fermentació lenta i banana bread amb farina ecològica, fets a mà al Baix Llobregat. Reserva en línia i te’l porto a casa dimecres (${hours.ca} o ${evening}) o dissabte (${hours.ca}) a Sant Boi, Sant Just Desvern, Sant Joan Despí, Sant Feliu, Santa Coloma i Sant Vicenç.`,
+      title: `Fleca artesana a Sant Boi · Pa de massa mare · ${brand.name}`,
+      description: `Pa de massa mare i poolish amb farina ecològica, fet a mà a Sant Boi. Te’l porto a casa dimecres i dissabte. Des de ${loafPrice}, pagues en rebre’l.`,
       ogAlt: 'Pans de crosta torrada acabats de tallar',
     },
     xmas: {
