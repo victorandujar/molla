@@ -1506,7 +1506,7 @@ test('sourdough and 60 % wholegrain: on the menu, in the order and in the oven q
   await page.goto('/es/');
   const menu = page.locator('#carta .bread-list');
   await expect(menu).toContainText('Masa madre');
-  await expect(menu).toContainText('5,50');
+  await expect(menu).toContainText('6,00');
   await expect(menu).toContainText('Integral 60 %');
   // Four of one bread at most…
   const addSourdough = page.locator('[data-buy=sourdough] > [data-add]');
@@ -1518,7 +1518,7 @@ test('sourdough and 60 % wholegrain: on the menu, in the order and in the oven q
   await page.locator('[data-buy=wholegrain] > [data-add]').click();
   await page.locator('[data-mini=wholegrain] [data-add]').click();
   await expect(page.locator('[data-buy=loaf] > [data-add]')).toBeDisabled();
-  await expect(page.locator('#total')).toContainText('32,00');
+  await expect(page.locator('#total')).toContainText('34,00');
   await page.getByLabel('Tu nombre', { exact: true }).fill('Ana Pan');
   await page.locator('#phone').fill('612 345 679');
   await page.locator('#town').selectOption('sant-boi');
@@ -1539,7 +1539,7 @@ test('sourdough and 60 % wholegrain: on the menu, in the order and in the oven q
     ['masa-madre', 4],
     ['integral', 2],
   ]);
-  expect(d.orders[0].total).toBe(3200);
+  expect(d.orders[0].total).toBe(3400);
   // Six of the ten loaves are taken: four can still be ordered.
   const bake = await (await request.get('/api/bake')).json();
   expect(bake.bread).toEqual({ level: 'ok', max: 4 });

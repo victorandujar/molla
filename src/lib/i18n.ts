@@ -337,6 +337,12 @@ export const ui = {
         sourdough: 'Fermentada con masa madre.',
         wholegrain: 'Con un 60 % de harina integral.',
       },
+      photos: {
+        loaf: 'Media hogaza clásica en la mano, con la miga abierta a la vista',
+        sourdough: 'Dos mitades de pan de masa madre apiladas, con la miga alveolada',
+        wholegrain: 'Dos mitades de pan integral apiladas sobre una tabla, miga tostada y apretada',
+        sourdoughLoaf: 'Hogaza de masa madre vista desde arriba, con el greñado abierto y dorado',
+      },
       details: {
         sourdough:
           'Harina de trigo de fuerza, harina integral, masa madre, agua y sal.',
@@ -860,6 +866,12 @@ export const ui = {
         loaf: 'Poolish i fins a 35 h de fermentació. Suau, molla oberta i crosta que cruix.',
         sourdough: 'Fermentat amb massa mare.',
         wholegrain: 'Amb un 60 % de farina integral.',
+      },
+      photos: {
+        loaf: 'Mig pa clàssic a la mà, amb la molla oberta a la vista',
+        sourdough: 'Dues meitats de pa de massa mare apilades, amb la molla alveolada',
+        wholegrain: 'Dues meitats de pa integral apilades sobre una taula, molla torrada i atapeïda',
+        sourdoughLoaf: 'Pa de massa mare vist des de dalt, amb el tall obert i daurat',
       },
       details: {
         sourdough:
