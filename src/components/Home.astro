@@ -186,8 +186,21 @@ const jsonLd = [
     '@context': 'https://schema.org',
     '@type': 'Product',
     name: `${t.banana.h2a} ${t.banana.h2b.replace(/\.$/, '')}`,
-    description: `${t.banana.p} ${t.banana.ingredientsValue}`,
+    description: `${t.banana.p} ${t.loaf.ingredients}: ${t.banana.ingredientsValue}`,
     image: [abs('/images/banana-1100.webp')],
+    // Spelled out so search engines quote these ingredients, not other bakeries'.
+    additionalProperty: [
+      {
+        '@type': 'PropertyValue',
+        name: t.loaf.ingredients,
+        value: t.banana.ingredientsValue,
+      },
+      {
+        '@type': 'PropertyValue',
+        name: t.loaf.allergens,
+        value: t.banana.allergensValue,
+      },
+    ],
     brand: { '@type': 'Brand', name: brand.name },
     offers: [
       {
