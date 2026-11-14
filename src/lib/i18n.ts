@@ -312,7 +312,8 @@ export const ui = {
       h2a: 'Banana bread',
       h2b: 'de chocolate.',
       p: 'Tres plátanos muy maduros por molde, harina ecológica, yogur y una bolsa entera de pepitas de chocolate. Corteza dorada, miga húmeda y tierna.',
-      short: 'Tres plátanos maduros y 100 g de chocolate por molde.',
+      short:
+        'Hecho con plátano maduro, harina ecológica, yogur y 100 g de pepitas de chocolate por molde.',
       ingredientsValue:
         'Plátano maduro, harina de trigo ecológica, yogur y pepitas de chocolate.',
       allergensValue: 'Contiene trigo (gluten) y leche. Pregúntame por trazas.',
@@ -837,7 +838,8 @@ export const ui = {
       h2a: 'Banana bread',
       h2b: 'de xocolata.',
       p: 'Tres plàtans ben madurs per motlle, farina ecològica, iogurt i una bossa sencera de xips de xocolata. Crosta daurada, molla humida i tendra.',
-      short: 'Tres plàtans madurs i 100 g de xocolata per motlle.',
+      short:
+        'Fet amb plàtan madur, farina ecològica, iogurt i 100 g de xips de xocolata per motlle.',
       ingredientsValue:
         'Plàtan madur, farina de blat ecològica, iogurt i xips de xocolata.',
       allergensValue: 'Conté blat (gluten) i llet. Pregunta’m per traces.',
