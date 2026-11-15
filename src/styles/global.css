@@ -2019,6 +2019,22 @@ figure picture {
 .bread-item .mini-stepper button:hover {
   background: rgba(36, 66, 164, 0.1);
 }
+/* Cada pa amb la seva foto: la molla diu més que el nom. */
+.bread-item {
+  grid-template-columns: 84px minmax(0, 1fr) auto;
+  column-gap: 18px;
+}
+.bread-thumb {
+  grid-row: 1 / span 2;
+  align-self: start;
+  margin: 0;
+  aspect-ratio: 1;
+  overflow: clip;
+  background: var(--paper-2);
+}
+.bread-item .pastry-buy {
+  grid-column: 2 / -1;
+}
 /* Ingredients i al·lèrgens: a un clic, no a la cara. */
 details.dish-more {
   align-self: stretch;
@@ -4353,5 +4369,16 @@ details[open] p {
     grid-column: 1 / -1;
     grid-row: 3;
     justify-self: stretch;
+  }
+  .bread-item {
+    grid-template-columns: 64px minmax(0, 1fr) auto;
+    column-gap: 14px;
+  }
+  .bread-item .pastry-buy,
+  .bread-item .pastry-buy.dish-buy {
+    grid-column: 3;
+  }
+  .bread-item .pastry-buy:has(.mini-stepper:not([hidden])) {
+    grid-column: 1 / -1;
   }
 }

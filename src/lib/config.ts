@@ -2,7 +2,7 @@ import type { BakeState } from './domain';
 export const WEEKLY_LOAF_PRICE_CENTS = 500;
 // Two more breads on the menu. All three share the bake's capacity (the
 // oven holds loaves, whatever the dough): bakes.capacity counts every loaf.
-export const SOURDOUGH_PRICE_CENTS = 550;
+export const SOURDOUGH_PRICE_CENTS = 600;
 export const WHOLEGRAIN_PRICE_CENTS = 500;
 export const breadIds = ['clasica', 'masa-madre', 'integral'] as const;
 // Most loaves of each bread in one order, and of all breads together.

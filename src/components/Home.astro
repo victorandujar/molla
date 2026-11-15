@@ -71,6 +71,8 @@ const breads = [
     product: loaf,
     name: t.catalog.loaf,
     text: t.breads.items.loaf,
+    photo: 'slice',
+    photoAlt: t.breads.photos.loaf,
   },
   {
     key: 'sourdough',
@@ -78,6 +80,8 @@ const breads = [
     product: sourdough,
     name: t.catalog.sourdough,
     text: t.breads.items.sourdough,
+    photo: 'sourdough',
+    photoAlt: t.breads.photos.sourdough,
   },
   {
     key: 'wholegrain',
@@ -85,6 +89,8 @@ const breads = [
     product: wholegrain,
     name: t.catalog.wholegrain,
     text: t.breads.items.wholegrain,
+    photo: 'wholegrain',
+    photoAlt: t.breads.photos.wholegrain,
   },
 ] as const;
 const bananaWhole = productById('banana')!;
@@ -433,8 +439,8 @@ const jsonLd = [
               </figure>
               <figure class="dish-inset" data-parallax="-0.08">
                 <Photo
-                  name="slice"
-                  alt={t.loaf.altSlice}
+                  name="sourdoughLoaf"
+                  alt={t.breads.photos.sourdoughLoaf}
                   sizes="(max-width: 960px) 50vw, 22vw"
                 />
               </figure>
@@ -449,6 +455,9 @@ const jsonLd = [
               <ul class="pastry-list bread-list">
                 {breads.map((b) => (
                   <li class="pastry-item bread-item">
+                    <figure class="bread-thumb">
+                      <Photo name={b.photo} alt={b.photoAlt} sizes="96px" />
+                    </figure>
                     <div class="pastry-name">
                       <h4>{b.name}</h4>
                       <p>{b.text}</p>
