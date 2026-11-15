@@ -2005,35 +2005,165 @@ figure picture {
   background: rgba(246, 239, 229, 0.14);
 }
 /* La carta de pa: la mateixa llista que la brioixeria, sobre el paper. */
-.bread-list {
-  margin-top: 22px;
-  border-top-color: var(--cobalt);
-  color: var(--cobalt);
+/* La carta de pa: tres pans iguals, cadascun amb la seva foto. El pa
+   sencer de primeres; en passar-hi per sobre (o tocar-lo al mòbil), el tall. */
+.breads {
+  grid-column: 1 / -1;
+  margin-bottom: clamp(40px, 6vw, 88px);
 }
-.bread-item {
-  border-bottom-color: var(--line-strong);
+.breads-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: end;
+  gap: 12px clamp(24px, 4vw, 64px);
 }
-.bread-item .pastry-name p {
-  color: var(--ink-2);
+.breads-head .dish-index {
+  grid-column: 1 / -1;
 }
-.bread-item .mini-stepper button:hover {
-  background: rgba(36, 66, 164, 0.1);
+.breads-head h3 {
+  font-size: clamp(36px, 3.4vw, 58px);
+  text-transform: uppercase;
+  line-height: 0.92;
 }
-/* Cada pa amb la seva foto: la molla diu més que el nom. */
-.bread-item {
-  grid-template-columns: 84px minmax(0, 1fr) auto;
-  column-gap: 18px;
-}
-.bread-thumb {
-  grid-row: 1 / span 2;
-  align-self: start;
+.breads-head .dish-desc {
+  max-width: 42ch;
   margin: 0;
-  aspect-ratio: 1;
+  justify-self: end;
+}
+.bread-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(20px, 2.4vw, 36px);
+  margin: clamp(24px, 3vw, 40px) 0 0;
+  padding: 0;
+  list-style: none;
+}
+.bread-card {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.bread-photo {
+  position: relative;
+  aspect-ratio: 5 / 4;
   overflow: clip;
   background: var(--paper-2);
 }
-.bread-item .pastry-buy {
-  grid-column: 2 / -1;
+.bread-photo picture {
+  position: absolute;
+  inset: 0;
+  transition: opacity 0.5s var(--ease-out);
+}
+.bread-photo img {
+  transition: transform 1.6s var(--ease-out);
+}
+.bread-photo.has-cut picture + picture {
+  opacity: 0;
+}
+.bread-photo.has-cut:hover picture + picture,
+.bread-photo.show-cut picture + picture {
+  opacity: 1;
+}
+.bread-photo:hover img {
+  transform: scale(1.03);
+}
+@media (hover: none) {
+  .bread-photo.has-cut {
+    cursor: pointer;
+  }
+}
+.bread-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1.5px solid var(--cobalt);
+}
+.bread-head h4 {
+  font-weight: 800;
+  font-stretch: 112%;
+  font-size: clamp(22px, 1.9vw, 28px);
+  letter-spacing: -0.02em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+.bread-price {
+  flex: none;
+  font-weight: 800;
+  font-stretch: 125%;
+  font-size: clamp(24px, 2vw, 30px);
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+.bread-text {
+  margin-top: 10px;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--ink-2);
+}
+.bread-buy {
+  margin-top: auto;
+  padding-top: 18px;
+}
+.bread-buy .mini-stepper:not([hidden]) {
+  flex: 1;
+  justify-content: space-between;
+}
+.breads-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 20px;
+  margin-top: clamp(24px, 3vw, 40px);
+}
+.breads-foot details.dish-more {
+  flex: 1 1 100%;
+  margin-top: 0;
+  padding-top: 0;
+}
+@media (max-width: 960px) {
+  .bread-list {
+    grid-template-columns: 1fr;
+    gap: 36px;
+  }
+  .bread-card {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-rows: auto auto 1fr;
+    column-gap: 24px;
+  }
+  .bread-photo {
+    grid-row: 1 / span 3;
+  }
+  .bread-head {
+    margin-top: 0;
+  }
+  .bread-buy {
+    align-self: start;
+    margin-top: 0;
+  }
+  .breads-head {
+    grid-template-columns: 1fr;
+  }
+  .breads-head .dish-desc {
+    justify-self: start;
+  }
+}
+@media (max-width: 600px) {
+  .bread-list {
+    gap: 32px;
+  }
+  .bread-card {
+    display: flex;
+  }
+  .bread-photo {
+    aspect-ratio: 4 / 3;
+  }
+  .bread-buy {
+    padding-top: 14px;
+  }
 }
 /* Ingredients i al·lèrgens: a un clic, no a la cara. */
 details.dish-more {
@@ -4369,16 +4499,5 @@ details[open] p {
     grid-column: 1 / -1;
     grid-row: 3;
     justify-self: stretch;
-  }
-  .bread-item {
-    grid-template-columns: 64px minmax(0, 1fr) auto;
-    column-gap: 14px;
-  }
-  .bread-item .pastry-buy,
-  .bread-item .pastry-buy.dish-buy {
-    grid-column: 3;
-  }
-  .bread-item .pastry-buy:has(.mini-stepper:not([hidden])) {
-    grid-column: 1 / -1;
   }
 }

@@ -1368,3 +1368,9 @@ if (reviewsSection) {
   // The first poster should not replay its entrance on load.
   posters[0]?.classList.remove('is-in');
 }
+
+// The bread photos: whole loaf first, the cut one on hover. Touch screens
+// have no hover, so a tap on the photo swaps them.
+if (matchMedia('(hover: none)').matches)
+  for (const photo of document.querySelectorAll('[data-bread-photo].has-cut'))
+    photo.addEventListener('click', () => photo.classList.toggle('show-cut'));
