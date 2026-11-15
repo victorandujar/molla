@@ -71,8 +71,11 @@ const breads = [
     product: loaf,
     name: t.catalog.loaf,
     text: t.breads.items.loaf,
-    photo: 'slice',
-    photoAlt: t.breads.photos.loaf,
+    // Whole first; the cut loaf shows on hover (or a tap on touch screens).
+    shots: [
+      { name: 'loaves', alt: t.loaf.alt },
+      { name: 'slice', alt: t.breads.photos.loaf },
+    ],
   },
   {
     key: 'sourdough',
@@ -80,8 +83,10 @@ const breads = [
     product: sourdough,
     name: t.catalog.sourdough,
     text: t.breads.items.sourdough,
-    photo: 'sourdough',
-    photoAlt: t.breads.photos.sourdough,
+    shots: [
+      { name: 'sourdoughLoaf', alt: t.breads.photos.sourdoughLoaf },
+      { name: 'sourdough', alt: t.breads.photos.sourdough },
+    ],
   },
   {
     key: 'wholegrain',
@@ -89,8 +94,7 @@ const breads = [
     product: wholegrain,
     name: t.catalog.wholegrain,
     text: t.breads.items.wholegrain,
-    photo: 'wholegrain',
-    photoAlt: t.breads.photos.wholegrain,
+    shots: [{ name: 'wholegrain', alt: t.breads.photos.wholegrain }],
   },
 ] as const;
 const bananaWhole = productById('banana')!;
@@ -428,85 +432,80 @@ const jsonLd = [
         </h2>
 
         <div class="menu">
-          <article class="dish dish-loaf" aria-labelledby="loaf-title">
-            <div class="dish-media">
-              <figure class="dish-photo" data-wipe>
-                <Photo
-                  name="loaves"
-                  alt={t.loaf.alt}
-                  sizes="(max-width: 960px) calc(100vw - 40px), 56vw"
-                />
-              </figure>
-              <figure class="dish-inset" data-parallax="-0.08">
-                <Photo
-                  name="sourdoughLoaf"
-                  alt={t.breads.photos.sourdoughLoaf}
-                  sizes="(max-width: 960px) 50vw, 22vw"
-                />
-              </figure>
-            </div>
-            <div class="dish-info" data-reveal>
+          <article class="breads" aria-labelledby="loaf-title">
+            <header class="breads-head" data-reveal>
               <p class="dish-index">
                 <span>01</span>
                 {t.breads.kicker}
               </p>
               <h3 id="loaf-title">{t.breads.h3}</h3>
               <p class="dish-desc">{t.breads.intro}</p>
-              <ul class="pastry-list bread-list">
-                {breads.map((b) => (
-                  <li class="pastry-item bread-item">
-                    <figure class="bread-thumb">
-                      <Photo name={b.photo} alt={b.photoAlt} sizes="96px" />
-                    </figure>
-                    <div class="pastry-name">
-                      <h4>{b.name}</h4>
-                      <p>{b.text}</p>
-                    </div>
-                    <p class="pastry-price">
+            </header>
+            <ul class="bread-list">
+              {breads.map((b) => (
+                <li class="bread-card" data-reveal>
+                  <div
+                    class:list={[
+                      'bread-photo',
+                      { 'has-cut': b.shots.length > 1 },
+                    ]}
+                    data-bread-photo
+                  >
+                    {b.shots.map((s) => (
+                      <Photo
+                        name={s.name}
+                        alt={s.alt}
+                        sizes="(max-width: 700px) calc(100vw - 40px), (max-width: 960px) 45vw, 30vw"
+                      />
+                    ))}
+                  </div>
+                  <div class="bread-head">
+                    <h4>{b.name}</h4>
+                    <p class="bread-price">
                       <span aria-hidden="true">{tight(b.product.price)}</span>
                       <span class="visually-hidden">
                         {money(b.product.price)} · {t.breads.unit}
                       </span>
                     </p>
-                    {open ? (
-                      <div class="dish-buy pastry-buy" data-buy={b.key}>
+                  </div>
+                  <p class="bread-text">{b.text}</p>
+                  {open ? (
+                    <div class="dish-buy bread-buy" data-buy={b.key}>
+                      <button
+                        type="button"
+                        class="button"
+                        data-add={b.key}
+                        disabled={breadMax === 0}
+                        aria-label={t.breads.more(b.name)}
+                      >
+                        {t.breads.add}
+                        <span class="button-plus" aria-hidden="true">
+                          +
+                        </span>
+                      </button>
+                      <div class="mini-stepper" data-mini={b.key} hidden>
                         <button
                           type="button"
-                          class="button"
+                          data-sub={b.key}
+                          aria-label={t.breads.less(b.name)}
+                        >
+                          −
+                        </button>
+                        <output data-count={b.key} aria-live="polite"></output>
+                        <button
+                          type="button"
                           data-add={b.key}
-                          disabled={breadMax === 0}
                           aria-label={t.breads.more(b.name)}
                         >
-                          {t.breads.add}
-                          <span class="button-plus" aria-hidden="true">
-                            +
-                          </span>
+                          +
                         </button>
-                        <div class="mini-stepper" data-mini={b.key} hidden>
-                          <button
-                            type="button"
-                            data-sub={b.key}
-                            aria-label={t.breads.less(b.name)}
-                          >
-                            −
-                          </button>
-                          <output
-                            data-count={b.key}
-                            aria-live="polite"
-                          ></output>
-                          <button
-                            type="button"
-                            data-add={b.key}
-                            aria-label={t.breads.more(b.name)}
-                          >
-                            +
-                          </button>
-                        </div>
                       </div>
-                    ) : null}
-                  </li>
-                ))}
-              </ul>
+                    </div>
+                  ) : null}
+                </li>
+              ))}
+            </ul>
+            <div class="breads-foot">
               {!open && (
                 <a class="button button-ghost" href="#avisame">
                   {t.loaf.notify}
