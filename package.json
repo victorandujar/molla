@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "astro dev --port 4381",
     "dev:e2e": "ADMIN_PASSWORD=e2e-password-local astro dev --port 4381",
-    "build": "astro build",
+    "build": "node --import tsx scripts/migrate.ts --vercel && astro build",
     "check": "astro check",
     "test": "node --import tsx --test --test-concurrency=1 tests/*.test.ts",
     "test:e2e": "playwright test",

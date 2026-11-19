@@ -157,7 +157,7 @@ Un cliente elige cantidad, día (miércoles o sábado), frecuencia (cada semana 
 - `npm run orders:prod -- subpause|subresume|subcancel ana@example.com --yes` cambia un pan fijo si el cliente te lo pide por WhatsApp (pausar o cancelar también cancela su pedido abierto).
 - `purge` anonimiza además las altas de pan fijo canceladas hace más de N meses.
 
-**Antes de publicar este cambio** hay una migración nueva (`006_standing_orders.sql`): ejecuta `npm run db:migrate:prod` **antes** de desplegar `main`, porque el código nuevo escribe columnas que no existen todavía. La migración es compatible con la versión anterior.
+Las migraciones (como `006_standing_orders.sql`) se aplican solas en el build de Production de Vercel, antes de que el código nuevo entre en servicio. Deben ser compatibles con la versión anterior.
 
 **Pruebas con PostgreSQL.** `TEST_DATABASE_URL=postgres://… npm test` ejecuta además `tests/subscriptions.db.test.ts` contra una base con las migraciones aplicadas (vacía las tablas de pedidos: no la apuntes a producción).
 

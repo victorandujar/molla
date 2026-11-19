@@ -431,14 +431,24 @@ export async function reserve(
     // The bake row is locked, so no concurrent reservation can take the same code.
     do order.code = pickupCode(b.number, randomBytes(4));
     while ((await tx`SELECT 1 FROM orders WHERE code=${order.code}`).length);
-    // The catalog in the database must agree with the price on the page.
+    // Prices come from src/lib/config.ts (what the page shows and the order
+    // charges). The products table only mirrors them for order_items' foreign
+    // key, so a row that lags behind (a migration not applied yet) is brought
+    // in line here instead of losing the order.
     const ids = items.map((i) => i.product);
     const rows =
       await tx`SELECT id, price FROM products WHERE id IN ${tx(ids)}`;
     for (const item of items) {
       const p = rows.find((r) => r.id === item.product);
-      if (!p) throw new AppError('productUnavailable');
-      if (p.price !== item.unitPrice) throw new AppError('priceChanged');
+      if (p && p.price === item.unitPrice) continue;
+      const name = productById(item.product)?.name ?? item.name;
+      console.warn('Catalog price synced', {
+        product: item.product,
+        from: p?.price ?? null,
+        to: item.unitPrice,
+      });
+      await tx`INSERT INTO products (id, name, price) VALUES (${item.product}, ${name}, ${item.unitPrice})
+        ON CONFLICT (id) DO UPDATE SET price = EXCLUDED.price`;
     }
     // An existing customer keeps their stored details: anyone can type an
     // email, so a new order must not overwrite someone else's name or phone.

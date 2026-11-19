@@ -42,7 +42,7 @@ No requiere credenciales de pago para arrancar. El email transaccional es opcion
 
 Remoto `github.com/victorandujar/molla`. `main` despliega producción en Vercel; las demás ramas generan Preview contra la base `molla_dev`, sin emails.
 
-Entornos locales: `.env` apunta a `molla_dev` y `.env.production` a producción. Los scripts de producción llevan el sufijo `:prod`. Si un despliegue incluye migraciones nuevas (el pan fijo añade `006_standing_orders.sql`), ejecuta `npm run db:migrate:prod` antes de publicarlo; las migraciones deben ser compatibles con la versión anterior. Gestión diaria: `/gestio` (ver `docs/operacion.md`).
+Entornos locales: `.env` apunta a `molla_dev` y `.env.production` a producción. Los scripts de producción llevan el sufijo `:prod`. Las migraciones nuevas se aplican solas al desplegar `main`: el build de Production en Vercel ejecuta `scripts/migrate.ts --vercel` antes de `astro build` (las Preview y los builds locales lo omiten). Si una migración falla, el build falla y Vercel sigue sirviendo la versión anterior. Por eso deben ser compatibles con la versión anterior. `npm run db:migrate:prod` sigue disponible a mano. Gestión diaria: `/gestio` (ver `docs/operacion.md`).
 
 ## SEO e indexación
 
