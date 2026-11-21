@@ -15,7 +15,7 @@ const photos = {
   },
   wholegrain: {
     file: 'integral-crumb.jpg',
-    crop: { left: 60, top: 560, width: 1060, height: 740 },
+    crop: { left: 0, top: 0, width: 1600, height: 1600 },
   },
 };
 await mkdir('public/images', { recursive: true });

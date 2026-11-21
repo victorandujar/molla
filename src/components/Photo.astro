@@ -24,7 +24,7 @@ const ratios: Record<string, number> = {
   slice: 1.6,
   sourdough: 1,
   sourdoughLoaf: 1,
-  wholegrain: 1060 / 740,
+  wholegrain: 1,
   boule: 1088 / 1445,
   crumb2: 1088 / 1445,
   banana: 1506 / 2000,
@@ -42,7 +42,7 @@ const ratios: Record<string, number> = {
   'combo-compartir': 1.25,
 };
 // The newer photos are smaller originals: they have no 1600 w variant.
-const widths = ['boule', 'crumb2', 'tiles', 'wholegrain'].includes(name)
+const widths = ['boule', 'crumb2', 'tiles'].includes(name)
   ? [400, 720, 1100]
   : [400, 720, 1100, 1600];
 const srcset = (format: string) =>
