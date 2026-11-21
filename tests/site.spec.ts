@@ -44,8 +44,10 @@ test('real photos, keyboard access, responsive layout and accessibility', async 
     expect(
       await page.locator('.site-footer .crumb-field path').count(),
     ).toBeGreaterThan(400);
-    // The hero is the loaf opened in the maker's mother's hands.
-    await expect(page.locator('.hero-photo img')).toBeVisible();
+    // The hero is the packaging crumb, alive; the loaf opened in the maker's
+    // mother's hands comes with the cut.
+    await expect(page.locator('.alive-canvas')).toBeVisible();
+    await expect(page.locator('.cut-photo img')).toBeVisible();
     expect(
       await page.evaluate(
         () => document.documentElement.scrollWidth <= window.innerWidth,
@@ -119,13 +121,16 @@ test('reservation, validation and waitlist journey', async ({ page }) => {
   await expect(page.locator('#confirmation')).toContainText(
     'Entrega a domicilio en Sant Just Desvern · Carrer Major 1, 2n 1a',
   );
-  await page.locator('#waitlist-email').fill('ana@example.com');
-  await page.locator('input[name=consent]').check();
-  await page.locator('#waitlist-form button[type=submit]').click();
-  await expect(page.locator('.waitlist-success')).toBeVisible();
-  await expect(page.locator('.waitlist-success')).toContainText(
-    'te he enviado un email para confirmar',
-  );
+  // With the bake open the page has no notice form: the closed-bake test
+  // covers it. Here the sign-up goes through the API, for the double opt-in.
+  expect(
+    (
+      await page.request.post('/api/waitlist?lang=es', {
+        headers: origin,
+        data: { email: 'ana@example.com', consent: 'yes' },
+      })
+    ).status(),
+  ).toBe(200);
   const d = await readData();
   expect(d.orders).toHaveLength(1);
   expect(d.orders[0].total).toBe(1800);
@@ -786,7 +791,7 @@ test('Wednesday offers an evening round; Saturday does not', async ({
   expect((await post.json()).error).toContain('miércoles');
 });
 
-test('Google reviews: verbatim quotes in both languages and exact links', async ({
+test('Google reviews: a verbatim quote on the counter and the exact links', async ({
   page,
 }) => {
   for (const [path, count, all, leave] of [
@@ -804,23 +809,16 @@ test('Google reviews: verbatim quotes in both languages and exact links', async 
     ],
   ] as const) {
     await page.goto(path);
-    const reviews = page.locator('section.reviews');
-    await expect(reviews.getByRole('heading', { level: 2 })).toContainText(
-      `5/5 ${count}`,
-    );
-    // Same quotes, untranslated, on both pages.
-    await expect(reviews.locator('blockquote')).toHaveCount(5);
-    await expect(reviews.locator('blockquote').first()).toContainText(
-      'TOTALMENTE ESPECTACULAR',
-    );
-    await expect(reviews.locator('blockquote').last()).toHaveAttribute(
-      'lang',
-      'es',
-    );
+    const quote = page.locator('#ressenya');
+    await expect(quote).toContainText(`5/5 · ${count}`);
+    // The quote stays in its own language on both pages.
+    await expect(quote.locator('blockquote')).toHaveCount(1);
+    await expect(quote.locator('blockquote')).toHaveAttribute('lang', 'es');
+    await expect(quote).toContainText('David L.');
     await expect(
-      reviews.getByRole('link', { name: new RegExp(all) }),
+      quote.getByRole('link', { name: new RegExp(all) }),
     ).toHaveAttribute('href', 'https://share.google/OwE1uCFKRkCMsFFOa');
-    const review = reviews.getByRole('link', { name: new RegExp(leave) });
+    const review = quote.getByRole('link', { name: new RegExp(leave) });
     await expect(review).toHaveAttribute(
       'href',
       'https://g.page/r/CYMY0tZs2YLiEBM/review',
@@ -828,18 +826,6 @@ test('Google reviews: verbatim quotes in both languages and exact links', async 
     await expect(review).toHaveAttribute('rel', 'noopener noreferrer');
     await expect(review).toHaveAttribute('target', '_blank');
   }
-  // One poster at a time, chosen from the index (tabs) or with the keys.
-  const tabs = page.getByRole('tab');
-  await expect(tabs).toHaveCount(5);
-  await expect(page.getByRole('tabpanel')).toHaveCount(1);
-  await expect(page.getByRole('tabpanel')).toContainText('Carlos M.');
-  await tabs.nth(1).click();
-  await expect(page.getByRole('tabpanel')).toContainText('David L.');
-  await page.keyboard.press('ArrowRight');
-  await expect(tabs.nth(2)).toBeFocused();
-  await expect(page.getByRole('tabpanel')).toContainText('Ramiro R.');
-  await page.getByRole('button', { name: 'Reseña siguiente' }).click();
-  await expect(page.getByRole('tabpanel')).toContainText('Guille M.');
 });
 
 test('croissants and pains au chocolat share 48 pieces per bake, by the unit', async ({
@@ -1232,7 +1218,7 @@ test('no banana bread gift anywhere; the first order still gets the pa fix vouch
   request,
 }) => {
   await page.goto('/es/');
-  await expect(page.locator('.hero-lede')).toContainText(
+  await expect(page.locator('.order-lede')).toContainText(
     'envío gratis y pagas al recibirlo.',
   );
   // The banana bread welcome gift is over: not in the hero nor by the ticket.
@@ -1248,7 +1234,7 @@ test('no banana bread gift anywhere; the first order still gets the pa fix vouch
   );
   await expect(page.locator('body')).not.toContainText('chutney');
   await expect(page.locator('body')).not.toContainText('suscripciones');
-  await expect(page.locator('.why')).toContainText('de fermentación lenta');
+  await expect(page.locator('.ferment')).toContainText('Mi pan fermenta hasta');
   // The pa fix block leads to the sign-up page.
   await expect(
     page.locator('.fix').getByRole('link', { name: /Pan fijo/ }),
