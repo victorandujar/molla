@@ -735,7 +735,9 @@ figure picture {
 }
 .hero-photo-frame {
   position: relative;
-  aspect-ratio: 3 / 2;
+  /* La foto es vertical y el pan, casi tan alto como ancho: un marco más
+     apaisado que 6:5 le corta la corteza por arriba y por abajo. */
+  aspect-ratio: 6 / 5;
   overflow: clip;
   background: var(--cobalt-deep);
   /* Se abre desde la línea donde se parte el pan. */
@@ -750,7 +752,7 @@ figure picture {
   }
 }
 .hero-photo-frame img {
-  object-position: 50% 46%;
+  object-position: 50% 39%;
   animation: settle 1.6s var(--ease-out) 0.05s both;
   transition: scale 1.4s var(--ease-out);
 }
@@ -2060,7 +2062,7 @@ figure picture {
 }
 .bread-photo {
   position: relative;
-  aspect-ratio: 5 / 4;
+  aspect-ratio: 6 / 5;
   overflow: clip;
   background: var(--paper-2);
 }
@@ -3830,9 +3832,6 @@ details[open] p {
     margin-top: 0;
     margin-bottom: 28px;
   }
-  .hero-photo-frame {
-    aspect-ratio: 16 / 10;
-  }
   .hero-photo .fig-bar {
     display: none;
   }
@@ -4348,9 +4347,6 @@ details[open] p {
   }
   .hero-photo {
     margin-bottom: 18px;
-  }
-  .hero-photo-frame {
-    aspect-ratio: 12 / 5;
   }
   .stub-row {
     flex-wrap: wrap;
