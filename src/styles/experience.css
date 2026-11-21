@@ -710,7 +710,8 @@
   aspect-ratio: 1;
   border-radius: 50%;
   overflow: clip;
-  background: var(--paper-2);
+  /* The mineral beige of the menu photos' background, while they load. */
+  background: #e3d8c5;
 }
 .bread-plate picture,
 .bread-plate img {
