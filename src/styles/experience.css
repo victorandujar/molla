@@ -1212,6 +1212,9 @@
 }
 /* El Pa fix, en una línia sota la comanda. */
 .order .fix {
+  /* Sense el fons ni el farciment de l'antiga secció del Pa fix. */
+  background: none;
+  padding-bottom: 0;
   display: flex;
   flex-wrap: wrap;
   gap: 6px 16px;
