@@ -7,15 +7,15 @@ const dir = process.argv[2] || 'assets/originals-breads';
 const photos = {
   sourdough: {
     file: 'masa-madre-crumb.jpg',
-    crop: { left: 220, top: 560, width: 2620, height: 2180 },
+    crop: { left: 0, top: 0, width: 1600, height: 1600 },
   },
   sourdoughLoaf: {
     file: 'masa-madre-top.webp',
-    crop: { left: 0, top: 640, width: 3072, height: 2800 },
+    crop: { left: 0, top: 0, width: 1600, height: 1600 },
   },
   wholegrain: {
     file: 'integral-crumb.jpg',
-    crop: { left: 60, top: 560, width: 1060, height: 740 },
+    crop: { left: 0, top: 0, width: 1600, height: 1600 },
   },
 };
 await mkdir('public/images', { recursive: true });
