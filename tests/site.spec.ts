@@ -1545,7 +1545,7 @@ test('breads with a filling and the milk loaf: menu in both languages, order and
   await page.goto('/');
   const ca = page.locator('#carta');
   for (const name of [
-    'Kalamata i romaní',
+    'Olives negres i romaní',
     'Nous',
     'Nous i taronja',
     'Xocolata',
@@ -1556,7 +1556,7 @@ test('breads with a filling and the milk loaf: menu in both languages, order and
   await page.goto('/es/');
   const menu = page.locator('#carta');
   for (const [name, price] of [
-    ['Kalamata y romero', '6,50€'],
+    ['Aceitunas negras y romero', '6,50€'],
     ['Nueces', '7,00€'],
     ['Nueces y naranja', '7,00€'],
     ['Chocolate', '8,00€'],
@@ -1581,7 +1581,7 @@ test('breads with a filling and the milk loaf: menu in both languages, order and
   await page.locator('input[name=pickup]').check();
   await page.locator('#reservation-form button[type=submit]').click();
   await expect(page.locator('#confirmation')).toContainText(
-    '1 × Kalamata y romero',
+    '1 × Aceitunas negras y romero',
   );
   await expect(page.locator('#confirmation')).toContainText('2 × Pan de leche');
   const d = await readData();
@@ -1605,7 +1605,7 @@ test('breads with a filling and the milk loaf: menu in both languages, order and
   await page.locator('form button[type=submit]').first().click();
   const stats = page.locator('.admin-stats').first();
   await expect(stats).toContainText('Pan de leche2');
-  await expect(stats).toContainText('Kalamata y romero1');
+  await expect(stats).toContainText('Aceitunas negras y romero1');
 });
 
 test('search snippets fit: titles up to 60 characters, descriptions up to 160', async ({

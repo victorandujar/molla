@@ -358,11 +358,11 @@ export const ui = {
         'La misma hogaza con olivas, nueces, chocolate o fruta seca. Y un pan de leche tierno para el desayuno.',
       extra: {
         kalamata: {
-          name: 'Kalamata y romero',
-          text: 'Olivas Kalamata y romero en la masa. Para el aperitivo o con un buen aceite.',
-          alt: 'Dos mitades de pan con olivas Kalamata negras y romero repartidos por la miga',
+          name: 'Aceitunas negras y romero',
+          text: 'Aceitunas negras y romero en la masa. Para el aperitivo o con un buen aceite.',
+          alt: 'Dos mitades de pan con aceitunas negras y romero repartidos por la miga',
           ingredients:
-            'Harina de trigo, agua, sal y masa madre, con olivas Kalamata y romero.',
+            'Harina de trigo, agua, sal y masa madre, con aceitunas negras y romero.',
         },
         nueces: {
           name: 'Nueces',
@@ -1007,11 +1007,11 @@ export const ui = {
         'El mateix pa amb olives, nous, xocolata o fruita seca. I un pa de llet tendre per esmorzar.',
       extra: {
         kalamata: {
-          name: 'Kalamata i romaní',
-          text: 'Olives Kalamata i romaní a la massa. Per a l’aperitiu o amb un bon oli.',
-          alt: 'Dues meitats de pa amb olives Kalamata negres i romaní repartits per la molla',
+          name: 'Olives negres i romaní',
+          text: 'Olives negres i romaní a la massa. Per a l’aperitiu o amb un bon oli.',
+          alt: 'Dues meitats de pa amb olives negres i romaní repartits per la molla',
           ingredients:
-            'Farina de blat, aigua, sal i massa mare, amb olives Kalamata i romaní.',
+            'Farina de blat, aigua, sal i massa mare, amb olives negres i romaní.',
         },
         nueces: {
           name: 'Nous',

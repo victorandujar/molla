@@ -194,12 +194,12 @@ export const products = [
   // (`extraBreads`).
   {
     id: 'kalamata',
-    name: 'Kalamata y romero',
-    subtitle: 'Hogaza con olivas Kalamata y romero',
+    name: 'Aceitunas negras y romero',
+    subtitle: 'Hogaza con aceitunas negras y romero',
     price: extraPrice('kalamata'),
     weight: '',
     ingredients:
-      'Harina de trigo, agua, sal y masa madre, con olivas Kalamata y romero.',
+      'Harina de trigo, agua, sal y masa madre, con aceitunas negras y romero.',
     allergens: 'Contiene trigo (gluten).',
     image: 'kalamata',
     available: true,
