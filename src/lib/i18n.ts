@@ -224,8 +224,7 @@ export const ui = {
     },
     catalog: {
       kicker: 'La carta',
-      h2a: 'La carta,',
-      h2b: 'hecha sin prisa.',
+      h2b: 'Hecha sin prisa.',
       details: 'Ingredientes y alérgenos',
       loaf: 'La de cada semana',
       sourdough: 'Masa madre',
@@ -353,7 +352,8 @@ export const ui = {
           'Harina integral, levadura, agua, harina de trigo de fuerza y sal.',
       },
       // Panes con relleno y pan de leche (config.ts, `extraBreads`).
-      extraH4: 'Con relleno, y pan de leche',
+      extraKicker: 'Con relleno',
+      extraH4: 'Seis más, mismo horno.',
       extraIntro:
         'La misma hogaza con olivas, nueces, chocolate o fruta seca. Y un pan de leche tierno para el desayuno.',
       extra: {
@@ -362,40 +362,41 @@ export const ui = {
           text: 'Olivas Kalamata y romero en la masa. Para el aperitivo o con un buen aceite.',
           alt: 'Dos mitades de pan con olivas Kalamata negras y romero repartidos por la miga',
           ingredients:
-            'Harina de trigo, agua, sal y fermento, con olivas Kalamata y romero.',
+            'Harina de trigo, agua, sal y masa madre, con olivas Kalamata y romero.',
         },
         nueces: {
           name: 'Nueces',
           text: 'Nueces en toda la miga. Con queso, de lujo.',
           alt: 'Dos mitades de pan con trozos de nuez en la miga',
-          ingredients: 'Harina de trigo, agua, sal y fermento, con nueces.',
+          ingredients: 'Harina de trigo, agua, sal y masa madre, con nueces.',
         },
         'nueces-naranja': {
           name: 'Nueces y naranja',
           text: 'Nueces y un toque de naranja. Perfecto para desayunar.',
           alt: 'Dos mitades de pan con nueces y naranja, miga alveolada',
           ingredients:
-            'Harina de trigo, agua, sal y fermento, con nueces y naranja.',
+            'Harina de trigo, agua, sal y masa madre, con nueces y naranja.',
         },
         chocolate: {
           name: 'Chocolate',
           text: 'Vetas de chocolate fundido dentro de la miga.',
           alt: 'Dos mitades de pan con vetas de chocolate en la miga',
-          ingredients: 'Harina de trigo, agua, sal y fermento, con chocolate.',
+          ingredients:
+            'Harina de trigo, agua, sal y masa madre, con chocolate.',
         },
         'pasas-pistachos': {
           name: 'Pasas, arándanos y pistachos',
           text: 'Pasas, arándanos y pistachos en cada rebanada.',
           alt: 'Dos mitades de pan con pasas, arándanos rojos y pistachos verdes en la miga',
           ingredients:
-            'Harina de trigo, agua, sal y fermento, con pasas, arándanos y pistachos.',
+            'Harina de trigo, agua, sal y masa madre, con pasas, arándanos y pistachos.',
         },
         'pan-de-leche': {
           name: 'Pan de leche',
-          text: 'Miga tierna y esponjosa. Una pieza grande: casi 1 kg de masa.',
+          text: 'Con poolish. Miga tierna y esponjosa, y una pieza grande: casi 1 kg de masa.',
           alt: 'Dos mitades de pan de leche con la miga blanca y esponjosa',
           ingredients:
-            'Harina de trigo, leche, mantequilla, azúcar, huevo, levadura y sal.',
+            'Harina de trigo, poolish, leche, mantequilla, azúcar, huevo y sal.',
         },
       } satisfies Record<
         ExtraBreadId,
@@ -813,8 +814,7 @@ export const ui = {
     },
     catalog: {
       kicker: 'La carta',
-      h2a: 'La carta,',
-      h2b: 'feta sense pressa.',
+      h2b: 'Feta sense pressa.',
       details: 'Ingredients i al·lèrgens',
       loaf: 'El de cada setmana',
       sourdough: 'Massa mare',
@@ -937,7 +937,8 @@ export const ui = {
           'Farina integral, llevat, aigua, farina de blat de força i sal.',
       },
       // Pans amb farciment i pa de llet (config.ts, `extraBreads`).
-      extraH4: 'Amb farciment, i pa de llet',
+      extraKicker: 'Amb farciment',
+      extraH4: 'Sis més, el mateix forn.',
       extraIntro:
         'El mateix pa amb olives, nous, xocolata o fruita seca. I un pa de llet tendre per esmorzar.',
       extra: {
@@ -946,40 +947,40 @@ export const ui = {
           text: 'Olives Kalamata i romaní a la massa. Per a l’aperitiu o amb un bon oli.',
           alt: 'Dues meitats de pa amb olives Kalamata negres i romaní repartits per la molla',
           ingredients:
-            'Farina de blat, aigua, sal i ferment, amb olives Kalamata i romaní.',
+            'Farina de blat, aigua, sal i massa mare, amb olives Kalamata i romaní.',
         },
         nueces: {
           name: 'Nous',
           text: 'Nous per tota la molla. Amb formatge, de luxe.',
           alt: 'Dues meitats de pa amb trossos de nou a la molla',
-          ingredients: 'Farina de blat, aigua, sal i ferment, amb nous.',
+          ingredients: 'Farina de blat, aigua, sal i massa mare, amb nous.',
         },
         'nueces-naranja': {
           name: 'Nous i taronja',
           text: 'Nous i un toc de taronja. Perfecte per esmorzar.',
           alt: 'Dues meitats de pa amb nous i taronja, molla alveolada',
           ingredients:
-            'Farina de blat, aigua, sal i ferment, amb nous i taronja.',
+            'Farina de blat, aigua, sal i massa mare, amb nous i taronja.',
         },
         chocolate: {
           name: 'Xocolata',
           text: 'Vetes de xocolata fosa dins de la molla.',
           alt: 'Dues meitats de pa amb vetes de xocolata a la molla',
-          ingredients: 'Farina de blat, aigua, sal i ferment, amb xocolata.',
+          ingredients: 'Farina de blat, aigua, sal i massa mare, amb xocolata.',
         },
         'pasas-pistachos': {
           name: 'Panses, nabius i festucs',
           text: 'Panses, nabius i festucs a cada llesca.',
           alt: 'Dues meitats de pa amb panses, nabius vermells i festucs verds a la molla',
           ingredients:
-            'Farina de blat, aigua, sal i ferment, amb panses, nabius i festucs.',
+            'Farina de blat, aigua, sal i massa mare, amb panses, nabius i festucs.',
         },
         'pan-de-leche': {
           name: 'Pa de llet',
-          text: 'Molla tendra i esponjosa. Una peça grossa: gairebé 1 kg de massa.',
+          text: 'Amb poolish. Molla tendra i esponjosa, i una peça grossa: gairebé 1 kg de massa.',
           alt: 'Dues meitats de pa de llet amb la molla blanca i esponjosa',
           ingredients:
-            'Farina de blat, llet, mantega, sucre, ou, llevat i sal.',
+            'Farina de blat, poolish, llet, mantega, sucre, ou i sal.',
         },
       } satisfies Record<
         ExtraBreadId,

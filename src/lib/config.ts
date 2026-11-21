@@ -199,7 +199,7 @@ export const products = [
     price: extraPrice('kalamata'),
     weight: '',
     ingredients:
-      'Harina de trigo, agua, sal y fermento, con olivas Kalamata y romero.',
+      'Harina de trigo, agua, sal y masa madre, con olivas Kalamata y romero.',
     allergens: 'Contiene trigo (gluten).',
     image: 'kalamata',
     available: true,
@@ -210,7 +210,7 @@ export const products = [
     subtitle: 'Hogaza con nueces',
     price: extraPrice('nueces'),
     weight: '',
-    ingredients: 'Harina de trigo, agua, sal y fermento, con nueces.',
+    ingredients: 'Harina de trigo, agua, sal y masa madre, con nueces.',
     allergens: 'Contiene trigo (gluten) y frutos de cáscara (nueces).',
     image: 'nueces',
     available: true,
@@ -221,7 +221,8 @@ export const products = [
     subtitle: 'Hogaza con nueces y naranja',
     price: extraPrice('nueces-naranja'),
     weight: '',
-    ingredients: 'Harina de trigo, agua, sal y fermento, con nueces y naranja.',
+    ingredients:
+      'Harina de trigo, agua, sal y masa madre, con nueces y naranja.',
     allergens: 'Contiene trigo (gluten) y frutos de cáscara (nueces).',
     image: 'nueces-naranja',
     available: true,
@@ -232,7 +233,7 @@ export const products = [
     subtitle: 'Hogaza con chocolate',
     price: extraPrice('chocolate'),
     weight: '',
-    ingredients: 'Harina de trigo, agua, sal y fermento, con chocolate.',
+    ingredients: 'Harina de trigo, agua, sal y masa madre, con chocolate.',
     allergens:
       'Contiene trigo (gluten). El chocolate puede contener leche y soja.',
     image: 'chocolate',
@@ -245,7 +246,7 @@ export const products = [
     price: extraPrice('pasas-pistachos'),
     weight: '',
     ingredients:
-      'Harina de trigo, agua, sal y fermento, con pasas, arándanos y pistachos.',
+      'Harina de trigo, agua, sal y masa madre, con pasas, arándanos y pistachos.',
     allergens: 'Contiene trigo (gluten) y frutos de cáscara (pistachos).',
     image: 'pasas-pistachos',
     available: true,
@@ -257,7 +258,7 @@ export const products = [
     price: extraPrice('pan-de-leche'),
     weight: '981 g de masa',
     ingredients:
-      'Harina de trigo, leche, mantequilla, azúcar, huevo, levadura y sal.',
+      'Harina de trigo, poolish, leche, mantequilla, azúcar, huevo y sal.',
     allergens: 'Contiene trigo (gluten), leche y huevo.',
     image: 'pan-de-leche',
     available: true,
