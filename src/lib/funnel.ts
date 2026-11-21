@@ -3,7 +3,7 @@
 // or overlapping cron runs never send the same email twice.
 import { randomBytes, randomUUID } from 'node:crypto';
 import { demo, sql, useDemo } from './store';
-import { referralGift } from './config';
+import { breadIds, referralGift } from './config';
 import { referralCode, type Lang, type Order } from './domain';
 
 export type Recipient = { email: string; lang: Lang; token: string };
@@ -165,7 +165,7 @@ export async function weeklyFigures(days = 7) {
   const bakes = await sql!`
     SELECT b.number, b.pickup_date, b.capacity,
       COALESCE((SELECT SUM(i.quantity) FROM orders o JOIN order_items i ON i.order_id=o.id
-        WHERE o.bake_id=b.id AND o.status!='CANCELLED' AND i.product_id IN ('clasica','masa-madre','integral')),0)::int AS reserved
+        WHERE o.bake_id=b.id AND o.status!='CANCELLED' AND i.product_id IN ${sql!(breadIds)}),0)::int AS reserved
     FROM bakes b WHERE b.pickup_date >= ${from}::date - 1 AND b.pickup_date < now() + interval '7 days'
     ORDER BY b.pickup_date`;
   const [lists] = await sql!`

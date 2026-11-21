@@ -116,6 +116,8 @@ const broadcastCopy = {
     loaf: 'Hogaza de poolish · 750–850 g',
     sourdough: 'Masa madre',
     wholegrain: 'Integral 60 %',
+    filled: 'Con relleno: olivas, nueces, chocolate o fruta seca · desde',
+    milkBread: 'Pan de leche',
     banana: 'Banana bread · entero o medio',
     pastries: 'Croissant · Pain au chocolat',
     delivery: 'Entrega',
@@ -143,6 +145,8 @@ const broadcastCopy = {
     loaf: 'Pa de poolish · 750–850 g',
     sourdough: 'Massa mare',
     wholegrain: 'Integral 60 %',
+    filled: 'Amb farciment: olives, nous, xocolata o fruita seca · des de',
+    milkBread: 'Pa de llet',
     banana: 'Banana bread · sencer o mig',
     pastries: 'Croissant · Pain au chocolat',
     delivery: 'Entrega',
@@ -215,6 +219,7 @@ export function broadcastEmail(
       [
         `${esc(t.loaf)} · <strong>${price('clasica')}</strong>`,
         `${esc(t.sourdough)} · <strong>${price('masa-madre')}</strong> · ${esc(t.wholegrain)} · <strong>${price('integral')}</strong>`,
+        `${esc(t.filled)} <strong>${price('kalamata')}</strong> · ${esc(t.milkBread)} · <strong>${price('pan-de-leche')}</strong>`,
         `${esc(t.banana)} · <strong>${price('banana')}</strong> / ${price('banana-mitad')}`,
         `${esc(t.pastries)} · <strong>${price('croissant')}</strong> / ${price('pain-au-chocolat')}`,
       ].join('<br>'),
@@ -247,6 +252,7 @@ ${text}
 ${t.menu}:
 - ${t.loaf}: ${price('clasica')}
 - ${t.sourdough}: ${price('masa-madre')} · ${t.wholegrain}: ${price('integral')}
+- ${t.filled} ${price('kalamata')} · ${t.milkBread}: ${price('pan-de-leche')}
 - ${t.banana}: ${price('banana')} / ${price('banana-mitad')}
 - ${t.pastries}: ${price('croissant')} / ${price('pain-au-chocolat')}
 

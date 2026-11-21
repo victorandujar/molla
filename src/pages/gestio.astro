@@ -39,6 +39,8 @@ import {
   STANDING_GOAL_LOAVES,
   BANANA_HALVES_PER_BAKE,
   PASTRY_UNITS_PER_BAKE,
+  extraBreadIds,
+  productById,
 } from '../lib/config';
 import { pickupDay } from '../lib/email-templates';
 import { routes, standingFrequency, ui } from '../lib/i18n';
@@ -361,7 +363,7 @@ import {
         )}
         <dl class="admin-stats">
           <div>
-            <dt>Pan reservado (los tres)</dt>
+            <dt>Pan reservado (todos)</dt>
             <dd>
               {data.bake.reserved} / {data.bake.capacity}
             </dd>
@@ -378,6 +380,12 @@ import {
             <dt>Integral 60 %</dt>
             <dd>{pieces(live, 'integral')}</dd>
           </div>
+          {extraBreadIds.map((id) => (
+            <div>
+              <dt>{productById(id)!.name}</dt>
+              <dd>{pieces(live, id)}</dd>
+            </div>
+          ))}
           <div>
             <dt>Banana bread</dt>
             <dd>
@@ -631,6 +639,20 @@ import {
                     value="0"
                   />
                 </div>
+                {extraBreadIds.map((id) => (
+                  <div class="field">
+                    <label for={`m-${id}`}>{productById(id)!.name}</label>
+                    <input
+                      id={`m-${id}`}
+                      name={id}
+                      type="number"
+                      inputmode="numeric"
+                      min="0"
+                      max="4"
+                      value="0"
+                    />
+                  </div>
+                ))}
                 <div class="field">
                   <label for="m-banana">Banana bread (mitades)</label>
                   <input

@@ -15,7 +15,13 @@ import {
   waitlistConfirmation,
 } from '../src/lib/email-templates';
 import { madridParts, ui } from '../src/lib/i18n';
-import { WEEKLY_LOAF_PRICE_CENTS, googleReviews } from '../src/lib/config';
+import {
+  WEEKLY_LOAF_PRICE_CENTS,
+  googleReviews,
+  extraBreads,
+  breadIds,
+  productById,
+} from '../src/lib/config';
 import { isMessageKey } from '../src/lib/messages';
 import {
   bakeState,
@@ -778,4 +784,49 @@ test('three breads share the oven: sourdough and 60 % wholegrain count as loaves
     pastryReserved: 0,
   });
   assert.deepEqual(stock.bread, { level: 'ok', max: 6 });
+});
+
+test('breads with a filling and the milk loaf count as loaves in the same oven', () => {
+  const order = reservationSchema.parse({
+    ...input,
+    quantity: 1,
+    kalamata: 1,
+    'nueces-naranja': 2,
+    'pan-de-leche': 1,
+  });
+  assert.equal(loavesOf(order), 5);
+  // One of them alone is a valid order.
+  assert.equal(
+    reservationSchema.safeParse({ ...input, quantity: 0, chocolate: 1 })
+      .success,
+    true,
+  );
+  // At most 4 of each and 6 loaves in all per order, whatever the bread.
+  assert.equal(
+    reservationSchema.safeParse({ ...input, quantity: 0, nueces: 5 }).success,
+    false,
+  );
+  assert.equal(
+    reservationSchema.safeParse({
+      ...input,
+      quantity: 2,
+      sourdough: 2,
+      'pasas-pistachos': 3,
+    }).success,
+    false,
+  );
+  // Prices as on the price list.
+  assert.deepEqual(
+    extraBreads.map((b) => [b.id, productById(b.id)!.price]),
+    [
+      ['kalamata', 650],
+      ['nueces', 700],
+      ['nueces-naranja', 700],
+      ['chocolate', 800],
+      ['pasas-pistachos', 900],
+      ['pan-de-leche', 850],
+    ],
+  );
+  // Every one of them takes a loaf's room in the oven.
+  for (const b of extraBreads) assert.ok(breadIds.includes(b.id));
 });

@@ -13,6 +13,7 @@ import {
   LOAF_MAX_PER_ORDER,
   standingVoucher,
   googleReviews,
+  extraBreadIds,
 } from '../lib/config';
 import { ui, routes, dayFormat, type Lang } from '../lib/i18n';
 import { currentBake, type ActiveBake } from '../lib/store';
@@ -96,7 +97,24 @@ const breads = [
     text: t.breads.items.wholegrain,
     shots: [{ name: 'wholegrain', alt: t.breads.photos.wholegrain }],
   },
-] as const;
+];
+// Breads with a filling and the milk loaf: same cards, same oven. Their key
+// is the product id, which is also the order form's field.
+const extras = extraBreadIds.map((id) => {
+  const e = t.breads.extra[id];
+  return {
+    key: id,
+    field: id,
+    product: productById(id)!,
+    name: e.name,
+    text: e.text,
+    shots: [{ name: id, alt: e.alt }],
+  };
+});
+const breadGroups = [
+  { id: 'base', items: breads },
+  { id: 'extra', items: extras },
+];
 const bananaWhole = productById('banana')!;
 const bananaHalf = productById('banana-mitad')!;
 // Levels, not counts: the page never says how many are left.
@@ -231,6 +249,15 @@ const jsonLd = [
     image: [abs('/images/loaves-1100.webp')],
     brand: { '@type': 'Brand', name: brand.name },
     offers: offer(b.price, open && stock.bread.max > 0),
+  })),
+  ...extras.map((b) => ({
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: b.name,
+    description: `${b.text} ${t.loaf.ingredients}: ${t.breads.extra[b.key].ingredients}`,
+    image: [abs(`/images/${b.key}-1100.webp`)],
+    brand: { '@type': 'Brand', name: brand.name },
+    offers: offer(b.product.price, open && stock.bread.max > 0),
   })),
   ...pastries.map((p) => ({
     '@context': 'https://schema.org',
@@ -441,70 +468,90 @@ const jsonLd = [
               <h3 id="loaf-title">{t.breads.h3}</h3>
               <p class="dish-desc">{t.breads.intro}</p>
             </header>
-            <ul class="bread-list">
-              {breads.map((b) => (
-                <li class="bread-card" data-reveal>
-                  <div
-                    class:list={[
-                      'bread-photo',
-                      { 'has-cut': b.shots.length > 1 },
-                    ]}
-                    data-bread-photo
-                  >
-                    {b.shots.map((s) => (
-                      <Photo
-                        name={s.name}
-                        alt={s.alt}
-                        sizes="(max-width: 700px) calc(100vw - 40px), (max-width: 960px) 45vw, 30vw"
-                      />
-                    ))}
-                  </div>
-                  <div class="bread-head">
-                    <h4>{b.name}</h4>
-                    <p class="bread-price">
-                      <span aria-hidden="true">{tight(b.product.price)}</span>
-                      <span class="visually-hidden">
-                        {money(b.product.price)} · {t.breads.unit}
-                      </span>
-                    </p>
-                  </div>
-                  <p class="bread-text">{b.text}</p>
-                  {open ? (
-                    <div class="dish-buy bread-buy" data-buy={b.key}>
-                      <button
-                        type="button"
-                        class="button"
-                        data-add={b.key}
-                        disabled={breadMax === 0}
-                        aria-label={t.breads.more(b.name)}
+            {breadGroups.map((group) => (
+              <>
+                {group.id === 'extra' && (
+                  <header class="breads-subhead" data-reveal>
+                    <h4 id="extra-breads-title">{t.breads.extraH4}</h4>
+                    <p class="dish-desc">{t.breads.extraIntro}</p>
+                  </header>
+                )}
+                <ul
+                  class="bread-list"
+                  aria-labelledby={
+                    group.id === 'extra' ? 'extra-breads-title' : undefined
+                  }
+                >
+                  {group.items.map((b) => (
+                    <li class="bread-card" data-reveal>
+                      <div
+                        class:list={[
+                          'bread-photo',
+                          { 'has-cut': b.shots.length > 1 },
+                        ]}
+                        data-bread-photo
                       >
-                        {t.breads.add}
-                        <span class="button-plus" aria-hidden="true">
-                          +
-                        </span>
-                      </button>
-                      <div class="mini-stepper" data-mini={b.key} hidden>
-                        <button
-                          type="button"
-                          data-sub={b.key}
-                          aria-label={t.breads.less(b.name)}
-                        >
-                          −
-                        </button>
-                        <output data-count={b.key} aria-live="polite"></output>
-                        <button
-                          type="button"
-                          data-add={b.key}
-                          aria-label={t.breads.more(b.name)}
-                        >
-                          +
-                        </button>
+                        {b.shots.map((s) => (
+                          <Photo
+                            name={s.name}
+                            alt={s.alt}
+                            sizes="(max-width: 700px) calc(100vw - 40px), (max-width: 960px) 45vw, 30vw"
+                          />
+                        ))}
                       </div>
-                    </div>
-                  ) : null}
-                </li>
-              ))}
-            </ul>
+                      <div class="bread-head">
+                        <h4>{b.name}</h4>
+                        <p class="bread-price">
+                          <span aria-hidden="true">
+                            {tight(b.product.price)}
+                          </span>
+                          <span class="visually-hidden">
+                            {money(b.product.price)} · {t.breads.unit}
+                          </span>
+                        </p>
+                      </div>
+                      <p class="bread-text">{b.text}</p>
+                      {open ? (
+                        <div class="dish-buy bread-buy" data-buy={b.key}>
+                          <button
+                            type="button"
+                            class="button"
+                            data-add={b.key}
+                            disabled={breadMax === 0}
+                            aria-label={t.breads.more(b.name)}
+                          >
+                            {t.breads.add}
+                            <span class="button-plus" aria-hidden="true">
+                              +
+                            </span>
+                          </button>
+                          <div class="mini-stepper" data-mini={b.key} hidden>
+                            <button
+                              type="button"
+                              data-sub={b.key}
+                              aria-label={t.breads.less(b.name)}
+                            >
+                              −
+                            </button>
+                            <output
+                              data-count={b.key}
+                              aria-live="polite"
+                            ></output>
+                            <button
+                              type="button"
+                              data-add={b.key}
+                              aria-label={t.breads.more(b.name)}
+                            >
+                              +
+                            </button>
+                          </div>
+                        </div>
+                      ) : null}
+                    </li>
+                  ))}
+                </ul>
+              </>
+            ))}
             <div class="breads-foot">
               {!open && (
                 <a class="button button-ghost" href="#avisame">
@@ -526,9 +573,17 @@ const jsonLd = [
                     <dt>{t.catalog.wholegrain}</dt>
                     <dd>{t.breads.details.wholegrain}</dd>
                   </div>
+                  {extras.map((b) => (
+                    <div>
+                      <dt>{b.name}</dt>
+                      <dd>{t.breads.extra[b.key].ingredients}</dd>
+                    </div>
+                  ))}
                   <div>
                     <dt>{t.loaf.allergens}</dt>
-                    <dd>{t.breads.allergens}</dd>
+                    <dd>
+                      {t.breads.allergens} {t.breads.extraAllergens}
+                    </dd>
                   </div>
                   <div>
                     <dt>{t.loaf.keeps}</dt>
@@ -968,6 +1023,53 @@ const jsonLd = [
                     </button>
                   </div>
                 </div>
+                {extras.map((b) => (
+                  <div class="order-line" data-line={b.key}>
+                    <label for={`${b.key}-view`}>
+                      <span class="line-name">{b.name}</span>
+                      <small>
+                        {money(b.product.price)} · {t.reserve.qtyMax}
+                      </small>
+                    </label>
+                    <div class="stepper">
+                      <button
+                        type="button"
+                        data-step="-1"
+                        data-target={b.key}
+                        aria-label={t.breads.less(b.name)}
+                      >
+                        −
+                      </button>
+                      <output
+                        id={`${b.key}-view`}
+                        class="stepper-view"
+                        aria-live="polite"
+                      >
+                        0
+                      </output>
+                      <input
+                        id={b.key}
+                        name={b.key}
+                        type="hidden"
+                        value="0"
+                        data-max={breadMax}
+                        data-pool="bread"
+                        data-extra-bread
+                        data-price={b.product.price}
+                        data-name={b.name}
+                      />
+                      <button
+                        type="button"
+                        data-step="1"
+                        data-target={b.key}
+                        aria-label={t.breads.more(b.name)}
+                        disabled={breadMax === 0}
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+                ))}
                 <div class="order-line" data-line="banana">
                   <label for="banana-view">
                     <span class="line-name">{t.reserve.bananaQty}</span>

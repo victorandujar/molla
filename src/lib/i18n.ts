@@ -1,4 +1,4 @@
-import { bake, brand, money, productById } from './config';
+import { bake, brand, money, productById, type ExtraBreadId } from './config';
 import { deliveryWindow, eveningWindow, windowHours } from './delivery';
 import type { Lang } from './messages';
 export type { Lang };
@@ -324,10 +324,10 @@ export const ui = {
       ask: 'Pedir banana bread',
       notify: 'Avísame cuando haya',
     },
-    // La carta de pan: tres panes en una lista, con una sola foto.
+    // La carta de pan: cada pan en su tarjeta, con su foto.
     breads: {
       kicker: 'El pan',
-      h3: 'Tres panes, una hornada.',
+      h3: 'Nueve panes, una hornada.',
       intro:
         'Elige uno o combínalos: salen del mismo horno el miércoles y el sábado.',
       from: 'desde',
@@ -339,9 +339,12 @@ export const ui = {
       },
       photos: {
         loaf: 'Media hogaza clásica en la mano, con la miga abierta a la vista',
-        sourdough: 'Dos mitades de pan de masa madre apiladas, con la miga alveolada',
-        wholegrain: 'Dos mitades de pan integral apiladas sobre una tabla, miga tostada y apretada',
-        sourdoughLoaf: 'Hogaza de masa madre vista desde arriba, con el greñado abierto y dorado',
+        sourdough:
+          'Dos mitades de pan de masa madre apiladas, con la miga alveolada',
+        wholegrain:
+          'Dos mitades de pan integral apiladas sobre una tabla, miga tostada y apretada',
+        sourdoughLoaf:
+          'Hogaza de masa madre vista desde arriba, con el greñado abierto y dorado',
       },
       details: {
         sourdough:
@@ -349,6 +352,57 @@ export const ui = {
         wholegrain:
           'Harina integral, levadura, agua, harina de trigo de fuerza y sal.',
       },
+      // Panes con relleno y pan de leche (config.ts, `extraBreads`).
+      extraH4: 'Con relleno, y pan de leche',
+      extraIntro:
+        'La misma hogaza con olivas, nueces, chocolate o fruta seca. Y un pan de leche tierno para el desayuno.',
+      extra: {
+        kalamata: {
+          name: 'Kalamata y romero',
+          text: 'Olivas Kalamata y romero en la masa. Para el aperitivo o con un buen aceite.',
+          alt: 'Dos mitades de pan con olivas Kalamata negras y romero repartidos por la miga',
+          ingredients:
+            'Harina de trigo, agua, sal y fermento, con olivas Kalamata y romero.',
+        },
+        nueces: {
+          name: 'Nueces',
+          text: 'Nueces en toda la miga. Con queso, de lujo.',
+          alt: 'Dos mitades de pan con trozos de nuez en la miga',
+          ingredients: 'Harina de trigo, agua, sal y fermento, con nueces.',
+        },
+        'nueces-naranja': {
+          name: 'Nueces y naranja',
+          text: 'Nueces y un toque de naranja. Perfecto para desayunar.',
+          alt: 'Dos mitades de pan con nueces y naranja, miga alveolada',
+          ingredients:
+            'Harina de trigo, agua, sal y fermento, con nueces y naranja.',
+        },
+        chocolate: {
+          name: 'Chocolate',
+          text: 'Vetas de chocolate fundido dentro de la miga.',
+          alt: 'Dos mitades de pan con vetas de chocolate en la miga',
+          ingredients: 'Harina de trigo, agua, sal y fermento, con chocolate.',
+        },
+        'pasas-pistachos': {
+          name: 'Pasas, arándanos y pistachos',
+          text: 'Pasas, arándanos y pistachos en cada rebanada.',
+          alt: 'Dos mitades de pan con pasas, arándanos rojos y pistachos verdes en la miga',
+          ingredients:
+            'Harina de trigo, agua, sal y fermento, con pasas, arándanos y pistachos.',
+        },
+        'pan-de-leche': {
+          name: 'Pan de leche',
+          text: 'Miga tierna y esponjosa. Una pieza grande: casi 1 kg de masa.',
+          alt: 'Dos mitades de pan de leche con la miga blanca y esponjosa',
+          ingredients:
+            'Harina de trigo, leche, mantequilla, azúcar, huevo, levadura y sal.',
+        },
+      } satisfies Record<
+        ExtraBreadId,
+        { name: string; text: string; alt: string; ingredients: string }
+      >,
+      extraAllergens:
+        'Nueces y pistachos: frutos de cáscara. El chocolate puede contener leche y soja. El pan de leche lleva leche y huevo.',
       allergens:
         'Contienen trigo (gluten). Si tienes otra alergia, pregúntame antes de reservar.',
       add: 'Añadir',
@@ -857,7 +911,7 @@ export const ui = {
     },
     breads: {
       kicker: 'El pa',
-      h3: 'Tres pans, una fornada.',
+      h3: 'Nou pans, una fornada.',
       intro:
         'Tria’n un o combina’ls: surten del mateix forn el dimecres i el dissabte.',
       from: 'des de',
@@ -869,9 +923,12 @@ export const ui = {
       },
       photos: {
         loaf: 'Mig pa clàssic a la mà, amb la molla oberta a la vista',
-        sourdough: 'Dues meitats de pa de massa mare apilades, amb la molla alveolada',
-        wholegrain: 'Dues meitats de pa integral apilades sobre una taula, molla torrada i atapeïda',
-        sourdoughLoaf: 'Pa de massa mare vist des de dalt, amb el tall obert i daurat',
+        sourdough:
+          'Dues meitats de pa de massa mare apilades, amb la molla alveolada',
+        wholegrain:
+          'Dues meitats de pa integral apilades sobre una taula, molla torrada i atapeïda',
+        sourdoughLoaf:
+          'Pa de massa mare vist des de dalt, amb el tall obert i daurat',
       },
       details: {
         sourdough:
@@ -879,6 +936,57 @@ export const ui = {
         wholegrain:
           'Farina integral, llevat, aigua, farina de blat de força i sal.',
       },
+      // Pans amb farciment i pa de llet (config.ts, `extraBreads`).
+      extraH4: 'Amb farciment, i pa de llet',
+      extraIntro:
+        'El mateix pa amb olives, nous, xocolata o fruita seca. I un pa de llet tendre per esmorzar.',
+      extra: {
+        kalamata: {
+          name: 'Kalamata i romaní',
+          text: 'Olives Kalamata i romaní a la massa. Per a l’aperitiu o amb un bon oli.',
+          alt: 'Dues meitats de pa amb olives Kalamata negres i romaní repartits per la molla',
+          ingredients:
+            'Farina de blat, aigua, sal i ferment, amb olives Kalamata i romaní.',
+        },
+        nueces: {
+          name: 'Nous',
+          text: 'Nous per tota la molla. Amb formatge, de luxe.',
+          alt: 'Dues meitats de pa amb trossos de nou a la molla',
+          ingredients: 'Farina de blat, aigua, sal i ferment, amb nous.',
+        },
+        'nueces-naranja': {
+          name: 'Nous i taronja',
+          text: 'Nous i un toc de taronja. Perfecte per esmorzar.',
+          alt: 'Dues meitats de pa amb nous i taronja, molla alveolada',
+          ingredients:
+            'Farina de blat, aigua, sal i ferment, amb nous i taronja.',
+        },
+        chocolate: {
+          name: 'Xocolata',
+          text: 'Vetes de xocolata fosa dins de la molla.',
+          alt: 'Dues meitats de pa amb vetes de xocolata a la molla',
+          ingredients: 'Farina de blat, aigua, sal i ferment, amb xocolata.',
+        },
+        'pasas-pistachos': {
+          name: 'Panses, nabius i festucs',
+          text: 'Panses, nabius i festucs a cada llesca.',
+          alt: 'Dues meitats de pa amb panses, nabius vermells i festucs verds a la molla',
+          ingredients:
+            'Farina de blat, aigua, sal i ferment, amb panses, nabius i festucs.',
+        },
+        'pan-de-leche': {
+          name: 'Pa de llet',
+          text: 'Molla tendra i esponjosa. Una peça grossa: gairebé 1 kg de massa.',
+          alt: 'Dues meitats de pa de llet amb la molla blanca i esponjosa',
+          ingredients:
+            'Farina de blat, llet, mantega, sucre, ou, llevat i sal.',
+        },
+      } satisfies Record<
+        ExtraBreadId,
+        { name: string; text: string; alt: string; ingredients: string }
+      >,
+      extraAllergens:
+        'Nous i festucs: fruits de closca. La xocolata pot contenir llet i soja. El pa de llet porta llet i ou.',
       allergens:
         'Contenen blat (gluten). Si tens una altra al·lèrgia, pregunta’m abans de reservar.',
       add: 'Afegir',

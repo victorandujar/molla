@@ -8,6 +8,8 @@ import {
   LOAF_MAX_PER_ORDER,
   PASTRY_MAX_PER_ORDER,
   PASTRY_UNITS_PER_BAKE,
+  extraBreadIds,
+  type ExtraBreadId,
 } from './config';
 export type { Lang };
 const lang = z.enum(['es', 'ca']).default('es');
@@ -46,6 +48,8 @@ const deliveryFields = {
   town: z.string().default(''),
   address: z.string().trim().max(160, 'address').default(''),
 };
+const loafField = () =>
+  z.coerce.number().int().min(0).max(LOAF_MAX_PER_ORDER).default(0);
 export const reservationSchema = z
   .object({
     requestId: z.uuid(),
@@ -78,6 +82,14 @@ export const reservationSchema = z
       .min(0)
       .max(LOAF_MAX_PER_ORDER)
       .default(0),
+    // Breads with a filling and the milk loaf (config.ts, `extraBreads`):
+    // loaves too, in the same oven. One field per bread, named by its id.
+    kalamata: loafField(),
+    nueces: loafField(),
+    'nueces-naranja': loafField(),
+    chocolate: loafField(),
+    'pasas-pistachos': loafField(),
+    'pan-de-leche': loafField(),
     // Banana bread counted in halves: 1 = half, 2 = whole, 3 = whole + half…
     banana: z.coerce.number().int().min(0).max(4).default(0),
     // Pastries by the unit; both share the bake's pastry quota.
@@ -123,12 +135,20 @@ export const reservationSchema = z
   })
   .transform((o) => (o.email ? o : { ...o, email: phoneKey(o.phone) }));
 // Loaves of every bread in an order: they all take room in the same oven.
-export function loavesOf(o: {
-  quantity: number;
-  sourdough?: number;
-  wholegrain?: number;
-}) {
-  return o.quantity + (o.sourdough || 0) + (o.wholegrain || 0);
+export type ExtraBreadCounts = Partial<Record<ExtraBreadId, number>>;
+export function loavesOf(
+  o: {
+    quantity: number;
+    sourdough?: number;
+    wholegrain?: number;
+  } & ExtraBreadCounts,
+) {
+  return (
+    o.quantity +
+    (o.sourdough || 0) +
+    (o.wholegrain || 0) +
+    extraBreadIds.reduce((n, id) => n + (o[id] || 0), 0)
+  );
 }
 // A standing order: the same bread every week (or every other week).
 export const subscriptionSchema = z
@@ -244,14 +264,15 @@ export const waitlistSchema = z.object({
 // other breads out.
 export type ReservationInput = Omit<
   z.infer<typeof reservationSchema>,
-  'notes' | 'sourdough' | 'wholegrain' | 'slot'
-> & {
-  notes?: string;
-  sourdough?: number;
-  wholegrain?: number;
-  // Absent means midday (the "pa fix" and every Saturday).
-  slot?: DeliverySlot;
-};
+  'notes' | 'sourdough' | 'wholegrain' | 'slot' | ExtraBreadId
+> &
+  ExtraBreadCounts & {
+    notes?: string;
+    sourdough?: number;
+    wholegrain?: number;
+    // Absent means midday (the "pa fix" and every Saturday).
+    slot?: DeliverySlot;
+  };
 export type BakeState =
   'UPCOMING' | 'OPEN' | 'SOLD_OUT' | 'CLOSED' | 'COMPLETED';
 export function bakeState(
