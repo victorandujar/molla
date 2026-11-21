@@ -486,8 +486,28 @@ function sentence() {
   update();
 }
 
+/* ---- La tira de la comanda: cada peça diu quantes en portes ---- */
+function picker() {
+  const form = $<HTMLFormElement>('#reservation-form');
+  const chips = $$<HTMLElement>('[data-chip]', form ?? document);
+  if (!form || !chips.length) return;
+  const field = (key: string) =>
+    $<HTMLInputElement>(`[name="${key === 'loaf' ? 'quantity' : key}"]`, form);
+  const update = () => {
+    for (const chip of chips) {
+      const n = Number(field(chip.dataset.chip!)?.value || 0);
+      chip.classList.toggle('has', n > 0);
+      const badge = $('.chip-n', chip);
+      if (badge) badge.textContent = n > 0 ? `×${n}` : '';
+    }
+  };
+  addEventListener('molla:cart', update);
+  update();
+}
+
 alive();
 ferment();
 cut();
 counter();
 sentence();
+picker();

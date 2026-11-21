@@ -453,6 +453,7 @@ export const ui = {
         email: 'Si quieres el tiquet por correo:',
         total: 'Total · pagas al recibirlo',
         notify: 'Avísame de la próxima hornada:',
+        pick: 'Añade:',
       },
       hint: 'Toca la masa',
       ferment: {
@@ -1098,6 +1099,7 @@ export const ui = {
         email: 'Si vols el tiquet per correu:',
         total: 'Total · pagues en rebre’l',
         notify: 'Avisa’m de la propera fornada:',
+        pick: 'Afegeix:',
       },
       hint: 'Toca la massa',
       ferment: {

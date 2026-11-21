@@ -852,6 +852,66 @@ const jsonLd = [
               </a>{' '}
               {t.xp.sentence.for} <em>{pickupDay}</em>.
             </p>
+            <div
+              class="picker"
+              role="group"
+              aria-label={t.xp.order.pick}
+              data-picker
+            >
+              <span class="picker-label" aria-hidden="true">
+                {t.xp.order.pick}
+              </span>
+              {menuBreads.map((b) => (
+                <button
+                  type="button"
+                  class="chip"
+                  data-add={b.key}
+                  data-chip={b.key}
+                  aria-label={t.breads.more(b.name)}
+                >
+                  <b aria-hidden="true">+</b>
+                  {b.name}
+                  <small>{tight(b.product.price)}</small>
+                  <i class="chip-n" aria-hidden="true"></i>
+                </button>
+              ))}
+              <button
+                type="button"
+                class="chip"
+                data-add="banana"
+                data-halves="2"
+                aria-label={`${t.catalog.add}: ${t.banana.h2a} ${t.banana.h2b} · ${t.ed.whole}`}
+              >
+                <b aria-hidden="true">+</b>
+                {t.banana.h2a} · {t.ed.whole}
+                <small>{short(bananaWhole.price)}</small>
+              </button>
+              <button
+                type="button"
+                class="chip"
+                data-add="banana"
+                data-halves="1"
+                aria-label={`${t.catalog.add}: ${t.banana.h2a} ${t.banana.h2b} · ${t.ed.half}`}
+              >
+                <b aria-hidden="true">+</b>
+                {t.banana.h2a} · {t.ed.half}
+                <small>{short(bananaHalf.price)}</small>
+              </button>
+              {pastries.map((p) => (
+                <button
+                  type="button"
+                  class="chip"
+                  data-add={p.key}
+                  data-chip={p.key}
+                  aria-label={`${t.pastry.add}: ${p.name}`}
+                >
+                  <b aria-hidden="true">+</b>
+                  {p.name}
+                  <small>{tight(p.product.price)}</small>
+                  <i class="chip-n" aria-hidden="true"></i>
+                </button>
+              ))}
+            </div>
             <div class="order-ticket">
               <div class="order-lines">
                 <div class="order-line" data-line="loaf">
