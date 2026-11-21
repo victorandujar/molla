@@ -492,6 +492,8 @@ export const ui = {
       counter: {
         bar: 'El mostrador',
         hint: 'Desliza →',
+        prev: 'Producto anterior',
+        next: 'Producto siguiente',
       },
       sentence: {
         hi: 'Hola Víctor, quiero',
@@ -1134,6 +1136,8 @@ export const ui = {
       counter: {
         bar: 'El taulell',
         hint: 'Llisca →',
+        prev: 'Producte anterior',
+        next: 'Producte següent',
       },
       sentence: {
         hi: 'Hola Víctor, vull',

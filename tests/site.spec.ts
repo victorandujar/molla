@@ -47,7 +47,7 @@ test('real photos, keyboard access, responsive layout and accessibility', async 
     // The hero is the packaging crumb, alive; the loaf opened in the maker's
     // mother's hands comes with the cut.
     await expect(page.locator('.alive-canvas')).toBeVisible();
-    await expect(page.locator('.cut-photo img')).toBeVisible();
+    await expect(page.locator('.cut-photo img.cut-loaf')).toBeVisible();
     expect(
       await page.evaluate(
         () => document.documentElement.scrollWidth <= window.innerWidth,
