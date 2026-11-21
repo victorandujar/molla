@@ -1287,11 +1287,6 @@
 .sentence #address {
   width: 16ch;
 }
-@media (max-width: 720px) {
-  .sentence #address {
-    width: 100%;
-  }
-}
 
 /* ---------- Capçalera: paper translúcid amb desenfocament ---------- */
 .site-header.is-float {
@@ -1420,5 +1415,121 @@
     flex: none;
     scroll-snap-align: start;
     white-space: nowrap;
+  }
+}
+
+/* ---------- Revisió: el taulell amb fletxes, el pa sencer, la frase a mida ---------- */
+.counter-rail {
+  min-width: 0;
+  position: relative;
+}
+.counter-arrow {
+  position: absolute;
+  z-index: 2;
+  top: 50%;
+  translate: 0 -50%;
+  display: grid;
+  place-items: center;
+  width: 60px;
+  height: 60px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--ink);
+  color: var(--paper);
+  font-size: 22px;
+  box-shadow: 0 16px 40px -18px rgba(18, 26, 69, 0.7);
+  transition:
+    background-color 0.25s ease,
+    opacity 0.3s ease,
+    scale 0.3s var(--ease-out);
+}
+.counter-arrow:hover:not(:disabled) {
+  background: var(--orange);
+  color: var(--night);
+  scale: 1.06;
+}
+.counter-arrow:disabled {
+  opacity: 0;
+  pointer-events: none;
+}
+.counter-prev {
+  left: max(12px, calc((100% - 1320px) / 2 - 76px));
+}
+.counter-next {
+  right: max(12px, calc((100% - 1320px) / 2 - 76px));
+}
+.counter .bread-list {
+  cursor: grab;
+}
+.counter .bread-list.is-dragging {
+  cursor: grabbing;
+  scroll-snap-type: none;
+  user-select: none;
+}
+.counter .bread-list.is-dragging img {
+  pointer-events: none;
+}
+@media (max-width: 820px) {
+  .counter-arrow {
+    top: calc(8px + min(36vw, 20svh));
+    width: 48px;
+    height: 48px;
+    font-size: 18px;
+  }
+}
+
+/* El pa sencer, de cap a peus: la foto a l'alçada de la pantalla i, als
+   costats, la mateixa foto desenfocada omple l'ample. */
+.cut-photo {
+  display: grid;
+  place-items: center;
+  overflow: clip;
+}
+.cut-blur {
+  position: absolute;
+  inset: -40px;
+}
+.cut-blur picture,
+.cut-blur img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: blur(36px) saturate(1.1) brightness(0.72);
+}
+.cut-photo > picture {
+  position: relative;
+  height: 100%;
+  width: auto;
+  max-width: 100%;
+}
+.cut-photo > picture .cut-loaf {
+  display: block;
+  height: 100%;
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+}
+
+/* La frase, a escala d'escriptori: gran però llegible; els camps fan
+   l'amplada del que hi escrius (experience.ts). */
+.sentence {
+  font-size: clamp(30px, 3.4vw, 58px);
+}
+.sentence input,
+.sentence select {
+  min-width: 3ch;
+}
+.sentence #address,
+.sentence #phone,
+.sentence input {
+  width: auto;
+}
+@media (max-width: 720px) {
+  /* Una adreça llarga no cap en una paraula: al mòbil té la seva línia. */
+  .sentence #address {
+    display: block;
+    width: 100% !important;
+    font-size: max(24px, 0.8em);
   }
 }

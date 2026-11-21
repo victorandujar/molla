@@ -305,18 +305,21 @@ function ferment() {
       play();
     }
   };
+  // It plays when the tin itself is well in view, not when the section edge
+  // appears: on a big screen the dough used to rise before anyone saw it.
   new IntersectionObserver(
     ([e]) => {
       visible = e!.isIntersecting;
       maybePlay();
     },
-    { threshold: 0.4 },
-  ).observe(section);
+    { threshold: 0.6 },
+  ).observe(cv);
   const idle = (now: number) => {
     if (visible && !reduce) draw(now);
     requestAnimationFrame(idle);
   };
-  set(35);
+  // Empty tin while it waits to be seen; full (35 h) when nothing will move.
+  set(reduce ? 35 : 0);
   if (src)
     loadCrumb(src).then((c) => {
       crumb = c;
@@ -365,89 +368,124 @@ function cut() {
   update();
 }
 
-/* ---- 4 · El taulell: un pa cada vegada, sobre la seva post ---- */
+/* ---- 4 · El taulell: un producte cada vegada, de costat ---- */
+// No scroll hijack: the page keeps going down, and the counter moves sideways
+// with the arrows, the trackpad, the finger or by dragging it with the mouse.
 function counter() {
   const section = $('[data-counter]');
   const track = $('[data-counter-track]', section ?? document);
   if (!section || !track) return;
-  const stick = $('.counter-stick', section)!;
   const bars = $$('.counter-progress i', section);
   const spins = $$<HTMLImageElement>('img.is-spin', track);
-  const wide = matchMedia('(min-width: 821px)');
-  let pinned = false;
-  let ours = false;
-
-  const travel = () => Math.max(0, track.scrollWidth - track.clientWidth);
-  // The floating header lies over the counter: it pins at the very top.
-  const top = () => 0;
+  const prev = $<HTMLButtonElement>('[data-counter-prev]', section);
+  const next = $<HTMLButtonElement>('[data-counter-next]', section);
+  const cards = $$('.bread-card', track);
+  const max = () => Math.max(0, track.scrollWidth - track.clientWidth);
+  const step = () => {
+    const [a, b] = cards;
+    return a && b ? b.offsetLeft - a.offsetLeft : track.clientWidth;
+  };
   const paint = () => {
-    const max = travel();
-    const p = max ? track.scrollLeft / max : 0;
+    const m = max();
+    const p = m ? track.scrollLeft / m : 0;
     if (!reduce)
       spins.forEach(
         (img, i) => (img.style.transform = `rotate(${p * 220 + i * 37}deg)`),
       );
-    const card = track.firstElementChild as HTMLElement | null;
-    const step = card ? card.offsetWidth : 1;
-    const n = Math.round(track.scrollLeft / step);
+    const n = Math.round(track.scrollLeft / step());
     bars.forEach((b, i) => b.classList.toggle('on', i <= n));
+    if (prev) prev.disabled = track.scrollLeft <= 4;
+    if (next) next.disabled = track.scrollLeft >= m - 4;
   };
-  const layout = () => {
-    pinned = !reduce && wide.matches;
-    section.classList.toggle('is-pinned', pinned);
-    section.style.height = pinned ? `${stick.offsetHeight + travel()}px` : '';
-    sync();
-  };
-  // Pinned: baixar fa córrer el taulell de costat.
-  const sync = () => {
-    if (pinned) {
-      const r = section.getBoundingClientRect();
-      const x = clamp((top() - r.top) / Math.max(1, travel())) * travel();
-      if (Math.abs(track.scrollLeft - x) > 0.5) {
-        ours = true;
-        track.scrollLeft = x;
-      }
-    }
-    paint();
-  };
-  // Si el taulell es mou per si sol (teclat, lliscar), la pàgina el segueix.
-  track.addEventListener(
-    'scroll',
-    () => {
-      if (ours) {
-        ours = false;
-        paint();
-        return;
-      }
-      if (pinned) {
-        const y =
-          section.getBoundingClientRect().top +
-          scrollY -
-          top() +
-          track.scrollLeft;
-        scrollTo({ top: y, behavior: 'instant' as ScrollBehavior });
-      }
-      paint();
-    },
-    { passive: true },
-  );
-  let ticking = false;
-  addEventListener(
-    'scroll',
-    () => {
-      if (ticking) return;
-      ticking = true;
-      requestAnimationFrame(() => {
-        ticking = false;
-        sync();
+  const go = (dir: number) =>
+    track.scrollBy({
+      left: dir * step(),
+      behavior: reduce ? 'auto' : 'smooth',
+    });
+  prev?.addEventListener('click', () => go(-1));
+  next?.addEventListener('click', () => go(1));
+  track.addEventListener('scroll', () => requestAnimationFrame(paint), {
+    passive: true,
+  });
+  // Dragging with the mouse, like sliding a board along the counter.
+  let downX: number | null = null;
+  let startLeft = 0;
+  let moved = false;
+  track.addEventListener('pointerdown', (e) => {
+    if (
+      e.pointerType !== 'mouse' ||
+      (e.target as Element).closest('button, a, input, label')
+    )
+      return;
+    downX = e.clientX;
+    startLeft = track.scrollLeft;
+    moved = false;
+    track.classList.add('is-dragging');
+  });
+  addEventListener('pointermove', (e) => {
+    if (downX === null) return;
+    const dx = e.clientX - downX;
+    if (Math.abs(dx) > 4) moved = true;
+    track.scrollLeft = startLeft - dx;
+  });
+  addEventListener('pointerup', () => {
+    if (downX === null) return;
+    downX = null;
+    track.classList.remove('is-dragging');
+    // Settle on the nearest product.
+    if (moved)
+      track.scrollTo({
+        left: Math.round(track.scrollLeft / step()) * step(),
+        behavior: reduce ? 'auto' : 'smooth',
       });
+  });
+  track.addEventListener(
+    'click',
+    (e) => {
+      if (!moved) return;
+      e.preventDefault();
+      e.stopPropagation();
+      moved = false;
     },
-    { passive: true },
+    true,
   );
-  addEventListener('resize', layout);
-  wide.addEventListener('change', layout);
-  layout();
-  if (document.fonts) document.fonts.ready.then(layout);
+  addEventListener('resize', paint);
+  paint();
+}
+
+/* ---- Els camps de la frase fan l'amplada del que hi escrius ---- */
+function fitFields() {
+  const fields = $$('.sentence').flatMap((s) =>
+    $$<HTMLInputElement | HTMLSelectElement>(
+      'input:not([type=radio]), select',
+      s,
+    ),
+  );
+  if (!fields.length) return;
+  const meter = document.createElement('span');
+  meter.setAttribute('aria-hidden', 'true');
+  meter.style.cssText =
+    'position:absolute;left:-9999px;top:0;visibility:hidden;white-space:pre;pointer-events:none';
+  document.body.append(meter);
+  const fit = (el: HTMLInputElement | HTMLSelectElement) => {
+    const cs = getComputedStyle(el);
+    meter.style.font = cs.font;
+    meter.style.letterSpacing = cs.letterSpacing;
+    meter.textContent =
+      el instanceof HTMLSelectElement
+        ? el.options[el.selectedIndex]?.text || ''
+        : el.value || el.placeholder || '';
+    const extra = el instanceof HTMLSelectElement ? 0.75 : 0.35;
+    el.style.width = `calc(${Math.ceil(meter.offsetWidth)}px + ${extra}em)`;
+  };
+  const all = () => fields.forEach(fit);
+  for (const el of fields) {
+    el.addEventListener('input', () => fit(el));
+    el.addEventListener('change', () => fit(el));
+  }
+  addEventListener('resize', all);
+  all();
+  document.fonts?.ready.then(all);
 }
 
 /* ---- 5 · La comanda, dita com una frase ---- */
@@ -511,3 +549,4 @@ cut();
 counter();
 sentence();
 picker();
+fitFields();
