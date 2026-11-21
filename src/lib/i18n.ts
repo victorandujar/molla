@@ -224,8 +224,7 @@ export const ui = {
     },
     catalog: {
       kicker: 'La carta',
-      h2a: 'La carta,',
-      h2b: 'hecha sin prisa.',
+      h2b: 'Hecha sin prisa.',
       details: 'Ingredientes y alérgenos',
       loaf: 'La de cada semana',
       sourdough: 'Masa madre',
@@ -353,7 +352,8 @@ export const ui = {
           'Harina integral, levadura, agua, harina de trigo de fuerza y sal.',
       },
       // Panes con relleno y pan de leche (config.ts, `extraBreads`).
-      extraH4: 'Con relleno, y pan de leche',
+      extraKicker: 'Con relleno',
+      extraH4: 'Seis más, mismo horno.',
       extraIntro:
         'La misma hogaza con olivas, nueces, chocolate o fruta seca. Y un pan de leche tierno para el desayuno.',
       extra: {
@@ -393,10 +393,10 @@ export const ui = {
         },
         'pan-de-leche': {
           name: 'Pan de leche',
-          text: 'Miga tierna y esponjosa. Una pieza grande: casi 1 kg de masa.',
+          text: 'Con poolish. Miga tierna y esponjosa, y una pieza grande: casi 1 kg de masa.',
           alt: 'Dos mitades de pan de leche con la miga blanca y esponjosa',
           ingredients:
-            'Harina de trigo, leche, mantequilla, azúcar, huevo, levadura y sal.',
+            'Harina de trigo, poolish, leche, mantequilla, azúcar, huevo y sal.',
         },
       } satisfies Record<
         ExtraBreadId,
@@ -814,8 +814,7 @@ export const ui = {
     },
     catalog: {
       kicker: 'La carta',
-      h2a: 'La carta,',
-      h2b: 'feta sense pressa.',
+      h2b: 'Feta sense pressa.',
       details: 'Ingredients i al·lèrgens',
       loaf: 'El de cada setmana',
       sourdough: 'Massa mare',
@@ -938,7 +937,8 @@ export const ui = {
           'Farina integral, llevat, aigua, farina de blat de força i sal.',
       },
       // Pans amb farciment i pa de llet (config.ts, `extraBreads`).
-      extraH4: 'Amb farciment, i pa de llet',
+      extraKicker: 'Amb farciment',
+      extraH4: 'Sis més, el mateix forn.',
       extraIntro:
         'El mateix pa amb olives, nous, xocolata o fruita seca. I un pa de llet tendre per esmorzar.',
       extra: {
@@ -977,10 +977,10 @@ export const ui = {
         },
         'pan-de-leche': {
           name: 'Pa de llet',
-          text: 'Molla tendra i esponjosa. Una peça grossa: gairebé 1 kg de massa.',
+          text: 'Amb poolish. Molla tendra i esponjosa, i una peça grossa: gairebé 1 kg de massa.',
           alt: 'Dues meitats de pa de llet amb la molla blanca i esponjosa',
           ingredients:
-            'Farina de blat, llet, mantega, sucre, ou, llevat i sal.',
+            'Farina de blat, poolish, llet, mantega, sucre, ou i sal.',
         },
       } satisfies Record<
         ExtraBreadId,

@@ -455,7 +455,7 @@ const jsonLd = [
           <span>{t.ed.menuBar}</span>
         </div>
         <h2 id="catalog-title" class="catalog-title" data-split>
-          {t.catalog.h2a} <em>{t.catalog.h2b}</em>
+          <em>{t.catalog.h2b}</em>
         </h2>
 
         <div class="menu">
@@ -471,7 +471,11 @@ const jsonLd = [
             {breadGroups.map((group) => (
               <>
                 {group.id === 'extra' && (
-                  <header class="breads-subhead" data-reveal>
+                  <header class="breads-head breads-subhead" data-reveal>
+                    <p class="dish-index">
+                      <span>+</span>
+                      {t.breads.extraKicker}
+                    </p>
                     <h4 id="extra-breads-title">{t.breads.extraH4}</h4>
                     <p class="dish-desc">{t.breads.extraIntro}</p>
                   </header>

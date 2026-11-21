@@ -258,7 +258,7 @@ export const products = [
     price: extraPrice('pan-de-leche'),
     weight: '981 g de masa',
     ingredients:
-      'Harina de trigo, leche, mantequilla, azúcar, huevo, levadura y sal.',
+      'Harina de trigo, poolish, leche, mantequilla, azúcar, huevo y sal.',
     allergens: 'Contiene trigo (gluten), leche y huevo.',
     image: 'pan-de-leche',
     available: true,
