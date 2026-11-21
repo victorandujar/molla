@@ -545,8 +545,9 @@
   font-style: italic;
   font-size: clamp(42px, 6vw, 104px);
   line-height: 1;
-  color: var(--paper);
-  text-shadow: 0 2px 40px rgba(20, 21, 25, 0.55);
+  /* En negre sobre la molla clara: es llegeix sense ombres. */
+  color: var(--night);
+  text-shadow: 0 0 28px rgba(246, 239, 229, 0.7);
 }
 .cut-cap {
   position: absolute;
@@ -1531,5 +1532,26 @@
     display: block;
     width: 100% !important;
     font-size: max(24px, 0.8em);
+  }
+}
+
+/* La foto girada (les mans entren per baix) omple tot l'ample. A l'escriptori
+   cobreix la pantalla, amb el pa una mica cap amunt perquè la crosta no es
+   talli; al mòbil, en vertical, es veu sencera a tot l'ample. */
+.cut-photo > picture {
+  width: 100%;
+  height: 100%;
+}
+.cut-photo > picture .cut-loaf {
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  object-fit: cover;
+  object-position: 50% 32%;
+}
+@media (max-width: 820px) {
+  .cut-photo > picture .cut-loaf {
+    object-fit: contain;
+    object-position: 50% 50%;
   }
 }
