@@ -2030,6 +2030,38 @@ figure picture {
   margin: 0;
   justify-self: end;
 }
+/* Panes con relleno y pan de leche: un segundo grupo de tarjetas. */
+.breads-subhead {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: end;
+  gap: 8px clamp(24px, 4vw, 64px);
+  margin-top: clamp(48px, 6vw, 88px);
+  padding-top: clamp(20px, 2.4vw, 32px);
+  border-top: 1px solid currentColor;
+}
+.breads-subhead h4 {
+  margin: 0;
+  font-weight: 800;
+  font-stretch: 112%;
+  letter-spacing: -0.02em;
+  font-size: clamp(26px, 2.4vw, 40px);
+  text-transform: uppercase;
+  line-height: 0.95;
+}
+.breads-subhead .dish-desc {
+  max-width: 42ch;
+  margin: 0;
+  justify-self: end;
+}
+@media (max-width: 720px) {
+  .breads-subhead {
+    grid-template-columns: 1fr;
+  }
+  .breads-subhead .dish-desc {
+    justify-self: start;
+  }
+}
 .bread-list {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));

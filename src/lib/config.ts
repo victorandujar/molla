@@ -4,7 +4,29 @@ export const WEEKLY_LOAF_PRICE_CENTS = 500;
 // oven holds loaves, whatever the dough): bakes.capacity counts every loaf.
 export const SOURDOUGH_PRICE_CENTS = 600;
 export const WHOLEGRAIN_PRICE_CENTS = 500;
-export const breadIds = ['clasica', 'masa-madre', 'integral'] as const;
+// Panes con relleno (sobre la misma masa, 1,22 € de coste base) y pan de
+// leche. Precio en céntimos; entre paréntesis, coste total de ingredientes y
+// su peso sobre el precio. También comparten el horno: cuentan como hogazas.
+// El id es el del producto, el del campo del formulario y el de la foto.
+export const extraBreads = [
+  { id: 'kalamata', price: 650 }, // Kalamata + romero (1,74 €, 27 %)
+  { id: 'nueces', price: 700 }, // Nueces (1,97 €, 28 %)
+  { id: 'nueces-naranja', price: 700 }, // Nueces + naranja (2,02 €, 29 %)
+  { id: 'chocolate', price: 800 }, // Chocolate (2,51 €, 31 %)
+  { id: 'pasas-pistachos', price: 900 }, // Pasas + arándanos + pistachos (3,03 €, 34 %)
+  { id: 'pan-de-leche', price: 850 }, // Pan de leche, 981 g de masa (30 %)
+] as const;
+export type ExtraBreadId = (typeof extraBreads)[number]['id'];
+export const extraBreadIds = extraBreads.map((b) => b.id);
+const extraPrice = (id: ExtraBreadId) =>
+  extraBreads.find((b) => b.id === id)!.price;
+// Every product that takes a loaf's room in the oven (bakes.capacity).
+export const breadIds = [
+  'clasica',
+  'masa-madre',
+  'integral',
+  ...extraBreadIds,
+] as string[];
 // Most loaves of each bread in one order, and of all breads together.
 export const LOAF_MAX_PER_ORDER = 4;
 export const BREAD_MAX_PER_ORDER = 6;
@@ -166,6 +188,78 @@ export const products = [
       'Harina integral, levadura, agua, harina de trigo de fuerza y sal.',
     allergens: 'Contiene trigo (gluten).',
     image: 'loaves',
+    available: true,
+  },
+  // Panes con relleno y pan de leche. Textos de la web en src/lib/i18n.ts
+  // (`extraBreads`).
+  {
+    id: 'kalamata',
+    name: 'Kalamata y romero',
+    subtitle: 'Hogaza con olivas Kalamata y romero',
+    price: extraPrice('kalamata'),
+    weight: '',
+    ingredients:
+      'Harina de trigo, agua, sal y fermento, con olivas Kalamata y romero.',
+    allergens: 'Contiene trigo (gluten).',
+    image: 'kalamata',
+    available: true,
+  },
+  {
+    id: 'nueces',
+    name: 'Nueces',
+    subtitle: 'Hogaza con nueces',
+    price: extraPrice('nueces'),
+    weight: '',
+    ingredients: 'Harina de trigo, agua, sal y fermento, con nueces.',
+    allergens: 'Contiene trigo (gluten) y frutos de cáscara (nueces).',
+    image: 'nueces',
+    available: true,
+  },
+  {
+    id: 'nueces-naranja',
+    name: 'Nueces y naranja',
+    subtitle: 'Hogaza con nueces y naranja',
+    price: extraPrice('nueces-naranja'),
+    weight: '',
+    ingredients: 'Harina de trigo, agua, sal y fermento, con nueces y naranja.',
+    allergens: 'Contiene trigo (gluten) y frutos de cáscara (nueces).',
+    image: 'nueces-naranja',
+    available: true,
+  },
+  {
+    id: 'chocolate',
+    name: 'Chocolate',
+    subtitle: 'Hogaza con chocolate',
+    price: extraPrice('chocolate'),
+    weight: '',
+    ingredients: 'Harina de trigo, agua, sal y fermento, con chocolate.',
+    allergens:
+      'Contiene trigo (gluten). El chocolate puede contener leche y soja.',
+    image: 'chocolate',
+    available: true,
+  },
+  {
+    id: 'pasas-pistachos',
+    name: 'Pasas, arándanos y pistachos',
+    subtitle: 'Hogaza con pasas, arándanos y pistachos',
+    price: extraPrice('pasas-pistachos'),
+    weight: '',
+    ingredients:
+      'Harina de trigo, agua, sal y fermento, con pasas, arándanos y pistachos.',
+    allergens: 'Contiene trigo (gluten) y frutos de cáscara (pistachos).',
+    image: 'pasas-pistachos',
+    available: true,
+  },
+  {
+    id: 'pan-de-leche',
+    name: 'Pan de leche',
+    subtitle: 'Pan de leche, casi 1 kg de masa',
+    price: extraPrice('pan-de-leche'),
+    weight: '981 g de masa',
+    ingredients:
+      'Harina de trigo, leche, mantequilla, azúcar, huevo, levadura y sal.',
+    allergens: 'Contiene trigo (gluten), leche y huevo.',
+    image: 'pan-de-leche',
     available: true,
   },
   {

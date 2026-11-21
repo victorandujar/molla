@@ -213,10 +213,16 @@ const observer = new IntersectionObserver(
           ga4('view_item', {
             ecommerce: {
               currency: 'EUR',
-              items: (Object.keys(catalog) as ItemKey[]).map((k) => ({
-                ...catalog[k],
-                price: priceOf(k) / 100,
-              })),
+              items: [
+                ...(Object.keys(catalog) as ItemKey[]).map((k) => ({
+                  ...catalog[k],
+                  price: priceOf(k) / 100,
+                })),
+                ...extraInputs.map((el) => ({
+                  ...extraItem(el),
+                  price: Number(el.dataset.price) / 100,
+                })),
+              ],
             },
           });
         }
@@ -258,6 +264,19 @@ const banana = document.querySelector<HTMLInputElement>('#banana');
 const croissant = document.querySelector<HTMLInputElement>('#croissant');
 const pain = document.querySelector<HTMLInputElement>('#pain');
 const total = document.querySelector<HTMLOutputElement>('#total');
+// Breads with a filling and the milk loaf: one hidden input each, carrying
+// its product id (name), price and name in the visitor's language.
+const extraInputs = [
+  ...document.querySelectorAll<HTMLInputElement>('input[data-extra-bread]'),
+];
+const extraKeys = new Set(extraInputs.map((el) => el.name));
+const extraCount = () => extraInputs.reduce((n, el) => n + read(el), 0);
+const extraCents = () =>
+  extraInputs.reduce((n, el) => n + read(el) * Number(el.dataset.price), 0);
+const extraItem = (el: HTMLInputElement) => ({
+  item_id: el.name,
+  item_name: el.dataset.name || el.name,
+});
 const prices = {
   loaf: Number(form?.dataset.price || 0),
   sourdough: Number(form?.dataset.sourdough || 0),
@@ -276,6 +295,7 @@ const fields: Record<string, HTMLInputElement | null> = {
   banana,
   croissant,
   pain,
+  ...Object.fromEntries(extraInputs.map((el) => [el.name, el])),
 };
 const fieldOf = (b: HTMLElement) =>
   fields[b.dataset.target || b.dataset.add || b.dataset.sub || 'loaf'] ||
@@ -346,6 +366,8 @@ type Cart = {
   loaves: number;
   sourdoughs: number;
   wholegrains: number;
+  // Every bread with a filling and the milk loaf, together.
+  extras: number;
   halves: number;
   croissants: number;
   pains: number;
@@ -362,6 +384,7 @@ function cart(): Cart {
     loaves,
     sourdoughs,
     wholegrains,
+    extras: extraCount(),
     halves,
     croissants,
     pains,
@@ -369,6 +392,7 @@ function cart(): Cart {
       loaves * prices.loaf +
       sourdoughs * prices.sourdough +
       wholegrains * prices.wholegrain +
+      extraCents() +
       Math.floor(halves / 2) * prices.whole +
       (halves % 2) * prices.half +
       croissants * prices.croissant +
@@ -396,7 +420,12 @@ function render(origin?: Element | null) {
     const out = document.querySelector(id);
     if (out) out.textContent = String(n);
   }
+  for (const el of extraInputs) {
+    const out = document.getElementById(`${el.name}-view`);
+    if (out) out.textContent = String(read(el));
+  }
   for (const [key, n, label] of [
+    ...extraInputs.map((el) => [el.name, read(el), String(read(el))] as const),
     ['loaf', c.loaves, String(c.loaves)],
     ['sourdough', c.sourdoughs, String(c.sourdoughs)],
     ['wholegrain', c.wholegrains, String(c.wholegrains)],
@@ -427,6 +456,9 @@ function render(origin?: Element | null) {
     c.loaves ? words.loaves(c.loaves) : '',
     c.sourdoughs ? words.sourdough(c.sourdoughs) : '',
     c.wholegrains ? words.wholegrain(c.wholegrains) : '',
+    ...extraInputs.map((el) =>
+      read(el) ? `${read(el)} ${(el.dataset.name || '').toLowerCase()}` : '',
+    ),
     c.halves ? `${halvesLabel(c.halves)} banana bread` : '',
     c.croissants ? pastryWords.croissants(c.croissants) : '',
     c.pains ? pastryWords.pains(c.pains) : '',
@@ -436,6 +468,7 @@ function render(origin?: Element | null) {
     c.loaves +
     c.sourdoughs +
     c.wholegrains +
+    c.extras +
     Math.ceil(c.halves / 2) +
     c.croissants +
     c.pains;
@@ -470,6 +503,7 @@ function render(origin?: Element | null) {
     loaf: c.loaves,
     sourdough: c.sourdoughs,
     wholegrain: c.wholegrains,
+    ...Object.fromEntries(extraInputs.map((el) => [el.name, read(el)])),
     banana: c.halves,
     croissant: c.croissants,
     pain: c.pains,
@@ -518,6 +552,7 @@ document
       c.loaves +
         c.sourdoughs +
         c.wholegrains +
+        c.extras +
         c.halves +
         c.croissants +
         c.pains ===
@@ -546,18 +581,32 @@ function startOnce() {
 }
 const priceOf = (k: ItemKey) =>
   k === 'loaf' ? prices.loaf : k === 'banana' ? prices.half : prices[k];
+// GA4 item of a key: a catalog entry or one of the extra breads.
+const itemOf = (key: string) => {
+  const extra = extraInputs.find((el) => el.name === key);
+  if (extra) return extraItem(extra);
+  return key in catalog
+    ? catalog[key as ItemKey]
+    : { item_id: key, item_name: key };
+};
+const unitPrice = (key: string) => {
+  const extra = extraInputs.find((el) => el.name === key);
+  return extra ? Number(extra.dataset.price) : priceOf(key as ItemKey);
+};
 const bananaCents = (halves: number) =>
   Math.floor(halves / 2) * prices.whole + (halves % 2) * prices.half;
-const keyOf = (input: HTMLInputElement): ItemKey =>
-  (
-    [
-      [banana, 'banana'],
-      [sourdough, 'sourdough'],
-      [wholegrain, 'wholegrain'],
-      [croissant, 'croissant'],
-      [pain, 'pain'],
-    ] as const
-  ).find(([el]) => el === input)?.[1] ?? 'loaf';
+const keyOf = (input: HTMLInputElement): string =>
+  extraKeys.has(input.name)
+    ? input.name
+    : ((
+        [
+          [banana, 'banana'],
+          [sourdough, 'sourdough'],
+          [wholegrain, 'wholegrain'],
+          [croissant, 'croissant'],
+          [pain, 'pain'],
+        ] as const
+      ).find(([el]) => el === input)?.[1] ?? 'loaf');
 // Which list a button belongs to, for GA4's select_item.
 const listOf = (el: Element) =>
   el.closest('#combina')
@@ -566,14 +615,13 @@ const listOf = (el: Element) =>
       ? 'ticket'
       : 'carta';
 const selected = new Set<string>();
-function selectOnce(key: ItemKey | string, origin: Element) {
+function selectOnce(key: string, origin: Element) {
   if (selected.has(key)) return;
   selected.add(key);
-  const item = key in catalog ? catalog[key as ItemKey] : null;
   ga4('select_item', {
     ecommerce: {
       item_list_name: listOf(origin),
-      items: [item || { item_id: key, item_name: key }],
+      items: [itemOf(key)],
     },
   });
 }
@@ -605,6 +653,14 @@ function cartItems() {
       price: prices.wholegrain / 100,
       quantity: c.wholegrains,
     },
+    ...extraInputs.map(
+      (el) =>
+        read(el) && {
+          ...extraItem(el),
+          price: Number(el.dataset.price) / 100,
+          quantity: read(el),
+        },
+    ),
     c.halves && {
       ...catalog.banana,
       price: bananaCents(c.halves) / c.halves / 100,
@@ -643,11 +699,11 @@ function change(
       value,
       items: [
         {
-          ...catalog[key],
+          ...itemOf(key),
           // Banana bread counts in halves (GA4 wants whole quantities).
           quantity: Math.abs(units),
           price:
-            key === 'banana' ? value / Math.abs(units) : priceOf(key) / 100,
+            key === 'banana' ? value / Math.abs(units) : unitPrice(key) / 100,
         },
       ],
     },
@@ -845,6 +901,7 @@ form?.addEventListener('submit', async (event) => {
     c.loaves +
       c.sourdoughs +
       c.wholegrains +
+      c.extras +
       c.halves +
       c.croissants +
       c.pains ===
@@ -1224,6 +1281,7 @@ async function refreshBake() {
       banana,
       croissant,
       pain,
+      ...extraInputs,
     ])
       if (input && read(input) > maxOf(input))
         input.value = String(maxOf(input));

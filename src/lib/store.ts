@@ -9,6 +9,8 @@ import {
   standingVoucher,
   BANANA_HALVES_PER_BAKE,
   PASTRY_UNITS_PER_BAKE,
+  breadIds,
+  extraBreadIds,
 } from './config';
 import { ui } from './i18n';
 import { isWednesday, slotWindow, townById } from './delivery';
@@ -151,7 +153,7 @@ const demoBake = (d: Demo): ActiveBake => ({
   pastryReserved: pastryIn(d, bake.id),
 });
 const reservedSql = sql
-  ? sql`COALESCE((SELECT SUM(i.quantity) FROM orders o JOIN order_items i ON i.order_id=o.id WHERE o.bake_id=b.id AND o.status!='CANCELLED' AND i.product_id IN ('clasica','masa-madre','integral')),0)::int AS reserved,
+  ? sql`COALESCE((SELECT SUM(i.quantity) FROM orders o JOIN order_items i ON i.order_id=o.id WHERE o.bake_id=b.id AND o.status!='CANCELLED' AND i.product_id IN ${sql(breadIds)}),0)::int AS reserved,
         COALESCE((SELECT SUM(CASE i.product_id WHEN 'banana' THEN i.quantity*2 WHEN 'banana-mitad' THEN i.quantity ELSE 0 END) FROM orders o JOIN order_items i ON i.order_id=o.id WHERE o.bake_id=b.id AND o.status!='CANCELLED'),0)::int AS banana_reserved,
         COALESCE((SELECT SUM(i.quantity) FROM orders o JOIN order_items i ON i.order_id=o.id WHERE o.bake_id=b.id AND o.status!='CANCELLED' AND i.product_id IN ('croissant','pain-au-chocolat')),0)::int AS pastry_reserved`
   : null;
@@ -246,6 +248,14 @@ function itemsFor(input: ReservationInput, lang: Lang): OrderItem[] {
     ['clasica', input.quantity, names.loaf],
     ['masa-madre', input.sourdough || 0, names.sourdough],
     ['integral', input.wholegrain || 0, names.wholegrain],
+    ...extraBreadIds.map(
+      (id) =>
+        [id, input[id] || 0, ui[lang].breads.extra[id].name] as [
+          string,
+          number,
+          string,
+        ],
+    ),
     ['banana', whole, names.bananaWhole],
     ['banana-mitad', half, names.bananaHalf],
     ['croissant', input.croissant, names.croissant],
@@ -404,7 +414,7 @@ export async function reserve(
     )
       throw new AppError('bakeChanged');
     const [count] =
-      await tx`SELECT COALESCE(SUM(i.quantity) FILTER (WHERE i.product_id IN ('clasica','masa-madre','integral')),0)::int AS n,
+      await tx`SELECT COALESCE(SUM(i.quantity) FILTER (WHERE i.product_id IN ${tx(breadIds)}),0)::int AS n,
         COALESCE(SUM(CASE i.product_id WHEN 'banana' THEN i.quantity*2 WHEN 'banana-mitad' THEN i.quantity ELSE 0 END),0)::int AS banana,
         COALESCE(SUM(i.quantity) FILTER (WHERE i.product_id IN ('croissant','pain-au-chocolat')),0)::int AS pastry
         FROM orders o JOIN order_items i ON i.order_id=o.id WHERE o.bake_id=${input.bakeId} AND o.status!='CANCELLED'`;

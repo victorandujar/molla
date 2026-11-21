@@ -1,5 +1,6 @@
 import postgres from 'postgres';
 import { madridIso, type BakeState } from '../src/lib/domain';
+import { breadIds } from '../src/lib/config';
 const url = process.env.DATABASE_URL_UNPOOLED;
 if (!url) throw new Error('Configura DATABASE_URL_UNPOOLED.');
 const [command = 'list', ...rest] = process.argv.slice(2);
@@ -30,7 +31,7 @@ const fmt = (d: Date) =>
 try {
   if (command === 'list') {
     const rows =
-      await sql`SELECT b.*, COALESCE((SELECT SUM(i.quantity) FROM orders o JOIN order_items i ON i.order_id=o.id WHERE o.bake_id=b.id AND o.status!='CANCELLED' AND i.product_id IN ('clasica','masa-madre','integral')),0)::int AS reserved FROM bakes b ORDER BY pickup_date`;
+      await sql`SELECT b.*, COALESCE((SELECT SUM(i.quantity) FROM orders o JOIN order_items i ON i.order_id=o.id WHERE o.bake_id=b.id AND o.status!='CANCELLED' AND i.product_id IN ${sql(breadIds)}),0)::int AS reserved FROM bakes b ORDER BY pickup_date`;
     for (const b of rows)
       console.log(
         `${b.id} · nº ${b.number} · ${b.status} · ${b.reserved}/${b.capacity} · abre ${fmt(b.opens_at)} · cierra ${fmt(b.deadline)} · recogida ${fmt(b.pickup_date)} ${b.pickup_window || '(franja sin definir)'}`,
@@ -89,7 +90,7 @@ try {
       const [b] = await tx`SELECT id FROM bakes WHERE id=${id} FOR UPDATE`;
       if (!b) throw new Error('No existe esa hornada.');
       const [r] =
-        await tx`SELECT COALESCE(SUM(i.quantity),0)::int AS n FROM orders o JOIN order_items i ON i.order_id=o.id WHERE o.bake_id=${id} AND o.status!='CANCELLED' AND i.product_id IN ('clasica','masa-madre','integral')`;
+        await tx`SELECT COALESCE(SUM(i.quantity),0)::int AS n FROM orders o JOIN order_items i ON i.order_id=o.id WHERE o.bake_id=${id} AND o.status!='CANCELLED' AND i.product_id IN ${tx(breadIds)}`;
       if (capacity < r!.n)
         throw new Error(`Ya hay ${r!.n} hogazas reservadas en ${id}.`);
       await tx`UPDATE bakes SET capacity=${capacity} WHERE id=${id}`;

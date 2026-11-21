@@ -1504,7 +1504,7 @@ test('sourdough and 60 % wholegrain: on the menu, in the order and in the oven q
   request,
 }) => {
   await page.goto('/es/');
-  const menu = page.locator('#carta .bread-list');
+  const menu = page.locator('#carta .bread-list').first();
   await expect(menu).toContainText('Masa madre');
   await expect(menu).toContainText('6,00');
   await expect(menu).toContainText('Integral 60 %');
@@ -1550,6 +1550,76 @@ test('sourdough and 60 % wholegrain: on the menu, in the order and in the oven q
   const stats = page.locator('.admin-stats').first();
   await expect(stats).toContainText('Masa madre4');
   await expect(stats).toContainText('Integral 60 %2');
+});
+
+test('breads with a filling and the milk loaf: menu in both languages, order and oven quota', async ({
+  page,
+  request,
+}) => {
+  await page.goto('/');
+  const ca = page.locator('#carta');
+  for (const name of [
+    'Kalamata i romaní',
+    'Nous',
+    'Nous i taronja',
+    'Xocolata',
+    'Panses, nabius i festucs',
+    'Pa de llet',
+  ])
+    await expect(ca.getByRole('heading', { name, exact: true })).toBeVisible();
+  await page.goto('/es/');
+  const menu = page.locator('#carta');
+  for (const [name, price] of [
+    ['Kalamata y romero', '6,50€'],
+    ['Nueces', '7,00€'],
+    ['Nueces y naranja', '7,00€'],
+    ['Chocolate', '8,00€'],
+    ['Pasas, arándanos y pistachos', '9,00€'],
+    ['Pan de leche', '8,50€'],
+  ]) {
+    const card = menu.locator('.bread-card', {
+      has: page.getByRole('heading', { name, exact: true }),
+    });
+    await expect(card).toContainText(price);
+  }
+  await page.locator('[data-buy=kalamata] > [data-add]').click();
+  await page.locator('[data-buy=pan-de-leche] > [data-add]').click();
+  await page.locator('[data-mini=pan-de-leche] [data-add]').click();
+  await page.locator('[data-buy=pasas-pistachos] > [data-add]').click();
+  // 6,50 + 2 × 8,50 + 9,00
+  await expect(page.locator('#total')).toContainText('32,50');
+  await page.getByLabel('Tu nombre', { exact: true }).fill('Ana Pan');
+  await page.locator('#phone').fill('612 345 680');
+  await page.locator('#town').selectOption('sant-boi');
+  await page.locator('#address').fill('Carrer Major 2');
+  await page.locator('input[name=pickup]').check();
+  await page.locator('#reservation-form button[type=submit]').click();
+  await expect(page.locator('#confirmation')).toContainText(
+    '1 × Kalamata y romero',
+  );
+  await expect(page.locator('#confirmation')).toContainText('2 × Pan de leche');
+  const d = await readData();
+  expect(d.orders[0].quantity).toBe(4);
+  expect(
+    d.orders[0].items.map((i: { product: string; quantity: number }) => [
+      i.product,
+      i.quantity,
+    ]),
+  ).toEqual([
+    ['kalamata', 1],
+    ['pasas-pistachos', 1],
+    ['pan-de-leche', 2],
+  ]);
+  expect(d.orders[0].total).toBe(3250);
+  // They take room in the same oven as the other breads.
+  const bake = await (await request.get('/api/bake')).json();
+  expect(bake.bread).toEqual({ level: 'ok', max: 6 });
+  await page.goto('/gestio');
+  await page.locator('input[name=password]').fill('e2e-password-local');
+  await page.locator('form button[type=submit]').first().click();
+  const stats = page.locator('.admin-stats').first();
+  await expect(stats).toContainText('Pan de leche2');
+  await expect(stats).toContainText('Kalamata y romero1');
 });
 
 test('search snippets fit: titles up to 60 characters, descriptions up to 160', async ({
