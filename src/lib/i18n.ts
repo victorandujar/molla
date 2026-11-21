@@ -362,33 +362,34 @@ export const ui = {
           text: 'Olivas Kalamata y romero en la masa. Para el aperitivo o con un buen aceite.',
           alt: 'Dos mitades de pan con olivas Kalamata negras y romero repartidos por la miga',
           ingredients:
-            'Harina de trigo, agua, sal y fermento, con olivas Kalamata y romero.',
+            'Harina de trigo, agua, sal y masa madre, con olivas Kalamata y romero.',
         },
         nueces: {
           name: 'Nueces',
           text: 'Nueces en toda la miga. Con queso, de lujo.',
           alt: 'Dos mitades de pan con trozos de nuez en la miga',
-          ingredients: 'Harina de trigo, agua, sal y fermento, con nueces.',
+          ingredients: 'Harina de trigo, agua, sal y masa madre, con nueces.',
         },
         'nueces-naranja': {
           name: 'Nueces y naranja',
           text: 'Nueces y un toque de naranja. Perfecto para desayunar.',
           alt: 'Dos mitades de pan con nueces y naranja, miga alveolada',
           ingredients:
-            'Harina de trigo, agua, sal y fermento, con nueces y naranja.',
+            'Harina de trigo, agua, sal y masa madre, con nueces y naranja.',
         },
         chocolate: {
           name: 'Chocolate',
           text: 'Vetas de chocolate fundido dentro de la miga.',
           alt: 'Dos mitades de pan con vetas de chocolate en la miga',
-          ingredients: 'Harina de trigo, agua, sal y fermento, con chocolate.',
+          ingredients:
+            'Harina de trigo, agua, sal y masa madre, con chocolate.',
         },
         'pasas-pistachos': {
           name: 'Pasas, arándanos y pistachos',
           text: 'Pasas, arándanos y pistachos en cada rebanada.',
           alt: 'Dos mitades de pan con pasas, arándanos rojos y pistachos verdes en la miga',
           ingredients:
-            'Harina de trigo, agua, sal y fermento, con pasas, arándanos y pistachos.',
+            'Harina de trigo, agua, sal y masa madre, con pasas, arándanos y pistachos.',
         },
         'pan-de-leche': {
           name: 'Pan de leche',
@@ -946,33 +947,33 @@ export const ui = {
           text: 'Olives Kalamata i romaní a la massa. Per a l’aperitiu o amb un bon oli.',
           alt: 'Dues meitats de pa amb olives Kalamata negres i romaní repartits per la molla',
           ingredients:
-            'Farina de blat, aigua, sal i ferment, amb olives Kalamata i romaní.',
+            'Farina de blat, aigua, sal i massa mare, amb olives Kalamata i romaní.',
         },
         nueces: {
           name: 'Nous',
           text: 'Nous per tota la molla. Amb formatge, de luxe.',
           alt: 'Dues meitats de pa amb trossos de nou a la molla',
-          ingredients: 'Farina de blat, aigua, sal i ferment, amb nous.',
+          ingredients: 'Farina de blat, aigua, sal i massa mare, amb nous.',
         },
         'nueces-naranja': {
           name: 'Nous i taronja',
           text: 'Nous i un toc de taronja. Perfecte per esmorzar.',
           alt: 'Dues meitats de pa amb nous i taronja, molla alveolada',
           ingredients:
-            'Farina de blat, aigua, sal i ferment, amb nous i taronja.',
+            'Farina de blat, aigua, sal i massa mare, amb nous i taronja.',
         },
         chocolate: {
           name: 'Xocolata',
           text: 'Vetes de xocolata fosa dins de la molla.',
           alt: 'Dues meitats de pa amb vetes de xocolata a la molla',
-          ingredients: 'Farina de blat, aigua, sal i ferment, amb xocolata.',
+          ingredients: 'Farina de blat, aigua, sal i massa mare, amb xocolata.',
         },
         'pasas-pistachos': {
           name: 'Panses, nabius i festucs',
           text: 'Panses, nabius i festucs a cada llesca.',
           alt: 'Dues meitats de pa amb panses, nabius vermells i festucs verds a la molla',
           ingredients:
-            'Farina de blat, aigua, sal i ferment, amb panses, nabius i festucs.',
+            'Farina de blat, aigua, sal i massa mare, amb panses, nabius i festucs.',
         },
         'pan-de-leche': {
           name: 'Pa de llet',
