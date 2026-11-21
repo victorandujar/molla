@@ -32,7 +32,8 @@ const ratios: Record<string, number> = {
   'pasas-pistachos': 1,
   'pan-de-leche': 1,
   boule: 1088 / 1445,
-  crumb2: 1088 / 1445,
+  // Turned 90° so the hands come from below: landscape.
+  crumb2: 1445 / 1088,
   banana: 1506 / 2000,
   bananaDetail: 1500 / 1129,
   kitchen: 1.4,
@@ -48,9 +49,11 @@ const ratios: Record<string, number> = {
   'combo-compartir': 1.25,
 };
 // The newer photos are smaller originals: they have no 1600 w variant.
-const widths = ['boule', 'crumb2', 'tiles'].includes(name)
+const widths = ['boule', 'tiles'].includes(name)
   ? [400, 720, 1100]
-  : [400, 720, 1100, 1600];
+  : name === 'crumb2'
+    ? [400, 720, 1100, 1440]
+    : [400, 720, 1100, 1600];
 const srcset = (format: string) =>
   widths.map((w) => `/images/${name}-${w}.${format} ${w}w`).join(', ');
 ---
