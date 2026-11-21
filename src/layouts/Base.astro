@@ -25,6 +25,8 @@ interface Props {
   noindex?: boolean;
   ogType?: 'website' | 'article';
   jsonLd?: Record<string, unknown>[];
+  // The home: a floating header with only what the page has.
+  minimal?: boolean;
 }
 const {
   lang = 'ca',
@@ -35,6 +37,7 @@ const {
   noindex = false,
   ogType = 'website',
   jsonLd = [],
+  minimal = false,
 } = Astro.props;
 const t = ui[lang];
 const other: Lang = lang === 'es' ? 'ca' : 'es';
@@ -224,28 +227,38 @@ const graph = [organization, website, webpage, ...jsonLd];
         {t.demo}
       </div>
     )}
-    <header class="site-header" data-header>
+    <header class:list={['site-header', { 'is-float': minimal }]} data-header>
       <div class="wrap header-inner">
         <a class="wordmark" href={home} aria-label={t.home}>
           {brand.name.toLowerCase()}
           <span class="wordmark-dot">.</span>
         </a>
         <nav aria-label={lang === 'ca' ? 'Principal' : 'Principal'}>
-          <a class="nav-hide" href={`${home}#carta`}>
-            {lang === 'ca' ? 'La carta' : 'La carta'}
-          </a>
-          <a class="nav-hide" href={routes.standing[lang]}>
-            {t.nav.standing}
-          </a>
-          <a class="nav-hide" href={`${routes.poolish[lang]}#proceso`}>
-            {t.nav.process}
-          </a>
-          <a class="nav-hide" href={routes.delivery[lang]}>
-            {t.nav.delivery}
-          </a>
-          <a class="nav-hide" href={`${home}#preguntas`}>
-            {t.nav.faq}
-          </a>
+          {minimal ? (
+            <>
+              <a class="nav-hide" href="#fermentacio">
+                {t.xp.nav.how}
+              </a>
+              <a class="nav-hide" href="#carta">
+                {t.xp.nav.menu}
+              </a>
+            </>
+          ) : (
+            <>
+              <a class="nav-hide" href={`${home}#carta`}>
+                {lang === 'ca' ? 'La carta' : 'La carta'}
+              </a>
+              <a class="nav-hide" href={routes.standing[lang]}>
+                {t.nav.standing}
+              </a>
+              <a class="nav-hide" href={`${routes.poolish[lang]}#proceso`}>
+                {t.nav.process}
+              </a>
+              <a class="nav-hide" href={routes.delivery[lang]}>
+                {t.nav.delivery}
+              </a>
+            </>
+          )}
           {route && (
             <a
               class="lang-switch"

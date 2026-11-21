@@ -126,6 +126,8 @@ const menuBreads = [...breads, ...extras].map((b) => ({
   plateAlt: b.shots[b.shots.length - 1]!.alt,
   spin: !['sourdough', 'wholegrain'].includes(b.key),
 }));
+// The breads, the banana bread and the two pastries.
+const menuCount = menuBreads.length + 3;
 const bananaWhole = productById('banana')!;
 const bananaHalf = productById('banana-mitad')!;
 // Levels, not counts: the page never says how many are left.
@@ -279,16 +281,6 @@ const jsonLd = [
     brand: { '@type': 'Brand', name: brand.name },
     offers: offer(p.product.price, open && pastryPool > 0),
   })),
-  {
-    '@context': 'https://schema.org',
-    '@type': 'FAQPage',
-    inLanguage: lang,
-    mainEntity: t.faq.items.map(([q, a]) => ({
-      '@type': 'Question',
-      name: q,
-      acceptedAnswer: { '@type': 'Answer', text: a },
-    })),
-  },
 ];
 ---
 
@@ -297,8 +289,9 @@ const jsonLd = [
   route={chosen ? undefined : 'home'}
   jsonLd={chosen ? [] : jsonLd}
   noindex={noindex}
+  minimal
 >
-  <main id="contenido">
+  <main id="contenido" class="xp">
     <!-- 1 · La molla viva: la miga del packaging respira i s'obre on la toques -->
     <section class="alive" aria-labelledby="hero-title" data-alive>
       <canvas
@@ -306,136 +299,82 @@ const jsonLd = [
         data-crumb={crumbUrl}
         aria-hidden="true"
       ></canvas>
-      <div class="wrap alive-grid">
+      <div class="alive-center">
         <div class="alive-tag">
           <span class="alive-mark" aria-hidden="true">
             molla<i>.</i>
           </span>
           <h1 id="hero-title" class="alive-title">
-            {t.hero.h1a} <em>{t.hero.h1b}.</em>
+            {t.hero.h1a} {t.hero.h1b}.
           </h1>
-          <p class="hero-lede">{t.hero.short}</p>
         </div>
-        <div
-          id="hornada"
-          class="hero-bake"
-          data-state={state}
-          data-event-view="view_current_bake"
-          aria-labelledby="bake-title"
-          role="region"
-        >
-          <div class="stub-row">
-            <span class="status">
-              <span class="status-dot" aria-hidden="true"></span>
-              <span data-bake-label>{statusLabel}</span>
-            </span>
-          </div>
-          <h2 id="bake-title" class="stub-day">
-            {pickupDay}
-          </h2>
+      </div>
+      <div
+        id="hornada"
+        class="wrap alive-bake"
+        data-state={state}
+        data-event-view="view_current_bake"
+        aria-labelledby="bake-title"
+        role="region"
+      >
+        <p class="status">
+          <span class="status-dot" aria-hidden="true"></span>
+          <span data-bake-label>{statusLabel}</span>
+        </p>
+        <h2 id="bake-title" class="stub-day">
+          {pickupDay}
+        </h2>
+        {open && (
+          <p
+            class="stub-countdown"
+            data-countdown={current.deadline}
+            data-countdown-label={t.bake.closesIn}
+            hidden
+          ></p>
+        )}
+        {!open && (
           <p class="stub-deadline">
-            {open
-              ? t.bake.open(current.deadline)
+            {unavailable
+              ? t.bake.unavailable
               : state === 'UPCOMING'
                 ? t.bake.upcoming
                 : t.bake.closed}
           </p>
-          {open && (
-            <p
-              class="stub-countdown"
-              data-countdown={current.deadline}
-              data-countdown-label={t.bake.closesIn}
-              hidden
-            ></p>
-          )}
-          {unavailable && (
-            <p role="status" class="stub-deadline">
-              {t.bake.unavailable}
-            </p>
-          )}
-          {open && <p class="stub-when">{t.hero.when(wed)}</p>}
-          {open && <p class="stub-terms">{t.hero.terms}</p>}
-          <p
-            class="stub-count"
-            data-stock="bread"
-            data-level={stock.bread.level}
-            hidden={!open || stock.bread.level !== 'low'}
-          >
-            {t.catalog.stock.bread.low}
-          </p>
-          <a
-            class="button button-orange full stub-cta"
-            href={orderHref}
-            data-bake-cta
-            data-quick-loaf={quickLoaf ? '' : undefined}
-          >
-            {quickLoaf
-              ? t.bake.ctaQuick(money(loaf.price))
-              : open && pickupWeekday
-                ? t.bake.ctaOpen(pickupWeekday)
-                : t.bake.ctaClosed}
-            <span class="button-arrow" aria-hidden="true">
-              →
-            </span>
-          </a>
-          {open && (
-            <a class="stub-menu" href="#carta">
-              {t.bake.ctaMenu} <span aria-hidden="true">↓</span>
-            </a>
-          )}
-          <a class="stub-trust" href="#resenas">
-            <span class="hero-stars" aria-hidden="true">
-              ★★★★★
-            </span>{' '}
-            {t.hero.trust(googleReviews.score, googleReviews.count)}
-          </a>
-          {open && whatsappBook && (
-            <a
-              class="stub-whatsapp"
-              data-event="click_whatsapp_order"
-              data-place="hero"
-              href={whatsappBook}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {t.reserve.whatsappAlt} <span aria-hidden="true">↗</span>
-            </a>
-          )}
-        </div>
+        )}
+        <p
+          class="stub-count"
+          data-stock="bread"
+          data-level={stock.bread.level}
+          hidden={!open || stock.bread.level !== 'low'}
+        >
+          {t.catalog.stock.bread.low}
+        </p>
+        <a class="stub-trust" href="#ressenya">
+          <span aria-hidden="true">★★★★★</span>
+          {t.hero.trust(googleReviews.score, googleReviews.count)}
+        </a>
+        <a
+          class="button button-orange stub-cta"
+          href={orderHref}
+          data-bake-cta
+          data-quick-loaf={quickLoaf ? '' : undefined}
+        >
+          {quickLoaf
+            ? t.bake.ctaQuick(money(loaf.price))
+            : open && pickupWeekday
+              ? t.bake.ctaOpen(pickupWeekday)
+              : t.bake.ctaClosed}
+          <span class="button-arrow" aria-hidden="true">
+            →
+          </span>
+        </a>
       </div>
       <p class="wrap alive-hint" aria-hidden="true">
         <span>
           <i></i>
           {t.xp.hint}
         </span>
-        <span>Sant Boi · Baix Llobregat</span>
       </p>
-    </section>
-
-    <!-- Quién hace el pan y qué dicen de él, antes de nada más -->
-    <section class="baker" aria-label={t.baker.line}>
-      <div class="wrap baker-inner">
-        <div class="baker-photo">
-          <Photo name="person" alt={t.baker.photo} sizes="112px" />
-        </div>
-        <div class="baker-text">
-          <p class="baker-line">{t.baker.line}</p>
-          <figure class="baker-quote">
-            <blockquote lang={googleReviews.quotes[1].lang}>
-              <p>“{googleReviews.quotes[1].text}”</p>
-            </blockquote>
-            <figcaption>
-              <span class="hero-stars" aria-hidden="true">
-                ★★★★★
-              </span>{' '}
-              {googleReviews.quotes[1].author} ·{' '}
-              <a href="#resenas">
-                {googleReviews.score} · {t.reviews.count(googleReviews.count)}
-              </a>
-            </figcaption>
-          </figure>
-        </div>
-      </div>
     </section>
 
     <!-- 2 · 35 hores en una pantalla: la massa puja i s'omple d'alvèols -->
@@ -446,7 +385,7 @@ const jsonLd = [
       data-ferment
     >
       <div class="wrap">
-        <div class="mono-bar" data-bar>
+        <div class="xp-bar">
           <span>{t.xp.ferment.kicker}</span>
           <span>{t.xp.ferment.bar}</span>
         </div>
@@ -502,7 +441,7 @@ const jsonLd = [
             <button type="button" class="ferment-replay" data-ferment-replay>
               {t.xp.ferment.replay}
             </button>
-            <figcaption class="fig-bar">
+            <figcaption class="xp-cap">
               <span>{t.xp.ferment.fig}</span>
               <span data-ferment-fig>35 h</span>
             </figcaption>
@@ -528,7 +467,7 @@ const jsonLd = [
           <span>{t.ed.ferment}</span>
         </div>
         <div class="cut-lid cut-top" aria-hidden="true">
-          <div class="wrap mono-bar cut-bar">
+          <div class="wrap xp-bar cut-bar">
             <span>{t.xp.cut.label}</span>
             <span>{t.xp.cut.scroll} ↓</span>
           </div>
@@ -547,190 +486,109 @@ const jsonLd = [
       </div>
     </section>
 
-    <!-- 3 · La carta: tres piezas, la foto manda y el botón está a mano -->
+    <!-- 4 · El taulell: tota la carta, un producte cada vegada -->
     <section
       id="carta"
-      class="catalog"
+      class="counter"
       aria-labelledby="catalog-title"
+      data-counter
       data-event-view="view_product"
     >
-      <div class="wrap">
-        <div class="mono-bar" data-bar>
-          <span>Nº 01 · {t.catalog.kicker}</span>
-          <span>{t.ed.menuBar}</span>
+      <div class="counter-stick">
+        <div class="wrap xp-bar">
+          <span id="catalog-title">Nº 02 · {t.xp.counter.bar}</span>
+          <span class="counter-hint" aria-hidden="true">
+            {t.xp.counter.hint}
+          </span>
         </div>
-        <h2 id="catalog-title" class="catalog-title" data-split>
-          <em>{t.catalog.h2b}</em>
-        </h2>
-
-        <div class="menu">
-          <article class="breads" aria-labelledby="loaf-title">
-            <header class="breads-head" data-reveal>
-              <p class="dish-index">
-                <span>01</span>
-                {t.breads.kicker}
-              </p>
-              <h3 id="loaf-title">{t.breads.h3}</h3>
-              <p class="dish-desc">{t.breads.intro}</p>
-            </header>
-            <div class="counter" data-counter>
-              <div class="counter-stick">
-                <div class="counter-bar" aria-hidden="true">
-                  <span>{t.xp.counter.bar}</span>
-                  <span class="counter-hint">{t.xp.counter.hint}</span>
-                </div>
-                <ul class="bread-list" data-counter-track>
-                  {menuBreads.map((b, i) => (
-                    <li class="bread-card" data-bread={b.key}>
-                      <div class="bread-plate">
-                        <Photo
-                          name={b.plate}
-                          alt={b.plateAlt}
-                          class={b.spin ? 'is-spin' : ''}
-                          sizes="(max-width: 820px) 72vw, 40vw"
-                        />
-                      </div>
-                      <div class="bread-info">
-                        <span class="bread-idx" aria-hidden="true">
-                          {pad(i + 1)} / {pad(menuBreads.length)}
-                        </span>
-                        <h4>{b.name}</h4>
-                        <p class="bread-price">
-                          <span aria-hidden="true">
-                            {tight(b.product.price)}
-                          </span>
-                          <span class="visually-hidden">
-                            {money(b.product.price)} · {t.breads.unit}
-                          </span>
-                        </p>
-                        <p class="bread-text">{b.text}</p>
-                        {open ? (
-                          <div class="dish-buy bread-buy" data-buy={b.key}>
-                            <button
-                              type="button"
-                              class="button"
-                              data-add={b.key}
-                              disabled={breadMax === 0}
-                              aria-label={t.breads.more(b.name)}
-                            >
-                              {t.breads.add}
-                              <span class="button-plus" aria-hidden="true">
-                                +
-                              </span>
-                            </button>
-                            <div class="mini-stepper" data-mini={b.key} hidden>
-                              <button
-                                type="button"
-                                data-sub={b.key}
-                                aria-label={t.breads.less(b.name)}
-                              >
-                                −
-                              </button>
-                              <output
-                                data-count={b.key}
-                                aria-live="polite"
-                              ></output>
-                              <button
-                                type="button"
-                                data-add={b.key}
-                                aria-label={t.breads.more(b.name)}
-                              >
-                                +
-                              </button>
-                            </div>
-                          </div>
-                        ) : null}
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-                <div class="counter-progress" aria-hidden="true">
-                  {menuBreads.map(() => (
-                    <i />
-                  ))}
-                </div>
+        <ul class="bread-list" data-counter-track>
+          {menuBreads.map((b, i) => (
+            <li class="bread-card" data-bread={b.key}>
+              <div class="bread-plate">
+                <Photo
+                  name={b.plate}
+                  alt={b.plateAlt}
+                  class={b.spin ? 'is-spin' : ''}
+                  sizes="(max-width: 820px) 72vw, 40vw"
+                />
               </div>
-            </div>
-            <div class="breads-foot">
-              {!open && (
-                <a class="button button-ghost" href="#avisame">
-                  {t.loaf.notify}
-                </a>
-              )}
-              <details class="dish-more">
-                <summary>{t.catalog.details}</summary>
-                <dl class="spec">
-                  <div>
-                    <dt>{t.catalog.loaf}</dt>
-                    <dd>{t.loaf.ingredientsValue}</dd>
-                  </div>
-                  <div>
-                    <dt>{t.catalog.sourdough}</dt>
-                    <dd>{t.breads.details.sourdough}</dd>
-                  </div>
-                  <div>
-                    <dt>{t.catalog.wholegrain}</dt>
-                    <dd>{t.breads.details.wholegrain}</dd>
-                  </div>
-                  {extras.map((b) => (
-                    <div>
-                      <dt>{b.name}</dt>
-                      <dd>{t.breads.extra[b.key].ingredients}</dd>
+              <div class="bread-info">
+                <span class="bread-idx" aria-hidden="true">
+                  {pad(i + 1)} / {pad(menuCount)}
+                </span>
+                <h3>{b.name}</h3>
+                <p class="bread-price">
+                  <span aria-hidden="true">{tight(b.product.price)}</span>
+                  <span class="visually-hidden">
+                    {money(b.product.price)} · {t.breads.unit}
+                  </span>
+                </p>
+                <p class="bread-text">{b.text}</p>
+                {open && (
+                  <div class="dish-buy" data-buy={b.key}>
+                    <button
+                      type="button"
+                      class="add"
+                      data-add={b.key}
+                      disabled={breadMax === 0}
+                      aria-label={t.breads.more(b.name)}
+                    >
+                      {t.breads.add}
+                      <b aria-hidden="true">+</b>
+                    </button>
+                    <div class="mini-stepper" data-mini={b.key} hidden>
+                      <button
+                        type="button"
+                        data-sub={b.key}
+                        aria-label={t.breads.less(b.name)}
+                      >
+                        −
+                      </button>
+                      <output data-count={b.key} aria-live="polite"></output>
+                      <button
+                        type="button"
+                        data-add={b.key}
+                        aria-label={t.breads.more(b.name)}
+                      >
+                        +
+                      </button>
                     </div>
-                  ))}
-                  <div>
-                    <dt>{t.loaf.allergens}</dt>
-                    <dd>
-                      {t.breads.allergens} {t.breads.extraAllergens}
-                    </dd>
                   </div>
-                  <div>
-                    <dt>{t.loaf.keeps}</dt>
-                    <dd>{t.loaf.keepsValue}</dd>
-                  </div>
-                </dl>
-              </details>
-            </div>
-          </article>
-
-          <!-- El banana bread, como el reel: fondo oscuro y precios en cursiva -->
-          <article class="card card-banana" aria-labelledby="banana-title">
-            <figure class="card-photo" data-wipe>
+                )}
+              </div>
+            </li>
+          ))}
+          <li class="bread-card" data-bread="banana">
+            <div class="bread-plate">
               <Photo
                 name="banana"
                 alt={t.banana.alt}
-                sizes="(max-width: 960px) calc(100vw - 40px), 44vw"
+                sizes="(max-width: 820px) 72vw, 40vw"
               />
-            </figure>
-            <div class="card-body" data-reveal>
-              <p class="dish-index">
-                <span>02</span>
-                {t.banana.kicker}
-              </p>
+            </div>
+            <div class="bread-info">
+              <span class="bread-idx" aria-hidden="true">
+                {pad(menuBreads.length + 1)} / {pad(menuCount)}
+              </span>
               <h3 id="banana-title">
-                <span class="serif-it">{t.banana.h2a}</span>{' '}
-                <em>{t.banana.h2b}</em>
+                {t.banana.h2a} <em>{t.banana.h2b}</em>
               </h3>
-              <p class="card-desc">{t.banana.short}</p>
-              <fieldset class="size-choice menu-choice" disabled={!open}>
+              <fieldset class="sizes" disabled={!open}>
                 <legend class="visually-hidden">{t.catalog.size}</legend>
                 <label>
                   <input type="radio" name="banana-size" value="2" checked />
                   <span>
-                    <strong>{t.ed.whole}</strong>
-                    <i class="leader" aria-hidden="true"></i>
-                    <em>{short(bananaWhole.price)}</em>
+                    {t.ed.whole} <b>{short(bananaWhole.price)}</b>
                   </span>
                 </label>
                 <label>
                   <input type="radio" name="banana-size" value="1" />
                   <span>
-                    <strong>{t.ed.half}</strong>
-                    <i class="leader" aria-hidden="true"></i>
-                    <em>{short(bananaHalf.price)}</em>
+                    {t.ed.half} <b>{short(bananaHalf.price)}</b>
                   </span>
                 </label>
               </fieldset>
+              <p class="bread-text">{t.banana.short}</p>
               <p
                 class="dish-stock"
                 data-stock="banana"
@@ -739,18 +597,16 @@ const jsonLd = [
               >
                 {open ? stockText('banana') : t.catalog.closed}
               </p>
-              {open ? (
+              {open && (
                 <div class="dish-buy" data-buy="banana">
                   <button
                     type="button"
-                    class="button button-orange"
+                    class="add"
                     data-add="banana"
                     disabled={bananaMax === 0}
                   >
                     {t.catalog.add}
-                    <span class="button-plus" aria-hidden="true">
-                      +
-                    </span>
+                    <b aria-hidden="true">+</b>
                   </button>
                   <div class="mini-stepper" data-mini="banana" hidden>
                     <button
@@ -771,138 +627,174 @@ const jsonLd = [
                     </button>
                   </div>
                 </div>
-              ) : (
-                <a class="button button-light" href="#avisame">
-                  {t.banana.notify}
-                </a>
               )}
-              <details class="dish-more">
-                <summary>{t.catalog.details}</summary>
-                <dl class="spec">
-                  <div>
-                    <dt>{t.loaf.ingredients}</dt>
-                    <dd>{t.banana.ingredientsValue}</dd>
-                  </div>
-                  <div>
-                    <dt>{t.loaf.allergens}</dt>
-                    <dd>{t.banana.allergensValue}</dd>
-                  </div>
-                </dl>
-              </details>
             </div>
-          </article>
-
-          <!-- Brioixeria: per unitats, amb cupo compartit, a totes les fornades -->
-          <article
-            id="bolleria"
-            class="card card-pastry"
-            aria-labelledby="pastry-title"
-          >
-            <figure class="card-photo" data-wipe>
-              <Photo
-                name="pastries"
-                alt={t.pastry.alt}
-                sizes="(max-width: 960px) calc(100vw - 40px), 44vw"
-              />
-              <span class="card-tag">{t.pastry.tag}</span>
-            </figure>
-            <div class="card-body" data-reveal>
-              <p class="dish-index">
-                <span>03</span>
-                {t.pastry.kicker}
-              </p>
-              <h3 id="pastry-title" class="visually-hidden">
-                {t.pastry.kicker}
-              </h3>
-              <p class="card-desc">{t.pastry.short}</p>
-              <ul class="pastry-list">
-                {pastries.map((p) => (
-                  <li class="pastry-item">
-                    <div class="pastry-name">
-                      <h4>{p.name}</h4>
-                      <p>{p.text}</p>
+          </li>
+          {pastries.map((p, i) => (
+            <li class="bread-card" data-bread={p.key}>
+              <div class="bread-plate">
+                <Photo
+                  name={p.key === 'croissant' ? 'croissant' : 'pastries'}
+                  alt={t.pastry.alt}
+                  sizes="(max-width: 820px) 72vw, 40vw"
+                />
+              </div>
+              <div class="bread-info">
+                <span class="bread-idx" aria-hidden="true">
+                  {pad(menuBreads.length + 2 + i)} / {pad(menuCount)}
+                </span>
+                <h3>{p.name}</h3>
+                <p class="bread-price">
+                  <span aria-hidden="true">{tight(p.product.price)}</span>
+                  <span class="visually-hidden">
+                    {money(p.product.price)} · {t.pastry.unit}
+                  </span>
+                </p>
+                <p class="bread-text">{p.text}</p>
+                {i === 1 && (
+                  <p
+                    class="dish-stock"
+                    data-stock="pastry"
+                    data-level={stock.pastry.level}
+                    hidden={open && !stockText('pastry')}
+                  >
+                    {open ? stockText('pastry') : t.catalog.closed}
+                  </p>
+                )}
+                {open && (
+                  <div class="dish-buy" data-buy={p.key}>
+                    <button
+                      type="button"
+                      class="add"
+                      data-add={p.key}
+                      disabled={pastryMax === 0}
+                      aria-label={`${t.pastry.add}: ${p.name}`}
+                    >
+                      {t.pastry.add}
+                      <b aria-hidden="true">+</b>
+                    </button>
+                    <div class="mini-stepper" data-mini={p.key} hidden>
+                      <button
+                        type="button"
+                        data-sub={p.key}
+                        aria-label={t.pastry.less(p.name)}
+                      >
+                        −
+                      </button>
+                      <output data-count={p.key} aria-live="polite"></output>
+                      <button
+                        type="button"
+                        data-add={p.key}
+                        aria-label={t.pastry.more(p.name)}
+                      >
+                        +
+                      </button>
                     </div>
-                    <p class="pastry-price">
-                      <span aria-hidden="true">{tight(p.product.price)}</span>
-                      <span class="visually-hidden">
-                        {money(p.product.price)} · {t.pastry.unit}
-                      </span>
-                    </p>
-                    {open ? (
-                      <div class="dish-buy pastry-buy" data-buy={p.key}>
-                        <button
-                          type="button"
-                          class="button button-orange"
-                          data-add={p.key}
-                          disabled={pastryMax === 0}
-                          aria-label={`${t.pastry.add}: ${p.name}`}
-                        >
-                          {t.pastry.add}
-                          <span class="button-plus" aria-hidden="true">
-                            +
-                          </span>
-                        </button>
-                        <div class="mini-stepper" data-mini={p.key} hidden>
-                          <button
-                            type="button"
-                            data-sub={p.key}
-                            aria-label={t.pastry.less(p.name)}
-                          >
-                            −
-                          </button>
-                          <output
-                            data-count={p.key}
-                            aria-live="polite"
-                          ></output>
-                          <button
-                            type="button"
-                            data-add={p.key}
-                            aria-label={t.pastry.more(p.name)}
-                          >
-                            +
-                          </button>
-                        </div>
-                      </div>
-                    ) : null}
-                  </li>
-                ))}
-              </ul>
-              {!open && (
-                <a class="button button-light" href="#avisame">
-                  {t.pastry.notify}
-                </a>
-              )}
-              <p
-                class="dish-stock"
-                data-stock="pastry"
-                data-level={stock.pastry.level}
-                hidden={open && !stockText('pastry')}
-              >
-                {open ? stockText('pastry') : t.catalog.closed}
+                  </div>
+                )}
+              </div>
+            </li>
+          ))}
+          <li class="bread-card quote-card" id="ressenya">
+            <figure class="bread-info">
+              <p class="bread-idx">
+                <span aria-hidden="true">★★★★★</span>
+                {googleReviews.score} · {t.reviews.count(googleReviews.count)}
               </p>
-              <details class="dish-more">
-                <summary>{t.catalog.details}</summary>
-                <dl class="spec">
-                  <div>
-                    <dt>{t.loaf.ingredients}</dt>
-                    <dd>{t.pastry.ingredients}</dd>
-                  </div>
-                  <div>
-                    <dt>{t.loaf.allergens}</dt>
-                    <dd>{t.pastry.allergens}</dd>
-                  </div>
-                </dl>
-              </details>
-            </div>
-          </article>
+              <blockquote lang={googleReviews.quotes[1].lang}>
+                <p>{googleReviews.quotes[1].text}</p>
+              </blockquote>
+              <figcaption class="bread-idx">
+                {googleReviews.quotes[1].author} · {t.reviews.source}
+              </figcaption>
+              <p class="quote-links">
+                <a
+                  href={googleReviews.profileUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {t.reviews.all(googleReviews.count)} ↗
+                  <span class="visually-hidden">{t.reviews.newTab}</span>
+                </a>
+                <a
+                  href={googleReviews.reviewUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {t.reviews.leave} ↗
+                  <span class="visually-hidden">{t.reviews.newTab}</span>
+                </a>
+              </p>
+            </figure>
+          </li>
+        </ul>
+        <div class="wrap counter-foot">
+          <div class="counter-progress" aria-hidden="true">
+            {Array.from({ length: menuCount + 1 }, () => (
+              <i />
+            ))}
+          </div>
+          <details class="dish-more">
+            <summary>{t.catalog.details}</summary>
+            <dl class="spec">
+              <div>
+                <dt>{t.catalog.loaf}</dt>
+                <dd>{t.loaf.ingredientsValue}</dd>
+              </div>
+              <div>
+                <dt>{t.catalog.sourdough}</dt>
+                <dd>{t.breads.details.sourdough}</dd>
+              </div>
+              <div>
+                <dt>{t.catalog.wholegrain}</dt>
+                <dd>{t.breads.details.wholegrain}</dd>
+              </div>
+              {extras.map((b) => (
+                <div>
+                  <dt>{b.name}</dt>
+                  <dd>{t.breads.extra[b.key].ingredients}</dd>
+                </div>
+              ))}
+              <div>
+                <dt>{t.loaf.allergens}</dt>
+                <dd>
+                  {t.breads.allergens} {t.breads.extraAllergens}
+                </dd>
+              </div>
+              <div>
+                <dt>
+                  {t.banana.h2a} {t.banana.h2b}
+                </dt>
+                <dd>
+                  {t.banana.ingredientsValue} · {t.loaf.allergens}:{' '}
+                  {t.banana.allergensValue}
+                </dd>
+              </div>
+              <div>
+                <dt>{t.pastry.kicker}</dt>
+                <dd>
+                  {t.pastry.ingredients} · {t.loaf.allergens}:{' '}
+                  {t.pastry.allergens}
+                </dd>
+              </div>
+              <div>
+                <dt>{t.loaf.keeps}</dt>
+                <dd>{t.loaf.keepsValue}</dd>
+              </div>
+            </dl>
+          </details>
         </div>
       </div>
     </section>
 
-    <!-- 7 · Reserva: el tiquet, sobre el azul del flyer -->
-    <section id="reserva" class="reserve" aria-labelledby="reserve-title">
-      {(xmasLinks.length > 0 || chosen) && (
-        <div class="wrap">
+    <!-- 5 · La comanda, dita com una frase a Víctor -->
+    <section id="reserva" class="order" aria-labelledby="reserve-title">
+      <div class="wrap">
+        <div class="xp-bar">
+          <span>{t.xp.order.kicker}</span>
+          <span>{t.xp.order.bar}</span>
+        </div>
+        {(xmasLinks.length > 0 || chosen) && (
           <p class="xmas-strip">
             <strong>{t.xmas.label}</strong>
             <span>
@@ -921,100 +813,46 @@ const jsonLd = [
               )}
             </span>
           </p>
-        </div>
-      )}
-      <div class="wrap">
-        <div class="mono-bar" data-bar>
-          <span>Nº 02 · {t.reserve.kicker}</span>
-          <span>{t.ed.reserveBar}</span>
-        </div>
-      </div>
-      <div class="wrap reserve-grid">
-        <div class="reserve-intro" data-reveal>
-          <h2 id="reserve-title">{t.reserve.h2}</h2>
-          {open && (
+        )}
+        <h2 id="reserve-title" class="visually-hidden">
+          {t.reserve.h2}
+        </h2>
+        <p class="order-lede">{t.hero.short}</p>
+        {open ? (
+          <form
+            id="reservation-form"
+            action={`/api/reservations?lang=${lang}`}
+            method="post"
+            data-price={loaf.price}
+            data-banana-whole={bananaWhole.price}
+            data-banana-half={bananaHalf.price}
+            data-croissant={croissant.price}
+            data-pain={pain.price}
+            data-sourdough={sourdough.price}
+            data-wholegrain={wholegrain.price}
+            data-bread-pool={stock.bread.max}
+            data-pastry-pool={pastryPool}
+          >
+            {isDemo && <p class="form-intro">{t.reserve.demoIntro}</p>}
+            <input type="hidden" name="requestId" value="" />
+            <input type="hidden" name="bakeId" value={current.id} />
+            <input type="hidden" name="product" value="clasica" />
+            <input type="hidden" name="source" value="direct" />
+            <input type="hidden" name="ref" value="" />
             <p
-              class="order-sentence"
-              data-sentence
-              data-hi={t.xp.sentence.hi}
-              data-for={t.xp.sentence.for}
-              data-and={t.xp.sentence.and}
-              data-day={pickupDay}
-              aria-hidden="true"
-            >
+              id="referral-note"
+              class="form-intro"
+              hidden
+              data-text={t.reserve.referralNote}
+            ></p>
+            <p class="sentence" data-sentence data-and={t.xp.sentence.and}>
               {t.xp.sentence.hi}{' '}
-              <em data-sentence-what>{t.xp.sentence.empty}</em>{' '}
+              <a class="slot" href="#carta" data-sentence-what>
+                {t.xp.sentence.empty}
+              </a>{' '}
               {t.xp.sentence.for} <em>{pickupDay}</em>.
             </p>
-          )}
-          <dl class="summary">
-            <div>
-              <dt>{t.reserve.pickup}</dt>
-              <dd>{pickupDay}</dd>
-            </div>
-            <div>
-              <dt>{t.reserve.where}</dt>
-              <dd id="recogida" data-event-view="pickup_info_view">
-                {t.reserve.pickupLocation}
-                <small>{t.reserve.pickupDetails}</small>
-                {current.pickupWindow && <small>{current.pickupWindow}</small>}
-                <span class="map-links">
-                  <a href={routes.delivery[lang]}>{t.reserve.pickupInfo}</a>
-                </span>
-              </dd>
-            </div>
-            <div>
-              <dt>{t.reserve.pay}</dt>
-              <dd>{t.reserve.payValue}</dd>
-            </div>
-          </dl>
-          {brand.whatsapp && (
-            <a
-              class="text-link"
-              data-event="click_whatsapp"
-              data-place="question"
-              href={`https://wa.me/${brand.whatsapp}`}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {t.reserve.question}
-            </a>
-          )}
-        </div>
-        <div class="reservation-panel ticket">
-          {open ? (
-            <form
-              id="reservation-form"
-              action={`/api/reservations?lang=${lang}`}
-              method="post"
-              data-price={loaf.price}
-              data-banana-whole={bananaWhole.price}
-              data-banana-half={bananaHalf.price}
-              data-croissant={croissant.price}
-              data-pain={pain.price}
-              data-sourdough={sourdough.price}
-              data-wholegrain={wholegrain.price}
-              data-bread-pool={stock.bread.max}
-              data-pastry-pool={pastryPool}
-            >
-              <div class="ticket-head" aria-hidden="true">
-                <span>molla.</span>
-                <span>Nº {pad(current.number)}</span>
-              </div>
-              <h3>{t.reserve.yourOrder}</h3>
-              {isDemo && <p class="form-intro">{t.reserve.demoIntro}</p>}
-              <input type="hidden" name="requestId" value="" />
-              <input type="hidden" name="bakeId" value={current.id} />
-              <input type="hidden" name="product" value="clasica" />
-              <input type="hidden" name="source" value="direct" />
-              <input type="hidden" name="ref" value="" />
-              <p
-                id="referral-note"
-                class="form-intro"
-                hidden
-                data-text={t.reserve.referralNote}
-              ></p>
-              <p class="step-label">{t.reserve.step1}</p>
+            <div class="order-ticket">
               <div class="order-lines">
                 <div class="order-line" data-line="loaf">
                   <label for="quantity">
@@ -1357,64 +1195,113 @@ const jsonLd = [
               <button type="button" class="more-products" data-more-products>
                 {t.reserve.moreProducts}
               </button>
-              <div class="perforation" aria-hidden="true"></div>
-              <fieldset class="size-choice delivery-choice">
-                <legend>{t.reserve.deliveryH}</legend>
+            </div>
+            <p class="sentence">
+              <span
+                class="choice delivery-choice"
+                role="radiogroup"
+                aria-label={t.reserve.deliveryH}
+              >
                 <label>
                   <input type="radio" name="delivery" value="home" checked />
-                  <span>
-                    <strong>{t.reserve.deliveryHome(wed)}</strong>
-                    <em>{t.reserve.deliveryHomeHint}</em>
-                  </span>
+                  <span>{t.xp.order.home}</span>
                 </label>
                 <label>
                   <input type="radio" name="delivery" value="pickup" />
-                  <span>
-                    <strong>{t.reserve.deliveryPickup}</strong>
-                    <em>{t.reserve.deliveryPickupHint}</em>
-                  </span>
+                  <span>{t.xp.order.pickup}</span>
                 </label>
-              </fieldset>
-              <div class="form-columns address-columns" data-home-fields>
+              </span>
+              <span class="home-fields" data-home-fields>
+                {' '}
+                {t.xp.order.homeAt}{' '}
+                <label class="visually-hidden" for="town">
+                  {t.reserve.town}
+                </label>
+                <select id="town" name="town" required>
+                  <option value="">{t.reserve.townPick}</option>
+                  {deliveryTowns.map((town) => (
+                    <option value={town.id}>{town.name}</option>
+                  ))}
+                </select>
+                , {t.xp.order.street}{' '}
+                <label class="visually-hidden" for="address">
+                  {t.reserve.address}
+                </label>
+                <input
+                  id="address"
+                  name="address"
+                  autocomplete="street-address"
+                  minlength="5"
+                  maxlength="160"
+                  required
+                  placeholder={t.reserve.addressPlaceholder}
+                />
                 {wed && (
-                  <fieldset class="size-choice slot-choice">
-                    <legend>{t.reserve.slotH}</legend>
+                  <span
+                    class="choice slot-choice"
+                    role="radiogroup"
+                    aria-label={t.reserve.slotH}
+                  >
+                    {' '}
+                    {t.xp.order.slot}{' '}
                     <label>
                       <input type="radio" name="slot" value="midday" checked />
-                      <span>
-                        <strong>{t.reserve.slotMidday}</strong>
-                      </span>
+                      <span>{t.reserve.slotMidday}</span>
                     </label>
                     <label>
                       <input type="radio" name="slot" value="evening" />
-                      <span>
-                        <strong>{t.reserve.slotEvening}</strong>
-                        <em>{t.reserve.slotEveningHint}</em>
-                      </span>
+                      <span>{t.reserve.slotEvening}</span>
                     </label>
-                  </fieldset>
+                  </span>
                 )}
-                <div class="field">
-                  <label for="town">{t.reserve.town}</label>
-                  <select id="town" name="town" required>
-                    <option value="">{t.reserve.townPick}</option>
-                    {deliveryTowns.map((town) => (
-                      <option value={town.id}>{town.name}</option>
-                    ))}
-                  </select>
-                </div>
-                <div class="field">
-                  <label for="address">{t.reserve.address}</label>
-                  <input
-                    id="address"
-                    name="address"
-                    autocomplete="street-address"
-                    minlength="5"
-                    maxlength="160"
-                    required
-                    placeholder={t.reserve.addressPlaceholder}
-                  />
-                </div>
+              </span>
+              . {t.xp.order.name}{' '}
+              <label class="visually-hidden" for="name">
+                {t.reserve.name}
+              </label>
+              <input
+                id="name"
+                name="name"
+                autocomplete="name"
+                minlength="2"
+                maxlength="100"
+                required
+                placeholder={lang === 'ca' ? 'el teu nom' : 'tu nombre'}
+              />{' '}
+              {t.xp.order.phone}{' '}
+              <label class="visually-hidden" for="phone">
+                {t.reserve.phone}
+              </label>
+              <input
+                id="phone"
+                name="phone"
+                type="tel"
+                autocomplete="tel"
+                minlength="9"
+                maxlength="22"
+                pattern="[0-9 \(\)\+\-]{9,22}"
+                required
+                placeholder="612 345 678"
+              />
+              .
+            </p>
+            <div class="order-extra">
+              <p class="field-line">
+                <label for="email">{t.xp.order.email}</label>
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  autocomplete="email"
+                  maxlength="254"
+                  placeholder="tu@email.com"
+                  aria-describedby="email-hint"
+                />
+                <span id="email-hint" class="visually-hidden">
+                  {t.reserve.emailHint}
+                </span>
+              </p>
+              <div class="notes-wrap" data-home-notes>
                 <details class="notes-more">
                   <summary>{t.reserve.notesToggle}</summary>
                   <div class="field">
@@ -1429,459 +1316,96 @@ const jsonLd = [
                   </div>
                 </details>
               </div>
-              <p class="step-label">{t.reserve.step3}</p>
-              <div class="field">
-                <label for="name">{t.reserve.name}</label>
-                <input
-                  id="name"
-                  name="name"
-                  autocomplete="name"
-                  minlength="2"
-                  maxlength="100"
-                  required
-                />
-              </div>
-              <div class="form-columns">
-                <div class="field">
-                  <label for="email">{t.reserve.email}</label>
-                  <input
-                    id="email"
-                    name="email"
-                    type="email"
-                    autocomplete="email"
-                    maxlength="254"
-                    placeholder="tu@email.com"
-                    aria-describedby="email-hint"
-                  />
-                  <p id="email-hint" class="field-hint">
-                    {t.reserve.emailHint}
-                  </p>
-                </div>
-                <div class="field">
-                  <label for="phone">{t.reserve.phone}</label>
-                  <input
-                    id="phone"
-                    name="phone"
-                    type="tel"
-                    autocomplete="tel"
-                    minlength="9"
-                    maxlength="22"
-                    pattern="[0-9 \(\)\+\-]{9,22}"
-                    required
-                    placeholder="612 345 678"
-                  />
-                </div>
-              </div>
-              <div class="honey" aria-hidden="true">
-                <label>
-                  {t.reserve.honey}
-                  <input name="website" tabindex="-1" autocomplete="off" />
-                </label>
-              </div>
-              {isDemo ? (
-                <label class="check">
-                  <input type="checkbox" name="pickup" value="yes" required />
-                  <span>{t.reserve.demoCheck}</span>
-                </label>
-              ) : (
-                <p class="check-note">
-                  {t.reserve.pickupCheck(pickupDay, current.pickupWindow, wed)}
-                </p>
-              )}
-              <!-- Ordering is the consent: a line to read, not a box to tick. -->
-              <input type="hidden" name="privacy" value="yes" />
-              <label class="check">
-                <input type="checkbox" name="news" value="yes" />
-                <span>{t.reserve.newsCheck}</span>
+            </div>
+            <div class="honey" aria-hidden="true">
+              <label>
+                {t.reserve.honey}
+                <input name="website" tabindex="-1" autocomplete="off" />
               </label>
-              <p class="form-error" role="alert" tabindex="-1" hidden></p>
-              <button
-                type="submit"
-                class="button full"
-                data-label={isDemo ? t.reserve.submitDemo : t.reserve.submit}
-              >
-                {isDemo ? t.reserve.submitDemo : t.reserve.submit}
-              </button>
-              <p class="form-footnote">
-                {t.reserve.footnote} {t.reserve.privacyNote}{' '}
-                <a href={routes.privacy[lang]} target="_blank">
-                  {t.reserve.privacyLink}
-                </a>
-                .
-              </p>
-              {whatsappBook && (
-                <a
-                  class="text-link form-whatsapp"
-                  data-event="click_whatsapp_order"
-                  data-place="form"
-                  href={whatsappBook}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {t.reserve.whatsappAlt} <span aria-hidden="true">↗</span>
-                </a>
-              )}
-              <noscript>
-                <p>
-                  {t.reserve.noscript}{' '}
-                  {brand.contact && (
-                    <a href={`mailto:${brand.contact}`}>
-                      {t.reserve.noscriptMail}
-                    </a>
-                  )}
-                </p>
-              </noscript>
-            </form>
-          ) : (
-            <div class="closed-panel">
-              <p class="kicker">{statusLabel}</p>
-              <h3>{t.reserve.closedH3}</h3>
-              <p>{t.reserve.closedP}</p>
-              <a class="button" href="#avisame">
-                {t.reserve.notify}
-              </a>
             </div>
-          )}
-          <div
-            id="confirmation"
-            hidden
-            tabindex="-1"
-            role="status"
-            data-whatsapp={brand.whatsapp || undefined}
-          ></div>
-          <Sticker class="ticket-stamp" />
-        </div>
-      </div>
-    </section>
-
-    <!-- La cinta: palabras del obrador, después del pedido para no alargar el camino -->
-    <div class="marquee" aria-hidden="true" data-marquee>
-      {[0, 1].map((row) => (
-        <div class:list={['marquee-row', { 'marquee-reverse': row === 1 }]}>
-          {[0, 1].map(() => (
-            <span class="marquee-track">
-              {[...t.hero.keywords, ...t.hero.keywords].map((w, i) => (
-                <span class:list={['marquee-word', { outline: (i + row) % 2 }]}>
-                  {w}
-                  <span class="star">✷</span>
-                </span>
-              ))}
-            </span>
-          ))}
-        </div>
-      ))}
-    </div>
-
-    <!-- Ressenyes de Google: un cartell amb l'índex al costat, com la taula
-         del flyer. Una ressenya a la vegada. Cites textuals, en el seu idioma. -->
-    <section
-      id="resenas"
-      class="reviews"
-      aria-labelledby="reviews-title"
-      data-reviews
-    >
-      <div class="wrap">
-        <div class="mono-bar" data-bar>
-          <span>{t.reviews.kicker}</span>
-          <span>{t.reviews.fig}</span>
-        </div>
-        <h2 id="reviews-title" class="reviews-score">
-          <span class="reviews-big">{googleReviews.score}</span>{' '}
-          <span class="reviews-count">
-            {t.reviews.count(googleReviews.count)}
-          </span>
-        </h2>
-        <div class="reviews-board">
-          <div class="reviews-stage" data-reviews-stage>
-            {googleReviews.quotes.map((r, i) => {
-              const [before, after] = r.highlight.split(r.accent);
-              return (
-                <div
-                  class="review-slide"
-                  id={`review-${i}`}
-                  role="tabpanel"
-                  aria-labelledby={`review-tab-${i}`}
-                  data-review={i}
-                >
-                  <figure>
-                    <p class="review-top" aria-hidden="true">
-                      <span>(Fig. 7.{i + 1})</span>
-                      <span>Google · {googleReviews.score}</span>
-                    </p>
-                    <p class="review-headline" aria-hidden="true">
-                      <span class="review-mark">“</span>
-                      <span class="review-line">
-                        {before}
-                        <em>{r.accent}</em>
-                        {after}
-                      </span>
-                    </p>
-                    <div class="review-body">
-                      <blockquote lang={r.lang}>
-                        <p>{r.text}</p>
-                      </blockquote>
-                      <figcaption class="review-by">
-                        <cite>{r.author}</cite>
-                        <span>{t.reviews.source}</span>
-                      </figcaption>
-                    </div>
-                  </figure>
-                </div>
-              );
-            })}
-          </div>
-          <div class="reviews-nav">
-            <div
-              class="reviews-index"
-              role="tablist"
-              aria-label={t.reviews.label}
-            >
-              {googleReviews.quotes.map((r, i) => (
-                <button
-                  type="button"
-                  role="tab"
-                  id={`review-tab-${i}`}
-                  aria-controls={`review-${i}`}
-                  aria-selected={i === 0 ? 'true' : 'false'}
-                  tabindex={i === 0 ? 0 : -1}
-                  data-review-tab={i}
-                >
-                  <span class="review-tab-num">{pad(i + 1)}</span>
-                  <span class="review-tab-name">{r.author}</span>
-                </button>
-              ))}
-            </div>
-            <div class="reviews-arrows" data-reviews-arrows hidden>
-              <button
-                type="button"
-                class="reviews-arrow"
-                data-reviews-prev
-                aria-label={t.reviews.prev}
-              >
-                ←
-              </button>
-              <button
-                type="button"
-                class="reviews-arrow"
-                data-reviews-next
-                aria-label={t.reviews.next}
-              >
-                →
-              </button>
-            </div>
-          </div>
-        </div>
-        <div class="reviews-actions">
-          <a
-            class="button button-light"
-            href={googleReviews.profileUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            {t.reviews.all(googleReviews.count)}
-            <span aria-hidden="true">↗</span>
-            <span class="visually-hidden">{t.reviews.newTab}</span>
-          </a>
-          <a
-            class="button button-ghost reviews-leave"
-            href={googleReviews.reviewUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            {t.reviews.leave}
-            <span aria-hidden="true">↗</span>
-            <span class="visually-hidden">{t.reviews.newTab}</span>
-          </a>
-        </div>
-      </div>
-    </section>
-
-    <!-- 2 · Diari de l'obrador: las fotos de la cocina, como un reel -->
-    <section class="diary" aria-label={t.film.label} data-diary>
-      <div class="diary-pin">
-        <div class="wrap mono-bar diary-bar">
-          <span>{t.ed.diary}</span>
-          <span>
-            (Fig. <span data-diary-index>1</span> / {t.film.items.length})
-          </span>
-        </div>
-        <div class="wrap diary-progress" aria-hidden="true">
-          {t.film.items.map(() => (
-            <span>
-              <i />
-            </span>
-          ))}
-        </div>
-        <div
-          class="diary-track"
-          data-film
-          tabindex="0"
-          role="group"
-          aria-label={t.film.label}
-        >
-          {t.film.items.map(([name, title, text, alt], i) => (
-            <figure class:list={['story', { 'story-outline': i % 2 }]}>
-              <div class="story-photo">
-                <Photo
-                  name={name}
-                  alt={alt}
-                  sizes="(max-width: 720px) 78vw, 34vh"
-                />
-              </div>
-              <span class="story-word" aria-hidden="true">
-                {title}
-              </span>
-              <span class="story-num" aria-hidden="true">
-                {i + 1}
-              </span>
-              <figcaption>
-                <strong>{title}</strong>
-                <span>{text}</span>
-              </figcaption>
-              <span class="story-foot" aria-hidden="true">
-                <b>molla.</b>
-                <span>Baix Llobregat</span>
-              </span>
-            </figure>
-          ))}
-        </div>
-        <p class="wrap diary-hint" aria-hidden="true">
-          {t.ed.swipe} →
-        </p>
-      </div>
-    </section>
-
-    <!-- Pa fix: després de la primera compra, la subscripció -->
-    <section class="fix" aria-labelledby="fix-title">
-      <div class="wrap fix-card">
-        <div class="mono-bar fix-bar" data-bar>
-          <span>{t.fix.kicker}</span>
-          <span>{t.fix.bar}</span>
-        </div>
-        <div class="fix-grid">
-          <div>
-            <h2 id="fix-title" data-split>
-              {t.fix.h2a} <em>{t.fix.h2b}</em>
-            </h2>
-          </div>
-          <div class="fix-side" data-reveal>
-            {standingVoucher.active && (
-              <p class="fix-voucher">
-                <span class="star" aria-hidden="true">
-                  ✷
-                </span>
-                {t.fix.voucher}
+            {isDemo ? (
+              <label class="check">
+                <input type="checkbox" name="pickup" value="yes" required />
+                <span>{t.reserve.demoCheck}</span>
+              </label>
+            ) : (
+              <p class="check-note">
+                {t.reserve.pickupCheck(pickupDay, current.pickupWindow, wed)}
               </p>
             )}
-            <ul class="fix-facts">
-              {t.fix.facts(money(loaf.price)).map((fact) => (
-                <li>{fact}</li>
-              ))}
-            </ul>
-            <a class="button button-orange" href={routes.standing[lang]}>
-              {t.fix.cta}
-              <span class="button-arrow" aria-hidden="true">
-                →
-              </span>
-            </a>
+            <!-- Ordering is the consent: a line to read, not a box to tick. -->
+            <input type="hidden" name="privacy" value="yes" />
+            <label class="check">
+              <input type="checkbox" name="news" value="yes" />
+              <span>{t.reserve.newsCheck}</span>
+            </label>
+            <p class="form-error" role="alert" tabindex="-1" hidden></p>
+            <button
+              type="submit"
+              class="button full"
+              data-label={isDemo ? t.reserve.submitDemo : t.reserve.submit}
+            >
+              {isDemo ? t.reserve.submitDemo : t.reserve.submit}
+            </button>
+            <p class="form-footnote">
+              {t.reserve.footnote} {t.reserve.privacyNote}{' '}
+              <a href={routes.privacy[lang]} target="_blank">
+                {t.reserve.privacyLink}
+              </a>
+              .
+            </p>
+            {whatsappBook && (
+              <a
+                class="text-link form-whatsapp"
+                data-event="click_whatsapp_order"
+                data-place="form"
+                href={whatsappBook}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {t.reserve.whatsappAlt} <span aria-hidden="true">↗</span>
+              </a>
+            )}
+            <noscript>
+              <p>
+                {t.reserve.noscript}{' '}
+                {brand.contact && (
+                  <a href={`mailto:${brand.contact}`}>
+                    {t.reserve.noscriptMail}
+                  </a>
+                )}
+              </p>
+            </noscript>
+          </form>
+        ) : (
+          <div class="closed-panel">
+            <p class="sentence">{t.reserve.closedH3}</p>
+            <p class="order-lede">{t.reserve.closedP}</p>
           </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- 8 · Preguntas -->
-    <section id="preguntas" class="faq" aria-labelledby="faq-title">
-      <div class="wrap">
-        <div class="mono-bar" data-bar>
-          <span>Nº 03 · {t.nav.faq}</span>
-          <span>{t.ed.faqBar}</span>
-        </div>
-        <div class="faq-grid">
-          <div class="faq-head">
-            <h2 id="faq-title" data-split>
-              {t.faq.h2}
-            </h2>
-          </div>
-          <div class="faq-list">
-            {t.faq.items.map(([q, a], i) => (
-              <details>
-                <summary>
-                  <span class="faq-num" aria-hidden="true">
-                    {pad(i + 1)}
-                  </span>
-                  <span class="faq-q">{q}</span>
-                  <span aria-hidden="true" class="faq-icon"></span>
-                </summary>
-                <p>{a}</p>
-              </details>
-            ))}
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Amb la fornada oberta, l'avís és una franja: no competeix amb la reserva -->
-    <section
-      id="avisame"
-      class:list={['waitlist', { 'is-compact': open }]}
-      aria-labelledby="waitlist-title"
-    >
-      <div class="wrap">
-        <div class="mono-bar" data-bar>
-          <span>Nº 04 · {t.status.UPCOMING}</span>
-          <span>{t.ed.waitBar}</span>
-        </div>
-      </div>
-      <div class="wrap waitlist-grid">
-        {!open && (
-          <figure class="poster" data-wipe>
-            <Photo
-              name="crumb"
-              alt={t.waitlist.poster}
-              sizes="(max-width: 960px) calc(100vw - 40px), 44vw"
-            />
-            <span class="poster-star" aria-hidden="true">
-              ✷
-            </span>
-          </figure>
         )}
-        <div class="waitlist-body" data-reveal>
-          <h2 id="waitlist-title">{t.waitlist.h2}</h2>
-          <p>{t.waitlist.p}</p>
-          {(brand.whatsappChannel || whatsappNotify) && (
-            <div class="waitlist-whatsapp">
-              {brand.whatsappChannel ? (
-                <a
-                  class="button button-orange"
-                  data-event="click_channel"
-                  href={brand.whatsappChannel}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {t.waitlist.channelCta} <span aria-hidden="true">↗</span>
-                </a>
-              ) : (
-                <a
-                  class="button button-orange"
-                  data-event="click_whatsapp"
-                  data-place="waitlist"
-                  href={whatsappNotify}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {t.waitlist.whatsapp} <span aria-hidden="true">↗</span>
-                </a>
-              )}
-              <p class="waitlist-alt">{t.waitlist.emailAlt}</p>
-            </div>
-          )}
+        <div
+          id="confirmation"
+          hidden
+          tabindex="-1"
+          role="status"
+          data-whatsapp={brand.whatsapp || undefined}
+        ></div>
+        <p class="fix">
+          {standingVoucher.active && <span>{t.fix.voucher}</span>}{' '}
+          <a href={routes.standing[lang]}>
+            {t.fix.cta} <span aria-hidden="true">→</span>
+          </a>
+        </p>
+        {!open && (
           <form
             id="waitlist-form"
+            class="waitlist"
             action={`/api/waitlist?lang=${lang}`}
             method="post"
           >
-            <label for="waitlist-email">{t.waitlist.label}</label>
-            <div class="waitlist-input">
+            <span id="avisame"></span>
+            <p class="sentence">
+              <label for="waitlist-email">{t.xp.order.notify}</label>{' '}
               <input
                 id="waitlist-email"
                 name="email"
@@ -1892,10 +1416,7 @@ const jsonLd = [
                 placeholder="tu@email.com"
                 disabled={!canSubmit}
               />
-              <button class="button" type="submit" disabled={!canSubmit}>
-                {t.waitlist.button}
-              </button>
-            </div>
+            </p>
             <input type="hidden" name="source" value="direct" />
             <div class="honey" aria-hidden="true">
               <input
@@ -1918,6 +1439,23 @@ const jsonLd = [
                 <a href={routes.privacy[lang]}>{t.waitlist.consentLink}</a>.
               </span>
             </label>
+            {(brand.whatsappChannel || whatsappNotify) && (
+              <a
+                class="text-link"
+                data-event={
+                  brand.whatsappChannel ? 'click_channel' : 'click_whatsapp'
+                }
+                data-place="waitlist"
+                href={brand.whatsappChannel || whatsappNotify}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {brand.whatsappChannel
+                  ? t.waitlist.channelCta
+                  : t.waitlist.whatsapp}{' '}
+                <span aria-hidden="true">↗</span>
+              </a>
+            )}
             {!canSubmit && <p class="form-footnote">{t.waitlist.disabled}</p>}
             {isDemo && <p class="form-footnote">{t.waitlist.demo}</p>}
             <p class="form-error" role="alert" tabindex="-1" hidden></p>
@@ -1929,13 +1467,16 @@ const jsonLd = [
             >
               {t.waitlist.success}
             </p>
+            <button class="go" type="submit" disabled={!canSubmit}>
+              {t.waitlist.button} <span aria-hidden="true">→</span>
+            </button>
           </form>
-        </div>
+        )}
       </div>
     </section>
   </main>
 
-  <!-- Pedido flotante: aparece al añadir algo; en el móvil, siempre a mano -->
+  <!-- La bossa: apareix quan hi ha alguna cosa a la comanda -->
   <div
     class="order-pill"
     role="navigation"
@@ -1954,7 +1495,7 @@ const jsonLd = [
     </span>
     <span class="pill-total" data-pill-total hidden></span>
     <a
-      class="button button-light"
+      class="button button-orange"
       href={orderHref}
       data-pill-cta
       data-done={open ? t.catalog.pillDone : undefined}

@@ -90,6 +90,7 @@ function alive() {
   const section = $('[data-alive]');
   const cv = $<HTMLCanvasElement>('.alive-canvas', section ?? document);
   if (!section || !cv?.dataset.crumb) return;
+  const tag = $('.alive-tag', section);
   let crumb: Crumb | null = null;
   let box = fitCanvas(cv);
   let k = 1;
@@ -161,6 +162,7 @@ function alive() {
     () => {
       const r = section.getBoundingClientRect();
       leave = clamp(-r.top / r.height);
+      if (tag && !reduce) tag.style.transform = `scale(${1 - leave * 0.35})`;
     },
     { passive: true },
   );
@@ -371,13 +373,13 @@ function counter() {
   const stick = $('.counter-stick', section)!;
   const bars = $$('.counter-progress i', section);
   const spins = $$<HTMLImageElement>('img.is-spin', track);
-  const header = $('[data-header]');
   const wide = matchMedia('(min-width: 821px)');
   let pinned = false;
   let ours = false;
 
   const travel = () => Math.max(0, track.scrollWidth - track.clientWidth);
-  const top = () => header?.offsetHeight ?? 68;
+  // The floating header lies over the counter: it pins at the very top.
+  const top = () => 0;
   const paint = () => {
     const max = travel();
     const p = max ? track.scrollLeft / max : 0;

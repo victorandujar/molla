@@ -439,6 +439,21 @@ export const ui = {
       ],
     },
     xp: {
+      nav: { how: 'Cómo lo hago', menu: 'La carta' },
+      order: {
+        kicker: 'Nº 04 · El pedido',
+        bar: 'Sin tarjeta ni cuenta',
+        home: 'Tráemelo a casa',
+        pickup: 'Lo recojo yo',
+        homeAt: 'en',
+        street: 'en',
+        slot: 'a',
+        name: 'Me llamo',
+        phone: 'y mi móvil es el',
+        email: 'Si quieres el tiquet por correo:',
+        total: 'Total · pagas al recibirlo',
+        notify: 'Avísame de la próxima hornada:',
+      },
       hint: 'Toca la masa',
       ferment: {
         label: 'Hasta 35 horas de fermentación',
@@ -1069,6 +1084,21 @@ export const ui = {
       ],
     },
     xp: {
+      nav: { how: 'Com el faig', menu: 'La carta' },
+      order: {
+        kicker: 'Nº 04 · La comanda',
+        bar: 'Sense targeta ni compte',
+        home: 'Porta-me’l a casa',
+        pickup: 'El recullo jo',
+        homeAt: 'a',
+        street: 'a',
+        slot: 'al',
+        name: 'Em dic',
+        phone: 'i el meu mòbil és el',
+        email: 'Si vols el tiquet per correu:',
+        total: 'Total · pagues en rebre’l',
+        notify: 'Avisa’m de la propera fornada:',
+      },
       hint: 'Toca la massa',
       ferment: {
         label: 'Fins a 35 hores de fermentació',
