@@ -761,7 +761,7 @@ if (pill) {
     }
     updatePill();
   });
-  const hero = document.querySelector('.hero');
+  const hero = document.querySelector('.alive, .hero');
   if (hero) watch.observe(hero);
   if (reserve) watch.observe(reserve);
 }

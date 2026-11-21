@@ -1,0 +1,769 @@
+/*
+  «Fermenta mentre baixes». La portada és la molla del packaging, viva; les
+  35 hores es veuen pujar en una pantalla; un tall obre el pa; la carta és un
+  taulell, un pa cada vegada sobre la seva post. Tot amb els mateixos colors i
+  tipus del flyer. experience.ts hi posa el moviment; sense, tot queda quiet.
+*/
+
+/* ---------- 1 · La molla viva ---------- */
+.alive {
+  position: relative;
+  overflow: clip;
+  background: var(--cobalt);
+  color: var(--ink);
+  min-height: calc(100svh - var(--header-h));
+  display: grid;
+  grid-template-rows: 1fr auto;
+}
+.alive-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  touch-action: pan-y;
+}
+.alive-grid {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: clamp(16px, 2vw, 32px);
+  align-items: center;
+  padding-block: clamp(40px, 6vw, 88px) 24px;
+  pointer-events: none;
+}
+.alive-grid > * {
+  pointer-events: auto;
+}
+.alive-tag {
+  grid-column: 1 / span 7;
+  display: grid;
+  gap: clamp(12px, 1.6vw, 20px);
+  justify-items: start;
+  padding: clamp(22px, 3vw, 44px);
+  background: var(--paper);
+  box-shadow: 0 40px 90px -50px rgba(15, 29, 85, 0.75);
+}
+.alive-mark {
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: clamp(72px, 12vw, 196px);
+  line-height: 0.8;
+  letter-spacing: -0.055em;
+  color: var(--cobalt);
+}
+.alive-mark i {
+  font-style: normal;
+  color: var(--orange);
+}
+.alive-title {
+  font-size: clamp(34px, 4vw, 64px);
+  line-height: 0.9;
+  color: var(--ink);
+  max-width: 16ch;
+}
+.alive-title em {
+  color: var(--cobalt);
+}
+.alive .hero-lede {
+  max-width: 48ch;
+  color: var(--ink-2);
+  font-size: clamp(15.5px, 1.1vw, 17px);
+}
+/* La fornada: un tiquet de paper, al costat de l'etiqueta. */
+.alive .hero-bake {
+  grid-column: 9 / span 4;
+  margin-top: 0;
+  padding: 20px 22px 22px;
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: 0 40px 90px -50px rgba(15, 29, 85, 0.75);
+}
+.alive .hero-bake:hover {
+  box-shadow:
+    inset 0 0 0 1.5px var(--orange),
+    0 40px 90px -50px rgba(15, 29, 85, 0.75);
+}
+.alive .stub-row {
+  border-bottom-color: var(--line-strong);
+}
+.alive .status,
+.alive .stub-day {
+  color: var(--cobalt);
+}
+.alive .stub-deadline,
+.alive .stub-trust,
+.alive .stub-whatsapp {
+  color: var(--ink-2);
+}
+.alive .stub-countdown {
+  background: var(--cobalt);
+  color: var(--paper);
+}
+.alive .stub-countdown b {
+  color: var(--paper);
+  text-decoration: underline 2px var(--orange);
+  text-underline-offset: 3px;
+}
+.alive .stub-when,
+.alive .stub-terms,
+.alive .stub-menu {
+  color: var(--ink);
+}
+.alive .stub-trust {
+  border-top-color: var(--line-strong);
+}
+.alive .stub-trust:hover,
+.alive .stub-whatsapp:hover {
+  color: var(--cobalt);
+}
+.alive [data-state]:not([data-state='OPEN']) .status-dot,
+.alive [data-state]:not([data-state='OPEN']) .status-dot::after {
+  background: var(--muted);
+}
+.alive-hint {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding-block: 0 18px;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--paper);
+  pointer-events: none;
+}
+.alive-hint span {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px;
+  background: var(--cobalt);
+}
+.alive-hint i {
+  position: relative;
+  width: 20px;
+  height: 20px;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+}
+.alive-hint i::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 6px;
+  height: 6px;
+  margin: -3px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: press 2.2s var(--ease-out) infinite;
+}
+@keyframes press {
+  40% {
+    transform: scale(2.2);
+    opacity: 0.4;
+  }
+}
+@media (max-width: 960px) {
+  .alive-tag,
+  .alive .hero-bake {
+    grid-column: 1 / -1;
+  }
+  /* L'etiqueta primer; la fornada, just a sota. */
+  .alive .hero-bake {
+    order: 0;
+  }
+  .alive-grid {
+    row-gap: 16px;
+    align-content: center;
+  }
+  .alive .hero-bake {
+    margin-top: 0;
+  }
+}
+@media (max-width: 720px) {
+  .alive {
+    min-height: 0;
+  }
+  .alive-grid {
+    padding-block: 28px 16px;
+  }
+  .alive-tag {
+    padding: 20px 18px 22px;
+  }
+  .alive-mark {
+    font-size: clamp(64px, 21vw, 96px);
+  }
+  .alive-title {
+    font-size: clamp(30px, 9vw, 40px);
+  }
+  /* El preu i l'enviament ja els diu el tiquet: el botó entra a la primera pantalla. */
+  .alive .hero-lede {
+    display: none;
+  }
+  .alive-hint span:last-child {
+    display: none;
+  }
+}
+
+/* ---------- 2 · 35 hores: la massa puja ---------- */
+.ferment {
+  padding-block: clamp(64px, 7vw, 104px);
+  background: var(--paper);
+  color: var(--cobalt);
+}
+.ferment-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+  gap: clamp(32px, 5vw, 96px);
+  align-items: center;
+  margin-top: clamp(32px, 5vw, 64px);
+}
+.ferment-clock {
+  display: grid;
+  gap: 24px;
+  min-width: 0;
+}
+.ferment-lead {
+  display: grid;
+  gap: 10px;
+  font-family: var(--mono);
+  font-weight: 400;
+  font-stretch: 100%;
+  font-size: 12px;
+  line-height: 1.3;
+  letter-spacing: 0.14em;
+  color: var(--muted);
+}
+.ferment-hours {
+  display: flex;
+  align-items: baseline;
+  font-family: var(--sans);
+  font-weight: 800;
+  font-stretch: 125%;
+  font-size: clamp(120px, 19vw, 320px);
+  line-height: 0.78;
+  letter-spacing: -0.06em;
+  font-variant-numeric: tabular-nums;
+  color: var(--cobalt);
+  text-transform: none;
+}
+.ferment-hours small {
+  margin-left: 0.08em;
+  font-family: var(--serif-it);
+  font-style: italic;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-size: 0.36em;
+  letter-spacing: 0;
+  color: var(--ink);
+}
+.ferment-phase {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 14px;
+  min-height: 2.6em;
+}
+.ferment-phase b {
+  font-weight: 800;
+  font-stretch: 62%;
+  font-size: clamp(38px, 3.6vw, 60px);
+  line-height: 0.9;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+.ferment-phase span {
+  font-family: var(--serif-it);
+  font-style: italic;
+  font-size: clamp(20px, 1.8vw, 28px);
+  line-height: 1.15;
+  color: var(--ink-2);
+}
+.ferment-scrub {
+  display: grid;
+  gap: 6px;
+}
+.ferment-scrub input {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 40px;
+  margin: 0;
+  background: transparent;
+  cursor: ew-resize;
+}
+.ferment-scrub input::-webkit-slider-runnable-track {
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    var(--ink) var(--fill, 100%),
+    var(--line-strong) var(--fill, 100%)
+  );
+}
+.ferment-scrub input::-moz-range-track {
+  height: 2px;
+  background: var(--line-strong);
+}
+.ferment-scrub input::-moz-range-progress {
+  height: 2px;
+  background: var(--ink);
+}
+.ferment-scrub input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 30px;
+  height: 30px;
+  margin-top: -14px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--orange);
+  box-shadow: 0 0 0 6px rgba(254, 123, 41, 0.2);
+}
+.ferment-scrub input::-moz-range-thumb {
+  width: 30px;
+  height: 30px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--orange);
+  box-shadow: 0 0 0 6px rgba(254, 123, 41, 0.2);
+}
+.ferment-scale {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.ferment-drag {
+  color: var(--rust);
+}
+.ferment-vs {
+  display: grid;
+  gap: 12px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+.vs-row {
+  display: grid;
+  grid-template-columns: 120px minmax(0, 1fr) 60px;
+  gap: 14px;
+  align-items: center;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.vs-row i {
+  position: relative;
+  height: 14px;
+  overflow: clip;
+  background: var(--paper-2);
+}
+.vs-row i::after {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: var(--w, 0%);
+  background: var(--muted);
+}
+.vs-row b {
+  font-weight: 400;
+  text-align: right;
+  letter-spacing: 0.02em;
+}
+.vs-me {
+  color: var(--cobalt);
+}
+.vs-me i::after {
+  background: var(--cobalt);
+}
+.vs-me b {
+  font-weight: 700;
+}
+.ferment-tin {
+  position: relative;
+  justify-self: end;
+  width: 100%;
+  max-width: 520px;
+  margin: 0;
+}
+.ferment-tin canvas {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  cursor: grab;
+  touch-action: pan-y;
+  background: var(--paper-2);
+}
+.ferment-replay {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  padding: 9px 12px;
+  border: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 11.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.ferment-replay:hover {
+  background: var(--orange);
+}
+.ferment .fig-bar {
+  color: var(--muted);
+}
+@media (prefers-reduced-motion: reduce) {
+  .ferment-replay {
+    display: none;
+  }
+}
+@media (max-width: 820px) {
+  .ferment-grid {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+  .ferment-tin {
+    order: -1;
+    justify-self: stretch;
+    max-width: none;
+  }
+  .ferment-tin canvas {
+    aspect-ratio: 5 / 4;
+  }
+  .ferment-hours {
+    font-size: clamp(104px, 34vw, 180px);
+  }
+  .vs-row {
+    grid-template-columns: 96px minmax(0, 1fr) 52px;
+    gap: 10px;
+  }
+}
+
+/* ---------- 3 · El tall ---------- */
+.cut {
+  position: relative;
+  background: var(--night);
+}
+.cut-stick {
+  position: relative;
+  height: 100svh;
+  max-height: 960px;
+  overflow: clip;
+}
+.cut-photo {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  will-change: transform;
+}
+.cut-photo picture,
+.cut-photo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.cut-says {
+  position: absolute;
+  inset: 50% 0 auto;
+  translate: 0 -50%;
+  padding-inline: 16px;
+  text-align: center;
+  font-family: var(--serif-it);
+  font-style: italic;
+  font-size: clamp(42px, 6vw, 104px);
+  line-height: 1;
+  color: var(--paper);
+  text-shadow: 0 2px 40px rgba(20, 21, 25, 0.55);
+}
+.cut-cap {
+  position: absolute;
+  inset: auto 0 20px;
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--paper);
+}
+.cut-cap span {
+  padding: 6px 8px;
+  background: var(--night);
+}
+/* Les tapes només hi són quan el script les pot obrir. */
+.cut-lid,
+.cut-knife {
+  display: none;
+}
+.cut.is-live {
+  height: 260vh;
+}
+.cut.is-live .cut-stick {
+  position: sticky;
+  top: 0;
+  max-height: none;
+}
+.cut.is-live .cut-photo {
+  transform: scale(1.18);
+}
+.cut.is-live .cut-says {
+  opacity: 0;
+}
+.cut.is-live .cut-lid {
+  display: block;
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 50.2%;
+  overflow: clip;
+  background: var(--cobalt);
+  will-change: transform;
+}
+.cut-top {
+  top: 0;
+}
+.cut-bot {
+  bottom: 0;
+}
+.cut-bar {
+  position: absolute;
+  top: calc(var(--header-h) + 16px);
+  left: 0;
+  right: 0;
+  color: var(--on-cobalt);
+}
+.cut-word {
+  position: absolute;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-weight: 800;
+  font-stretch: 62%;
+  font-size: clamp(110px, 26vw, 460px);
+  line-height: 0.8;
+  text-transform: uppercase;
+  color: var(--paper);
+}
+.cut-word em {
+  font-family: var(--serif-it);
+  font-style: italic;
+  font-weight: 400;
+  font-stretch: 100%;
+  text-transform: none;
+  color: var(--orange);
+}
+.cut-top .cut-word {
+  bottom: 0;
+  translate: 0 50%;
+}
+.cut-bot .cut-word {
+  top: 0;
+  translate: 0 -50%;
+}
+.cut.is-live .cut-knife {
+  display: block;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 1.5px;
+  background: var(--paper);
+  transform: scaleX(0);
+  transform-origin: left;
+}
+@media (max-width: 720px) {
+  .cut-stick {
+    height: 80svh;
+  }
+  .cut.is-live .cut-stick {
+    height: 100svh;
+  }
+  .cut-cap span:last-child {
+    display: none;
+  }
+}
+
+/* ---------- 4 · El taulell ---------- */
+.catalog .counter {
+  margin-inline: calc(50% - 50vw);
+  margin-top: clamp(28px, 3vw, 44px);
+}
+.counter-stick {
+  display: grid;
+  gap: clamp(16px, 2vw, 28px);
+  padding-block: 8px;
+}
+.counter-bar,
+.counter-progress {
+  width: min(1320px, 100% - var(--gutter) * 2);
+  margin-inline: auto;
+}
+.counter-bar {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.counter.is-pinned .counter-hint {
+  visibility: hidden;
+}
+.catalog .bread-list {
+  display: flex;
+  gap: clamp(28px, 6vw, 120px);
+  margin: 0;
+  padding: 8px max(var(--gutter), calc((100% - 1320px) / 2)) 16px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: max(var(--gutter), calc((100% - 1320px) / 2));
+  scrollbar-width: none;
+  overscroll-behavior-x: contain;
+}
+.catalog .bread-list::-webkit-scrollbar {
+  display: none;
+}
+.counter.is-pinned .bread-list {
+  scroll-snap-type: none;
+}
+.catalog .bread-card {
+  /* Ancora el text ocult (visually-hidden) dins del taulell. */
+  position: relative;
+  flex: 0 0 auto;
+  width: min(1100px, 84vw);
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-rows: none;
+  align-items: center;
+  gap: clamp(24px, 4vw, 72px);
+  scroll-snap-align: start;
+}
+.bread-plate {
+  width: min(56vh, 38vw, 520px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  overflow: clip;
+  background: var(--paper-2);
+}
+.bread-plate picture,
+.bread-plate img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.bread-plate img {
+  scale: 1.12;
+  will-change: transform;
+}
+.bread-info {
+  display: grid;
+  gap: 16px;
+  justify-items: start;
+  min-width: 0;
+}
+.bread-idx {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  color: var(--muted);
+}
+.catalog .bread-info h4 {
+  margin: 0;
+  font-weight: 800;
+  font-stretch: 62%;
+  font-size: clamp(52px, 6.4vw, 116px);
+  line-height: 0.86;
+  letter-spacing: -0.005em;
+  text-transform: uppercase;
+  color: var(--ink);
+  text-wrap: balance;
+}
+.catalog .bread-info .bread-price {
+  font-size: clamp(52px, 6vw, 104px);
+  line-height: 0.8;
+  letter-spacing: -0.05em;
+  color: transparent;
+  -webkit-text-stroke: 1.5px var(--cobalt);
+}
+.catalog .bread-info .bread-text {
+  margin: 0;
+  max-width: 26ch;
+  font-family: var(--serif-it);
+  font-style: italic;
+  font-size: clamp(21px, 1.9vw, 28px);
+  line-height: 1.15;
+  color: var(--ink-2);
+}
+.catalog .bread-info .bread-buy {
+  margin-top: 4px;
+  padding-top: 0;
+}
+.counter-progress {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: 6px;
+}
+.counter-progress i {
+  height: 2px;
+  background: var(--line);
+  transition: background 0.4s;
+}
+.counter-progress i.on {
+  background: var(--cobalt);
+}
+/* Fixat: baixar fa córrer el taulell; la secció és tan alta com el recorregut. */
+.counter.is-pinned .counter-stick {
+  position: sticky;
+  top: var(--header-h);
+  min-height: calc(100svh - var(--header-h));
+  align-content: center;
+}
+@media (max-width: 820px) {
+  .catalog .bread-card {
+    width: 80vw;
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+  .bread-plate {
+    width: min(72vw, 40svh);
+  }
+  .bread-info {
+    gap: 12px;
+  }
+  .catalog .bread-info h4 {
+    font-size: clamp(40px, 12vw, 64px);
+  }
+  .catalog .bread-info .bread-price {
+    font-size: 48px;
+  }
+  .catalog .bread-info .bread-text {
+    font-size: 19px;
+  }
+}
+
+/* ---------- 5 · La comanda, dita com una frase ---------- */
+.order-sentence {
+  margin-top: clamp(20px, 2.4vw, 32px);
+  font-family: var(--serif-it);
+  font-size: clamp(26px, 2.6vw, 40px);
+  line-height: 1.15;
+  color: var(--paper);
+  text-wrap: pretty;
+}
+.order-sentence em {
+  color: var(--orange);
+  border-bottom: 2px dashed var(--on-cobalt-line);
+}

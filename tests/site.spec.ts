@@ -44,8 +44,10 @@ test('real photos, keyboard access, responsive layout and accessibility', async 
     expect(
       await page.locator('.site-footer .crumb-field path').count(),
     ).toBeGreaterThan(400);
-    // The hero is the loaf opened in the maker's mother's hands.
-    await expect(page.locator('.hero-photo img')).toBeVisible();
+    // The hero is the packaging crumb, alive; the loaf opened in the maker's
+    // mother's hands comes with the cut.
+    await expect(page.locator('.alive-canvas')).toBeVisible();
+    await expect(page.locator('.cut-photo img')).toBeVisible();
     expect(
       await page.evaluate(
         () => document.documentElement.scrollWidth <= window.innerWidth,
@@ -1248,7 +1250,7 @@ test('no banana bread gift anywhere; the first order still gets the pa fix vouch
   );
   await expect(page.locator('body')).not.toContainText('chutney');
   await expect(page.locator('body')).not.toContainText('suscripciones');
-  await expect(page.locator('.why')).toContainText('de fermentación lenta');
+  await expect(page.locator('.ferment')).toContainText('Mi pan fermenta hasta');
   // The pa fix block leads to the sign-up page.
   await expect(
     page.locator('.fix').getByRole('link', { name: /Pan fijo/ }),

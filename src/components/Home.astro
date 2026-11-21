@@ -2,6 +2,8 @@
 import Base from '../layouts/Base.astro';
 import Photo from './Photo.astro';
 import Sticker from './Sticker.astro';
+import '../styles/experience.css';
+import crumbUrl from '../assets/crumb.json?url';
 import {
   brand,
   bake,
@@ -111,10 +113,19 @@ const extras = extraBreadIds.map((id) => {
     shots: [{ name: id, alt: e.alt }],
   };
 });
-const breadGroups = [
-  { id: 'base', items: breads },
-  { id: 'extra', items: extras },
-];
+// The counter: the nine breads in one row, each on its round board. The
+// shots from above turn with the scroll; the side views stay still.
+const plates: Record<string, string> = {
+  loaf: 'slice',
+  sourdough: 'sourdough',
+  wholegrain: 'wholegrain',
+};
+const menuBreads = [...breads, ...extras].map((b) => ({
+  ...b,
+  plate: plates[b.key] ?? b.key,
+  plateAlt: b.shots[b.shots.length - 1]!.alt,
+  spin: !['sourdough', 'wholegrain'].includes(b.key),
+}));
 const bananaWhole = productById('banana')!;
 const bananaHalf = productById('banana-mitad')!;
 // Levels, not counts: the page never says how many are left.
@@ -288,132 +299,117 @@ const jsonLd = [
   noindex={noindex}
 >
   <main id="contenido">
-    <!-- 1 · Portada: el flyer. El pan abierto en las manos de mi madre, en cobalto -->
-    <section class="hero" aria-labelledby="hero-title">
-      <div class="wrap mono-bar hero-bar hero-in" style="--i:0">
-        <span>{t.ed.bar}</span>
-        <span>Sant Boi · Baix Llobregat</span>
-      </div>
-      <div class="wrap hero-grid">
-        <h1 id="hero-title" class="hero-title">
-          <span class="hero-mask">
-            <span class="hero-line" style="--i:0">
-              {t.hero.h1a}
-            </span>
-          </span>{' '}
-          <span class="hero-mask">
-            <span class="hero-line hero-orange" style="--i:1">
-              {t.hero.h1b}.
-            </span>
+    <!-- 1 · La molla viva: la miga del packaging respira i s'obre on la toques -->
+    <section class="alive" aria-labelledby="hero-title" data-alive>
+      <canvas
+        class="alive-canvas"
+        data-crumb={crumbUrl}
+        aria-hidden="true"
+      ></canvas>
+      <div class="wrap alive-grid">
+        <div class="alive-tag">
+          <span class="alive-mark" aria-hidden="true">
+            molla<i>.</i>
           </span>
-        </h1>
-        <figure class="hero-photo" data-hero-photo>
-          <div class="hero-photo-frame">
-            <Photo
-              name="crumb2"
-              alt={t.hero.photos[1]!}
-              eager
-              sizes="(max-width: 960px) calc(100vw - 40px), 56vw"
-            />
+          <h1 id="hero-title" class="alive-title">
+            {t.hero.h1a} <em>{t.hero.h1b}.</em>
+          </h1>
+          <p class="hero-lede">{t.hero.short}</p>
+        </div>
+        <div
+          id="hornada"
+          class="hero-bake"
+          data-state={state}
+          data-event-view="view_current_bake"
+          aria-labelledby="bake-title"
+          role="region"
+        >
+          <div class="stub-row">
+            <span class="status">
+              <span class="status-dot" aria-hidden="true"></span>
+              <span data-bake-label>{statusLabel}</span>
+            </span>
           </div>
-          <figcaption class="fig-bar">
-            <span>{t.ed.fig}</span>
-            <span>{t.ed.ferment}</span>
-          </figcaption>
-        </figure>
-        <div class="hero-info">
-          <p class="hero-lede hero-in" style="--i:3">
-            {t.hero.short}
+          <h2 id="bake-title" class="stub-day">
+            {pickupDay}
+          </h2>
+          <p class="stub-deadline">
+            {open
+              ? t.bake.open(current.deadline)
+              : state === 'UPCOMING'
+                ? t.bake.upcoming
+                : t.bake.closed}
           </p>
-          <div
-            id="hornada"
-            class="hero-bake hero-in"
-            style="--i:4"
-            data-state={state}
-            data-event-view="view_current_bake"
-            aria-labelledby="bake-title"
-            role="region"
-          >
-            <div class="stub-row">
-              <span class="status">
-                <span class="status-dot" aria-hidden="true"></span>
-                <span data-bake-label>{statusLabel}</span>
-              </span>
-            </div>
-            <h2 id="bake-title" class="stub-day">
-              {pickupDay}
-            </h2>
-            <p class="stub-deadline">
-              {open
-                ? t.bake.open(current.deadline)
-                : state === 'UPCOMING'
-                  ? t.bake.upcoming
-                  : t.bake.closed}
-            </p>
-            {open && (
-              <p
-                class="stub-countdown"
-                data-countdown={current.deadline}
-                data-countdown-label={t.bake.closesIn}
-                hidden
-              ></p>
-            )}
-            {unavailable && (
-              <p role="status" class="stub-deadline">
-                {t.bake.unavailable}
-              </p>
-            )}
-            {open && <p class="stub-when">{t.hero.when(wed)}</p>}
-            {open && <p class="stub-terms">{t.hero.terms}</p>}
+          {open && (
             <p
-              class="stub-count"
-              data-stock="bread"
-              data-level={stock.bread.level}
-              hidden={!open || stock.bread.level !== 'low'}
-            >
-              {t.catalog.stock.bread.low}
+              class="stub-countdown"
+              data-countdown={current.deadline}
+              data-countdown-label={t.bake.closesIn}
+              hidden
+            ></p>
+          )}
+          {unavailable && (
+            <p role="status" class="stub-deadline">
+              {t.bake.unavailable}
             </p>
+          )}
+          {open && <p class="stub-when">{t.hero.when(wed)}</p>}
+          {open && <p class="stub-terms">{t.hero.terms}</p>}
+          <p
+            class="stub-count"
+            data-stock="bread"
+            data-level={stock.bread.level}
+            hidden={!open || stock.bread.level !== 'low'}
+          >
+            {t.catalog.stock.bread.low}
+          </p>
+          <a
+            class="button button-orange full stub-cta"
+            href={orderHref}
+            data-bake-cta
+            data-quick-loaf={quickLoaf ? '' : undefined}
+          >
+            {quickLoaf
+              ? t.bake.ctaQuick(money(loaf.price))
+              : open && pickupWeekday
+                ? t.bake.ctaOpen(pickupWeekday)
+                : t.bake.ctaClosed}
+            <span class="button-arrow" aria-hidden="true">
+              →
+            </span>
+          </a>
+          {open && (
+            <a class="stub-menu" href="#carta">
+              {t.bake.ctaMenu} <span aria-hidden="true">↓</span>
+            </a>
+          )}
+          <a class="stub-trust" href="#resenas">
+            <span class="hero-stars" aria-hidden="true">
+              ★★★★★
+            </span>{' '}
+            {t.hero.trust(googleReviews.score, googleReviews.count)}
+          </a>
+          {open && whatsappBook && (
             <a
-              class="button button-orange full stub-cta"
-              href={orderHref}
-              data-bake-cta
-              data-quick-loaf={quickLoaf ? '' : undefined}
+              class="stub-whatsapp"
+              data-event="click_whatsapp_order"
+              data-place="hero"
+              href={whatsappBook}
+              target="_blank"
+              rel="noopener noreferrer"
             >
-              {quickLoaf
-                ? t.bake.ctaQuick(money(loaf.price))
-                : open && pickupWeekday
-                  ? t.bake.ctaOpen(pickupWeekday)
-                  : t.bake.ctaClosed}
-              <span class="button-arrow" aria-hidden="true">
-                →
-              </span>
+              {t.reserve.whatsappAlt} <span aria-hidden="true">↗</span>
             </a>
-            {open && (
-              <a class="stub-menu" href="#carta">
-                {t.bake.ctaMenu} <span aria-hidden="true">↓</span>
-              </a>
-            )}
-            <a class="stub-trust" href="#resenas">
-              <span class="hero-stars" aria-hidden="true">
-                ★★★★★
-              </span>{' '}
-              {t.hero.trust(googleReviews.score, googleReviews.count)}
-            </a>
-            {open && whatsappBook && (
-              <a
-                class="stub-whatsapp"
-                data-event="click_whatsapp_order"
-                data-place="hero"
-                href={whatsappBook}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {t.reserve.whatsappAlt} <span aria-hidden="true">↗</span>
-              </a>
-            )}
-          </div>
+          )}
         </div>
       </div>
+      <p class="wrap alive-hint" aria-hidden="true">
+        <span>
+          <i></i>
+          {t.xp.hint}
+        </span>
+        <span>Sant Boi · Baix Llobregat</span>
+      </p>
     </section>
 
     <!-- Quién hace el pan y qué dicen de él, antes de nada más -->
@@ -439,6 +435,115 @@ const jsonLd = [
             </figcaption>
           </figure>
         </div>
+      </div>
+    </section>
+
+    <!-- 2 · 35 hores en una pantalla: la massa puja i s'omple d'alvèols -->
+    <section
+      id="fermentacio"
+      class="ferment"
+      aria-labelledby="ferment-title"
+      data-ferment
+    >
+      <div class="wrap">
+        <div class="mono-bar" data-bar>
+          <span>{t.xp.ferment.kicker}</span>
+          <span>{t.xp.ferment.bar}</span>
+        </div>
+        <div class="ferment-grid">
+          <div class="ferment-clock">
+            <h2 id="ferment-title" class="ferment-lead">
+              {t.xp.ferment.lead}
+              <span class="ferment-hours" aria-hidden="true">
+                <span data-ferment-hours>35</span>
+                <small>h</small>
+              </span>
+              <span class="visually-hidden">35 h</span>
+            </h2>
+            <p class="ferment-phase" aria-live="polite">
+              <b data-ferment-word>{t.xp.ferment.phases.at(-1)![1]}</b>
+              <span data-ferment-say>{t.xp.ferment.phases.at(-1)![2]}</span>
+            </p>
+            <div class="ferment-scrub">
+              <input
+                type="range"
+                min="0"
+                max="35"
+                step="0.1"
+                value="35"
+                aria-label={t.xp.ferment.slider}
+                data-ferment-scrub
+              />
+              <div class="ferment-scale" aria-hidden="true">
+                <span>0 h</span>
+                <span class="ferment-drag">{t.xp.ferment.drag}</span>
+                <span>35 h</span>
+              </div>
+            </div>
+            <div
+              class="ferment-vs"
+              role="img"
+              aria-label={t.xp.ferment.compare}
+            >
+              <div class="vs-row">
+                <span>{t.xp.ferment.fast}</span>
+                <i style="--w: 8.57%" data-vs-fast></i>
+                <b>{t.xp.ferment.fastValue}</b>
+              </div>
+              <div class="vs-row vs-me">
+                <span>{t.xp.ferment.me}</span>
+                <i style="--w: 100%" data-vs-me></i>
+                <b data-vs-me-h>35 h</b>
+              </div>
+            </div>
+          </div>
+          <figure class="ferment-tin">
+            <canvas aria-hidden="true" data-ferment-canvas></canvas>
+            <button type="button" class="ferment-replay" data-ferment-replay>
+              {t.xp.ferment.replay}
+            </button>
+            <figcaption class="fig-bar">
+              <span>{t.xp.ferment.fig}</span>
+              <span data-ferment-fig>35 h</span>
+            </figcaption>
+          </figure>
+        </div>
+        <script
+          type="application/json"
+          data-ferment-phases
+          set:html={JSON.stringify(t.xp.ferment.phases)}
+        ></script>
+      </div>
+    </section>
+
+    <!-- 3 · El tall: el ganivet parteix la paraula i s'obre el pa -->
+    <section class="cut" aria-label={t.xp.cut.label} data-cut>
+      <div class="cut-stick">
+        <figure class="cut-photo">
+          <Photo name="crumb2" alt={t.hero.photos[1]!} sizes="100vw" />
+        </figure>
+        <p class="cut-says">{t.xp.cut.says}</p>
+        <div class="wrap cut-cap">
+          <span>{t.xp.cut.fig}</span>
+          <span>{t.ed.ferment}</span>
+        </div>
+        <div class="cut-lid cut-top" aria-hidden="true">
+          <div class="wrap mono-bar cut-bar">
+            <span>{t.xp.cut.label}</span>
+            <span>{t.xp.cut.scroll} ↓</span>
+          </div>
+          <span class="cut-word">
+            {t.xp.cut.word[0]}
+            <em>{t.xp.cut.word[1]}</em>
+          </span>
+        </div>
+        <div class="cut-lid cut-bot" aria-hidden="true">
+          <span class="cut-word">
+            {t.xp.cut.word[0]}
+            <em>{t.xp.cut.word[1]}</em>
+          </span>
+        </div>
+        <div class="cut-knife" aria-hidden="true"></div>
       </div>
     </section>
 
@@ -468,42 +573,27 @@ const jsonLd = [
               <h3 id="loaf-title">{t.breads.h3}</h3>
               <p class="dish-desc">{t.breads.intro}</p>
             </header>
-            {breadGroups.map((group) => (
-              <>
-                {group.id === 'extra' && (
-                  <header class="breads-head breads-subhead" data-reveal>
-                    <p class="dish-index">
-                      <span>+</span>
-                      {t.breads.extraKicker}
-                    </p>
-                    <h4 id="extra-breads-title">{t.breads.extraH4}</h4>
-                    <p class="dish-desc">{t.breads.extraIntro}</p>
-                  </header>
-                )}
-                <ul
-                  class="bread-list"
-                  aria-labelledby={
-                    group.id === 'extra' ? 'extra-breads-title' : undefined
-                  }
-                >
-                  {group.items.map((b) => (
-                    <li class="bread-card" data-reveal>
-                      <div
-                        class:list={[
-                          'bread-photo',
-                          { 'has-cut': b.shots.length > 1 },
-                        ]}
-                        data-bread-photo
-                      >
-                        {b.shots.map((s) => (
-                          <Photo
-                            name={s.name}
-                            alt={s.alt}
-                            sizes="(max-width: 700px) calc(100vw - 40px), (max-width: 960px) 45vw, 30vw"
-                          />
-                        ))}
+            <div class="counter" data-counter>
+              <div class="counter-stick">
+                <div class="counter-bar" aria-hidden="true">
+                  <span>{t.xp.counter.bar}</span>
+                  <span class="counter-hint">{t.xp.counter.hint}</span>
+                </div>
+                <ul class="bread-list" data-counter-track>
+                  {menuBreads.map((b, i) => (
+                    <li class="bread-card" data-bread={b.key}>
+                      <div class="bread-plate">
+                        <Photo
+                          name={b.plate}
+                          alt={b.plateAlt}
+                          class={b.spin ? 'is-spin' : ''}
+                          sizes="(max-width: 820px) 72vw, 40vw"
+                        />
                       </div>
-                      <div class="bread-head">
+                      <div class="bread-info">
+                        <span class="bread-idx" aria-hidden="true">
+                          {pad(i + 1)} / {pad(menuBreads.length)}
+                        </span>
                         <h4>{b.name}</h4>
                         <p class="bread-price">
                           <span aria-hidden="true">
@@ -513,49 +603,54 @@ const jsonLd = [
                             {money(b.product.price)} · {t.breads.unit}
                           </span>
                         </p>
-                      </div>
-                      <p class="bread-text">{b.text}</p>
-                      {open ? (
-                        <div class="dish-buy bread-buy" data-buy={b.key}>
-                          <button
-                            type="button"
-                            class="button"
-                            data-add={b.key}
-                            disabled={breadMax === 0}
-                            aria-label={t.breads.more(b.name)}
-                          >
-                            {t.breads.add}
-                            <span class="button-plus" aria-hidden="true">
-                              +
-                            </span>
-                          </button>
-                          <div class="mini-stepper" data-mini={b.key} hidden>
+                        <p class="bread-text">{b.text}</p>
+                        {open ? (
+                          <div class="dish-buy bread-buy" data-buy={b.key}>
                             <button
                               type="button"
-                              data-sub={b.key}
-                              aria-label={t.breads.less(b.name)}
-                            >
-                              −
-                            </button>
-                            <output
-                              data-count={b.key}
-                              aria-live="polite"
-                            ></output>
-                            <button
-                              type="button"
+                              class="button"
                               data-add={b.key}
+                              disabled={breadMax === 0}
                               aria-label={t.breads.more(b.name)}
                             >
-                              +
+                              {t.breads.add}
+                              <span class="button-plus" aria-hidden="true">
+                                +
+                              </span>
                             </button>
+                            <div class="mini-stepper" data-mini={b.key} hidden>
+                              <button
+                                type="button"
+                                data-sub={b.key}
+                                aria-label={t.breads.less(b.name)}
+                              >
+                                −
+                              </button>
+                              <output
+                                data-count={b.key}
+                                aria-live="polite"
+                              ></output>
+                              <button
+                                type="button"
+                                data-add={b.key}
+                                aria-label={t.breads.more(b.name)}
+                              >
+                                +
+                              </button>
+                            </div>
                           </div>
-                        </div>
-                      ) : null}
+                        ) : null}
+                      </div>
                     </li>
                   ))}
                 </ul>
-              </>
-            ))}
+                <div class="counter-progress" aria-hidden="true">
+                  {menuBreads.map(() => (
+                    <i />
+                  ))}
+                </div>
+              </div>
+            </div>
             <div class="breads-foot">
               {!open && (
                 <a class="button button-ghost" href="#avisame">
@@ -837,6 +932,21 @@ const jsonLd = [
       <div class="wrap reserve-grid">
         <div class="reserve-intro" data-reveal>
           <h2 id="reserve-title">{t.reserve.h2}</h2>
+          {open && (
+            <p
+              class="order-sentence"
+              data-sentence
+              data-hi={t.xp.sentence.hi}
+              data-for={t.xp.sentence.for}
+              data-and={t.xp.sentence.and}
+              data-day={pickupDay}
+              aria-hidden="true"
+            >
+              {t.xp.sentence.hi}{' '}
+              <em data-sentence-what>{t.xp.sentence.empty}</em>{' '}
+              {t.xp.sentence.for} <em>{pickupDay}</em>.
+            </p>
+          )}
           <dl class="summary">
             <div>
               <dt>{t.reserve.pickup}</dt>
@@ -1586,29 +1696,6 @@ const jsonLd = [
       </div>
     </section>
 
-    <!-- Per què jo i no el forn: tres xifres, sense discurs -->
-    <section class="why" aria-labelledby="why-title">
-      <div class="wrap">
-        <div class="mono-bar" data-bar>
-          <span>{t.why.kicker}</span>
-          <span>{t.why.bar}</span>
-        </div>
-        <div class="why-grid">
-          <h2 id="why-title" data-split>
-            {t.why.h2a} <em>{t.why.h2b}</em>
-          </h2>
-          <ul class="why-stats" data-reveal>
-            {t.why.stats.map(([value, label]) => (
-              <li>
-                <strong>{value}</strong>
-                <span>{label}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
-    </section>
-
     <!-- 2 · Diari de l'obrador: las fotos de la cocina, como un reel -->
     <section class="diary" aria-label={t.film.label} data-diary>
       <div class="diary-pin">
@@ -1876,3 +1963,7 @@ const jsonLd = [
     </a>
   </div>
 </Base>
+
+<script>
+  import '../lib/experience';
+</script>
