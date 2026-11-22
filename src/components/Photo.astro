@@ -49,7 +49,7 @@ const ratios: Record<string, number> = {
   'combo-compartir': 1.25,
 };
 // The newer photos are smaller originals: they have no 1600 w variant.
-const widths = ['boule', 'tiles', 'slice'].includes(name)
+const widths = ['boule', 'tiles', 'slice', 'pan-de-leche'].includes(name)
   ? [400, 720, 1100]
   : name === 'crumb2'
     ? [400, 720, 1100, 1440]
