@@ -142,7 +142,7 @@ button {
 button:disabled,
 input:disabled {
   cursor: not-allowed;
-  opacity: 0.45;
+  opacity: 0.72;
 }
 :focus-visible {
   outline: 2px solid var(--orange);
@@ -615,19 +615,28 @@ figure picture {
 .site-header nav a:not(.nav-order):not(.lang-switch):hover {
   background-size: 100% 1.5px;
 }
-.lang-switch {
-  display: grid;
-  place-items: center;
-  width: 38px;
-  height: 38px;
-  box-shadow: inset 0 0 0 1.5px var(--cobalt);
-  transition:
-    background-color 0.2s ease,
-    color 0.2s ease;
+.langs {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
 }
-.lang-switch:hover {
-  background: var(--cobalt);
-  color: var(--paper);
+.langs a,
+.lang-current {
+  padding-block: 4px;
+  line-height: 1;
+}
+.langs a {
+  color: var(--muted);
+  transition: color 0.2s ease;
+}
+.langs a:hover,
+.langs a:focus-visible {
+  color: var(--ink);
+}
+.lang-current {
+  background: linear-gradient(currentColor, currentColor) 0 100% / 100% 1.5px
+    no-repeat;
+  font-weight: 700;
 }
 .site-header nav a.nav-order {
   position: relative;
@@ -3510,8 +3519,21 @@ details[open] p {
 .footer-links a:hover {
   color: var(--cobalt);
 }
+.footer-langs {
+  gap: 16px;
+}
+.footer-langs a {
+  text-decoration: none;
+}
+.footer-langs .lang-current {
+  color: var(--ink);
+}
 .site-footer small {
   grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px 24px;
   padding-top: 18px;
   border-top: 1px solid var(--line);
   font-size: 13px;
