@@ -68,6 +68,7 @@ export const brand = {
   pickupLabel: {
     es: 'Punto de recogida en Sant Boi de Llobregat',
     ca: 'Punt de recollida a Sant Boi de Llobregat',
+    en: 'Pickup point in Sant Boi de Llobregat',
   },
   pickupWindow: process.env.PICKUP_WINDOW || '',
   legalName: process.env.LEGAL_NAME || '',
@@ -77,10 +78,12 @@ export const brand = {
   googleSiteVerification: process.env.GOOGLE_SITE_VERIFICATION || '',
   bingSiteVerification: process.env.BING_SITE_VERIFICATION || '',
 };
-// Legal texts come from the environment; the Catalan ones fall back to Spanish.
+// Legal texts come from the environment; the Catalan and English ones fall
+// back to Spanish.
 const privacyText = (name: string) => ({
   es: process.env[name] || '',
   ca: process.env[`${name}_CA`] || process.env[name] || '',
+  en: process.env[`${name}_EN`] || process.env[name] || '',
 });
 export const privacy = {
   providers: privacyText('PRIVACY_PROVIDERS'),

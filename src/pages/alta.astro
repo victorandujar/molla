@@ -2,7 +2,8 @@
 import Base from '../layouts/Base.astro';
 import { confirmWaitlist } from '../lib/store';
 import { routes } from '../lib/i18n';
-const lang = Astro.url.searchParams.get('lang') === 'ca' ? 'ca' : 'es';
+import { toLang } from '../lib/messages';
+const lang = toLang(Astro.url.searchParams.get('lang'));
 const t = {
   es: {
     title: 'Confirmar el aviso',
@@ -31,6 +32,20 @@ const t = {
     invalid:
       'Aquest enllaç no és vàlid o ha caducat. Torna a apuntar-te des del web.',
     back: 'Tornar al pa',
+  },
+  en: {
+    title: 'Confirm the notice',
+    done: 'Notice confirmed.',
+    ask: 'Do you confirm you want the notice?',
+    doneText:
+      'I’ll write to you when the next bake opens. Every notice includes a link to unsubscribe.',
+    askText: 'You’ll receive an email when a new Molla bake opens.',
+    button: 'Yes, let me know',
+    origin: 'Invalid request.',
+    failed: 'We couldn’t confirm it. Try again in a few minutes.',
+    invalid:
+      'This link is not valid or has expired. Sign up again from the website.',
+    back: 'Back to the bread',
   },
 }[lang];
 let done = false;

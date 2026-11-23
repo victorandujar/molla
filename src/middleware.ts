@@ -16,6 +16,13 @@ const cacheable = new Set([
   '/es/poolish',
   '/privacidad',
   '/privacitat',
+  '/en',
+  '/en/',
+  '/en/pickup',
+  '/en/bread-delivery',
+  '/en/weekly-bread',
+  '/en/poolish',
+  '/en/privacy',
   '/robots.txt',
   '/sitemap.xml',
 ]);

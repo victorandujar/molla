@@ -1,5 +1,6 @@
 import { brand, searchIndexable } from '../lib/config';
 import { routes, indexedRoutes } from '../lib/i18n';
+import { LANGS } from '../lib/messages';
 const esc = (s: string) => s.replace(/[<>&"']/g, '');
 export function GET() {
   const site = esc(brand.site).replace(/\/$/, '');
@@ -7,11 +8,13 @@ export function GET() {
     ? indexedRoutes
         .map((key) => routes[key])
         .flatMap((r) =>
-          (['ca', 'es'] as const).map(
+          LANGS.map(
             (lang) =>
               `<url><loc>${site}${r[lang]}</loc>` +
-              `<xhtml:link rel="alternate" hreflang="es" href="${site}${r.es}"/>` +
-              `<xhtml:link rel="alternate" hreflang="ca" href="${site}${r.ca}"/>` +
+              LANGS.map(
+                (l) =>
+                  `<xhtml:link rel="alternate" hreflang="${l}" href="${site}${r[l]}"/>`,
+              ).join('') +
               `<xhtml:link rel="alternate" hreflang="x-default" href="${site}${r.ca}"/></url>`,
           ),
         )

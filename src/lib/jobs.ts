@@ -17,6 +17,7 @@ import {
 } from './email';
 import { generateSubscriptionOrders } from './subscriptions';
 import { brand } from './config';
+import { toLang } from './messages';
 import {
   bakeState,
   broadcastDue,
@@ -178,7 +179,7 @@ async function runFollowups(budget: number) {
     if (!followupDue(order.pickupDate)) continue;
     const kind = followupKind(number, subscribed);
     if (!kind || !(await claimOnce(kind, 'once', order.email))) continue;
-    const lang = order.lang === 'ca' ? 'ca' : 'es';
+    const lang = toLang(order.lang);
     let message;
     if (kind === 'thanks') {
       const token = await inviteToken(order.email, lang);

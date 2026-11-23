@@ -12,7 +12,7 @@ import {
   type ExtraBreadId,
 } from './config';
 export type { Lang };
-const lang = z.enum(['es', 'ca']).default('es');
+const lang = z.enum(['es', 'ca', 'en']).default('es');
 // A one-off order may come without an email: the customer is then keyed by
 // phone under this reserved domain (RFC 2606), which can never receive mail.
 // Every sender checks `hasMailbox` first.

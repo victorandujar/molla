@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import type postgres from 'postgres';
-import { AppError } from './messages';
+import { AppError, toLang } from './messages';
 import { townById } from './delivery';
 import {
   bakeState,
@@ -54,7 +54,10 @@ type NewSubscription = Omit<SubscriptionInput, 'day'> & {
   lang: Lang;
 };
 // A double click or a retried request must not create two subscriptions.
-const recently = (sub: Subscription, input: NewSubscription & { day: StandingDay }) =>
+const recently = (
+  sub: Subscription,
+  input: NewSubscription & { day: StandingDay },
+) =>
   sub.email === input.email &&
   sub.status !== 'CANCELLED' &&
   sub.quantity === input.quantity &&
@@ -264,7 +267,9 @@ export async function standingCandidates(): Promise<StandingCandidate[]> {
         (s) => s.status !== 'CANCELLED',
       );
       const taken = (o: Order) =>
-        subs.some((s) => s.email === o.email || digits(s.phone) === digits(o.phone));
+        subs.some(
+          (s) => s.email === o.email || digits(s.phone) === digits(o.phone),
+        );
       const byPhone = new Map<string, StandingCandidate>();
       for (const o of d.orders) {
         if (o.status === 'CANCELLED' || o.subscription) continue;
@@ -274,7 +279,7 @@ export async function standingCandidates(): Promise<StandingCandidate[]> {
         byPhone.set(key, {
           name: prev?.name ?? o.name,
           phone: o.phone,
-          lang: o.lang === 'ca' ? 'ca' : 'es',
+          lang: toLang(o.lang),
           orders: (prev?.orders ?? 0) + 1,
           lastDate:
             prev && prev.lastDate > o.pickupDate ? prev.lastDate : o.pickupDate,
@@ -303,7 +308,7 @@ export async function standingCandidates(): Promise<StandingCandidate[]> {
   return rows.map((r) => ({
     name: r.name as string,
     phone: r.phone as string,
-    lang: r.lang === 'ca' ? 'ca' : 'es',
+    lang: toLang(r.lang),
     orders: r.orders as number,
     lastDate: new Date(r.last).toISOString(),
   }));

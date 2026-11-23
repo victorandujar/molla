@@ -1,0 +1,105 @@
+---
+import Article from '../../layouts/Article.astro';
+import Photo from '../../components/Photo.astro';
+import { brand, isDemo, launchReady } from '../../lib/config';
+import { dayFormat, madridParts } from '../../lib/i18n';
+import { currentBake } from '../../lib/store';
+let current: Awaited<ReturnType<typeof currentBake>> | undefined;
+if (isDemo || launchReady) {
+  try {
+    current = await currentBake();
+  } catch {
+    /* Shows the weekly rhythm without a date. */
+  }
+}
+const close = current && madridParts('en', current.deadline);
+const place = {
+  '@context': 'https://schema.org',
+  '@type': 'Place',
+  name: `${brand.name} pickup point`,
+  address: {
+    '@type': 'PostalAddress',
+    addressLocality: 'Sant Boi de Llobregat',
+    addressRegion: 'Barcelona',
+    addressCountry: 'ES',
+  },
+};
+---
+
+<Article
+  lang="en"
+  route="pickup"
+  crumb="Pickup"
+  title={`Pick up artisan bread in Sant Boi de Llobregat · ${brand.name}`}
+  description="Order your sourdough or poolish bread online and pick it up in Sant Boi on Wednesday or Saturday. Pay on pickup; the exact spot comes with your order."
+  kicker="Pickup · Sant Boi de Llobregat"
+  h1="Pick up your bread in Sant Boi de Llobregat."
+  lede="Twice a week, Wednesday and Saturday, in Sant Boi de Llobregat. Order ahead, pay on pickup and take home bread baked that day."
+  jsonLd={[place]}
+>
+  <div class="article-grid">
+    <div class="prose">
+      <h2>Where</h2>
+      <p>
+        <strong>Pickup point in Sant Boi de Llobregat.</strong> We’ll confirm
+        the exact pickup point with your order.
+      </p>
+
+      <h2>When</h2>
+      <p>
+        {current ? (
+          <>
+            Wednesdays and Saturdays. The next pickup is on{' '}
+            <strong>{dayFormat('en', current.pickupDate)}</strong>
+            {current.pickupWindow
+              ? `, ${current.pickupWindow}`
+              : '. The pickup time is confirmed with the order'}
+            . Orders close on {close!.weekday} {close!.day} at {close!.time} or
+            when the bake is full.
+          </>
+        ) : (
+          <>
+            Wednesday and Saturday · pickup time confirmed with the order.
+            Orders close on Monday (for Wednesday) or Thursday (for Saturday) at
+            20:00, or when the bake is full.
+          </>
+        )}
+      </p>
+
+      <h2>How it works</h2>
+      <ol>
+        <li>
+          You order on the website and receive a confirmation by email with your
+          pickup code. The day before, you get a reminder.
+        </li>
+        <li>
+          On delivery day you come to the pickup point within the time slot.
+        </li>
+        <li>You say your code, pay and take your loaf, baked that same day.</li>
+      </ol>
+      <p>
+        If you can’t make it after all, reply to the confirmation email as soon
+        as possible with your code: that way I can release your bread for
+        someone else.
+      </p>
+
+      <h2>Home delivery and pickup</h2>
+      <p>
+        I make bread for the whole Baix Llobregat. If you live in Sant Boi de
+        Llobregat, Sant Just Desvern, Sant Joan Despí, Sant Feliu de Llobregat,
+        Santa Coloma de Cervelló or Sant Vicenç dels Horts, I bring it to your
+        home on Wednesday or Saturday between 12:00 and 14:00:{' '}
+        <a href="/en/bread-delivery">bread delivery</a>. If you live in another
+        town (Cornellà de Llobregat, Molins de Rei, Viladecans…), you pick it up
+        in Sant Boi de Llobregat.
+      </p>
+    </div>
+    <figure class="article-photo">
+      <Photo
+        name="hands"
+        alt="A hand holding a dark-crusted loaf while it is cut with a bread knife"
+        sizes="(max-width: 860px) calc(100vw - 40px), 40vw"
+      />
+    </figure>
+  </div>
+</Article>

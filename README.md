@@ -46,11 +46,15 @@ Entornos locales: `.env` apunta a `molla_dev` y `.env.production` a producción.
 
 ## SEO e indexación
 
-Producción usa `https://www.mollapa.com`; `/robots.txt` permite rastrear las páginas públicas y `/sitemap.xml` enumera las diez páginas indexables en catalán y castellano. Tras cada cambio SEO, despliega `main` y vuelve a enviar el sitemap.
+Producción usa `https://www.mollapa.com`; `/robots.txt` permite rastrear las páginas públicas y `/sitemap.xml` enumera las quince páginas indexables en catalán, castellano e inglés (`/en/…`). Tras cada cambio SEO, despliega `main` y vuelve a enviar el sitemap.
 
 En Google Search Console, añade la propiedad de prefijo `https://www.mollapa.com/`. Si verificas con la etiqueta HTML, guarda el valor de `content` como `GOOGLE_SITE_VERIFICATION` en el entorno Production de Vercel, despliega y completa la verificación. Después envía `https://www.mollapa.com/sitemap.xml` y solicita la indexación de las páginas principales desde Inspección de URLs. La alternativa es verificar el dominio mediante un registro DNS TXT.
 
 En Bing Webmaster Tools, verifica el mismo dominio con `BING_SITE_VERIFICATION` en Production o mediante DNS y envía el sitemap. `npm run seo:indexnow` notifica a Bing y otros motores compatibles con IndexNow; no sustituye Search Console ni garantiza la indexación.
+
+## Idiomas
+
+La web está en catalán (`/`), castellano (`/es/…`) e inglés (`/en/…`). Los textos viven en `src/lib/i18n.ts` (interfaz), `src/lib/messages.ts` (errores del servidor), `src/lib/email-templates.ts`, `src/lib/email-funnel.ts` y `src/lib/campaigns.ts` (emails), y en cada página o componente con un objeto `{ ca, es, en }`. Los emails salen en el idioma que tenía la página cuando el cliente reservó, se apuntó a los avisos o al Pan fijo; ese idioma se guarda con el pedido, el aviso o la suscripción. Los textos legales de entorno (`PRIVACY_PROVIDERS`, `PRIVACY_RETENTION`, `PRIVACY_TRANSFERS`) admiten una versión `_CA` y `_EN`; sin ella usan la castellana.
 
 ## Documentos
 

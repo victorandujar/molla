@@ -128,6 +128,53 @@ const text = {
     photo: 'El forner sosté un pa acabat de coure i somriu',
     service: 'Repartiment de pa artesà a domicili',
   },
+  en: {
+    crumb: 'Bread delivery',
+    title: `Bread delivery in Sant Boi and the Baix Llobregat · ${brand.name}`,
+    description: `Sourdough and poolish bread delivered in Sant Boi, Sant Just, Sant Joan Despí, Sant Feliu, Santa Coloma and Sant Vicenç. Wednesday and Saturday, free delivery.`,
+    kicker: `Home delivery · Wednesdays and Saturdays ${from}–${to} · Wednesdays also ${eveFrom}–${eveTo}`,
+    h1: 'Artisan bread delivered, Wednesday and Saturday.',
+    lede: `You order during the week and on Wednesday or Saturday, between ${from} and ${to}, I bring you bread baked that same morning. If you work at midday, on Wednesdays I also deliver in the evening, between ${eveFrom} and ${eveTo}. In Sant Boi de Llobregat, Sant Just Desvern, Sant Joan Despí, Sant Feliu de Llobregat, Santa Coloma de Cervelló and Sant Vicenç dels Horts.`,
+    whenH: 'When',
+    when: (day: string) =>
+      `Wednesdays and Saturdays, ${from}–${to}; Wednesdays also ${eveFrom}–${eveTo}. The next delivery is on ${day}.`,
+    whenClose: (weekday: string, d: string, time: string) =>
+      ` Orders close on ${weekday} ${d} at ${time} or when the bake is full.`,
+    whenFallback: `Wednesdays and Saturdays, ${from}–${to}; Wednesdays also ${eveFrom}–${eveTo}. Orders close at 20:00 on Monday (for Wednesday) or Thursday (for Saturday), or when the bake is full.`,
+    whereH: 'Where I deliver',
+    towns: {
+      'sant-boi':
+        'This is where I make the bread. I deliver on Wednesday and Saturday and, if you prefer, you can also pick it up in Sant Boi.',
+      'sant-just':
+        'Every Wednesday and Saturday I drive the route to Sant Just Desvern. The bread arrives baked that same morning, its crust still crunchy.',
+      'sant-joan':
+        'Sant Joan Despí is right next to Sant Just: it’s on the same Wednesday and Saturday route.',
+      'sant-feliu':
+        'I deliver in Sant Feliu de Llobregat within the same slot, Wednesday and Saturday.',
+      'santa-coloma':
+        'I deliver in Santa Coloma de Cervelló within the same slot, Wednesday and Saturday.',
+      'sant-vicenc':
+        'I deliver in Sant Vicenç dels Horts within the same slot, Wednesday and Saturday.',
+    } as Record<string, string>,
+    otherH: 'Live in another town in the Baix Llobregat?',
+    other:
+      'From Cornellà, Molins de Rei or Viladecans, you pick it up in Sant Boi de Llobregat.',
+    otherLink: 'How pickup works',
+    howH: 'How it works',
+    how: [
+      'Order on the website, choose «Home delivery», your town and your address.',
+      'You get the confirmation by email with your code. The day before, a reminder.',
+      `On Wednesday or Saturday, between ${from} and ${to}, I bring the order to your home. If I need to confirm anything, I’ll message you on WhatsApp.`,
+      'You pay when you get it. No card, no account. Ordering once doesn’t commit you to anything. Weekly bread is optional.',
+    ],
+    priceH: 'What it costs',
+    price: `The poolish loaf (750–850 g) costs ${loaf}; the banana bread, ${bananaWhole} whole or ${bananaHalf} for half. Every bake also has croissants (${croissant}) and pains au chocolat (${pain}). Delivery is free of charge.`,
+    absentH: 'What if I won’t be home?',
+    absent:
+      'Reply to the confirmation email as soon as possible with your code. If there’s still time, I release the bread for someone else; if not, we’ll find another way to get it to you.',
+    photo: 'The baker holds a freshly baked loaf and smiles',
+    service: 'Artisan bread home delivery',
+  },
 }[lang];
 const service = {
   '@context': 'https://schema.org',

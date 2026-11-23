@@ -8,7 +8,8 @@ import {
   eveningWindow,
   isWednesday,
 } from './delivery';
-import { routes } from './i18n';
+import { routes, xmasRoutes } from './i18n';
+import { localeOf, toLang } from './messages';
 import type { Lang, Order } from './domain';
 import type { Campaign } from './campaigns';
 import {
@@ -26,6 +27,7 @@ import {
   inviteUrl as personalInvite,
   inviteWhatsapp,
   pickupDay,
+  dayInSentence,
 } from './email-templates';
 
 export type FunnelBake = {
@@ -41,7 +43,7 @@ type Message = {
   headers?: Record<string, string>;
 };
 
-const locale = (lang: Lang) => (lang === 'ca' ? 'ca-ES' : 'es-ES');
+const locale = localeOf;
 const weekday = (iso: string, lang: Lang) =>
   new Intl.DateTimeFormat(locale(lang), {
     timeZone: 'Europe/Madrid',
@@ -56,7 +58,8 @@ const clock = (iso: string) =>
   }).format(new Date(iso));
 const towns = (lang: Lang) => {
   const names = deliveryTowns.map((t) => t.name.replace(' de Llobregat', ''));
-  return `${names.slice(0, -1).join(', ')} ${lang === 'ca' ? 'i' : 'y'} ${names.at(-1)}`;
+  const and = { ca: 'i', es: 'y', en: 'and' }[lang];
+  return `${names.slice(0, -1).join(', ')} ${and} ${names.at(-1)}`;
 };
 // Every link back to the shop says it came from the funnel and which email.
 export const shopUrl = (
@@ -85,14 +88,14 @@ const quoteBlock = (n: number, lang: Lang) => {
   const q = quoteFor(n);
   return section(
     `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;"><tr><td style="padding:20px 22px;">
-      <p style="margin:0 0 8px;font-family:${body};font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:${c.orange};">★★★★★ · ${lang === 'ca' ? 'Ressenya a Google' : 'Reseña en Google'}</p>
+      <p style="margin:0 0 8px;font-family:${body};font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:${c.orange};">★★★★★ · ${{ ca: 'Ressenya a Google', es: 'Reseña en Google', en: 'Google review' }[lang]}</p>
       <p style="margin:0;font-family:${display};font-size:20px;line-height:1.3;font-weight:700;color:${c.ink};">«${esc(q.text)}»</p>
       <p style="margin:8px 0 0;font-family:${body};font-size:13px;color:${c.muted};">${esc(q.author)}</p>
     </td></tr></table>`,
   );
 };
 const unsubscribeLine = (url: string, lang: Lang) =>
-  `<a href="${esc(url)}" style="color:${c.crumb};">${lang === 'ca' ? 'No vull rebre més avisos' : 'No quiero recibir más avisos'}</a>`;
+  `<a href="${esc(url)}" style="color:${c.crumb};">${{ ca: 'No vull rebre més avisos', es: 'No quiero recibir más avisos', en: 'I don’t want any more notices' }[lang]}</a>`;
 const listHeaders = (url: string) => ({
   'List-Unsubscribe': `<${url}>${brand.contact ? `, <mailto:${brand.contact}?subject=baja>` : ''}`,
 });
@@ -158,6 +161,34 @@ const broadcastCopy = {
     fix: 'El vols cada setmana sense haver-te’n de recordar? Prova el Pa fix:',
     why: 'Reps aquest correu perquè et vas apuntar als avisos de fornades de Molla.',
   },
+  en: {
+    openSubject: (day: string) => `You can now order bread for ${day}`,
+    openKicker: (n: string) => `Bake ${n} · open`,
+    openHeading: (day: string) => `Bread for ${day}: the oven is ready.`,
+    openIntro: (close: string) =>
+      `Poolish, organic flour and up to 35 hours of fermentation. I only bake what is ordered, so when it fills up, it closes. Orders until ${close}.`,
+    lastSubject: (day: string) => `Today at 20:00 I close orders for ${day}`,
+    lastKicker: 'Last call',
+    lastHeading: 'I close today at 20:00.',
+    lastIntro: (day: string) =>
+      `If you want bread, banana bread or pastries for ${day}, there’s still time. After that I can’t add anything to the bake.`,
+    menu: 'The menu',
+    loaf: 'Poolish loaf · 750–850 g',
+    sourdough: 'Sourdough',
+    wholegrain: 'Wholegrain 60 %',
+    filled: 'Filled: olives, walnuts, chocolate or dried fruit · from',
+    milkBread: 'Milk bread',
+    banana: 'Banana bread · whole or half',
+    pastries: 'Croissant · Pain au chocolat',
+    delivery: 'Delivery',
+    deliveryText: (day: string, window: string) =>
+      `${day}, ${window}, delivered in ${towns('en')}, free of charge. Or pickup in Sant Boi for the rest of the Baix Llobregat.`,
+    pay: 'Payment',
+    payText: 'On delivery. Cancel with one click until orders close.',
+    button: 'Place my order →',
+    fix: 'Want it every week without having to remember? Try Weekly bread:',
+    why: 'You receive this email because you signed up for Molla’s bake notices.',
+  },
 };
 
 const inviteCopy = {
@@ -170,6 +201,11 @@ const inviteCopy = {
     h: 'Convida un veí: un croissant per a cadascú',
     p: 'Amb la seva primera comanda pel teu enllaç tindrà un croissant de regal, i tu un altre a la teva propera comanda quan l’hi entregui.',
     button: 'Enviar la invitació per WhatsApp ↗',
+  },
+  en: {
+    h: 'Invite a neighbour: a croissant for each of you',
+    p: 'With their first order through your link they get a free croissant, and you get another with your next order once I deliver theirs.',
+    button: 'Send the invitation on WhatsApp ↗',
   },
 };
 function inviteSection(lang: Lang, code: string) {
@@ -198,13 +234,13 @@ export function broadcastEmail(
 ): Message {
   const t = broadcastCopy[lang];
   const invite = inviteCode ? inviteSection(lang, inviteCode) : null;
-  const day = pickupDay(bake.pickupDate, lang).toLowerCase();
+  const day = dayInSentence(bake.pickupDate, lang);
   const dayName = weekday(bake.pickupDate, lang);
   // Wednesday bakes also deliver in the evening.
   const deliveryHours = isWednesday(bake.pickupDate)
-    ? `${deliveryWindow} o ${eveningWindow}`
+    ? `${deliveryWindow} ${lang === 'en' ? 'or' : 'o'} ${eveningWindow}`
     : deliveryWindow;
-  const close = `${weekday(bake.deadline, lang)} ${lang === 'ca' ? 'a les' : 'a las'} ${clock(bake.deadline)}`;
+  const close = `${weekday(bake.deadline, lang)} ${{ ca: 'a les', es: 'a las', en: 'at' }[lang]} ${clock(bake.deadline)}`;
   const campaign = `${kind}-${bake.number}`;
   const url = shopUrl(lang, campaign);
   const fixUrl = shopUrl(lang, campaign, 'standing');
@@ -264,7 +300,7 @@ ${t.button} ${url}
 ${t.fix} ${fixUrl}
 ${invite ? `\n${invite.text}\n` : ''}
 ${t.why}
-${lang === 'ca' ? 'Baixa' : 'Baja'}: ${unsub}
+${{ ca: 'Baixa', es: 'Baja', en: 'Unsubscribe' }[lang]}: ${unsub}
 
 ${brand.name}`,
     headers: listHeaders(unsub),
@@ -350,8 +386,47 @@ const followCopy = {
     fixButton: 'Vull el meu pa fix →',
     fixOnce: 'Només t’escric això un cop. Gràcies per repetir.',
   },
+  en: {
+    thanksSubject: 'How was your order?',
+    thanksKicker: 'Thanks for your first order',
+    thanksHeading: (name: string) => `${name}, how was your order?`,
+    thanksIntro:
+      'I hope you enjoyed it. I’m a very small bakery, with no shop and no advertising: what helps me most to keep going is other people in the neighbourhood knowing I exist.',
+    reviewH: '30 seconds that help me enormously',
+    reviewP:
+      'If you liked it, a Google review helps neighbours find me when they look for artisan bread.',
+    reviewButton: 'Leave a review →',
+    shareH: 'Pass it on to a neighbour',
+    shareP:
+      'If you know someone in Sant Boi, Sant Just, Sant Joan Despí, Sant Feliu, Santa Coloma or Sant Vicenç who likes good bread, send them the link.',
+    shareLink: 'Send on WhatsApp ↗',
+    shareGift:
+      'If you know someone in Sant Boi, Sant Just, Sant Joan Despí, Sant Feliu, Santa Coloma or Sant Vicenç who likes good bread, send them your invitation: with their first order they get a free croissant, and you get another with your next order.',
+    shareText:
+      'I’ve tried the bread from Molla, a small bakery in Sant Boi: slow fermentation and they bring it to your door. Have a look: ',
+    newsH: 'Shall I let you know every week?',
+    newsP:
+      'One email when the Saturday bake opens and another on the day I close. Nothing else. Unsubscribe with one click.',
+    newsButton: 'Yes, let me know →',
+    fix: 'And if you want it every week without ordering, there’s Weekly bread:',
+    once: 'This is the only email I’ll send you about this order.',
+    fixSubject: 'Shall I keep bread for you every week?',
+    fixKicker: 'Weekly bread',
+    fixHeading: (name: string) =>
+      `${name}, shall I keep it for you every week?`,
+    fixIntro:
+      'It’s already your second order, so here’s an idea: with Weekly bread you choose your bread once and every week I make it for you without you having to order or remember the closing time.',
+    fixPoints: [
+      'Every week or every other week.',
+      'Skip a week, pause or cancel with one click.',
+      'Pay on delivery. Nothing is ever charged in advance.',
+      'Your bread goes first: it’s reserved before the bake opens.',
+    ],
+    fixButton: 'I want my weekly bread →',
+    fixOnce: 'I’ll only write to you about this once. Thanks for coming back.',
+  },
 };
-const langOf = (o: Order): Lang => (o.lang === 'ca' ? 'ca' : 'es');
+const langOf = (o: Order): Lang => toLang(o.lang);
 const subhead = (title: string, text: string) =>
   `<h2 style="margin:0 0 6px;font-family:${display};font-size:22px;line-height:1.15;font-weight:800;color:${c.ink};">${esc(title)}</h2><p style="margin:0 0 14px;font-family:${body};font-size:15px;line-height:1.6;color:${c.muted};">${esc(text)}</p>`;
 const link = (href: string, label: string) =>
@@ -373,7 +448,14 @@ export function thanksEmail(o: Order, inviteUrl: string | null): Message {
   const shareP = o.referralCode ? t.shareGift : t.shareP;
   const fixUrl = shopUrl(lang, 'thanks', 'standing');
   const content =
-    photo('miga.jpg', lang === 'ca' ? 'La molla del pa' : 'La miga del pan') +
+    photo(
+      'miga.jpg',
+      {
+        ca: 'La molla del pa',
+        es: 'La miga del pan',
+        en: 'The crumb of the bread',
+      }[lang],
+    ) +
     intro(t.thanksKicker, esc(t.thanksHeading(name)), esc(t.thanksIntro)) +
     section(
       subhead(t.reviewH, t.reviewP) +
@@ -592,6 +674,17 @@ const rewardCopy = {
       'Coneixes algú més? Cada veí que provi Molla amb el teu enllaç és un altre croissant:',
     share: 'Enviar la invitació per WhatsApp ↗',
   },
+  en: {
+    subject: 'A neighbour tried Molla thanks to you',
+    kicker: 'Invite a neighbour',
+    heading: (name: string) => `${name}, your next croissant is on me.`,
+    intro:
+      'Someone you invited has just received their first order. Thanks for recommending me: your next order comes with a free croissant, without doing anything.',
+    button: 'Order my next one →',
+    again:
+      'Know anyone else? Every neighbour who tries Molla with your link is another croissant:',
+    share: 'Send the invitation on WhatsApp ↗',
+  },
 };
 
 // The day after a friend's first order is delivered: the referrer's gift.
@@ -633,7 +726,7 @@ export function campaignEmail(
 ): Message {
   const t = campaign.copy[lang];
   // Straight to the Christmas page of that day: orders are open already.
-  const page = { ca: '/nadal', es: '/es/navidad' }[lang];
+  const page = xmasRoutes[lang];
   const dayUrl = (dia: string) =>
     asset(
       `${page}?dia=${dia}&utm_source=email&utm_medium=funnel&utm_campaign=${encodeURIComponent(campaign.id)}`,
@@ -645,10 +738,7 @@ export function campaignEmail(
       : null;
   const unsub = unsubscribeUrl(unsubscribeToken, lang);
   const invite = inviteCode ? inviteSection(lang, inviteCode) : null;
-  const why =
-    lang === 'ca'
-      ? 'Reps aquest correu perquè et vas apuntar als avisos de fornades de Molla.'
-      : 'Recibes este email porque te apuntaste a los avisos de hornadas de Molla.';
+  const why = broadcastCopy[lang].why;
   const content =
     photo('hornada.jpg', 'Molla') +
     intro(esc(t.kicker), esc(t.heading), esc(t.intro)) +
@@ -683,7 +773,7 @@ ${t.rows.map(([k, v]) => `${k}: ${v}`).join('\n')}
 ${t.button} ${url}${second ? `\n${second.label} ${second.url}` : ''}
 ${t.note ? `\n${t.note}\n` : ''}${invite ? `\n${invite.text}\n` : ''}
 ${why}
-${lang === 'ca' ? 'Baixa' : 'Baja'}: ${unsub}
+${{ ca: 'Baixa', es: 'Baja', en: 'Unsubscribe' }[lang]}: ${unsub}
 
 ${brand.name}`,
     headers: listHeaders(unsub),

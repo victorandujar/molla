@@ -12,6 +12,7 @@ import {
   type Subscription,
 } from './domain';
 import { townById } from './delivery';
+import { localeOf, toLang } from './messages';
 import { routes, standingFrequency, standingWords, ui } from './i18n';
 // Email clients ignore stylesheets and web fonts unevenly: inline styles,
 // table layout, hosted PNGs and system-font fallbacks for everything.
@@ -45,7 +46,7 @@ export const asset = (path: string) => {
   ).href;
 };
 export const pickupDay = (iso: string, lang: Lang = 'es') => {
-  const text = new Intl.DateTimeFormat(lang === 'ca' ? 'ca-ES' : 'es-ES', {
+  const text = new Intl.DateTimeFormat(localeOf(lang), {
     timeZone: 'Europe/Madrid',
     weekday: 'long',
     day: 'numeric',
@@ -53,11 +54,17 @@ export const pickupDay = (iso: string, lang: Lang = 'es') => {
   }).format(new Date(iso));
   return text.charAt(0).toUpperCase() + text.slice(1);
 };
+// Inside a sentence: lowercase in Catalan and Spanish, capitalised in English.
+export const dayInSentence = (iso: string, lang: Lang) => {
+  const day = pickupDay(iso, lang);
+  return lang === 'en' ? day : day.toLowerCase();
+};
 export const firstName = (name: string) => name.trim().split(/\s+/)[0] || name;
-const langOf = (o: Order): Lang => (o.lang === 'ca' ? 'ca' : 'es');
-const privacyPath = { es: '/privacidad', ca: '/privacitat' };
+const langOf = (o: Order): Lang => toLang(o.lang);
+const privacyPath = routes.privacy;
 // Catalan dates read "dissabte, 26 de setembre"; after "el" they stay lowercase.
-const onDay = (o: Order) => pickupDay(o.pickupDate, langOf(o)).toLowerCase();
+// English weekdays and months keep their capital: "Saturday 26 September".
+const onDay = (o: Order) => dayInSentence(o.pickupDate, langOf(o));
 // Delivery orders show the street under the town; pickup orders the note.
 // The pa fix day of an order: from its bake (Saturday if the date is odd).
 const orderDay = (o: Order): StandingDay =>
@@ -269,6 +276,106 @@ const copy = {
     inviteButton: 'Enviar la invitació per WhatsApp →',
     inviteMessage:
       'Et convido a provar el pa de Molla, un obrador de Sant Boi: fermentació lenta i te’l porten a casa. Amb la primera comanda tens un croissant de regal: ',
+  },
+  en: {
+    footer: 'Bread and pastries made to order',
+    privacy: 'Privacy and terms',
+    subject: (o: Order) => `Order ${o.code} · Your order for ${onDay(o)}`,
+    hello: 'Hi',
+    confirmed: 'Order confirmed',
+    heading: 'Your order has your name on it',
+    intro: (o: Order) =>
+      `All handmade in Sant Boi, without hurry. See you on ${onDay(o)}.`,
+    code: 'Pickup code',
+    codeHint: 'Say it or show it when you pick up.',
+    order: 'Your order',
+    total: 'Total',
+    payLater: 'pay on pickup',
+    payOnDelivery: 'pay on delivery',
+    when: 'When',
+    where: 'Where',
+    pickupNote: 'We’ll confirm the exact pickup point with your order.',
+    deliveryNote:
+      'I’ll bring it to your home within the slot. If I need to confirm anything, I’ll message you on WhatsApp.',
+    changes:
+      'Changes, or can’t make it? Reply to this email with your code before orders close and your order will go to someone else.',
+    changesText: (contact: string) =>
+      `Changes, or can’t make it? Reply to this email${contact ? ` or write to ${contact}` : ''} with your code before orders close.`,
+    channel:
+      'If you want to hear about the next bake, follow the WhatsApp channel.',
+    channelButton: 'Follow the channel →',
+    cancelNote:
+      'Won’t be able to receive it? Cancel the order with one click until the bake’s orders close, at 20:00, with no explanation needed.',
+    cancelLink: 'Cancel the order →',
+    fixCta: 'Want it every week? Weekly bread:',
+    fixCtaFirst:
+      'Weekly bread only: once I’ve delivered 3 loaves, the 4th is on me. Sign up:',
+    standingKicker: 'Weekly bread',
+    standingHeading: (name: string) =>
+      `${name}, there’s bread for you this week.`,
+    standingIntro: (day: StandingDay) =>
+      `Your ${standingWords.en.day[day]} weekly bread is reserved. If you don’t want it that week, skip it with one click until orders close (${standingWords.en.closes[day]}, at 20:00): no problem, and your weekly bread carries on.`,
+    skipLink: 'Skip this week →',
+    manageLink: 'Manage my weekly bread: pause or cancel',
+    standingSubject: (o: Order) =>
+      `Your weekly bread for ${onDay(o)} · code ${o.code}`,
+    welcomeSubject: 'Your weekly bread is set up',
+    welcomeKicker: 'Weekly bread',
+    welcomeHeading: (name: string) => `Welcome, ${name}.`,
+    welcomeIntro: (first: string) =>
+      first
+        ? `Your first delivery is on ${first}. From then on, every week I make your bread without you having to order anything.`
+        : 'This week’s bake is already full: you’ll start with the next one. From then on, every week I make your bread without you having to order anything.',
+    welcomeButton: 'Manage my weekly bread →',
+    welcomeHow: (day: StandingDay) =>
+      `Whenever you like, from that link you can skip a week, pause it or cancel with a single click. I’ll email you every week, and you have until ${standingWords.en.until[day]} at 20:00 to skip the delivery. You pay when you get it; nothing is ever charged in advance.`,
+    plan: 'Your weekly bread',
+    frequency: 'Frequency',
+    weekly: 'Every Saturday',
+    biweekly: 'Every other Saturday',
+    fullSubject: 'This week we couldn’t reserve your weekly bread',
+    fullHeading: 'No weekly bread this week.',
+    fullIntro:
+      'This week’s bake filled up and there was no room left for your order. You are not charged anything and your weekly bread stays active: we’ll make it again next week.',
+    thanks: 'Thanks for ordering,',
+    reminderSubject: (o: Order) =>
+      `Reminder · Your order for ${onDay(o)} (${o.code})`,
+    reminderKicker: 'Reminder',
+    reminderHeading: (o: Order) =>
+      `${firstName(o.name)}, your order comes out of the oven on ${onDay(o)}.`,
+    reminderIntro: 'Come within the slot with your code. Pay on pickup.',
+    reminderDelivery:
+      'I’ll bring it to your home within the slot. Pay on delivery.',
+    reminderCancel:
+      'Can’t make it after all? Reply to this email as soon as possible: that way nothing goes to waste.',
+    toPay: 'To pay on pickup',
+    cancelledSubject: (o: Order) => `Order ${o.code} cancelled · ${onDay(o)}`,
+    cancelledKicker: 'Order cancelled',
+    cancelledHeading: (o: Order) =>
+      `I’m sorry, ${firstName(o.name)}: this time I won’t be able to make your order.`,
+    cancelledIntro: (o: Order) =>
+      `I’ve had to cancel your order for ${onDay(o)}. Something unexpected came up and I can’t make it. You don’t need to do anything and you are not charged anything. Sorry for the inconvenience.`,
+    cancelledNext:
+      'I’d love to bake for you in the next bake: you can order now.',
+    cancelledButton: 'Order for the next bake →',
+    cancelledStanding:
+      'Your weekly bread stays active: you don’t need to do anything and the next delivery will arrive as usual.',
+    cancelledReply: 'If you have any questions, reply to this email.',
+    waitlistSubject: 'Confirm your new bake notices',
+    waitlistHeading: 'One click and I’ll let you know.',
+    waitlistIntro:
+      'Someone (hopefully you) asked to receive an email when a new Molla bake opens. Confirm it with the button. If it wasn’t you, ignore this message and we won’t write again.',
+    waitlistButton: 'Confirm the notice →',
+    waitlistUnsubscribe: 'Unsubscribe',
+    giftInvited: '🎁 You were invited: this order comes with a free croissant.',
+    giftEarned: (n: number) =>
+      `🎁 For inviting ${n === 1 ? 'a neighbour' : `${n} neighbours`}, this order includes ${n === 1 ? 'a free croissant' : `${n} free croissants`}.`,
+    inviteH: 'Invite a neighbour',
+    inviteP:
+      'With their first order they get a free croissant, and you get another with your next order once I deliver theirs. This is your link:',
+    inviteButton: 'Send the invitation on WhatsApp →',
+    inviteMessage:
+      'Try the bread from Molla, a small bakery in Sant Boi: slow fermentation and they bring it to your door. Your first order comes with a free croissant: ',
   },
 };
 
@@ -629,8 +736,12 @@ Teléfono: ${o.phone}
 ${o.delivery ? 'Entrega a domicilio' : 'Recogida'}: ${pickupDay(o.pickupDate)}, ${o.pickupWindow}${
     o.delivery
       ? `
-Dirección: ${where(o)}${o.delivery.notes ? `
-Si no está: ${o.delivery.notes}` : ''}`
+Dirección: ${where(o)}${
+          o.delivery.notes
+            ? `
+Si no está: ${o.delivery.notes}`
+            : ''
+        }`
       : ''
   }
 Canal: ${o.source}${o.firstOrder ? `\n${ownerVoucher()}` : ''}${giftCroissants(o) ? `\n${ownerGift(o)}` : ''}

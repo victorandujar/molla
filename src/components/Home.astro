@@ -17,7 +17,8 @@ import {
   googleReviews,
   extraBreadIds,
 } from '../lib/config';
-import { ui, routes, dayFormat, type Lang } from '../lib/i18n';
+import { ui, routes, xmasRoutes, dayFormat, type Lang } from '../lib/i18n';
+import { localeOf } from '../lib/messages';
 import { currentBake, type ActiveBake } from '../lib/store';
 import { bakeState, earlyBakesOpen, publicStock } from '../lib/domain';
 import { deliveryTowns, isWednesday } from '../lib/delivery';
@@ -44,7 +45,7 @@ const madridDate = (iso: string) =>
   new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Madrid' }).format(
     new Date(iso),
   );
-const xmasPage = { ca: '/nadal', es: '/es/navidad' }[lang];
+const xmasPage = xmasRoutes[lang];
 const xmasLinks =
   isDemo || launchReady
     ? earlyBakesOpen()
@@ -167,7 +168,7 @@ const orderHref = open ? '#reservation-form' : '#avisame';
 // «sábado» or «miércoles»: the button names the day the bread arrives.
 const pickupWeekday = unavailable
   ? ''
-  : new Intl.DateTimeFormat(lang === 'ca' ? 'ca-ES' : 'es-ES', {
+  : new Intl.DateTimeFormat(localeOf(lang), {
       timeZone: 'Europe/Madrid',
       weekday: 'long',
     }).format(new Date(current.pickupDate));
@@ -1383,7 +1384,9 @@ const jsonLd = [
                 minlength="2"
                 maxlength="100"
                 required
-                placeholder={lang === 'ca' ? 'el teu nom' : 'tu nombre'}
+                placeholder={
+                  { ca: 'el teu nom', es: 'tu nombre', en: 'your name' }[lang]
+                }
               />{' '}
               {t.xp.order.phone}{' '}
               <label class="visually-hidden" for="phone">
@@ -1411,7 +1414,7 @@ const jsonLd = [
                   type="email"
                   autocomplete="email"
                   maxlength="254"
-                  placeholder="tu@email.com"
+                  placeholder={lang === 'en' ? 'you@email.com' : 'tu@email.com'}
                   aria-describedby="email-hint"
                 />
                 <span id="email-hint" class="visually-hidden">
@@ -1530,7 +1533,7 @@ const jsonLd = [
                 autocomplete="email"
                 maxlength="254"
                 required
-                placeholder="tu@email.com"
+                placeholder={lang === 'en' ? 'you@email.com' : 'tu@email.com'}
                 disabled={!canSubmit}
               />
             </p>

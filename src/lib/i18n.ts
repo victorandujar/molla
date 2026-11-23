@@ -1,6 +1,6 @@
 import { bake, brand, money, productById, type ExtraBreadId } from './config';
 import { deliveryWindow, eveningWindow, windowHours } from './delivery';
-import type { Lang } from './messages';
+import { localeOf, type Lang } from './messages';
 export type { Lang };
 
 // "Pa fix" days: the bake day, when its orders close, and the frequency line.
@@ -15,6 +15,11 @@ export const standingWords = {
     closes: { wed: 'el dilluns abans', sat: 'el dijous abans' },
     until: { wed: 'dilluns', sat: 'dijous' },
   },
+  en: {
+    day: { wed: 'Wednesday', sat: 'Saturday' },
+    closes: { wed: 'the Monday before', sat: 'the Thursday before' },
+    until: { wed: 'Monday', sat: 'Thursday' },
+  },
 } as const;
 export const standingFrequency = (
   lang: Lang,
@@ -22,19 +27,31 @@ export const standingFrequency = (
   day: 'wed' | 'sat',
 ) => {
   const d = standingWords[lang].day[day];
+  if (lang === 'en')
+    return frequency === 'weekly' ? `Every ${d}` : `Every other ${d}`;
   if (frequency === 'weekly') return `Cada ${d}`;
   return lang === 'ca' ? `Un ${d} sí i un altre no` : `Un ${d} sí y otro no`;
 };
 
 // Pages that exist in both languages. Keys are shared, paths are localised.
 export const routes = {
-  home: { ca: '/', es: '/es/' },
-  pickup: { ca: '/recollida', es: '/es/recogida' },
-  delivery: { ca: '/pa-a-domicili', es: '/es/pan-a-domicilio' },
-  standing: { ca: '/pa-fix', es: '/es/pan-fijo' },
-  poolish: { ca: '/poolish', es: '/es/poolish' },
-  privacy: { ca: '/privacitat', es: '/privacidad' },
+  home: { ca: '/', es: '/es/', en: '/en/' },
+  pickup: { ca: '/recollida', es: '/es/recogida', en: '/en/pickup' },
+  delivery: {
+    ca: '/pa-a-domicili',
+    es: '/es/pan-a-domicilio',
+    en: '/en/bread-delivery',
+  },
+  standing: { ca: '/pa-fix', es: '/es/pan-fijo', en: '/en/weekly-bread' },
+  poolish: { ca: '/poolish', es: '/es/poolish', en: '/en/poolish' },
+  privacy: { ca: '/privacitat', es: '/privacidad', en: '/en/privacy' },
 } as const;
+// Christmas order page (not in the sitemap).
+export const xmasRoutes = {
+  ca: '/nadal',
+  es: '/es/navidad',
+  en: '/en/christmas',
+};
 // Pages listed in the sitemap; the privacy page is noindex.
 export const indexedRoutes = [
   'home',
@@ -46,7 +63,7 @@ export const indexedRoutes = [
 export type RouteKey = keyof typeof routes;
 
 export const dayFormat = (lang: Lang, iso = bake.pickupDate) =>
-  new Intl.DateTimeFormat(lang === 'ca' ? 'ca-ES' : 'es-ES', {
+  new Intl.DateTimeFormat(localeOf(lang), {
     timeZone: 'Europe/Madrid',
     weekday: 'long',
     day: 'numeric',
@@ -56,7 +73,7 @@ export const dayFormat = (lang: Lang, iso = bake.pickupDate) =>
 // Parts of a Madrid date for sentences such as "hasta el jueves 24 a las 20:00".
 export const madridParts = (lang: Lang, iso: string) => {
   const parts = Object.fromEntries(
-    new Intl.DateTimeFormat(lang === 'ca' ? 'ca-ES' : 'es-ES', {
+    new Intl.DateTimeFormat(localeOf(lang), {
       timeZone: 'Europe/Madrid',
       weekday: 'long',
       day: 'numeric',
@@ -86,9 +103,11 @@ const loafPrice = money(productById('clasica')!.price);
 const hours = {
   es: `de ${fromH}\u00a0a\u00a0${toH}\u00a0h`,
   ca: `de ${fromH}\u00a0a\u00a0${toH}\u00a0h`,
+  en: deliveryWindow.replace('–', '\u2013'),
 };
 // Wednesday's second round, for people who work at midday.
 const evening = windowHours(eveningWindow);
+const eveningEn = windowHours(eveningWindow, 'en');
 
 export const ui = {
   es: {
@@ -1393,5 +1412,650 @@ export const ui = {
       half: 'La meitat',
     },
     breadcrumbHome: 'Inici',
+  },
+  en: {
+    skip: 'Skip to content',
+    demo: 'Test version · Orders on this version are not real.',
+    home: `${brand.name}, home`,
+    nav: {
+      process: 'The process',
+      pickup: 'Pickup',
+      delivery: 'Home delivery',
+      standing: 'Weekly bread',
+      faq: 'Questions',
+      order: 'Order',
+    },
+    switchLabel: 'English',
+    switchAria: 'Read this page in English',
+    footer: {
+      line: 'Slow-fermented artisan bread, made to order.',
+      area: `Bread delivered on Wednesdays ${hours.en} or ${eveningEn} and Saturdays ${hours.en} in Sant Boi, Sant Just Desvern, Sant Joan Despí, Sant Feliu de Llobregat, Santa Coloma de Cervelló and Sant Vicenç dels Horts · Pickup in Sant Boi de Llobregat`,
+      privacy: 'Privacy and terms',
+      write: 'Write to me ↗',
+      channel: 'WhatsApp channel',
+    },
+    meta: {
+      title: `Artisan bakery in Sant Boi · Sourdough · ${brand.name}`,
+      description: `Sourdough and poolish bread made by hand with organic flour in Sant Boi. Delivered to your door on Wednesdays and Saturdays. From ${loafPrice}, pay on delivery.`,
+      ogAlt: 'Freshly sliced loaves with a toasted crust',
+    },
+    xmas: {
+      label: 'Christmas',
+      lead: 'You can now order for ',
+      week: 'This week’s bake',
+    },
+    status: {
+      OPEN: 'Orders open',
+      SOLD_OUT: 'Bake sold out',
+      CLOSED: 'Orders closed',
+      UPCOMING: 'Next bake',
+      COMPLETED: 'This bake is already out of the oven',
+    },
+    hero: {
+      h1a: 'Artisan bread, freshly baked,',
+      h1b: 'at your door',
+      sub: `Every Wednesday and Saturday ${hours.en}, and on Wednesdays also ${eveningEn}, delivered to Sant Boi, Sant Just Desvern, Sant Joan Despí, Sant Feliu, Santa Coloma and Sant Vicenç.`,
+      short: `I bake it that same morning and bring it to your home or office, every Wednesday and Saturday ${hours.en} (on Wednesdays, also ${eveningEn}). Bread from ${loafPrice}, free delivery and you pay when it arrives.`,
+      kicker: 'Neighbourhood bakery · Baix Llobregat',
+      keywords: [
+        'Organic flour',
+        'Poolish',
+        'Up to 35 h of fermentation',
+        'Handmade',
+        'Delivered Wednesday and Saturday',
+        'Baix Llobregat',
+      ],
+      order: 'Order a loaf',
+      notify: 'Tell me when it opens',
+      how: 'How I make it',
+      photos: [
+        'Round loaf fresh from the oven, with its score open, on baking paper',
+        'A loaf broken in half between two hands, with an open crumb',
+      ],
+      values: [
+        ['Organic flour', 'Organically grown, no improvers.'],
+        ['Up to 35 hours', 'Of slow fermentation with poolish.'],
+        ['Small bake', 'Few loaves, made one at a time.'],
+        [
+          'Home delivery',
+          `Wednesdays and Saturdays ${hours.en}; Wednesdays also ${eveningEn}. In Sant Boi, Sant Just, Sant Joan Despí, Sant Feliu, Santa Coloma and Sant Vicenç.`,
+        ],
+      ],
+      nextBake: 'Next bake',
+      ribbon: [
+        'Molla',
+        'Pa artesà',
+        'Fins a 35 h de fermentació',
+        'Baix Llobregat',
+      ],
+      terms: `Bread from ${loafPrice} · Free delivery · Pay on delivery`,
+      proof: ['Handmade in Sant Boi'],
+      trust: (score: string, count: number) =>
+        `${score} on Google (${count} reviews) · Made by me, Víctor, in Sant Boi`,
+      when: (wed: boolean) =>
+        wed ? `Delivered ${hours.en} or ${eveningEn}` : `Delivered ${hours.en}`,
+      scroll: 'Scroll',
+      hands: 'My mother’s hands',
+      sealTop: 'up to',
+      sealBottom: 'of fermentation',
+    },
+    baker: {
+      line: 'I’m Víctor. I make the bread in Sant Boi, loaf by loaf, and I deliver it myself.',
+      photo: 'Víctor, the baker, holds a freshly baked loaf and smiles',
+      reviews: 'See the reviews',
+    },
+    film: {
+      label: 'The kitchen, in photos',
+      items: [
+        [
+          'proof',
+          'The dough',
+          'It ferments slowly, no rush.',
+          'Two bread doughs resting on the counter',
+        ],
+        [
+          'hands',
+          'By hand',
+          'Folds, shaping and scoring, one by one.',
+          'A hand cutting a dark-crusted loaf with a bread knife',
+        ],
+        [
+          'smell',
+          'Smell it',
+          'The first thing I do when it comes out of the oven.',
+          'The baker smells a freshly baked loaf',
+        ],
+        [
+          'cut',
+          'Crust',
+          'Dark and crunchy; the crumb, moist.',
+          'Freshly cut loaf, with a toasted crust and the crumb on show',
+        ],
+        [
+          'slices',
+          'Up to 35 h',
+          'Of fermentation: that’s where the flavour is.',
+          'Slices of bread with an airy crumb on a board',
+        ],
+      ] as [string, string, string, string][],
+    },
+    catalog: {
+      kicker: 'The menu',
+      h2b: 'Made without hurry.',
+      details: 'Ingredients and allergens',
+      loaf: 'The weekly loaf',
+      sourdough: 'Sourdough',
+      wholegrain: 'Wholegrain 60 %',
+      bananaWhole: 'Whole banana bread',
+      bananaHalf: 'Half banana bread',
+      add: 'Add to order',
+      inOrder: (n: string) => `${n} in your order`,
+      remove: 'Remove one',
+      whole: 'Whole',
+      half: 'Half',
+      size: 'Size',
+      each: 'each',
+      closed: 'Orders open with the next bake',
+      stock: {
+        bread: { ok: '', low: 'Few loaves left', out: 'Bake sold out' },
+        banana: {
+          ok: '',
+          low: 'Little banana bread left',
+          out: 'Sold out this week',
+        },
+        pastry: {
+          ok: '',
+          low: 'Few pastries left',
+          out: 'Pastries sold out this week',
+        },
+      },
+      pill: 'Your order',
+      pillCta: 'Order',
+      pillDone: 'Finish →',
+      loaves: (n: number) => `${n} ${n === 1 ? 'loaf' : 'loaves'}`,
+      banana: (halves: number) =>
+        halves === 1 ? '½ banana bread' : `${halves / 2} banana bread`,
+      croissant: 'Croissant',
+      pain: 'Pain au chocolat',
+      croissants: (n: number) => `${n} ${n === 1 ? 'croissant' : 'croissants'}`,
+      pains: (n: number) =>
+        `${n} ${n === 1 ? 'pain au chocolat' : 'pains au chocolat'}`,
+    },
+    bake: {
+      number: 'Bake',
+      test: ' (test)',
+      open: (deadline: string) => {
+        const d = madridParts('en', deadline);
+        return `Orders until ${d.weekday} ${d.day} at ${d.time} or until the bake is full.`;
+      },
+      dateSoon: 'Date to be confirmed',
+      closesIn: 'Closes in',
+      upcoming: 'I’ll announce the date when orders open.',
+      closed:
+        'I’m not taking more orders this week. I’ll let you know about the next one.',
+      unavailable:
+        'I can’t check availability right now. Reload the page before ordering.',
+      ctaOpen: (weekday: string) => `Order my bread for ${weekday}`,
+      ctaQuick: (price: string) => `Order 1 loaf · ${price}`,
+      ctaMenu: 'See the whole menu',
+      ctaClosed: 'Tell me about the next one',
+    },
+    loaf: {
+      kicker: 'The loaf',
+      name: 'The weekly loaf',
+      alt: 'Two artisan loaves with open scores on a wooden board',
+      altSlice: 'Half a loaf held in the hand, with its airy crumb on show',
+      fermentation: 'Fermentation',
+      pitch:
+        'A crust that crackles, a soft crumb and it keeps for days. Organic flour, water, salt and yeast',
+      fermentationValue: 'Poolish and up to 35 hours of slow fermentation',
+      ingredients: 'Ingredients',
+      ingredientsValue:
+        'Organic wheat flour, water, salt and yeast. Nothing else.',
+      allergens: 'Allergens',
+      allergensValue:
+        'Contains wheat (gluten). If you have another allergy, ask me before ordering.',
+      keeps: 'Keeps',
+      keepsValue: 'Several days wrapped in a cloth. It freezes well in slices.',
+      order: 'Order this loaf',
+      notify: 'Keep me posted',
+    },
+    banana: {
+      kicker: 'I also bake',
+      h2a: 'Chocolate chip',
+      h2b: 'banana bread.',
+      p: 'Three very ripe bananas per tin, organic flour, yoghurt and a whole bag of chocolate chips. Golden crust, moist and tender crumb.',
+      short:
+        'Made with ripe banana, organic flour, yoghurt and 100 g of chocolate chips per tin.',
+      ingredientsValue:
+        'Ripe banana, organic wheat flour, yoghurt and chocolate chips.',
+      allergensValue: 'Contains wheat (gluten) and milk. Ask me about traces.',
+      note: 'Whole or half. With your loaf or on its own.',
+      alt: 'Chocolate chip banana bread on a wooden board',
+      altDetail: 'Close-up of the banana bread crust with chocolate chips',
+      ask: 'Order banana bread',
+      notify: 'Tell me when there is some',
+    },
+    breads: {
+      kicker: 'The bread',
+      h3: 'Nine breads, one bake.',
+      intro:
+        'Pick one or mix them: they come out of the same oven on Wednesday and Saturday.',
+      from: 'from',
+      unit: 'Per loaf',
+      items: {
+        loaf: 'Poolish and up to 35 h of fermentation. Mild, open crumb and a crust that crackles.',
+        sourdough: 'Fermented with sourdough starter.',
+        wholegrain: 'With 60 % wholegrain flour.',
+      },
+      photos: {
+        loaf: 'Half a classic loaf in the hand, with its open crumb on show',
+        sourdough: 'Two halves of sourdough bread stacked, with an airy crumb',
+        wholegrain:
+          'Two halves of wholegrain bread stacked on a board, toasted and dense crumb',
+        sourdoughLoaf:
+          'Sourdough loaf seen from above, with an open, golden score',
+      },
+      details: {
+        sourdough:
+          'Strong wheat flour, wholegrain flour, sourdough starter, water and salt.',
+        wholegrain:
+          'Wholegrain flour, yeast, water, strong wheat flour and salt.',
+      },
+      extraKicker: 'Filled breads',
+      extraH4: 'Six more, same oven.',
+      extraIntro:
+        'The same loaf with olives, walnuts, chocolate or dried fruit. And a soft milk bread for breakfast.',
+      extra: {
+        kalamata: {
+          name: 'Black olives and rosemary',
+          text: 'Black olives and rosemary in the dough. For an aperitivo or with good olive oil.',
+          alt: 'Two halves of bread with black olives and rosemary through the crumb',
+          ingredients:
+            'Wheat flour, water, salt and sourdough starter, with black olives and rosemary.',
+        },
+        nueces: {
+          name: 'Walnuts',
+          text: 'Walnuts all through the crumb. Superb with cheese.',
+          alt: 'Two halves of bread with pieces of walnut in the crumb',
+          ingredients:
+            'Wheat flour, water, salt and sourdough starter, with walnuts.',
+        },
+        'nueces-naranja': {
+          name: 'Walnuts and orange',
+          text: 'Walnuts and a hint of orange. Perfect for breakfast.',
+          alt: 'Two halves of bread with walnuts and orange, airy crumb',
+          ingredients:
+            'Wheat flour, water, salt and sourdough starter, with walnuts and orange.',
+        },
+        chocolate: {
+          name: 'Chocolate',
+          text: 'Streaks of melted chocolate inside the crumb.',
+          alt: 'Two halves of bread with streaks of chocolate in the crumb',
+          ingredients:
+            'Wheat flour, water, salt and sourdough starter, with chocolate.',
+        },
+        'pasas-pistachos': {
+          name: 'Raisins, cranberries and pistachios',
+          text: 'Raisins, cranberries and pistachios in every slice.',
+          alt: 'Two halves of bread with raisins, red cranberries and green pistachios in the crumb',
+          ingredients:
+            'Wheat flour, water, salt and sourdough starter, with raisins, cranberries and pistachios.',
+        },
+        'pan-de-leche': {
+          name: 'Milk bread',
+          text: 'With poolish. Soft, fluffy crumb, and a big one: almost 1 kg of dough.',
+          alt: 'Two halves of milk bread with a white, fluffy crumb',
+          ingredients:
+            'Wheat flour, poolish, milk, butter, sugar, egg and salt.',
+        },
+      } satisfies Record<
+        ExtraBreadId,
+        { name: string; text: string; alt: string; ingredients: string }
+      >,
+      extraAllergens:
+        'Walnuts and pistachios: tree nuts. The chocolate may contain milk and soy. The milk bread contains milk and egg.',
+      allergens:
+        'They contain wheat (gluten). If you have another allergy, ask me before ordering.',
+      add: 'Add',
+      less: (name: string) => `Remove ${name}`,
+      more: (name: string) => `Add ${name}`,
+    },
+    pastry: {
+      kicker: 'Pastries',
+      tag: 'By the piece',
+      short: 'Butter-laminated dough, by hand.',
+      unit: 'Each',
+      croissantText: 'Crackling layers and a honeycomb crumb.',
+      painText: 'The same dough, with two chocolate batons inside.',
+      ingredients:
+        'Butter-laminated dough. The pain au chocolat has chocolate.',
+      allergens:
+        'Contains wheat (gluten), milk and egg. Ask me about traces before ordering.',
+      alt: 'A golden pain au chocolat and croissant on a wooden board, in afternoon light',
+      add: 'Add',
+      less: (name: string) => `Remove one ${name}`,
+      more: (name: string) => `Add one ${name}`,
+      notify: 'Tell me when there are some',
+    },
+    why: {
+      kicker: 'Why me',
+      bar: 'And not the bakery next door',
+      h2a: 'Why me',
+      h2b: 'and not the bakery.',
+      stats: [
+        ['35 h', 'of slow fermentation'],
+        ['€0', 'delivery, right to your door'],
+        ['0', 'queues or “it’s all gone”'],
+      ],
+    },
+    xp: {
+      nav: { how: 'How I make it', menu: 'The menu' },
+      order: {
+        kicker: 'No. 04 · The order',
+        bar: 'No card, no account',
+        home: 'Bring it to my home',
+        pickup: 'I’ll pick it up',
+        homeAt: 'in',
+        street: 'at',
+        slot: 'at',
+        name: 'My name is',
+        phone: 'and my mobile is',
+        email: 'If you want the receipt by email:',
+        total: 'Total · pay on delivery',
+        notify: 'Tell me about the next bake:',
+        pick: 'Add:',
+      },
+      hint: 'Touch the dough',
+      ferment: {
+        label: 'Up to 35 hours of fermentation',
+        kicker: 'No. 01 · 35 hours',
+        bar: 'Drag the time',
+        lead: 'My bread ferments for up to',
+        drag: '← Drag →',
+        slider: 'Hours of fermentation',
+        compare: 'Fermentation time, compared',
+        fast: 'Rushed bread',
+        fastValue: '< 3 h',
+        me: 'Molla',
+        replay: '↺ Again',
+        fig: '(Fig. 2) The crumb, while it ferments',
+        phases: [
+          [0, 'Poolish', 'flour, water and a pinch of yeast. All night long.'],
+          [14, 'Folds', 'by hand, no machines.'],
+          [16, 'Shaping', 'loaf by loaf, one by one.'],
+          [17, 'Cold', 'another whole night. No rush here.'],
+          [33, 'Oven', 'a dark crust that crackles.'],
+          [35, 'Ready', 'it smells of bread.'],
+        ] as [number, string, string][],
+      },
+      cut: {
+        label: 'The crumb, inside',
+        word: ['Open', ' it'] as [string, string],
+        says: 'This is the crumb.',
+        fig: '(Fig. 3) The weekly loaf, cut open',
+        scroll: 'Keep scrolling',
+      },
+      counter: {
+        bar: 'The counter',
+        hint: 'Swipe →',
+        prev: 'Previous product',
+        next: 'Next product',
+      },
+      sentence: {
+        hi: 'Hi Víctor, I’d like',
+        for: 'for',
+        empty: 'a loaf',
+        and: 'and',
+      },
+    },
+    reviews: {
+      kicker: 'No. — Reviews',
+      fig: '(Fig. 7)',
+      count: (n: number) => `${n} reviews on Google`,
+      source: 'Google review',
+      all: (n: number) => `See all ${n} reviews on Google`,
+      leave: 'Leave yours',
+      newTab: '(opens in a new tab)',
+      label: 'Google reviews',
+      prev: 'Previous review',
+      next: 'Next review',
+    },
+    fix: {
+      kicker: 'Weekly bread',
+      bar: 'Every week, no thinking',
+      h2a: 'Your bread every week.',
+      h2b: 'Without thinking.',
+      voucher:
+        'Weekly bread only: once I’ve delivered 3 loaves, the 4th is on me.',
+      cta: 'Sign up for weekly bread',
+      facts: (price: string) => [
+        `Wednesday or Saturday ${hours.en}`,
+        `${price} per loaf · no delivery fee`,
+        'Skip or cancel with one click',
+      ],
+    },
+    organic: {
+      kicker: 'Flour',
+      h2a: 'Organic flour,',
+      h2b: 'and time.',
+      p: 'All the bread and the banana bread are made with organically grown flour. Good flour needs no improvers: water, salt, a little yeast and plenty of time are enough.',
+      items: [
+        ['100 %', 'organic flour'],
+        ['0', 'improvers or additives'],
+        ['35 h', 'of fermentation'],
+      ],
+    },
+    process: {
+      h2a: 'Most of the work',
+      h2b: 'is waiting.',
+      hours: 'hours of fermentation',
+      intro:
+        'Poolish is a liquid pre-dough that ferments slowly overnight. It gives the loaf a more open crumb, a thinner crust and a flavour you can’t get in a hurry.',
+      more: 'What poolish is, in detail',
+      closeWhen: (deadline: string) => {
+        const d = madridParts('en', deadline);
+        return `Until ${d.weekday}, ${d.time}`;
+      },
+      pickupWhen: (pickup: string) =>
+        capital(madridParts('en', pickup).weekday),
+      steps: [
+        {
+          when: 'Until closing, 20:00',
+          title: 'Orders',
+          text: 'I close orders and know exactly how many loaves to make. Not one more.',
+        },
+        {
+          when: 'After closing',
+          title: 'Slow fermentation',
+          time: 'Up to 35 h',
+          text: 'Poolish, hand-folded dough, shaping and a long cold fermentation. No rush: that’s where the flavour, the aroma and the crumb come from.',
+        },
+        {
+          when: 'The morning of delivery',
+          title: 'Oven',
+          text: 'A dark crust that crackles, an open and moist crumb.',
+        },
+        {
+          when: 'Wednesday or Saturday',
+          title: 'To your door',
+          text: `I deliver it ${hours.en} (on Wednesdays, also ${eveningEn}) to Sant Boi, Sant Just, Sant Joan Despí, Sant Feliu, Santa Coloma or Sant Vicenç, or you pick it up in Sant Boi. You pay when you get it.`,
+        },
+      ],
+    },
+    maker: {
+      kicker: 'Who makes the bread',
+      h2: 'Few loaves, made one at a time.',
+      p1: 'I make artisan bread to order for people all over the Baix Llobregat. Each week I bake only what has been ordered: that way every loaf gets its time and nothing goes to waste.',
+      p2: 'No improvers, no shortcuts. Organic flour, water, salt, a little yeast and a whole night of patience.',
+      altPerson: 'The baker holds a freshly baked loaf and smiles',
+      altDough: 'Two shaped doughs resting in their proofing baskets',
+    },
+    reserve: {
+      kicker: 'Order for the next bake',
+      h2: 'Place your order.',
+      bananaQty: 'Banana bread',
+      bananaHint: 'In halves: ½, 1, 1½ or 2',
+      bananaLess: 'Remove half a banana bread',
+      bananaMore: 'Add half a banana bread',
+      bananaNone: 'No banana bread',
+      emptyOrder: 'Add a loaf, a banana bread or pastries to order.',
+      quickPick: 'Shall we start here?',
+      quickLoaf: (price: string) => `1 loaf · ${price}`,
+      totalLabel: 'Total to pay on delivery',
+      pickup: 'Delivery',
+      where: 'Where',
+      pickupLocation: `Home delivery, ${hours.en} · Wednesdays also ${eveningEn}`,
+      pickupDetails:
+        'Sant Boi, Sant Just Desvern, Sant Joan Despí, Sant Feliu de Llobregat, Santa Coloma de Cervelló and Sant Vicenç dels Horts. Another town? Pick it up in Sant Boi.',
+      pickupInfo: 'Delivery areas and times',
+      deliveryH: '2 · How do you want it?',
+      deliveryHome: (wed: boolean) =>
+        wed
+          ? 'Home delivery · midday or evening'
+          : `Home delivery · ${hours.en}`,
+      slotH: 'What time should I bring it?',
+      slotMidday: `Midday · ${hours.en}`,
+      slotEvening: `Evening · ${eveningEn}`,
+      slotEveningHint: 'If you’re not home at midday',
+      deliveryHomeHint:
+        'Sant Boi, Sant Just Desvern, Sant Joan Despí, Sant Feliu de Llobregat, Santa Coloma de Cervelló and Sant Vicenç dels Horts',
+      deliveryPickup: 'I’ll pick it up in Sant Boi',
+      deliveryPickupHint:
+        'Rest of the Baix Llobregat. I’ll confirm the exact spot.',
+      town: 'Town',
+      townPick: 'Choose your town',
+      address: 'Delivery address',
+      notes: 'If you’re out (optional)',
+      notesPlaceholder:
+        'Leave it with the concierge, at reception, with the neighbour on the 2nd floor…',
+      addressPlaceholder: 'Street, number, floor and door (home or work)',
+      deliveryLabel: (town: string) => `Home delivery in ${town}`,
+      pay: 'Payment',
+      payValue: 'When you receive or pick it up. No card, no account.',
+      question: 'I have a question ↗',
+      yourOrder: 'Your order',
+      step1: '1 · What you want',
+      step3: '3 · Your details',
+      moreProducts: '+ Add another product',
+      notesToggle: '+ Add a delivery note',
+      submitTotal: (total: string) => `Confirm order · ${total}`,
+      demoIntro:
+        'Test mode: use made-up details. No emails are sent and no bread is ordered.',
+      qty: 'Loaves',
+      qtyMax: 'Up to 4 per order',
+      less: 'Remove a loaf',
+      more: 'Add a loaf',
+      name: 'Your name',
+      email: 'Email (optional)',
+      emailHint: 'If you leave it out, I’ll confirm the order on WhatsApp.',
+      phone: 'Mobile or WhatsApp',
+      honey: 'Leave this field empty',
+      demoCheck: 'I understand I am testing a fake order.',
+      pickupCheck: (day: string, window: string, wed = false) =>
+        `I’ll deliver it on ${day}: to the address you give ${wed ? `${hours.en} or ${eveningEn}, depending on the slot you choose,` : hours.en} if you choose home delivery, or at the pickup point in Sant Boi de Llobregat${window ? ` (${window})` : ''}.`,
+      privacyA: 'I have read the',
+      privacyNote: 'By ordering you accept the',
+      privacyLink: 'privacy policy and terms',
+      referralNote:
+        '🎁 A neighbour invited you: a free croissant with your first order.',
+      newsCheck:
+        'Optional: email me when each Saturday bake opens (two emails a week at most; unsubscribe with one click).',
+      submitDemo: 'Test order',
+      submit: 'Confirm order',
+      footnote:
+        'Pay on delivery. Cancel with one click until orders close. No commitment.',
+      whatsappCta: 'Order on WhatsApp',
+      whatsappAlt: 'Rather order on WhatsApp?',
+      whatsappText: (day: string) =>
+        `Hi! I’d like to order bread for ${day}. I’d like: `,
+      noscript: 'Turn on JavaScript to see the confirmation on this page.',
+      noscriptMail: 'You can also write to me to order.',
+      closedH3: 'There are no loaves left this week.',
+      closedP:
+        'I’ll let you know as soon as the next bake opens: on WhatsApp or by email.',
+      notify: 'Tell me',
+    },
+    faq: {
+      h2: 'Questions',
+      items: [
+        [
+          'Is it sourdough bread?',
+          'There are both. The weekly loaf is poolish: a pre-dough of flour, water and very little yeast that ferments overnight, with up to 35 hours of fermentation in total; mild flavour, not sour at all. If you prefer sourdough, the sourdough loaf is on the menu too.',
+        ],
+        [
+          'What’s in the loaf?',
+          'Organic wheat flour, water, salt and yeast. Contains gluten. If you have another allergy, ask me before ordering: other flours are used in the kitchen.',
+        ],
+        [
+          'Where do I pick it up?',
+          `At a pickup point in Sant Boi de Llobregat; I confirm the exact spot with your order. It’s the option if you live in another town in the Baix Llobregat, such as ${areaTowns.replace(' o ', ' or ')}.`,
+        ],
+        [
+          'Do you deliver to homes?',
+          `Yes, on Wednesdays ${hours.en} or ${eveningEn} and on Saturdays ${hours.en} in Sant Boi de Llobregat, Sant Just Desvern, Sant Joan Despí, Sant Feliu de Llobregat, Santa Coloma de Cervelló and Sant Vicenç dels Horts, free of charge. When ordering, choose «Home delivery», the slot if it’s a Wednesday, and write your address. You pay when you get it.`,
+        ],
+        [
+          'Do you bring bread to Sant Just Desvern?',
+          `Yes. Every Wednesday and Saturday I deliver in Sant Just Desvern ${hours.en} (on Wednesdays, also ${eveningEn}), just like in Sant Boi, Sant Joan Despí, Sant Feliu de Llobregat, Santa Coloma de Cervelló and Sant Vicenç dels Horts. Order before orders close: Monday for Wednesday and Thursday for Saturday, at 20:00.`,
+        ],
+        [
+          'What if I won’t be home?',
+          'Reply to the confirmation email or write to me as soon as possible with your order code. You get a reminder the day before. If there’s still time, I release your order for someone else.',
+        ],
+      ],
+    },
+    waitlist: {
+      h2: 'Shall I tell you about the next bake?',
+      p: 'One message when orders open, and nothing else.',
+      whatsapp: 'Tell me on WhatsApp',
+      whatsappText:
+        'Hi Víctor! Please let me know when you open the next bake.',
+      channelCta: 'Join the WhatsApp channel',
+      emailAlt: 'Rather get an email?',
+      label: 'Your email',
+      button: 'Tell me',
+      honey: 'Leave empty',
+      consentA: 'I want to receive bake notices and I accept the',
+      consentLink: 'privacy policy',
+      channel: 'Or follow the WhatsApp channel: one notice per bake, no chat.',
+      disabled: 'Notices will start when the first bake is announced.',
+      demo: 'Test mode: you won’t receive emails.',
+      success:
+        'Almost done: I’ve sent you an email to confirm the notice. If you can’t see it, check your spam.',
+      successDirect:
+        'You’re on the list. I’ll write to you when the next bake opens.',
+      poster: 'Loaf broken in half, with its open crumb against the light',
+    },
+    mobile: {
+      label: 'Quick order',
+      loaf: 'Loaf',
+      order: 'Order',
+      notify: 'Tell me',
+    },
+    ed: {
+      bar: 'Artisan bread made to order',
+      fig: '(Fig. 1) A loaf, broken in half',
+      ferment: 'Fermented up to 35 h',
+      diary: 'Bakehouse diary',
+      swipe: 'Swipe',
+      menuBar: 'From the oven to your table',
+      processBar: 'Two bakes a week',
+      flourBar: 'No improvers',
+      makerBar: 'Baix Llobregat',
+      reserveBar: 'No card, no account',
+      faqBar: 'What people ask me most',
+      waitBar: 'One notice per bake',
+      fig2: '(Fig. 2) The weekly loaf, fresh out of the oven',
+      fig3: '(Fig. 3) Chocolate chip banana bread',
+      fig4: '(Fig. 6) The person who makes the bread',
+      fig5: '(Fig. 4) Croissant and pain au chocolat',
+      defWord: 'molla',
+      defGram: 'n. (Catalan)',
+      defText: 'The crumb: the soft inside of the bread.',
+      whole: 'Whole',
+      half: 'Half',
+    },
+    breadcrumbHome: 'Home',
   },
 };

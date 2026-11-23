@@ -172,6 +172,80 @@ const text = {
     photo: 'El forner sosté un pa acabat de coure i somriu',
     service: 'Pa fix: subscripció setmanal de pa artesà a domicili',
   },
+  en: {
+    crumb: 'Weekly bread',
+    title: `Artisan bread subscription in Sant Boi · Weekly bread · ${brand.name}`,
+    description: `Your sourdough or poolish bread delivered every week, in Sant Boi and the Baix Llobregat. Choose the day, skip or cancel with one click and pay on delivery.`,
+    kicker: 'Weekly bread · weekly subscription',
+    h1: 'Your bread every week, without thinking about it.',
+    lede: `You choose once how much you want and which day: Wednesday or Saturday. Every week I make the bread and bring it to you between ${from} and ${to}. If one week you don’t want it, skip it with one click.`,
+    howH: 'How it works',
+    how: [
+      'Choose how many loaves you want (and banana bread, if you fancy it), the day (Wednesday or Saturday) and whether you want it every week or every other week.',
+      'I write to you every week to tell you what’s coming. You don’t have to do anything.',
+      `On the day you choose, between ${from} and ${to}, I bring it to your home or work. You pay when you get it: no card and no advance charges.`,
+      'Whenever you like, skip a week, pause it or cancel.',
+    ],
+    cancelH: 'Cancelling is one click',
+    cancel: [
+      'No calling, no writing and no explaining why. Every email I send you has a button.',
+      'Skip a week: one click, until I close orders (Monday at 20:00 for Wednesday; Thursday at 20:00 for Saturday).',
+      'Pause or cancel completely: one click from the link in your welcome email.',
+      'You can sign up again whenever you like.',
+    ],
+    priceH: 'What it costs',
+    price: `The poolish loaf costs ${money(loaf)}; the banana bread, ${money(bananaWhole)} whole or ${money(bananaHalf)} for half. No delivery fee. If prices ever change I’ll give you 14 days’ notice and you can cancel.`,
+    voucherH: 'The Weekly bread voucher',
+    voucher:
+      'Your first order comes with a card with this voucher. Weekly bread only: once I’ve delivered 3 loaves, the 4th is on me. It counts loaves, not deliveries: with 2 loaves per delivery, the 4th comes on the second.',
+    voucherSkip:
+      'If you skip a week, you don’t lose the voucher. It counts delivered loaves.',
+    jump: 'Sign me up',
+    capacityH: 'Small bakes',
+    capacity:
+      'I bake in small batches and subscribers have their bread reserved before anyone else. If one week the bake is full, I’ll tell you, I won’t charge you anything and you carry on with your Weekly bread the following week.',
+    formH: 'Sign up for weekly bread',
+    qty: 'Loaves per delivery',
+    banana: 'Banana bread per delivery',
+    bananaOptions: ['None', '½', '1', '1½', '2'],
+    frequency: 'Frequency',
+    dayH: 'Which day?',
+    wed: 'Wednesday',
+    wedHint: 'Ideal for getting it at work',
+    sat: 'Saturday',
+    satHint: 'For the weekend at home',
+    weekly: 'Every week',
+    biweekly: 'Every other week',
+    deliveryH: 'How do you want it?',
+    home: `Home delivery · ${from}–${to}`,
+    homeHint:
+      'Sant Boi, Sant Just Desvern, Sant Joan Despí, Sant Feliu de Llobregat, Santa Coloma de Cervelló and Sant Vicenç dels Horts',
+    pickup: 'I’ll pick it up in Sant Boi',
+    pickupHint: 'Rest of the Baix Llobregat. I’ll confirm the exact spot.',
+    town: 'Town',
+    townPick: 'Choose your town',
+    address: 'Delivery address',
+    addressPlaceholder: 'Street, number, floor and door',
+    name: 'Your name',
+    email: 'Email',
+    phone: 'Mobile or WhatsApp',
+    per: 'Per delivery',
+    honey: 'Leave this field empty',
+    termsA: 'I have read the',
+    termsLink: 'weekly bread terms',
+    termsB: 'and agree that my order is prepared every week.',
+    privacyA: 'I have read the',
+    privacyLink: 'privacy policy',
+    submit: 'Start my weekly bread',
+    footnote: 'Pay on delivery. You can skip, pause or cancel with one click.',
+    closed: 'Weekly bread will open together with orders.',
+    demo: 'Test mode: use made-up details.',
+    doneH: 'Your weekly bread is set up.',
+    doneP: 'I’ve sent you an email with everything and the link to manage it.',
+    manage: 'Manage my weekly bread',
+    photo: 'The baker holds a freshly baked loaf and smiles',
+    service: 'Weekly bread: weekly artisan bread delivery subscription',
+  },
 }[lang];
 const privacyHref = routes.privacy[lang];
 const service = {
@@ -191,7 +265,11 @@ const service = {
     '@type': 'Offer',
     price: (loaf / 100).toFixed(2),
     priceCurrency: 'EUR',
-    description: lang === 'ca' ? 'Preu per pa' : 'Precio por hogaza',
+    description: {
+      ca: 'Preu per pa',
+      es: 'Precio por hogaza',
+      en: 'Price per loaf',
+    }[lang],
   },
 };
 ---
@@ -383,7 +461,7 @@ const service = {
               autocomplete="email"
               maxlength="254"
               required
-              placeholder="tu@email.com"
+              placeholder={lang === 'en' ? 'you@email.com' : 'tu@email.com'}
             />
           </div>
           <div class="field">

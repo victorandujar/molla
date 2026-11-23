@@ -18,7 +18,9 @@ export const slotWindow = (slot: DeliverySlot, pickupDate: string) =>
     ? eveningWindow
     : deliveryWindow;
 // "12:00–14:00" reads "de 12 a 14 h" in copy.
-export const windowHours = (window: string) => {
+// English keeps the clock: "12:00–14:00".
+export const windowHours = (window: string, lang?: 'ca' | 'es' | 'en') => {
+  if (lang === 'en') return window;
   const [from, to] = window.split('–').map((t) => Number(t.split(':')[0]));
   return `de ${from} a ${to} h`;
 };

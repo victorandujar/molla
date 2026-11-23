@@ -100,6 +100,33 @@ export const campaigns: Campaign[] = [
           ? 'Y una cosa más: estoy probando un panettone de masa madre. Todavía no sé si llegará a tiempo para estas fiestas. Si te gustaría tener uno, responde a este correo y serás de los primeros en saberlo.'
           : undefined,
       },
+      en: {
+        subject: 'This Christmas, Molla bread on the table',
+        kicker: 'Christmas 2026',
+        heading: 'Christmas Eve and New Year’s Eve bakes.',
+        intro:
+          'This year I’m baking on Thursday 24 and Thursday 31 December, so the bread reaches the table the same day. You can already order for both days. As always, I only bake what is ordered: when it fills up, it closes.',
+        rows: [
+          [
+            'Christmas Eve',
+            'Thursday 24, 12:00–14:00 · orders open until Tuesday 22 at 20:00',
+          ],
+          [
+            'New Year’s Eve',
+            'Thursday 31, 12:00–14:00 · orders open until Tuesday 29 at 20:00',
+          ],
+          [
+            'Delivery',
+            'Delivered in Sant Boi, Sant Just, Sant Joan Despí, Sant Feliu, Santa Coloma and Sant Vicenç, free of charge. Or pickup in Sant Boi.',
+          ],
+          ['The menu', 'Poolish bread, banana bread and pastries, as always.'],
+        ],
+        button: 'Order for the 24th →',
+        secondButton: 'Order for the 31st →',
+        note: panettoneTeaser
+          ? 'And one more thing: I’m testing a sourdough panettone. I don’t know yet whether it will be ready in time for these holidays. If you’d like one, reply to this email and you’ll be among the first to know.'
+          : undefined,
+      },
     },
   },
   {
@@ -132,6 +159,18 @@ export const campaigns: Campaign[] = [
         ],
         button: 'Reservar para el 24 →',
       },
+      en: {
+        subject: 'Christmas Eve bread: orders until Tuesday',
+        kicker: 'Christmas Eve',
+        heading: 'Bread for the 24th, at your door at midday.',
+        intro:
+          'There’s still time to order bread and pastries for Thursday 24. I’ll bring them between 12:00 and 14:00, freshly made. Orders close on Tuesday 22 at 20:00 or when the bake is full.',
+        rows: [
+          ['Delivery', 'Thursday 24 December, 12:00–14:00'],
+          ['Closing', 'Tuesday 22 at 20:00'],
+        ],
+        button: 'Order for the 24th →',
+      },
     },
   },
   {
@@ -163,6 +202,18 @@ export const campaigns: Campaign[] = [
           ['Cierre', 'Martes 29 a las 20 h'],
         ],
         button: 'Reservar para el 31 →',
+      },
+      en: {
+        subject: 'New Year’s Eve bread: orders until Tuesday',
+        kicker: 'New Year’s Eve',
+        heading: 'Ending the year with good bread.',
+        intro:
+          'Last bake of 2026: Thursday 31, between 12:00 and 14:00. Order bread and pastries for the last dinner of the year until Tuesday 29 at 20:00.',
+        rows: [
+          ['Delivery', 'Thursday 31 December, 12:00–14:00'],
+          ['Closing', 'Tuesday 29 at 20:00'],
+        ],
+        button: 'Order for the 31st →',
       },
     },
   },

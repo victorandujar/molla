@@ -175,6 +175,38 @@ test('croissants alone can be booked from the form', async ({ page }) => {
   expect(d.orders).toHaveLength(1);
   expect(d.orders[0].total).toBe(440);
 });
+test('an English visitor books in English and the order keeps the language', async ({
+  page,
+}) => {
+  await page.goto('/en/');
+  await expect(page.locator('html')).toHaveAttribute('lang', 'en');
+  await expect(page.locator('a.lang-switch[hreflang=ca]')).toHaveAttribute(
+    'href',
+    '/',
+  );
+  await expect(page.locator('a.lang-switch[hreflang=es]')).toHaveAttribute(
+    'href',
+    '/es/',
+  );
+  await showLines(page);
+  await page
+    .locator('#reservation-form [data-target=croissant][data-step="1"]')
+    .click();
+  await page.getByLabel('Your name', { exact: true }).fill('Ann Test');
+  await page.locator('#email').fill('ann@example.com');
+  await page.locator('#phone').fill('612345678');
+  await page.locator('#town').selectOption('sant-boi');
+  await page.locator('#address').fill('Carrer Major 1, 2n 1a');
+  await page.locator('input[name=pickup]').check();
+  await page.locator('#reservation-form button[type=submit]').click();
+  await expect(page.locator('#confirmation')).toContainText(
+    'This is what your confirmation will look like.',
+  );
+  await expect(page.locator('#confirmation')).toContainText('Order code');
+  const d = await readData();
+  expect(d.orders).toHaveLength(1);
+  expect(d.orders[0].lang).toBe('en');
+});
 test('a booking without email goes through and is keyed by phone', async ({
   page,
 }) => {
@@ -573,8 +605,13 @@ test('Catalan privacy page mirrors the Spanish one', async ({ page }) => {
   await expect(page.getByRole('heading', { level: 1 })).toHaveText(
     'Privacitat i condicions.',
   );
-  await page.locator('.lang-switch').click();
+  await page.locator('.lang-switch[hreflang=es]').click();
   await expect(page).toHaveURL(/\/privacidad$/);
+  await page.locator('.lang-switch[hreflang=en]').click();
+  await expect(page).toHaveURL(/\/en\/privacy$/);
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText(
+    'Privacy and terms.',
+  );
 });
 test('waitlist deduplicates emails and unsubscribe requires explicit POST', async ({
   page,
@@ -644,8 +681,10 @@ test('Catalan is the main language, Spanish lives under /es/', async ({
     'Te confirmaremos el punto exacto de recogida con tu pedido',
   );
   await expect(page.locator('body')).not.toContainText('Ronda de Sant Ramon');
-  await page.locator('.lang-switch').click();
+  await page.locator('.lang-switch[hreflang=ca]').click();
   await expect(page).toHaveURL(/\/recollida$/);
+  await page.locator('.lang-switch[hreflang=en]').click();
+  await expect(page).toHaveURL(/\/en\/pickup$/);
 });
 
 test('banana bread is ordered by halves, alone or with bread, within its quota', async ({
@@ -1095,9 +1134,13 @@ test('pa fix sign-up validation, language and bad links', async ({
   await expect(page.getByRole('heading', { level: 1 })).toContainText(
     'El teu pa de cada setmana',
   );
-  await expect(page.locator('.lang-switch')).toHaveAttribute(
+  await expect(page.locator('.lang-switch[hreflang=es]')).toHaveAttribute(
     'href',
     '/es/pan-fijo',
+  );
+  await expect(page.locator('.lang-switch[hreflang=en]')).toHaveAttribute(
+    'href',
+    '/en/weekly-bread',
   );
 });
 
