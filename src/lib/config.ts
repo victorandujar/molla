@@ -80,10 +80,34 @@ export const brand = {
 };
 // Legal texts come from the environment; the Catalan and English ones fall
 // back to Spanish.
+// Catalan and English: the published Spanish texts, translated. A `_EN` variable
+// overrides them; update these if the Spanish ones change.
+const privacyEn: Record<string, string> = {
+  PRIVACY_PROVIDERS:
+    'Providers: Vercel Inc. (web hosting), Neon Inc. (database, servers in London) and Resend Inc. (email delivery), acting as data processors.',
+  PRIVACY_TRANSFERS:
+    'Vercel, Neon and Resend are US companies; transfers are covered by the EU-US Data Privacy Framework and the European Commission’s standard contractual clauses.',
+  PRIVACY_RETENTION:
+    'Order data is kept while the order is being handled and for the applicable legal periods; it is then deleted.',
+};
+const privacyCa: Record<string, string> = {
+  PRIVACY_PROVIDERS:
+    'Proveïdors: Vercel Inc. (allotjament web), Neon Inc. (base de dades, servidors a Londres) i Resend Inc. (enviament de correus), que actuen com a encarregats del tractament.',
+  PRIVACY_TRANSFERS:
+    'Vercel, Neon i Resend són empreses dels Estats Units; les transferències s’emparen en el Marc de Privacitat de Dades UE-EUA i en les clàusules contractuals tipus de la Comissió Europea.',
+  PRIVACY_RETENTION:
+    'Les dades de les reserves es conserven mentre es gestiona la comanda i durant els terminis legals aplicables; després s’eliminen.',
+};
 const privacyText = (name: string) => ({
   es: process.env[name] || '',
-  ca: process.env[`${name}_CA`] || process.env[name] || '',
-  en: process.env[`${name}_EN`] || process.env[name] || '',
+  ca:
+    process.env[`${name}_CA`] ||
+    (process.env[name] ? privacyCa[name] : '') ||
+    '',
+  en:
+    process.env[`${name}_EN`] ||
+    (process.env[name] ? privacyEn[name] : '') ||
+    '',
 });
 export const privacy = {
   providers: privacyText('PRIVACY_PROVIDERS'),
