@@ -3494,7 +3494,8 @@ details[open] p {
 }
 .footer-inner {
   display: grid;
-  grid-template-columns: 1fr auto;
+  /* Two balanced columns: the links wrap instead of squeezing the text. */
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 20px 48px;
   padding-block: 32px 18px;
 }
