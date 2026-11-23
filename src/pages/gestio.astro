@@ -256,6 +256,8 @@ const pieces = (orders: Order[], product: string) =>
 const offerStanding = (c: StandingCandidate) => {
   const first = c.name.split(' ')[0];
   const link = new URL(routes.standing[c.lang], Astro.url.origin).href;
+  if (c.lang === 'en')
+    return `Hi ${first}! It’s Víctor, from Molla. I’m setting up bread for regular customers: I keep your loaf for you every week, bring it to your home and you pay when you get it. If one week you don’t want it, skip it with one click. Shall I sign you up? Here it is: ${link}`;
   return c.lang === 'ca'
     ? `Hola, ${first}! Sóc el Víctor, de Molla. Estic organitzant el pa per a clients fixos: et guardo el teu pa cada setmana, te’l porto a casa i el pagues en rebre’l. Si una setmana no el vols, el saltes amb un clic. T’hi apunto? Aquí ho tens: ${link}`
     : `¡Hola, ${first}! Soy Víctor, de Molla. Estoy organizando el pan para clientes fijos: te guardo tu hogaza cada semana, te la llevo a casa y la pagas al recibirla. Si una semana no la quieres, la saltas con un clic. ¿Te apunto? Aquí lo tienes: ${link}`;
@@ -265,6 +267,10 @@ const offerStanding = (c: StandingCandidate) => {
 const onTheWay = (o: Order) => {
   const first = o.name.split(' ')[0];
   const ca = o.lang === 'ca';
+  if (o.lang === 'en')
+    return o.delivery
+      ? `Hi ${first}! It’s Víctor, from Molla. I’m leaving now with your order; I’ll be there in about 15 minutes.`
+      : `Hi ${first}! It’s Víctor, from Molla. Your order is ready to pick up.`;
   if (o.delivery)
     return ca
       ? `Hola, ${first}! Sóc el Víctor, de Molla. Surto ara amb la teva comanda; arribo en uns 15 minuts.`
@@ -893,7 +899,7 @@ import {
                 </div>
                 <p class="admin-meta">
                   Último: {pickupDay(c.lastDate)} ·{' '}
-                  {c.lang === 'ca' ? 'catalán' : 'castellano'}
+                  {{ ca: 'catalán', es: 'castellano', en: 'inglés' }[c.lang]}
                 </p>
                 <p class="admin-contact">
                   <a

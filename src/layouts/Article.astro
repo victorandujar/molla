@@ -58,7 +58,10 @@ const breadcrumbs = {
   <main id="contenido">
     <header class="article-hero">
       <div class="wrap">
-        <nav class="breadcrumbs" aria-label={lang === 'ca' ? 'Ruta' : 'Ruta'}>
+        <nav
+          class="breadcrumbs"
+          aria-label={lang === 'en' ? 'Breadcrumb' : 'Ruta'}
+        >
           <a href={routes.home[lang]}>{t.breadcrumbHome}</a>
           <span aria-hidden="true">/</span>
           <span aria-current="page">{crumb}</span>

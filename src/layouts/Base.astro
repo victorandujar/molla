@@ -15,6 +15,7 @@ import Ribbon from '../components/Ribbon.astro';
 import Crumb from '../components/Crumb.astro';
 import { brand, searchIndexable, isDemo } from '../lib/config';
 import { ui, routes, type Lang, type RouteKey } from '../lib/i18n';
+import { LANGS, langNames, langSwitchAria } from '../lib/messages';
 import { deliveryTowns, deliveryWindow, eveningWindow } from '../lib/delivery';
 interface Props {
   lang?: Lang;
@@ -40,7 +41,9 @@ const {
   minimal = false,
 } = Astro.props;
 const t = ui[lang];
-const other: Lang = lang === 'es' ? 'ca' : 'es';
+// The other two languages, offered in the header and the footer.
+const others = LANGS.filter((l) => l !== lang);
+const ogLocale = { ca: 'ca_ES', es: 'es_ES', en: 'en_GB' } as const;
 const home = routes.home[lang];
 const abs = (path: string) =>
   brand.site ? new URL(path, brand.site).href : null;
@@ -69,7 +72,9 @@ const organization = {
   priceRange: '€',
   currenciesAccepted: 'EUR',
   paymentAccepted: 'Cash',
-  servesCuisine: lang === 'ca' ? 'Pa artesà' : 'Pan artesano',
+  servesCuisine: { ca: 'Pa artesà', es: 'Pan artesano', en: 'Artisan bread' }[
+    lang
+  ],
   address: {
     '@type': 'PostalAddress',
     addressLocality: 'Sant Boi de Llobregat',
@@ -104,7 +109,7 @@ const website = {
   '@id': abs('/#website'),
   url: abs('/'),
   name: brand.name,
-  inLanguage: ['ca', 'es'],
+  inLanguage: [...LANGS],
   publisher: { '@id': abs('/#organization') },
 };
 const webpage = {
@@ -172,8 +177,9 @@ const graph = [organization, website, webpage, ...jsonLd];
     )}
     {route && brand.site && (
       <>
-        <link rel="alternate" hreflang="ca" href={abs(routes[route].ca)} />
-        <link rel="alternate" hreflang="es" href={abs(routes[route].es)} />
+        {LANGS.map((l) => (
+          <link rel="alternate" hreflang={l} href={abs(routes[route][l])} />
+        ))}
         <link
           rel="alternate"
           hreflang="x-default"
@@ -187,11 +193,10 @@ const graph = [organization, website, webpage, ...jsonLd];
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <meta property="og:type" content={ogType} />
     <meta property="og:site_name" content={brand.name} />
-    <meta property="og:locale" content={lang === 'ca' ? 'ca_ES' : 'es_ES'} />
-    <meta
-      property="og:locale:alternate"
-      content={lang === 'ca' ? 'es_ES' : 'ca_ES'}
-    />
+    <meta property="og:locale" content={ogLocale[lang]} />
+    {others.map((l) => (
+      <meta property="og:locale:alternate" content={ogLocale[l]} />
+    ))}
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     {canonical && (
@@ -233,7 +238,7 @@ const graph = [organization, website, webpage, ...jsonLd];
           {brand.name.toLowerCase()}
           <span class="wordmark-dot">.</span>
         </a>
-        <nav aria-label={lang === 'ca' ? 'Principal' : 'Principal'}>
+        <nav aria-label={lang === 'en' ? 'Main' : 'Principal'}>
           {minimal ? (
             <>
               <a class="nav-hide" href="#fermentacio">
@@ -246,7 +251,7 @@ const graph = [organization, website, webpage, ...jsonLd];
           ) : (
             <>
               <a class="nav-hide" href={`${home}#carta`}>
-                {lang === 'ca' ? 'La carta' : 'La carta'}
+                {t.xp.nav.menu}
               </a>
               <a class="nav-hide" href={routes.standing[lang]}>
                 {t.nav.standing}
@@ -259,17 +264,18 @@ const graph = [organization, website, webpage, ...jsonLd];
               </a>
             </>
           )}
-          {route && (
-            <a
-              class="lang-switch"
-              href={routes[route][other]}
-              hreflang={other}
-              lang={other}
-              aria-label={t.switchAria}
-            >
-              {other.toUpperCase()}
-            </a>
-          )}
+          {route &&
+            others.map((l) => (
+              <a
+                class="lang-switch"
+                href={routes[route][l]}
+                hreflang={l}
+                lang={l}
+                aria-label={langSwitchAria[l]}
+              >
+                {l.toUpperCase()}
+              </a>
+            ))}
           <a
             class="nav-order"
             href={`${home}#reserva`}
@@ -319,11 +325,12 @@ const graph = [organization, website, webpage, ...jsonLd];
           <a href={routes.delivery[lang]}>{t.nav.delivery}</a>
           <a href={routes.standing[lang]}>{t.nav.standing}</a>
           <a href={routes.pickup[lang]}>{t.nav.pickup}</a>
-          {route && (
-            <a href={routes[route][other]} hreflang={other} lang={other}>
-              {t.switchLabel}
-            </a>
-          )}
+          {route &&
+            others.map((l) => (
+              <a href={routes[route][l]} hreflang={l} lang={l}>
+                {langNames[l]}
+              </a>
+            ))}
           <a href={routes.privacy[lang]}>{t.footer.privacy}</a>
           {brand.whatsappChannel && (
             <a

@@ -11,7 +11,7 @@ import {
   sendConfirmation,
   sendSubscriptionWelcome,
 } from '../../lib/email';
-import { pickupDay, manageUrl } from '../../lib/email-templates';
+import { dayInSentence, manageUrl } from '../../lib/email-templates';
 import { isDemo } from '../../lib/config';
 import { AppError } from '../../lib/messages';
 import type { Order } from '../../lib/domain';
@@ -34,9 +34,7 @@ export const POST: APIRoute = async (ctx) => {
     } catch {
       /* No open bake yet: the weekly job places the first order. */
     }
-    const firstDay = first
-      ? pickupDay(first.pickupDate, lang).toLowerCase()
-      : '';
+    const firstDay = first ? dayInSentence(first.pickupDate, lang) : '';
     after(
       Promise.all([
         sendSubscriptionWelcome(sub, firstDay),

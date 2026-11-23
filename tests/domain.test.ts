@@ -259,6 +259,36 @@ test('emails follow the customer language; older orders stay in Spanish', () => 
   assert.doesNotMatch(reminder, /<script>/);
   assert.match(reminder, /A pagar al recoger|a pagar al recoger/);
 });
+test('English orders get English emails, with capitalised dates', () => {
+  const en = { ...order, lang: 'en' as const };
+  assert.match(confirmationSubject(en), /Your order for Saturday/);
+  assert.match(
+    confirmationHtml(en),
+    /<html lang="en">[\s\S]*Pickup code[\s\S]*\/en\/privacy/,
+  );
+  assert.match(confirmationHtml(en), /All handmade in Sant Boi/);
+  assert.match(reminderSubject(en), /^Reminder/);
+  assert.match(cancelledByOwner(en).subject, /cancelled/);
+});
+test('every language has the same interface and server messages', async () => {
+  const { messages, LANGS, toLang } = await import('../src/lib/messages');
+  const keys = (o: object): string[] =>
+    Object.entries(o).flatMap(([k, v]) =>
+      v && typeof v === 'object' && !Array.isArray(v)
+        ? keys(v).map((x) => `${k}.${x}`)
+        : [k],
+    );
+  for (const lang of LANGS) {
+    assert.deepEqual(keys(ui[lang]).sort(), keys(ui.es).sort(), lang);
+    assert.deepEqual(
+      Object.keys(messages[lang]).sort(),
+      Object.keys(messages.es).sort(),
+    );
+  }
+  assert.equal(toLang('en'), 'en');
+  assert.equal(toLang('fr'), 'es');
+  assert.equal(toLang(null), 'es');
+});
 test('waitlist confirmation links confirm and unsubscribe in the right language', () => {
   const m = waitlistConfirmation('ca', {
     confirm: '11111111-1111-4111-8111-111111111111',

@@ -1,0 +1,129 @@
+---
+import Article from '../../layouts/Article.astro';
+import Photo from '../../components/Photo.astro';
+import HowItsMade from '../../components/HowItsMade.astro';
+import { brand } from '../../lib/config';
+export const prerender = true;
+const article = {
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline: 'Poolish bread: what it is and why it ferments for up to 35 hours',
+  description:
+    'What poolish is, how it transforms bread and how it differs from sourdough.',
+  inLanguage: 'en',
+  mainEntityOfPage: brand.site
+    ? new URL('/en/poolish', brand.site).href
+    : undefined,
+  author: {
+    '@id': brand.site ? new URL('/#organization', brand.site).href : undefined,
+  },
+  publisher: {
+    '@id': brand.site ? new URL('/#organization', brand.site).href : undefined,
+  },
+  dateModified: '2026-11-23',
+  image: brand.site
+    ? new URL('/images/crumb-1100.webp', brand.site).href
+    : undefined,
+};
+---
+
+<Article
+  lang="en"
+  route="poolish"
+  crumb="Poolish"
+  title={`Poolish or sourdough: what it is and how they differ · ${brand.name}`}
+  description="What poolish is, why the bread ferments for up to 35 hours and how it differs from sourdough. Explained by a small artisan bakery in Sant Boi."
+  kicker="Slow fermentation"
+  h1="Poolish bread: a night’s head start."
+  lede="What poolish is, what it does to the loaf and how it is similar to (and different from) sourdough."
+  jsonLd={[article]}
+>
+  <div class="article-grid">
+    <div class="prose">
+      <h2>What poolish is</h2>
+      <p>
+        It’s a pre-dough, or pre-ferment: flour and water in equal parts with a
+        very small amount of yeast. It has the texture of thick cream and is
+        made the day before. While it rests overnight, the yeast works slowly
+        and the flour develops aromas that quick kneading has no time to create.
+      </p>
+      <p>
+        Then the poolish is mixed with the rest of the flour, water and salt.
+        The dough is folded by hand, each loaf is shaped and it ferments another
+        night in the cold before going into the oven. All in all, up to 35
+        hours.
+      </p>
+
+      <h2>What you notice in the loaf</h2>
+      <ul>
+        <li>
+          <strong>Flavour</strong>: deeper, slightly sweet and toasty.
+        </li>
+        <li>
+          <strong>Crumb</strong>: more open, moist and elastic.
+        </li>
+        <li>
+          <strong>Crust</strong>: thin, dark golden and crunchy.
+        </li>
+        <li>
+          <strong>Keeping</strong>: it stays soft for more days than a quickly
+          fermented bread.
+        </li>
+      </ul>
+
+      <h2>Poolish or sourdough?</h2>
+      <p>
+        Both are slow fermentations, but they are not the same. Sourdough is a
+        culture of wild yeasts and lactic bacteria that is fed every day; it
+        makes breads with a distinct sour note. Poolish uses yeast, but very
+        little of it and with plenty of time: the result is a bread with
+        character and an open crumb, with a milder flavour and no sourness.
+      </p>
+      <p>
+        I make both, and I’d rather be clear about it: the weekly loaf is
+        <strong>poolish</strong>, and there is also
+        <a href="/en/#carta">sourdough bread</a> on the menu. If you’re after a
+        slow-fermented bread with a friendly taste for every day, poolish is
+        exactly that; if you like a sour note, choose sourdough.
+      </p>
+
+      <h2>What a bake looks like</h2>
+      <ol>
+        <li>
+          <strong>Until closing</strong> (usually two days before, at 20:00): I
+          close orders.
+        </li>
+        <li>
+          <strong>After closing</strong>: I make the poolish, which rests all
+          night.
+        </li>
+        <li>
+          <strong>Then</strong>: I knead with folds, shape each loaf by hand and
+          leave it to ferment another night in the cold.
+        </li>
+        <li>
+          <strong>Oven</strong> and then{' '}
+          <a href="/en/bread-delivery">to your door</a> on Wednesday or
+          Saturday, or <a href="/en/pickup">pickup in Sant Boi</a>.
+        </li>
+      </ol>
+    </div>
+    <div class="article-photos">
+      <figure class="article-photo">
+        <Photo
+          name="crumb"
+          alt="Open crumb of a poolish loaf with a toasted crust"
+          sizes="(max-width: 860px) calc(100vw - 40px), 40vw"
+        />
+      </figure>
+      <figure class="article-photo">
+        <Photo
+          name="dough"
+          alt="Shaped poolish doughs resting in floured proofing baskets"
+          sizes="(max-width: 860px) calc(100vw - 40px), 40vw"
+        />
+      </figure>
+    </div>
+  </div>
+  <HowItsMade lang="en" slot="after" />
+</Article>

@@ -123,6 +123,11 @@ test('opening email: tagged links, unsubscribe link and header, both languages',
   assert.match(ca.html, /<html lang="ca">/);
   assert.match(ca.html, /utm_campaign=last-010/);
   assert.match(ca.html, /lang=ca/);
+  const en = broadcastEmail('open', 'en', bake, token);
+  assert.match(en.subject, /You can now order bread for Saturday/);
+  assert.match(en.html, /<html lang="en">/);
+  assert.match(en.html, /Thursday at 20:00/);
+  assert.match(en.text, /Unsubscribe: .*lang=en/);
 });
 
 const order: Order = {

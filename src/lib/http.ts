@@ -6,6 +6,7 @@ import { rateLimit } from './store';
 import {
   AppError,
   isMessageKey,
+  toLang,
   messages,
   type Lang,
   type MessageKey,
@@ -20,7 +21,7 @@ export const json = (body: unknown, status = 200) =>
   });
 // Forms post to `/api/...?lang=ca` so even the earliest errors are translated.
 export const langOf = (ctx: APIContext): Lang =>
-  ctx.url.searchParams.get('lang') === 'ca' ? 'ca' : 'es';
+  toLang(ctx.url.searchParams.get('lang'));
 export const error = (lang: Lang, key: MessageKey, status: number) =>
   json({ error: messages[lang][key] }, status);
 // Astro throws when the adapter cannot tell the address (e.g. local handlers).
@@ -28,7 +29,10 @@ export function clientIp(ctx: Pick<APIContext, 'clientAddress' | 'request'>) {
   try {
     return ctx.clientAddress || 'unknown';
   } catch {
-    return ctx.request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
+    return (
+      ctx.request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+      'unknown'
+    );
   }
 }
 export const sameOrigin = (ctx: APIContext) =>

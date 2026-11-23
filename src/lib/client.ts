@@ -234,6 +234,7 @@ document
   .querySelectorAll('[data-event-view]')
   .forEach((el) => observer.observe(el));
 const isCa = document.documentElement.lang === 'ca';
+const isEn = document.documentElement.lang === 'en';
 const form = document.querySelector<HTMLFormElement>('#reservation-form');
 const money = (cents: number) =>
   new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(
@@ -300,47 +301,72 @@ const fields: Record<string, HTMLInputElement | null> = {
 const fieldOf = (b: HTMLElement) =>
   fields[b.dataset.target || b.dataset.add || b.dataset.sub || 'loaf'] ||
   quantity;
-const words = isCa
+const words = isEn
   ? {
-      inOrder: (n: string) => `${n} a la comanda`,
-      loaves: (n: number) => `${n} ${n === 1 ? 'pa' : 'pans'}`,
-      sourdough: (n: number) => `${n} massa mare`,
-      wholegrain: (n: number) => `${n} integral${n === 1 ? '' : 's'}`,
-      empty: 'Afegeix un pa, un banana bread o brioixeria per reservar.',
+      inOrder: (n: string) => `${n} in your order`,
+      loaves: (n: number) => `${n} ${n === 1 ? 'loaf' : 'loaves'}`,
+      sourdough: (n: number) => `${n} sourdough`,
+      wholegrain: (n: number) => `${n} wholegrain`,
+      empty: 'Add a loaf, a banana bread or pastries to order.',
       stock: {
-        bread: { ok: '', low: 'Queden pocs pans', out: 'Fornada exhaurida' },
+        bread: { ok: '', low: 'Few loaves left', out: 'Bake sold out' },
         banana: {
           ok: '',
-          low: 'Queda poc banana bread',
-          out: 'Exhaurit aquesta setmana',
+          low: 'Little banana bread left',
+          out: 'Sold out this week',
         },
         pastry: {
           ok: '',
-          low: 'Queda poca brioixeria',
-          out: 'Brioixeria exhaurida aquesta setmana',
+          low: 'Few pastries left',
+          out: 'Pastries sold out this week',
         },
       },
     }
-  : {
-      inOrder: (n: string) => `${n} en tu pedido`,
-      loaves: (n: number) => `${n} ${n === 1 ? 'hogaza' : 'hogazas'}`,
-      sourdough: (n: number) => `${n} masa madre`,
-      wholegrain: (n: number) => `${n} integral${n === 1 ? '' : 'es'}`,
-      empty: 'Añade una hogaza, un banana bread o bollería para reservar.',
-      stock: {
-        bread: { ok: '', low: 'Quedan pocas hogazas', out: 'Hornada agotada' },
-        banana: {
-          ok: '',
-          low: 'Queda poco banana bread',
-          out: 'Agotado esta semana',
+  : isCa
+    ? {
+        inOrder: (n: string) => `${n} a la comanda`,
+        loaves: (n: number) => `${n} ${n === 1 ? 'pa' : 'pans'}`,
+        sourdough: (n: number) => `${n} massa mare`,
+        wholegrain: (n: number) => `${n} integral${n === 1 ? '' : 's'}`,
+        empty: 'Afegeix un pa, un banana bread o brioixeria per reservar.',
+        stock: {
+          bread: { ok: '', low: 'Queden pocs pans', out: 'Fornada exhaurida' },
+          banana: {
+            ok: '',
+            low: 'Queda poc banana bread',
+            out: 'Exhaurit aquesta setmana',
+          },
+          pastry: {
+            ok: '',
+            low: 'Queda poca brioixeria',
+            out: 'Brioixeria exhaurida aquesta setmana',
+          },
         },
-        pastry: {
-          ok: '',
-          low: 'Queda poca bollería',
-          out: 'Bollería agotada esta semana',
+      }
+    : {
+        inOrder: (n: string) => `${n} en tu pedido`,
+        loaves: (n: number) => `${n} ${n === 1 ? 'hogaza' : 'hogazas'}`,
+        sourdough: (n: number) => `${n} masa madre`,
+        wholegrain: (n: number) => `${n} integral${n === 1 ? '' : 'es'}`,
+        empty: 'Añade una hogaza, un banana bread o bollería para reservar.',
+        stock: {
+          bread: {
+            ok: '',
+            low: 'Quedan pocas hogazas',
+            out: 'Hornada agotada',
+          },
+          banana: {
+            ok: '',
+            low: 'Queda poco banana bread',
+            out: 'Agotado esta semana',
+          },
+          pastry: {
+            ok: '',
+            low: 'Queda poca bollería',
+            out: 'Bollería agotada esta semana',
+          },
         },
-      },
-    };
+      };
 // Halves shown the way people say them: ½, 1, 1½, 2.
 const halvesLabel = (h: number) =>
   h === 1 ? '½' : `${Math.floor(h / 2)}${h % 2 ? '½' : ''}`;
@@ -842,7 +868,9 @@ async function submit(target: HTMLFormElement) {
     throw new Error(
       isCa
         ? 'No s’ha pogut processar la sol·licitud. Torna-ho a provar.'
-        : 'No se ha podido procesar la solicitud. Vuelve a intentarlo.',
+        : isEn
+          ? 'We could not process the request. Please try again.'
+          : 'No se ha podido procesar la solicitud. Vuelve a intentarlo.',
     );
   }
   if (!response.ok)
@@ -850,7 +878,9 @@ async function submit(target: HTMLFormElement) {
       data.error ||
         (isCa
           ? 'No s’ha pogut desar. Torna-ho a provar.'
-          : 'No se ha podido guardar. Vuelve a intentarlo.'),
+          : isEn
+            ? 'We could not save it. Please try again.'
+            : 'No se ha podido guardar. Vuelve a intentarlo.'),
     );
   return data;
 }
@@ -862,7 +892,9 @@ function showError(target: HTMLFormElement, error: unknown) {
       ? error.message
       : isCa
         ? 'La connexió va lenta. Torna-ho a provar; no duplicarem la reserva.'
-        : 'La conexión está tardando. Vuelve a intentarlo; no duplicaremos tu reserva.';
+        : isEn
+          ? 'The connection is slow. Please try again; we won’t duplicate your order.'
+          : 'La conexión está tardando. Vuelve a intentarlo; no duplicaremos tu reserva.';
   el.hidden = false;
   el.focus();
 }
@@ -915,7 +947,9 @@ form?.addEventListener('submit', async (event) => {
   const label = button.textContent;
   button.textContent = isCa
     ? 'Desant la teva reserva…'
-    : 'Guardando tu reserva…';
+    : isEn
+      ? 'Saving your order…'
+      : 'Guardando tu reserva…';
   form.querySelector<HTMLElement>('.form-error')!.hidden = true;
   try {
     const order = await submit(form);
@@ -925,24 +959,35 @@ form?.addEventListener('submit', async (event) => {
     heading.textContent = order.demo
       ? isCa
         ? 'Així serà la teva confirmació.'
-        : 'Así será tu confirmación.'
+        : isEn
+          ? 'This is what your confirmation will look like.'
+          : 'Así será tu confirmación.'
       : isCa
         ? 'La teva comanda ja té el teu nom.'
-        : 'Tu pedido ya tiene tu nombre.';
+        : isEn
+          ? 'Your order has your name on it.'
+          : 'Tu pedido ya tiene tu nombre.';
     const intro = document.createElement('p');
     intro.textContent = order.demo
       ? isCa
         ? 'Reserva de prova completada. No has encarregat res ni rebràs cap correu.'
-        : 'Reserva de prueba completada. No has encargado nada ni recibirás un email.'
+        : isEn
+          ? 'Test order completed. You haven’t ordered anything and you won’t receive an email.'
+          : 'Reserva de prueba completada. No has encargado nada ni recibirás un email.'
       : isCa
         ? 'Reserva confirmada. Guarda aquestes dades per a la recollida.'
-        : 'Reserva confirmada. Guarda estos datos para la recogida.';
+        : isEn
+          ? 'Order confirmed. Keep these details for pickup.'
+          : 'Reserva confirmada. Guarda estos datos para la recogida.';
     const details = document.createElement('div');
     details.className = 'confirmation-details';
-    const date = new Intl.DateTimeFormat(isCa ? 'ca-ES' : 'es-ES', {
-      timeZone: 'Europe/Madrid',
-      dateStyle: 'full',
-    }).format(new Date(order.pickupDate));
+    const date = new Intl.DateTimeFormat(
+      isCa ? 'ca-ES' : isEn ? 'en-GB' : 'es-ES',
+      {
+        timeZone: 'Europe/Madrid',
+        dateStyle: 'full',
+      },
+    ).format(new Date(order.pickupDate));
     const lines = (order.items as { quantity: number; name: string }[]).map(
       (i) => `${i.quantity} × ${i.name}`,
     );
@@ -952,28 +997,40 @@ form?.addEventListener('submit', async (event) => {
       home
         ? isCa
           ? `Total: ${money(order.total)} · Pagament en rebre-la`
-          : `Total: ${money(order.total)} · Pago al recibirlo`
+          : isEn
+            ? `Total: ${money(order.total)} · Pay on delivery`
+            : `Total: ${money(order.total)} · Pago al recibirlo`
         : isCa
           ? `Total: ${money(order.total)} · Pagament en recollir`
-          : `Total: ${money(order.total)} · Pago al recoger`,
+          : isEn
+            ? `Total: ${money(order.total)} · Pay on pickup`
+            : `Total: ${money(order.total)} · Pago al recoger`,
       date,
       order.pickupWindow ||
         (isCa
           ? 'Horari de recollida confirmat amb la comanda'
-          : 'Horario de recogida confirmado con el pedido'),
+          : isEn
+            ? 'Pickup time confirmed with the order'
+            : 'Horario de recogida confirmado con el pedido'),
       home
         ? `${order.pickupAddress} · ${home.address}`
         : order.pickupAddress ||
           (isCa
             ? 'Punt de recollida a Sant Boi de Llobregat'
-            : 'Punto de recogida en Sant Boi de Llobregat'),
+            : isEn
+              ? 'Pickup point in Sant Boi de Llobregat'
+              : 'Punto de recogida en Sant Boi de Llobregat'),
       home
         ? isCa
           ? 'Te la porto a casa dins de la franja.'
-          : 'Te lo llevo a casa dentro de la franja.'
+          : isEn
+            ? 'I’ll bring it to your home within the slot.'
+            : 'Te lo llevo a casa dentro de la franja.'
         : isCa
           ? 'Et confirmarem el punt exacte de recollida amb la teva comanda.'
-          : 'Te confirmaremos el punto exacto de recogida con tu pedido.',
+          : isEn
+            ? 'We’ll confirm the exact pickup point with your order.'
+            : 'Te confirmaremos el punto exacto de recogida con tu pedido.',
     ].filter(Boolean)) {
       const row = document.createElement('div');
       row.textContent = line;
@@ -985,17 +1042,23 @@ form?.addEventListener('submit', async (event) => {
     const codeLabel = home
       ? isCa
         ? 'Codi de comanda'
-        : 'Código de pedido'
+        : isEn
+          ? 'Order code'
+          : 'Código de pedido'
       : isCa
         ? 'Codi de recollida'
-        : 'Código de recogida';
+        : isEn
+          ? 'Pickup code'
+          : 'Código de recogida';
     ref.textContent = `${codeLabel}: ${order.code}`;
     const save = document.createElement('button');
     save.className = 'button';
     save.type = 'button';
     save.textContent = isCa
       ? 'Desar o imprimir la confirmació'
-      : 'Guardar o imprimir confirmación';
+      : isEn
+        ? 'Save or print the confirmation'
+        : 'Guardar o imprimir confirmación';
     save.addEventListener('click', () => window.print());
     result.replaceChildren(heading, intro, details, ref, save);
     // The confirmation by WhatsApp, without a paid API: the buyer sends the
@@ -1005,7 +1068,9 @@ form?.addEventListener('submit', async (event) => {
       const name = String(new FormData(form).get('name') || '').trim();
       const text = isCa
         ? `Hola! Sóc ${name}. He reservat ${lines.join(', ')} per a ${date}. Codi ${order.code}.`
-        : `¡Hola! Soy ${name}. He reservado ${lines.join(', ')} para el ${date}. Código ${order.code}.`;
+        : isEn
+          ? `Hi! I’m ${name}. I’ve ordered ${lines.join(', ')} for ${date}. Code ${order.code}.`
+          : `¡Hola! Soy ${name}. He reservado ${lines.join(', ')} para el ${date}. Código ${order.code}.`;
       const chat = document.createElement('a');
       chat.className = 'button button-ghost confirmation-whatsapp';
       chat.href = `https://wa.me/${result.dataset.whatsapp}?text=${encodeURIComponent(text)}`;
@@ -1014,7 +1079,9 @@ form?.addEventListener('submit', async (event) => {
       chat.dataset.event = 'click_whatsapp';
       chat.textContent = isCa
         ? 'Rebre la confirmació per WhatsApp ↗'
-        : 'Recibir la confirmación por WhatsApp ↗';
+        : isEn
+          ? 'Get the confirmation on WhatsApp ↗'
+          : 'Recibir la confirmación por WhatsApp ↗';
       chat.addEventListener('click', () =>
         track('click_whatsapp', { placement: 'confirmation' }),
       );
@@ -1023,10 +1090,12 @@ form?.addEventListener('submit', async (event) => {
     if (order.contact) {
       const support = document.createElement('a');
       support.className = 'text-link';
-      support.href = `mailto:${order.contact}?subject=${encodeURIComponent('Reserva ' + order.code)}`;
+      support.href = `mailto:${order.contact}?subject=${encodeURIComponent((isEn ? 'Order ' : 'Reserva ') + order.code)}`;
       support.textContent = isCa
         ? 'Consultar o canviar la reserva ↗'
-        : 'Consultar o cambiar mi reserva ↗';
+        : isEn
+          ? 'Ask about or change my order ↗'
+          : 'Consultar o cambiar mi reserva ↗';
       result.append(support);
     }
     // "Convida un veí": gifts this order carries and the buyer's own link.
@@ -1034,12 +1103,16 @@ form?.addEventListener('submit', async (event) => {
       order.invited
         ? isCa
           ? '🎁 Amb aquesta comanda tens un croissant de regal.'
-          : '🎁 Con este pedido tienes un croissant de regalo.'
+          : isEn
+            ? '🎁 This order comes with a free croissant.'
+            : '🎁 Con este pedido tienes un croissant de regalo.'
         : '',
       order.referralGifts
         ? isCa
           ? `🎁 Inclou ${order.referralGifts} croissant${order.referralGifts > 1 ? 's' : ''} de regal per haver convidat.`
-          : `🎁 Incluye ${order.referralGifts} croissant${order.referralGifts > 1 ? 's' : ''} de regalo por haber invitado.`
+          : isEn
+            ? `🎁 Includes ${order.referralGifts} free croissant${order.referralGifts > 1 ? 's' : ''} for inviting someone.`
+            : `🎁 Incluye ${order.referralGifts} croissant${order.referralGifts > 1 ? 's' : ''} de regalo por haber invitado.`
         : '',
     ].filter(Boolean);
     for (const line of gifts) {
@@ -1061,19 +1134,27 @@ form?.addEventListener('submit', async (event) => {
       kicker.className = 'invite-kicker';
       kicker.textContent = isCa
         ? 'Convida un veí · Un croissant per a cadascú'
-        : 'Invita a un vecino · Un croissant para cada uno';
+        : isEn
+          ? 'Invite a neighbour · A croissant for each of you'
+          : 'Invita a un vecino · Un croissant para cada uno';
       const title = document.createElement('p');
       title.className = 'invite-title';
       const strong = document.createElement('strong');
-      strong.textContent = isCa ? 'Un veí, ' : 'Un vecino, ';
+      strong.textContent = isCa
+        ? 'Un veí, '
+        : isEn
+          ? 'One neighbour, '
+          : 'Un vecino, ';
       const em = document.createElement('em');
-      em.textContent = 'dos croissants.';
+      em.textContent = isEn ? 'two croissants.' : 'dos croissants.';
       title.append(strong, em);
       const pitch = document.createElement('p');
       pitch.className = 'invite-text';
       pitch.textContent = isCa
         ? 'Amb la seva primera comanda pel teu enllaç tindrà un croissant de regal, i tu un altre a la teva propera comanda quan l’hi entregui.'
-        : 'Con su primer pedido por tu enlace tendrá un croissant de regalo, y tú otro en tu siguiente pedido cuando se lo entregue.';
+        : isEn
+          ? 'With their first order through your link they get a free croissant, and you get another with your next order once I deliver theirs.'
+          : 'Con su primer pedido por tu enlace tendrá un croissant de regalo, y tú otro en tu siguiente pedido cuando se lo entregue.';
       const share = document.createElement('a');
       share.className = 'button button-orange';
       share.target = '_blank';
@@ -1081,12 +1162,16 @@ form?.addEventListener('submit', async (event) => {
       share.href = `https://wa.me/?text=${encodeURIComponent(
         (isCa
           ? 'Et convido a provar el pa de Molla, un obrador de Sant Boi: fermentació lenta i te’l porten a casa. Amb la primera comanda tens un croissant de regal: '
-          : 'Te invito a probar el pan de Molla, un obrador de Sant Boi: fermentación lenta y te lo llevan a casa. Con tu primer pedido tienes un croissant de regalo: ') +
+          : isEn
+            ? 'Try the bread from Molla, a small bakery in Sant Boi: slow fermentation and they bring it to your door. Your first order comes with a free croissant: '
+            : 'Te invito a probar el pan de Molla, un obrador de Sant Boi: fermentación lenta y te lo llevan a casa. Con tu primer pedido tienes un croissant de regalo: ') +
           invite.href,
       )}`;
       share.textContent = isCa
         ? 'Enviar la invitació per WhatsApp ↗'
-        : 'Enviar la invitación por WhatsApp ↗';
+        : isEn
+          ? 'Send the invitation on WhatsApp ↗'
+          : 'Enviar la invitación por WhatsApp ↗';
       share.dataset.invite = invite.href;
       const copyRow = document.createElement('div');
       copyRow.className = 'invite-copy';
@@ -1096,12 +1181,20 @@ form?.addEventListener('submit', async (event) => {
       field.value = `${location.host.replace(/^www\./, '')}/?ref=${order.referralCode}`;
       field.setAttribute(
         'aria-label',
-        isCa ? 'El teu enllaç d’invitació' : 'Tu enlace de invitación',
+        isCa
+          ? 'El teu enllaç d’invitació'
+          : isEn
+            ? 'Your invitation link'
+            : 'Tu enlace de invitación',
       );
       const copy = document.createElement('button');
       copy.type = 'button';
       copy.className = 'invite-copy-button';
-      const copyLabel = isCa ? 'Copiar l’enllaç' : 'Copiar el enlace';
+      const copyLabel = isCa
+        ? 'Copiar l’enllaç'
+        : isEn
+          ? 'Copy the link'
+          : 'Copiar el enlace';
       copy.textContent = copyLabel;
       copy.addEventListener('click', async () => {
         try {
@@ -1111,7 +1204,7 @@ form?.addEventListener('submit', async (event) => {
           field.select();
           return;
         }
-        copy.textContent = isCa ? 'Copiat ✓' : 'Copiado ✓';
+        copy.textContent = isCa ? 'Copiat ✓' : isEn ? 'Copied ✓' : 'Copiado ✓';
         setTimeout(() => (copy.textContent = copyLabel), 2500);
       });
       copyRow.append(field, copy);
@@ -1131,20 +1224,26 @@ form?.addEventListener('submit', async (event) => {
       share.href = `https://wa.me/?text=${encodeURIComponent(
         (isCa
           ? 'Acabo de fer una comanda a Molla, un obrador de pa i brioixeria artesans de Sant Boi. Te la porten a casa dimecres o dissabte a Sant Boi, Sant Just, Sant Joan Despí, Sant Feliu, Santa Coloma i Sant Vicenç: '
-          : 'Acabo de hacer un pedido en Molla, un obrador de pan y bollería artesanos de Sant Boi. Te lo llevan a casa el miércoles o el sábado en Sant Boi, Sant Just, Sant Joan Despí, Sant Feliu, Santa Coloma y Sant Vicenç: ') +
+          : isEn
+            ? 'I’ve just ordered from Molla, a small artisan bread and pastry bakery in Sant Boi. They deliver on Wednesday or Saturday in Sant Boi, Sant Just, Sant Joan Despí, Sant Feliu, Santa Coloma and Sant Vicenç: '
+            : 'Acabo de hacer un pedido en Molla, un obrador de pan y bollería artesanos de Sant Boi. Te lo llevan a casa el miércoles o el sábado en Sant Boi, Sant Just, Sant Joan Despí, Sant Feliu, Santa Coloma y Sant Vicenç: ') +
           invite.href,
       )}`;
       share.textContent = isCa
         ? 'Passa-ho a un veí per WhatsApp ↗'
-        : 'Pásaselo a un vecino por WhatsApp ↗';
+        : isEn
+          ? 'Pass it on to a neighbour on WhatsApp ↗'
+          : 'Pásaselo a un vecino por WhatsApp ↗';
       result.append(share);
     }
     const fix = document.createElement('a');
     fix.className = 'text-link';
-    fix.href = isCa ? '/pa-fix' : '/es/pan-fijo';
+    fix.href = isCa ? '/pa-fix' : isEn ? '/en/weekly-bread' : '/es/pan-fijo';
     fix.textContent = isCa
       ? 'El vols cada setmana? Pa fix →'
-      : '¿Lo quieres cada semana? Pan fijo →';
+      : isEn
+        ? 'Want it every week? Weekly bread →'
+        : '¿Lo quieres cada semana? Pan fijo →';
     result.append(fix);
     result.hidden = false;
     result.focus();
@@ -1190,14 +1289,18 @@ waitlist?.addEventListener('submit', async (event) => {
   if (button.disabled) return;
   button.disabled = true;
   const label = button.textContent;
-  button.textContent = isCa ? 'Desant…' : 'Guardando…';
+  button.textContent = isCa ? 'Desant…' : isEn ? 'Saving…' : 'Guardando…';
   waitlist.querySelector<HTMLElement>('.form-error')!.hidden = true;
   try {
     const result = await submit(waitlist);
     const success = waitlist.querySelector<HTMLElement>('.waitlist-success')!;
     if (!result.confirm) success.textContent = success.dataset.direct || '';
     success.hidden = false;
-    button.textContent = isCa ? 'Ja ets a la llista' : 'Ya estás en la lista';
+    button.textContent = isCa
+      ? 'Ja ets a la llista'
+      : isEn
+        ? 'You’re on the list'
+        : 'Ya estás en la lista';
     track('waitlist_signup');
   } catch (error) {
     showError(waitlist, error);
@@ -1243,20 +1346,28 @@ async function refreshBake() {
           b.state === 'SOLD_OUT'
             ? isCa
               ? 'Fornada exhaurida'
-              : 'Hornada agotada'
+              : isEn
+                ? 'Bake sold out'
+                : 'Hornada agotada'
             : b.state === 'UPCOMING'
               ? isCa
                 ? 'Propera fornada'
-                : 'Próxima hornada'
+                : isEn
+                  ? 'Next bake'
+                  : 'Próxima hornada'
               : isCa
                 ? 'Comandes tancades'
-                : 'Pedidos cerrados';
+                : isEn
+                  ? 'Orders closed'
+                  : 'Pedidos cerrados';
       const cta = document.querySelector<HTMLAnchorElement>('[data-bake-cta]');
       if (cta) {
         cta.href = '#avisame';
         cta.textContent = isCa
           ? 'Avisa’m de la propera ↗'
-          : 'Avísame de la próxima ↗';
+          : isEn
+            ? 'Tell me about the next one ↗'
+            : 'Avísame de la próxima ↗';
       }
       if (form && !form.hidden) {
         form.querySelector<HTMLButtonElement>('button[type=submit]')!.disabled =
@@ -1266,7 +1377,9 @@ async function refreshBake() {
           new Error(
             isCa
               ? 'Aquesta fornada ja no admet comandes. Apunta’t a l’avís de la propera, més avall.'
-              : 'Esta hornada ya no admite pedidos. Apúntate al aviso de la próxima, más abajo.',
+              : isEn
+                ? 'This bake is no longer taking orders. Sign up for the next one’s notice, below.'
+                : 'Esta hornada ya no admite pedidos. Apúntate al aviso de la próxima, más abajo.',
           ),
         );
       }
@@ -1324,7 +1437,7 @@ if (subscriptionForm) {
     if (button.disabled) return;
     button.disabled = true;
     const label = button.textContent;
-    button.textContent = isCa ? 'Desant…' : 'Guardando…';
+    button.textContent = isCa ? 'Desant…' : isEn ? 'Saving…' : 'Guardando…';
     sub.querySelector<HTMLElement>('.form-error')!.hidden = true;
     try {
       const data = await submit(sub);
@@ -1335,10 +1448,14 @@ if (subscriptionForm) {
       first.textContent = data.firstDay
         ? isCa
           ? `La teva primera entrega: ${data.firstDay}${data.firstWindow ? `, ${data.firstWindow}` : ''}.`
-          : `Tu primera entrega: ${data.firstDay}${data.firstWindow ? `, ${data.firstWindow}` : ''}.`
+          : isEn
+            ? `Your first delivery: ${data.firstDay}${data.firstWindow ? `, ${data.firstWindow}` : ''}.`
+            : `Tu primera entrega: ${data.firstDay}${data.firstWindow ? `, ${data.firstWindow}` : ''}.`
         : isCa
           ? 'Aquesta setmana la fornada és plena: començaràs la setmana vinent.'
-          : 'Esta semana la hornada está completa: empezarás la semana que viene.';
+          : isEn
+            ? 'This week’s bake is full: you’ll start next week.'
+            : 'Esta semana la hornada está completa: empezarás la semana que viene.';
       result.querySelector<HTMLAnchorElement>('[data-manage]')!.href =
         data.manage;
       sub.hidden = true;

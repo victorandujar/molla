@@ -5,6 +5,7 @@ import { randomBytes, randomUUID } from 'node:crypto';
 import { demo, sql, useDemo } from './store';
 import { breadIds, referralGift } from './config';
 import { referralCode, type Lang, type Order } from './domain';
+import { toLang } from './messages';
 
 export type Recipient = { email: string; lang: Lang; token: string };
 
@@ -37,7 +38,7 @@ export async function claimBroadcast(
     FROM claimed JOIN waitlist_subscribers w ON w.email=claimed.email`;
   return rows.map((r) => ({
     email: r.email as string,
-    lang: r.lang === 'ca' ? 'ca' : 'es',
+    lang: toLang(r.lang),
     token: String(r.unsubscribe_token),
   }));
 }
@@ -257,7 +258,7 @@ export async function earnedRewards(): Promise<
     orderId: String(r.order_id),
     email: r.email as string,
     name: r.name as string,
-    lang: r.lang === 'ca' ? 'ca' : 'es',
+    lang: toLang(r.lang),
     code: r.referral_code as string,
   }));
 }
@@ -320,7 +321,7 @@ export async function claimCampaign(
     FROM claimed JOIN waitlist_subscribers w ON w.email=claimed.email`;
   return rows.map((r) => ({
     email: r.email as string,
-    lang: r.lang === 'ca' ? 'ca' : 'es',
+    lang: toLang(r.lang),
     token: String(r.unsubscribe_token),
   }));
 }

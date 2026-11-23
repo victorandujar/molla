@@ -11,6 +11,7 @@ import {
   ui,
 } from '../lib/i18n';
 import { after } from '../lib/http';
+import { isLang, type Lang } from '../lib/messages';
 import { notifyOwnerChange } from '../lib/email';
 import {
   clearSkips,
@@ -75,8 +76,7 @@ try {
   error = true;
 }
 const wanted = Astro.url.searchParams.get('lang');
-const lang =
-  wanted === 'es' ? 'es' : wanted === 'ca' ? 'ca' : (sub?.lang ?? 'ca');
+const lang: Lang = isLang(wanted) ? wanted : (sub?.lang ?? 'ca');
 const open = sub ? await openOrderOf(sub).catch(() => null) : null;
 const t = {
   es: {
@@ -165,6 +165,49 @@ const t = {
     whatsapp: 'Escriu-me per WhatsApp',
     back: 'Tornar al pa',
   },
+  en: {
+    title: 'My weekly bread',
+    active: 'Your weekly bread',
+    paused: 'Your weekly bread is paused',
+    cancelled: 'Weekly bread cancelled',
+    missing: 'The link is not valid.',
+    missingText: 'Check that you opened the full link from the email.',
+    error: 'We couldn’t process it.',
+    errorText: 'Try again in a moment or write to me.',
+    notice: {
+      skipped:
+        'Done: you won’t receive bread this week. We carry on next week.',
+      skippedNext: 'Done: we’ll skip the next delivery and then carry on.',
+      paused:
+        'Your weekly bread is paused. You won’t receive anything until you resume it.',
+      resumed: 'Your weekly bread is active again.',
+      cancelled:
+        'You have cancelled your weekly bread. Thanks for giving it a try.',
+      cleared: 'Done: we won’t skip any delivery.',
+      '': '',
+    },
+    order: 'Order',
+    frequency: 'Frequency',
+    weekly: 'Every Saturday',
+    biweekly: 'Every other Saturday',
+    where: 'Delivery',
+    pickup: 'Pickup in Sant Boi',
+    next: 'Next delivery',
+    nextOpen: (day: string) => `${day}, 12:00–14:00`,
+    nextNone: 'I’ll prepare it when the next bake opens.',
+    skipping: 'You’ll skip the next delivery.',
+    until: (s: string) => `You can skip it until ${s}.`,
+    skip: 'Skip this week',
+    skipNext: 'Skip the next delivery',
+    unskip: 'No, keep the next delivery',
+    pause: 'Pause my weekly bread',
+    resume: 'Resume my weekly bread',
+    cancel: 'Cancel',
+    again: 'Sign up again',
+    help: 'Want to change the quantity or the address? Write to me and I’ll do it.',
+    whatsapp: 'Write to me on WhatsApp',
+    back: 'Back to the bread',
+  },
 }[lang];
 const names = ui[lang].catalog;
 const items = (() => {
@@ -249,8 +292,10 @@ const actions = !sub
           sub.skipRemaining === 0 &&
           deadline && (
             <p>
-              {t.until(`${deadline.weekday} a les ${deadline.time}`)} (
-              {orderSummary(open.order)})
+              {t.until(
+                `${deadline.weekday} ${{ ca: 'a les', es: 'a las', en: 'at' }[lang]} ${deadline.time}`,
+              )}{' '}
+              ({orderSummary(open.order)})
             </p>
           )}
       </div>

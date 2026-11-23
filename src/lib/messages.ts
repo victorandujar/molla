@@ -1,5 +1,21 @@
 // Messages the server sends back to the page, in the visitor's language.
-export type Lang = 'es' | 'ca';
+export const LANGS = ['ca', 'es', 'en'] as const;
+export type Lang = (typeof LANGS)[number];
+export const isLang = (v: unknown): v is Lang =>
+  typeof v === 'string' && (LANGS as readonly string[]).includes(v);
+// Stored or requested languages fall back to Spanish when unknown.
+export const toLang = (v: unknown, fallback: Lang = 'es'): Lang =>
+  isLang(v) ? v : fallback;
+// Locale for Intl date and number formats.
+export const locales = { ca: 'ca-ES', es: 'es-ES', en: 'en-GB' } as const;
+export const localeOf = (lang: Lang) => locales[lang];
+// Each language named in itself, and the link that offers it.
+export const langNames = { ca: 'Català', es: 'Castellano', en: 'English' };
+export const langSwitchAria = {
+  ca: 'Llegeix aquesta pàgina en català',
+  es: 'Lee esta página en castellano',
+  en: 'Read this page in English',
+};
 export const messages = {
   es: {
     closed: 'Todavía no hemos abierto las reservas. Vuelve pronto.',
@@ -68,6 +84,40 @@ export const messages = {
     waitlistInvalid: 'Revisa el correu i accepta rebre l’avís.',
     waitlistFailed: 'No s’ha pogut desar el teu avís. Torna-ho a provar.',
     unavailable: 'No podem consultar la disponibilitat.',
+  },
+  en: {
+    closed: 'Orders are not open yet. Come back soon.',
+    origin: 'Invalid request.',
+    tooLarge: 'Request too long.',
+    rateLimited:
+      'You have sent several requests. Wait ten minutes and try again.',
+    invalid: 'Please check your details.',
+    name: 'Please write your name.',
+    email: 'Please check your email.',
+    phone: 'Please check your phone number.',
+    pickup: 'Please confirm the delivery or pickup of your order.',
+    terms: 'Accept the standing order terms to continue.',
+    town: 'Choose your town for home delivery.',
+    address: 'Write the delivery address: street, number and flat.',
+    slot: 'The evening slot is only on Wednesdays. Choose midday.',
+    notes: 'Delivery instructions cannot be longer than 200 characters.',
+    privacy: 'We need your consent to handle the order.',
+    capacity:
+      'This bake can no longer take that quantity. You can sign up for the next one.',
+    bakeChanged: 'The bake has changed. Reload the page.',
+    empty: 'Add at least one loaf, a banana bread or a pastry.',
+    bananaCapacity:
+      'There is not that much banana bread left in this bake. Try fewer.',
+    pastryCapacity:
+      'There are not that many pastries left in this bake. Try fewer.',
+    productUnavailable: 'This bread is not available.',
+    priceChanged:
+      'The price of this bread has changed. Get in touch before ordering.',
+    reservationFailed:
+      'We could not process the order. Your details are still in the form; please try again.',
+    waitlistInvalid: 'Check the email and agree to receive the notice.',
+    waitlistFailed: 'We could not save your notice. Please try again.',
+    unavailable: 'We cannot check availability.',
   },
 } satisfies Record<Lang, Record<string, string>>;
 export type MessageKey = keyof typeof messages.es;
