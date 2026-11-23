@@ -41,8 +41,9 @@ const {
   minimal = false,
 } = Astro.props;
 const t = ui[lang];
-// The other two languages, offered in the header and the footer.
+// The other two languages, for og:locale:alternate.
 const others = LANGS.filter((l) => l !== lang);
+const langGroup = { ca: 'Idioma', es: 'Idioma', en: 'Language' } as const;
 const ogLocale = { ca: 'ca_ES', es: 'es_ES', en: 'en_GB' } as const;
 const home = routes.home[lang];
 const abs = (path: string) =>
@@ -264,18 +265,27 @@ const graph = [organization, website, webpage, ...jsonLd];
               </a>
             </>
           )}
-          {route &&
-            others.map((l) => (
-              <a
-                class="lang-switch"
-                href={routes[route][l]}
-                hreflang={l}
-                lang={l}
-                aria-label={langSwitchAria[l]}
-              >
-                {l.toUpperCase()}
-              </a>
-            ))}
+          {route && (
+            <span class="langs" role="group" aria-label={langGroup[lang]}>
+              {LANGS.map((l) =>
+                l === lang ? (
+                  <span class="lang-current" aria-current="true">
+                    {l.toUpperCase()}
+                  </span>
+                ) : (
+                  <a
+                    class="lang-switch"
+                    href={routes[route][l]}
+                    hreflang={l}
+                    lang={l}
+                    aria-label={langSwitchAria[l]}
+                  >
+                    {l.toUpperCase()}
+                  </a>
+                ),
+              )}
+            </span>
+          )}
           <a
             class="nav-order"
             href={`${home}#reserva`}
@@ -325,12 +335,6 @@ const graph = [organization, website, webpage, ...jsonLd];
           <a href={routes.delivery[lang]}>{t.nav.delivery}</a>
           <a href={routes.standing[lang]}>{t.nav.standing}</a>
           <a href={routes.pickup[lang]}>{t.nav.pickup}</a>
-          {route &&
-            others.map((l) => (
-              <a href={routes[route][l]} hreflang={l} lang={l}>
-                {langNames[l]}
-              </a>
-            ))}
           <a href={routes.privacy[lang]}>{t.footer.privacy}</a>
           {brand.whatsappChannel && (
             <a
@@ -357,7 +361,28 @@ const graph = [organization, website, webpage, ...jsonLd];
           )}
         </div>
         <small>
-          © {new Date().getFullYear()} {brand.name}
+          <span>
+            © {new Date().getFullYear()} {brand.name}
+          </span>
+          {route && (
+            <span
+              class="langs footer-langs"
+              role="group"
+              aria-label={langGroup[lang]}
+            >
+              {LANGS.map((l) =>
+                l === lang ? (
+                  <span class="lang-current" aria-current="true">
+                    {langNames[l]}
+                  </span>
+                ) : (
+                  <a href={routes[route][l]} hreflang={l} lang={l}>
+                    {langNames[l]}
+                  </a>
+                ),
+              )}
+            </span>
+          )}
         </small>
       </div>
     </footer>
