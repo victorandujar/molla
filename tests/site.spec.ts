@@ -678,7 +678,7 @@ test('Catalan is the main language, Spanish lives under /es/', async ({
   await page.goto('/es/recogida');
   await expect(page.locator('main')).toContainText('Sant Boi de Llobregat');
   await expect(page.locator('main')).toContainText(
-    'Te confirmaremos el punto exacto de recogida con tu pedido',
+    'Delante del Mercat de la Muntanyeta',
   );
   await expect(page.locator('body')).not.toContainText('Ronda de Sant Ramon');
   await page.locator('.lang-switch[hreflang=ca]').click();
@@ -1262,7 +1262,7 @@ test('no banana bread gift anywhere; the first order still gets the pa fix vouch
 }) => {
   await page.goto('/es/');
   await expect(page.locator('.order-lede')).toContainText(
-    'envío gratis y pagas al recibirlo.',
+    'Envío gratis y pagas al recibirlo.',
   );
   // The banana bread welcome gift is over: not in the hero nor by the ticket.
   await expect(page.locator('.hero-gift')).toHaveCount(0);

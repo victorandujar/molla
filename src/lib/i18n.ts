@@ -186,7 +186,8 @@ export const ui = {
         'Baix Llobregat',
       ],
       // Price and terms sit by the button; the proof line adds who and where.
-      terms: `Pan desde ${loafPrice} · Envío gratis · Pagas al recibirlo`,
+      // Under the hero button: where it goes, where to pick it up, how you pay.
+      terms: `Envío gratis a Sant Boi, Sant Just, Sant Joan Despí, Sant Feliu, Santa Coloma y Sant Vicenç, o lo recoges ${brand.pickupPlace.es} · Pagas al recibirlo`,
       proof: ['Hecho a mano en Sant Boi'],
       // Next to the button: who makes it and what people say.
       trust: (score: string, count: number) =>
@@ -351,7 +352,7 @@ export const ui = {
       from: 'desde',
       unit: 'La hogaza',
       items: {
-        loaf: 'Poolish y hasta 35 h de fermentación. Suave, miga abierta y corteza que cruje.',
+        loaf: 'Con poolish, una masa previa que fermenta toda la noche, y hasta 35 h de fermentación: más sabor y aguanta tierno más días. Suave, miga abierta y corteza que cruje.',
         sourdough: 'Fermentada con masa madre.',
         wholegrain: 'Con un 60 % de harina integral.',
       },
@@ -473,11 +474,16 @@ export const ui = {
         total: 'Total · pagas al recibirlo',
         notify: 'Avísame de la próxima hornada:',
         pick: 'Añade:',
+        pickupAt: (window: string) =>
+          ` ${brand.pickupPlace.es}, en Sant Boi${window ? ` (${window})` : ''}`,
+        lede: (day: string, wed: boolean) =>
+          `Este pedido es para el ${day}. Te lo llevo a casa ${wed ? `${hours.es} o ${evening}` : hours.es}, o lo recoges ${brand.pickupPlace.es}. Envío gratis y pagas al recibirlo. Horneo cada miércoles y sábado, y cada hornada se reserva por separado.`,
       },
       hint: 'Toca la masa',
       ferment: {
         label: 'Hasta 35 horas de fermentación',
-        kicker: 'Nº 01 · 35 horas',
+        kicker: 'Nº 02 · 35 horas',
+        what: 'El poolish es una masa previa (harina, agua y una pizca de levadura) que fermenta despacio toda la noche. Por eso el pan sabe más, la miga sale más abierta y aguanta tierno más días.',
         bar: 'Arrastra el tiempo',
         lead: 'Mi pan fermenta hasta',
         drag: '← Arrastra →',
@@ -632,7 +638,7 @@ export const ui = {
         'Sant Boi, Sant Just Desvern, Sant Joan Despí, Sant Feliu de Llobregat, Santa Coloma de Cervelló y Sant Vicenç dels Horts',
       deliveryPickup: 'Lo recojo en Sant Boi',
       deliveryPickupHint:
-        'Resto del Baix Llobregat. Te confirmo el punto exacto.',
+        'Resto del Baix Llobregat. Delante del Mercat de la Muntanyeta.',
       town: 'Municipio',
       townPick: 'Elige tu municipio',
       address: 'Dirección de entrega',
@@ -663,7 +669,7 @@ export const ui = {
       honey: 'Deja este campo vacío',
       demoCheck: 'Entiendo que estoy probando una reserva ficticia.',
       pickupCheck: (day: string, window: string, wed = false) =>
-        `Te lo entrego el ${day}: en la dirección que pongas ${wed ? `${hours.es} o ${evening}, según la franja que elijas,` : hours.es} si eliges entrega a domicilio, o en el punto de recogida de Sant Boi de Llobregat${window ? ` (${window})` : ''}.`,
+        `Te lo entrego el ${day}: en la dirección que pongas ${wed ? `${hours.es} o ${evening}, según la franja que elijas,` : hours.es} si eliges entrega a domicilio, o delante del Mercat de la Muntanyeta, en Sant Boi de Llobregat${window ? ` (${window})` : ''}.`,
       privacyA: 'He leído la',
       privacyNote: 'Al reservar aceptas la',
       privacyLink: 'privacidad y las condiciones',
@@ -700,7 +706,7 @@ export const ui = {
         ],
         [
           '¿Dónde se recoge?',
-          `En un punto de recogida en Sant Boi de Llobregat; te confirmo el punto exacto con tu pedido. Es la opción si vives en otro municipio del Baix Llobregat, como ${areaTowns}.`,
+          `Delante del Mercat de la Muntanyeta, en Sant Boi de Llobregat. Es la opción si vives en otro municipio del Baix Llobregat, como ${areaTowns}.`,
         ],
         [
           '¿Hacéis entrega a domicilio?',
@@ -844,7 +850,7 @@ export const ui = {
         'Fins a 35 h de fermentació',
         'Baix Llobregat',
       ],
-      terms: `Pa des de ${loafPrice} · Enviament gratis · Pagues en rebre’l`,
+      terms: `Enviament gratis a Sant Boi, Sant Just, Sant Joan Despí, Sant Feliu, Santa Coloma i Sant Vicenç, o el reculls ${brand.pickupPlace.ca} · Pagues en rebre’l`,
       proof: ['Fet a mà a Sant Boi'],
       trust: (score: string, count: number) =>
         `${score} a Google (${count} ressenyes) · El faig jo, el Víctor, a Sant Boi`,
@@ -1000,7 +1006,7 @@ export const ui = {
       from: 'des de',
       unit: 'El pa',
       items: {
-        loaf: 'Poolish i fins a 35 h de fermentació. Suau, molla oberta i crosta que cruix.',
+        loaf: 'Amb poolish, una massa prèvia que fermenta tota la nit, i fins a 35 h de fermentació: més gust i es manté tendre més dies. Suau, molla oberta i crosta que cruix.',
         sourdough: 'Fermentat amb massa mare.',
         wholegrain: 'Amb un 60 % de farina integral.',
       },
@@ -1121,11 +1127,16 @@ export const ui = {
         total: 'Total · pagues en rebre’l',
         notify: 'Avisa’m de la propera fornada:',
         pick: 'Afegeix:',
+        pickupAt: (window: string) =>
+          ` ${brand.pickupPlace.ca}, a Sant Boi${window ? ` (${window})` : ''}`,
+        lede: (day: string, wed: boolean) =>
+          `Aquesta comanda és per al ${day}. Te’l porto a casa ${wed ? `${hours.ca} o ${evening}` : hours.ca}, o el reculls ${brand.pickupPlace.ca}. Enviament gratis i pagues en rebre’l. Fornejo cada dimecres i dissabte, i cada fornada es reserva per separat.`,
       },
       hint: 'Toca la massa',
       ferment: {
         label: 'Fins a 35 hores de fermentació',
-        kicker: 'Nº 01 · 35 hores',
+        kicker: 'Nº 02 · 35 hores',
+        what: 'El poolish és una massa prèvia (farina, aigua i una mica de llevat) que fermenta a poc a poc tota la nit. Per això el pa té més gust, la molla surt més oberta i es manté tendre més dies.',
         bar: 'Arrossega el temps',
         lead: 'El meu pa fermenta fins a',
         drag: '← Arrossega →',
@@ -1277,7 +1288,7 @@ export const ui = {
         'Sant Boi, Sant Just Desvern, Sant Joan Despí, Sant Feliu de Llobregat, Santa Coloma de Cervelló i Sant Vicenç dels Horts',
       deliveryPickup: 'El recullo a Sant Boi',
       deliveryPickupHint:
-        'Resta del Baix Llobregat. Et confirmo el punt exacte.',
+        'Resta del Baix Llobregat. Davant del Mercat de la Muntanyeta.',
       town: 'Municipi',
       townPick: 'Tria el teu municipi',
       address: 'Adreça d’entrega',
@@ -1307,7 +1318,7 @@ export const ui = {
       honey: 'Deixa aquest camp buit',
       demoCheck: 'Entenc que estic provant una reserva fictícia.',
       pickupCheck: (day: string, window: string, wed = false) =>
-        `Te l’entrego ${day}: a l’adreça que posis ${wed ? `${hours.ca} o ${evening}, segons la franja que triïs,` : hours.ca} si tries entrega a domicili, o al punt de recollida de Sant Boi de Llobregat${window ? ` (${window})` : ''}.`,
+        `Te l’entrego ${day}: a l’adreça que posis ${wed ? `${hours.ca} o ${evening}, segons la franja que triïs,` : hours.ca} si tries entrega a domicili, o davant del Mercat de la Muntanyeta, a Sant Boi de Llobregat${window ? ` (${window})` : ''}.`,
       privacyA: 'He llegit la',
       privacyNote: 'En reservar acceptes la',
       privacyLink: 'privacitat i les condicions',
@@ -1343,7 +1354,7 @@ export const ui = {
         ],
         [
           'On es recull?',
-          `En un punt de recollida a Sant Boi de Llobregat; et confirmo el punt exacte amb la comanda. És l’opció si vius en un altre municipi del Baix Llobregat, com ${areaTowns}.`,
+          `Davant del Mercat de la Muntanyeta, a Sant Boi de Llobregat. És l’opció si vius en un altre municipi del Baix Llobregat, com ${areaTowns}.`,
         ],
         [
           'Feu entrega a domicili?',
@@ -1488,7 +1499,7 @@ export const ui = {
         'Fins a 35 h de fermentació',
         'Baix Llobregat',
       ],
-      terms: `Bread from ${loafPrice} · Free delivery · Pay on delivery`,
+      terms: `Free delivery to Sant Boi, Sant Just, Sant Joan Despí, Sant Feliu, Santa Coloma and Sant Vicenç, or pick it up ${brand.pickupPlace.en} · Pay on delivery`,
       proof: ['Handmade in Sant Boi'],
       trust: (score: string, count: number) =>
         `${score} on Google (${count} reviews) · Made by me, Víctor, in Sant Boi`,
@@ -1644,7 +1655,7 @@ export const ui = {
       from: 'from',
       unit: 'Per loaf',
       items: {
-        loaf: 'Poolish and up to 35 h of fermentation. Mild, open crumb and a crust that crackles.',
+        loaf: 'With poolish, a pre-dough that ferments overnight, and up to 35 h of fermentation: more flavour and it stays soft for more days. Mild, open crumb and a crust that crackles.',
         sourdough: 'Fermented with sourdough starter.',
         wholegrain: 'With 60 % wholegrain flour.',
       },
@@ -1765,11 +1776,16 @@ export const ui = {
         total: 'Total · pay on delivery',
         notify: 'Tell me about the next bake:',
         pick: 'Add:',
+        pickupAt: (window: string) =>
+          ` ${brand.pickupPlace.en}, in Sant Boi${window ? ` (${window})` : ''}`,
+        lede: (day: string, wed: boolean) =>
+          `This order is for ${day}. I’ll bring it to your home ${wed ? `${hours.en} or ${eveningEn}` : hours.en}, or you pick it up ${brand.pickupPlace.en}. Free delivery and you pay when it arrives. I bake every Wednesday and Saturday, and each bake is ordered separately.`,
       },
       hint: 'Touch the dough',
       ferment: {
         label: 'Up to 35 hours of fermentation',
-        kicker: 'No. 01 · 35 hours',
+        kicker: 'No. 02 · 35 hours',
+        what: 'Poolish is a pre-dough (flour, water and a pinch of yeast) that ferments slowly overnight. That’s why the bread has more flavour, a more open crumb and stays soft for more days.',
         bar: 'Drag the time',
         lead: 'My bread ferments for up to',
         drag: '← Drag →',
@@ -1922,7 +1938,7 @@ export const ui = {
         'Sant Boi, Sant Just Desvern, Sant Joan Despí, Sant Feliu de Llobregat, Santa Coloma de Cervelló and Sant Vicenç dels Horts',
       deliveryPickup: 'I’ll pick it up in Sant Boi',
       deliveryPickupHint:
-        'Rest of the Baix Llobregat. I’ll confirm the exact spot.',
+        'Rest of the Baix Llobregat. In front of the Mercat de la Muntanyeta.',
       town: 'Town',
       townPick: 'Choose your town',
       address: 'Delivery address',
@@ -1953,7 +1969,7 @@ export const ui = {
       honey: 'Leave this field empty',
       demoCheck: 'I understand I am testing a fake order.',
       pickupCheck: (day: string, window: string, wed = false) =>
-        `I’ll deliver it on ${day}: to the address you give ${wed ? `${hours.en} or ${eveningEn}, depending on the slot you choose,` : hours.en} if you choose home delivery, or at the pickup point in Sant Boi de Llobregat${window ? ` (${window})` : ''}.`,
+        `I’ll deliver it on ${day}: to the address you give ${wed ? `${hours.en} or ${eveningEn}, depending on the slot you choose,` : hours.en} if you choose home delivery, or in front of the Mercat de la Muntanyeta, in Sant Boi de Llobregat${window ? ` (${window})` : ''}.`,
       privacyA: 'I have read the',
       privacyNote: 'By ordering you accept the',
       privacyLink: 'privacy policy and terms',
@@ -1989,7 +2005,7 @@ export const ui = {
         ],
         [
           'Where do I pick it up?',
-          `At a pickup point in Sant Boi de Llobregat; I confirm the exact spot with your order. It’s the option if you live in another town in the Baix Llobregat, such as ${areaTowns.replace(' o ', ' or ')}.`,
+          `In front of the Mercat de la Muntanyeta, in Sant Boi de Llobregat. It’s the option if you live in another town in the Baix Llobregat, such as ${areaTowns.replace(' o ', ' or ')}.`,
         ],
         [
           'Do you deliver to homes?',

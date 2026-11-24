@@ -906,6 +906,11 @@ function syncDelivery(target: HTMLFormElement | null) {
     target.querySelector<HTMLInputElement>('input[name=delivery]:checked')
       ?.value === 'home';
   homeFields.hidden = !home;
+  // Pickup names the place instead: in front of the Mercat de la Muntanyeta.
+  const pickupFields = target.querySelector<HTMLElement>(
+    '[data-pickup-fields]',
+  );
+  if (pickupFields) pickupFields.hidden = home;
   homeFields
     .querySelectorAll<HTMLInputElement | HTMLSelectElement>('input, select')
     .forEach((el) => (el.disabled = !home));
@@ -1016,10 +1021,10 @@ form?.addEventListener('submit', async (event) => {
         ? `${order.pickupAddress} · ${home.address}`
         : order.pickupAddress ||
           (isCa
-            ? 'Punt de recollida a Sant Boi de Llobregat'
+            ? 'Davant del Mercat de la Muntanyeta, Sant Boi de Llobregat'
             : isEn
-              ? 'Pickup point in Sant Boi de Llobregat'
-              : 'Punto de recogida en Sant Boi de Llobregat'),
+              ? 'In front of the Mercat de la Muntanyeta, Sant Boi de Llobregat'
+              : 'Delante del Mercat de la Muntanyeta, Sant Boi de Llobregat'),
       home
         ? isCa
           ? 'Te la porto a casa dins de la franja.'
@@ -1027,10 +1032,10 @@ form?.addEventListener('submit', async (event) => {
             ? 'I’ll bring it to your home within the slot.'
             : 'Te lo llevo a casa dentro de la franja.'
         : isCa
-          ? 'Et confirmarem el punt exacte de recollida amb la teva comanda.'
+          ? 'T’espero davant del Mercat de la Muntanyeta.'
           : isEn
-            ? 'We’ll confirm the exact pickup point with your order.'
-            : 'Te confirmaremos el punto exacto de recogida con tu pedido.',
+            ? 'I’ll be in front of the Mercat de la Muntanyeta.'
+            : 'Te espero delante del Mercat de la Muntanyeta.',
     ].filter(Boolean)) {
       const row = document.createElement('div');
       row.textContent = line;

@@ -203,6 +203,17 @@
   margin: 0 0 0 auto;
   min-height: 56px;
 }
+/* Where it goes and how you pay, under the button: its own full row. */
+.alive-bake .stub-where {
+  flex: 1 1 100%;
+  order: 10;
+  margin: 0;
+  max-width: 90ch;
+  font-size: 14px;
+  line-height: 1.45;
+  white-space: normal;
+  color: var(--ink-2);
+}
 .alive-hint {
   display: none;
 }
@@ -324,6 +335,14 @@
   font-size: 0.36em;
   letter-spacing: 0;
   color: var(--ink);
+}
+/* Poolish in plain words, for whoever has never heard the word. */
+.ferment-what {
+  max-width: 46ch;
+  margin: 0;
+  font-size: clamp(16px, 1.3vw, 19px);
+  line-height: 1.5;
+  color: var(--ink-2);
 }
 .ferment-phase {
   display: flex;
@@ -1067,7 +1086,8 @@
   font-size: 16px;
   font-style: normal;
 }
-.home-fields[hidden] {
+.home-fields[hidden],
+.pickup-fields[hidden] {
   display: none;
 }
 /* Triar en la frase: dues paraules, la marcada en taronja. */
@@ -1079,9 +1099,10 @@
   opacity: 0;
   pointer-events: none;
 }
+/* The option not chosen keeps a dashed line, so it reads as tappable. */
 .choice span {
-  color: rgba(246, 239, 229, 0.5);
-  border-bottom: 2px solid transparent;
+  color: rgba(246, 239, 229, 0.62);
+  border-bottom: 2px dashed rgba(246, 239, 229, 0.35);
   transition: color 0.3s ease;
 }
 .choice label + label::before {
@@ -1090,6 +1111,7 @@
 }
 .choice input:checked + span {
   color: var(--orange);
+  border-bottom-style: solid;
   border-bottom-color: var(--on-cobalt-line);
 }
 .choice input:focus-visible + span {
@@ -1254,8 +1276,9 @@
 
 /* ---------- Ajustos ---------- */
 @media (min-width: 721px) {
+  /* One row for the bake and the button; the delivery line wraps below. */
   .alive-bake {
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
   }
   .alive-bake > * {
     flex: none;

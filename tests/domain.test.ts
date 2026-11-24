@@ -237,10 +237,7 @@ test('confirmation email escapes customer input without exposing the old pickup 
   const html = confirmationHtml(order);
   assert.doesNotMatch(html, /<script>/);
   assert.match(html, /001-K7QM/);
-  assert.match(
-    html,
-    /Te confirmaremos el punto exacto de recogida con tu pedido/,
-  );
+  assert.match(html, /Te espero delante del Mercat de la Muntanyeta/);
   assert.match(html, /Todo hecho a mano en Sant Boi, sin prisas/);
   assert.doesNotMatch(html, /Ronda de Sant Ramon|Google Maps|mapa-recogida/);
   assert.match(html, /<html lang="es">/);

@@ -16,7 +16,7 @@ const close = current && madridParts('ca', current.deadline);
 const place = {
   '@context': 'https://schema.org',
   '@type': 'Place',
-  name: `Punt de recollida ${brand.name}`,
+  name: `Punt de recollida ${brand.name} · Mercat de la Muntanyeta`,
   address: {
     '@type': 'PostalAddress',
     addressLocality: 'Sant Boi de Llobregat',
@@ -31,7 +31,7 @@ const place = {
   route="pickup"
   crumb="Recollida"
   title={`Recollir pa artesà a Sant Boi de Llobregat · ${brand.name}`}
-  description="Reserva en línia el teu pa de massa mare o poolish i recull-lo a Sant Boi dimecres o dissabte. Pagues en recollir; el punt exacte va amb la comanda."
+  description="Reserva en línia el teu pa de massa mare o poolish i recull-lo a Sant Boi dimecres o dissabte. Pagues en recollir, davant del Mercat de la Muntanyeta."
   kicker="Recollida · Sant Boi de Llobregat"
   h1="Recull el teu pa a Sant Boi de Llobregat."
   lede="Dos cops per setmana, dimecres i dissabte, a Sant Boi de Llobregat. Reserves abans, pagues en recollir i t’emportes el pa del dia."
@@ -41,8 +41,8 @@ const place = {
     <div class="prose">
       <h2>On</h2>
       <p>
-        <strong>Punt de recollida a Sant Boi de Llobregat.</strong> Et
-        confirmarem el punt exacte de recollida amb la teva comanda.
+        <strong>Davant del Mercat de la Muntanyeta</strong>, a Sant Boi de
+        Llobregat.
       </p>
 
       <h2>Quan</h2>
