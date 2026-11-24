@@ -373,6 +373,7 @@ const jsonLd = [
             →
           </span>
         </a>
+        <p class="stub-where">{t.hero.terms}</p>
       </div>
       <p class="wrap alive-hint" aria-hidden="true">
         <span>
@@ -382,151 +383,7 @@ const jsonLd = [
       </p>
     </section>
 
-    <!-- 2 · 35 hores en una pantalla: la massa puja i s'omple d'alvèols -->
-    <section
-      id="fermentacio"
-      class="ferment"
-      aria-labelledby="ferment-title"
-      data-ferment
-    >
-      <div class="wrap">
-        <div class="xp-bar">
-          <span>{t.xp.ferment.kicker}</span>
-          <span>{t.xp.ferment.bar}</span>
-        </div>
-        <div class="ferment-grid">
-          <div class="ferment-clock">
-            <h2 id="ferment-title" class="ferment-lead">
-              {t.xp.ferment.lead}
-              <span class="ferment-hours" aria-hidden="true">
-                <span data-ferment-hours>35</span>
-                <small>h</small>
-              </span>
-              <span class="visually-hidden">35 h</span>
-            </h2>
-            <p class="ferment-phase" aria-live="polite">
-              <b data-ferment-word>{t.xp.ferment.phases.at(-1)![1]}</b>
-              <span data-ferment-say>{t.xp.ferment.phases.at(-1)![2]}</span>
-            </p>
-            <div class="ferment-scrub">
-              <input
-                type="range"
-                min="0"
-                max="35"
-                step="0.1"
-                value="35"
-                aria-label={t.xp.ferment.slider}
-                data-ferment-scrub
-              />
-              <div class="ferment-scale" aria-hidden="true">
-                <span>0 h</span>
-                <span class="ferment-drag">{t.xp.ferment.drag}</span>
-                <span>35 h</span>
-              </div>
-            </div>
-            <div
-              class="ferment-vs"
-              role="img"
-              aria-label={t.xp.ferment.compare}
-            >
-              <div class="vs-row">
-                <span>{t.xp.ferment.fast}</span>
-                <i style="--w: 8.57%" data-vs-fast></i>
-                <b>{t.xp.ferment.fastValue}</b>
-              </div>
-              <div class="vs-row vs-me">
-                <span>{t.xp.ferment.me}</span>
-                <i style="--w: 100%" data-vs-me></i>
-                <b data-vs-me-h>35 h</b>
-              </div>
-            </div>
-          </div>
-          <figure class="ferment-tin">
-            <canvas aria-hidden="true" data-ferment-canvas></canvas>
-            <button type="button" class="ferment-replay" data-ferment-replay>
-              {t.xp.ferment.replay}
-            </button>
-            <figcaption class="xp-cap">
-              <span>{t.xp.ferment.fig}</span>
-              <span data-ferment-fig>35 h</span>
-            </figcaption>
-          </figure>
-        </div>
-        <script
-          type="application/json"
-          data-ferment-phases
-          set:html={JSON.stringify(t.xp.ferment.phases)}
-        ></script>
-      </div>
-    </section>
-
-    <!-- 3 · El tall: el ganivet parteix la paraula i s'obre el pa -->
-    <section class="cut" aria-label={t.xp.cut.label} data-cut>
-      <div class="cut-stick">
-        <figure class="cut-photo">
-          <div class="cut-blur" aria-hidden="true">
-            <Photo name="crumb2" alt="" sizes="50vw" />
-          </div>
-          <!-- On the phone, the photo as it was taken (upright, hands from the
-               right); on a computer, turned so the hands come from below and
-               the photo spans the whole width. -->
-          <picture>
-            <source
-              media="(max-width: 820px)"
-              type="image/avif"
-              srcset={cutSrcset('crumb2v', [400, 720, 1088], 'avif')}
-              sizes="100vw"
-            />
-            <source
-              media="(max-width: 820px)"
-              type="image/webp"
-              srcset={cutSrcset('crumb2v', [400, 720, 1088], 'webp')}
-              sizes="100vw"
-            />
-            <source
-              type="image/avif"
-              srcset={cutSrcset('crumb2', [400, 720, 1100, 1440], 'avif')}
-              sizes="100vw"
-            />
-            <img
-              class="cut-loaf"
-              src="/images/crumb2-1100.webp"
-              srcset={cutSrcset('crumb2', [400, 720, 1100, 1440], 'webp')}
-              sizes="100vw"
-              alt={t.hero.photos[1]!}
-              width="1440"
-              height="1084"
-              loading="lazy"
-              decoding="async"
-            />
-          </picture>
-        </figure>
-        <p class="cut-says">{t.xp.cut.says}</p>
-        <div class="wrap cut-cap">
-          <span>{t.xp.cut.fig}</span>
-          <span>{t.ed.ferment}</span>
-        </div>
-        <div class="cut-lid cut-top" aria-hidden="true">
-          <div class="wrap xp-bar cut-bar">
-            <span>{t.xp.cut.label}</span>
-            <span>{t.xp.cut.scroll} ↓</span>
-          </div>
-          <span class="cut-word">
-            {t.xp.cut.word[0]}
-            <em>{t.xp.cut.word[1]}</em>
-          </span>
-        </div>
-        <div class="cut-lid cut-bot" aria-hidden="true">
-          <span class="cut-word">
-            {t.xp.cut.word[0]}
-            <em>{t.xp.cut.word[1]}</em>
-          </span>
-        </div>
-        <div class="cut-knife" aria-hidden="true"></div>
-      </div>
-    </section>
-
-    <!-- 4 · El taulell: tota la carta, un producte cada vegada -->
+    <!-- 2 · El taulell (just després del hero, perquè es vegi què es ven): tota la carta, un producte cada vegada -->
     <section
       id="carta"
       class="counter"
@@ -536,7 +393,7 @@ const jsonLd = [
     >
       <div class="counter-stick">
         <div class="wrap xp-bar">
-          <span id="catalog-title">Nº 02 · {t.xp.counter.bar}</span>
+          <span id="catalog-title">Nº 01 · {t.xp.counter.bar}</span>
           <span class="counter-hint" aria-hidden="true">
             {t.xp.counter.hint}
           </span>
@@ -845,6 +702,151 @@ const jsonLd = [
       </div>
     </section>
 
+    <!-- 3 · 35 hores en una pantalla: la massa puja i s'omple d'alvèols -->
+    <section
+      id="fermentacio"
+      class="ferment"
+      aria-labelledby="ferment-title"
+      data-ferment
+    >
+      <div class="wrap">
+        <div class="xp-bar">
+          <span>{t.xp.ferment.kicker}</span>
+          <span>{t.xp.ferment.bar}</span>
+        </div>
+        <div class="ferment-grid">
+          <div class="ferment-clock">
+            <h2 id="ferment-title" class="ferment-lead">
+              {t.xp.ferment.lead}
+              <span class="ferment-hours" aria-hidden="true">
+                <span data-ferment-hours>35</span>
+                <small>h</small>
+              </span>
+              <span class="visually-hidden">35 h</span>
+            </h2>
+            <p class="ferment-what">{t.xp.ferment.what}</p>
+            <p class="ferment-phase" aria-live="polite">
+              <b data-ferment-word>{t.xp.ferment.phases.at(-1)![1]}</b>
+              <span data-ferment-say>{t.xp.ferment.phases.at(-1)![2]}</span>
+            </p>
+            <div class="ferment-scrub">
+              <input
+                type="range"
+                min="0"
+                max="35"
+                step="0.1"
+                value="35"
+                aria-label={t.xp.ferment.slider}
+                data-ferment-scrub
+              />
+              <div class="ferment-scale" aria-hidden="true">
+                <span>0 h</span>
+                <span class="ferment-drag">{t.xp.ferment.drag}</span>
+                <span>35 h</span>
+              </div>
+            </div>
+            <div
+              class="ferment-vs"
+              role="img"
+              aria-label={t.xp.ferment.compare}
+            >
+              <div class="vs-row">
+                <span>{t.xp.ferment.fast}</span>
+                <i style="--w: 8.57%" data-vs-fast></i>
+                <b>{t.xp.ferment.fastValue}</b>
+              </div>
+              <div class="vs-row vs-me">
+                <span>{t.xp.ferment.me}</span>
+                <i style="--w: 100%" data-vs-me></i>
+                <b data-vs-me-h>35 h</b>
+              </div>
+            </div>
+          </div>
+          <figure class="ferment-tin">
+            <canvas aria-hidden="true" data-ferment-canvas></canvas>
+            <button type="button" class="ferment-replay" data-ferment-replay>
+              {t.xp.ferment.replay}
+            </button>
+            <figcaption class="xp-cap">
+              <span>{t.xp.ferment.fig}</span>
+              <span data-ferment-fig>35 h</span>
+            </figcaption>
+          </figure>
+        </div>
+        <script
+          type="application/json"
+          data-ferment-phases
+          set:html={JSON.stringify(t.xp.ferment.phases)}
+        ></script>
+      </div>
+    </section>
+
+    <!-- 4 · El tall: el ganivet parteix la paraula i s'obre el pa -->
+    <section class="cut" aria-label={t.xp.cut.label} data-cut>
+      <div class="cut-stick">
+        <figure class="cut-photo">
+          <div class="cut-blur" aria-hidden="true">
+            <Photo name="crumb2" alt="" sizes="50vw" />
+          </div>
+          <!-- On the phone, the photo as it was taken (upright, hands from the
+               right); on a computer, turned so the hands come from below and
+               the photo spans the whole width. -->
+          <picture>
+            <source
+              media="(max-width: 820px)"
+              type="image/avif"
+              srcset={cutSrcset('crumb2v', [400, 720, 1088], 'avif')}
+              sizes="100vw"
+            />
+            <source
+              media="(max-width: 820px)"
+              type="image/webp"
+              srcset={cutSrcset('crumb2v', [400, 720, 1088], 'webp')}
+              sizes="100vw"
+            />
+            <source
+              type="image/avif"
+              srcset={cutSrcset('crumb2', [400, 720, 1100, 1440], 'avif')}
+              sizes="100vw"
+            />
+            <img
+              class="cut-loaf"
+              src="/images/crumb2-1100.webp"
+              srcset={cutSrcset('crumb2', [400, 720, 1100, 1440], 'webp')}
+              sizes="100vw"
+              alt={t.hero.photos[1]!}
+              width="1440"
+              height="1084"
+              loading="lazy"
+              decoding="async"
+            />
+          </picture>
+        </figure>
+        <p class="cut-says">{t.xp.cut.says}</p>
+        <div class="wrap cut-cap">
+          <span>{t.xp.cut.fig}</span>
+          <span>{t.ed.ferment}</span>
+        </div>
+        <div class="cut-lid cut-top" aria-hidden="true">
+          <div class="wrap xp-bar cut-bar">
+            <span>{t.xp.cut.label}</span>
+            <span>{t.xp.cut.scroll} ↓</span>
+          </div>
+          <span class="cut-word">
+            {t.xp.cut.word[0]}
+            <em>{t.xp.cut.word[1]}</em>
+          </span>
+        </div>
+        <div class="cut-lid cut-bot" aria-hidden="true">
+          <span class="cut-word">
+            {t.xp.cut.word[0]}
+            <em>{t.xp.cut.word[1]}</em>
+          </span>
+        </div>
+        <div class="cut-knife" aria-hidden="true"></div>
+      </div>
+    </section>
+
     <!-- 5 · La comanda, dita com una frase a Víctor -->
     <section id="reserva" class="order" aria-labelledby="reserve-title">
       <div class="wrap">
@@ -875,7 +877,9 @@ const jsonLd = [
         <h2 id="reserve-title" class="visually-hidden">
           {t.reserve.h2}
         </h2>
-        <p class="order-lede">{t.hero.short}</p>
+        <p class="order-lede">
+          {open ? t.xp.order.lede(pickupDay, wed) : t.hero.short}
+        </p>
         {open ? (
           <form
             id="reservation-form"
@@ -1372,6 +1376,9 @@ const jsonLd = [
                     </label>
                   </span>
                 )}
+              </span>
+              <span class="pickup-fields" data-pickup-fields hidden>
+                {t.xp.order.pickupAt(current.pickupWindow)}
               </span>
               . {t.xp.order.name}{' '}
               <label class="visually-hidden" for="name">

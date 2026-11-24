@@ -16,7 +16,7 @@ const close = current && madridParts('en', current.deadline);
 const place = {
   '@context': 'https://schema.org',
   '@type': 'Place',
-  name: `${brand.name} pickup point`,
+  name: `${brand.name} pickup point · Mercat de la Muntanyeta`,
   address: {
     '@type': 'PostalAddress',
     addressLocality: 'Sant Boi de Llobregat',
@@ -31,7 +31,7 @@ const place = {
   route="pickup"
   crumb="Pickup"
   title={`Pick up artisan bread in Sant Boi de Llobregat · ${brand.name}`}
-  description="Order your sourdough or poolish bread online and pick it up in Sant Boi on Wednesday or Saturday. Pay on pickup; the exact spot comes with your order."
+  description="Order your sourdough or poolish bread online and pick it up in Sant Boi on Wednesday or Saturday. Pay on pickup, in front of the Mercat de la Muntanyeta."
   kicker="Pickup · Sant Boi de Llobregat"
   h1="Pick up your bread in Sant Boi de Llobregat."
   lede="Twice a week, Wednesday and Saturday, in Sant Boi de Llobregat. Order ahead, pay on pickup and take home bread baked that day."
@@ -41,8 +41,8 @@ const place = {
     <div class="prose">
       <h2>Where</h2>
       <p>
-        <strong>Pickup point in Sant Boi de Llobregat.</strong> We’ll confirm
-        the exact pickup point with your order.
+        <strong>In front of the Mercat de la Muntanyeta</strong>, in Sant Boi de
+        Llobregat.
       </p>
 
       <h2>When</h2>

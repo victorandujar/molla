@@ -65,10 +65,16 @@ export const brand = {
   googleProfile: /^https:\/\//.test(process.env.GOOGLE_PROFILE_URL || '')
     ? process.env.GOOGLE_PROFILE_URL!
     : '',
+  // Where pickup orders are collected: change it only here.
+  pickupPlace: {
+    es: 'delante del Mercat de la Muntanyeta',
+    ca: 'davant del Mercat de la Muntanyeta',
+    en: 'in front of the Mercat de la Muntanyeta',
+  },
   pickupLabel: {
-    es: 'Punto de recogida en Sant Boi de Llobregat',
-    ca: 'Punt de recollida a Sant Boi de Llobregat',
-    en: 'Pickup point in Sant Boi de Llobregat',
+    es: 'Delante del Mercat de la Muntanyeta, Sant Boi de Llobregat',
+    ca: 'Davant del Mercat de la Muntanyeta, Sant Boi de Llobregat',
+    en: 'In front of the Mercat de la Muntanyeta, Sant Boi de Llobregat',
   },
   pickupWindow: process.env.PICKUP_WINDOW || '',
   legalName: process.env.LEGAL_NAME || '',

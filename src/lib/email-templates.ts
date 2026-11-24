@@ -91,7 +91,8 @@ const copy = {
     payOnDelivery: 'pago al recibirlo',
     when: 'Cuándo',
     where: 'Dónde',
-    pickupNote: 'Te confirmaremos el punto exacto de recogida con tu pedido.',
+    pickupNote:
+      'Te espero delante del Mercat de la Muntanyeta, en Sant Boi de Llobregat.',
     deliveryNote:
       'Te lo llevo a casa dentro de la franja. Si necesito confirmar algo, te escribo por WhatsApp.',
     changes:
@@ -192,7 +193,7 @@ const copy = {
     when: 'Quan',
     where: 'On',
     pickupNote:
-      'Et confirmarem el punt exacte de recollida amb la teva comanda.',
+      'T’espero davant del Mercat de la Muntanyeta, a Sant Boi de Llobregat.',
     deliveryNote:
       'Te la porto a casa dins de la franja. Si he de confirmar alguna cosa, t’escric per WhatsApp.',
     changes:
@@ -294,7 +295,8 @@ const copy = {
     payOnDelivery: 'pay on delivery',
     when: 'When',
     where: 'Where',
-    pickupNote: 'We’ll confirm the exact pickup point with your order.',
+    pickupNote:
+      'I’ll be in front of the Mercat de la Muntanyeta, in Sant Boi de Llobregat.',
     deliveryNote:
       'I’ll bring it to your home within the slot. If I need to confirm anything, I’ll message you on WhatsApp.',
     changes:
