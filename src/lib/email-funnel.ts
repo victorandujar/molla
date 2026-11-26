@@ -3,7 +3,7 @@
 // Same identity and helpers as the transactional emails.
 import { brand, googleReviews, money, productById } from './config';
 import {
-  deliveryTowns,
+  deliveryArea,
   deliveryWindow,
   eveningWindow,
   isWednesday,
@@ -56,11 +56,6 @@ const clock = (iso: string) =>
     minute: '2-digit',
     hourCycle: 'h23',
   }).format(new Date(iso));
-const towns = (lang: Lang) => {
-  const names = deliveryTowns.map((t) => t.name.replace(' de Llobregat', ''));
-  const and = { ca: 'i', es: 'y', en: 'and' }[lang];
-  return `${names.slice(0, -1).join(', ')} ${and} ${names.at(-1)}`;
-};
 // Every link back to the shop says it came from the funnel and which email.
 export const shopUrl = (
   lang: Lang,
@@ -125,7 +120,7 @@ const broadcastCopy = {
     pastries: 'Croissant · Pain au chocolat',
     delivery: 'Entrega',
     deliveryText: (day: string, window: string) =>
-      `${day}, ${window}, a domicilio en ${towns('es')}, sin coste de envío. O recogida en Sant Boi para el resto del Baix Llobregat.`,
+      `${day}, ${window}, a domicilio en ${deliveryArea.es}, sin coste de envío. O recogida en Sant Boi si vives fuera de la zona.`,
     pay: 'Pago',
     payText: 'Al recibirlo. Cancelas con un clic hasta el cierre.',
     button: 'Hacer mi pedido →',
@@ -154,7 +149,7 @@ const broadcastCopy = {
     pastries: 'Croissant · Pain au chocolat',
     delivery: 'Entrega',
     deliveryText: (day: string, window: string) =>
-      `${day}, ${window}, a domicili a ${towns('ca')}, sense cost d’enviament. O recollida a Sant Boi per a la resta del Baix Llobregat.`,
+      `${day}, ${window}, a domicili a ${deliveryArea.ca}, sense cost d’enviament. O recollida a Sant Boi si vius fora de la zona.`,
     pay: 'Pagament',
     payText: 'En rebre-la. Cancel·les amb un clic fins al tancament.',
     button: 'Fer la meva comanda →',
@@ -182,7 +177,7 @@ const broadcastCopy = {
     pastries: 'Croissant · Pain au chocolat',
     delivery: 'Delivery',
     deliveryText: (day: string, window: string) =>
-      `${day}, ${window}, delivered in ${towns('en')}, free of charge. Or pickup in Sant Boi for the rest of the Baix Llobregat.`,
+      `${day}, ${window}, delivered in ${deliveryArea.en}, free of charge. Or pickup in Sant Boi if you live outside the area.`,
     pay: 'Payment',
     payText: 'On delivery. Cancel with one click until orders close.',
     button: 'Place my order →',
@@ -322,10 +317,10 @@ const followCopy = {
     reviewButton: 'Dejar una reseña →',
     shareH: 'Pásaselo a un vecino',
     shareP:
-      'Si conoces a alguien en Sant Boi, Sant Just, Sant Joan Despí, Sant Feliu, Santa Coloma o Sant Vicenç a quien le guste el buen pan, mándale el enlace.',
+      'Si conoces a alguien en el Baix Llobregat a quien le guste el buen pan, mándale el enlace.',
     shareLink: 'Enviar por WhatsApp ↗',
     shareGift:
-      'Si conoces a alguien en Sant Boi, Sant Just, Sant Joan Despí, Sant Feliu, Santa Coloma o Sant Vicenç a quien le guste el buen pan, mándale tu invitación: con su primer pedido tendrá un croissant de regalo, y tú otro en tu siguiente pedido.',
+      'Si conoces a alguien en el Baix Llobregat a quien le guste el buen pan, mándale tu invitación: con su primer pedido tendrá un croissant de regalo, y tú otro en tu siguiente pedido.',
     shareText:
       'He probado el pan de Molla, un obrador de Sant Boi: fermentación lenta y te lo llevan a casa. Mira: ',
     newsH: '¿Te aviso cada semana?',
@@ -360,10 +355,10 @@ const followCopy = {
     reviewButton: 'Deixar una ressenya →',
     shareH: 'Passa-ho a un veí',
     shareP:
-      'Si coneixes algú a Sant Boi, Sant Just, Sant Joan Despí, Sant Feliu, Santa Coloma o Sant Vicenç a qui li agradi el bon pa, envia-li l’enllaç.',
+      'Si coneixes algú al Baix Llobregat a qui li agradi el bon pa, envia-li l’enllaç.',
     shareLink: 'Enviar per WhatsApp ↗',
     shareGift:
-      'Si coneixes algú a Sant Boi, Sant Just, Sant Joan Despí, Sant Feliu, Santa Coloma o Sant Vicenç a qui li agradi el bon pa, envia-li la teva invitació: amb la primera comanda tindrà un croissant de regal, i tu un altre a la teva propera comanda.',
+      'Si coneixes algú al Baix Llobregat a qui li agradi el bon pa, envia-li la teva invitació: amb la primera comanda tindrà un croissant de regal, i tu un altre a la teva propera comanda.',
     shareText:
       'He provat el pa de Molla, un obrador de Sant Boi: fermentació lenta i te’l porten a casa. Mira: ',
     newsH: 'T’aviso cada setmana?',
@@ -398,10 +393,10 @@ const followCopy = {
     reviewButton: 'Leave a review →',
     shareH: 'Pass it on to a neighbour',
     shareP:
-      'If you know someone in Sant Boi, Sant Just, Sant Joan Despí, Sant Feliu, Santa Coloma or Sant Vicenç who likes good bread, send them the link.',
+      'If you know someone in the Baix Llobregat who likes good bread, send them the link.',
     shareLink: 'Send on WhatsApp ↗',
     shareGift:
-      'If you know someone in Sant Boi, Sant Just, Sant Joan Despí, Sant Feliu, Santa Coloma or Sant Vicenç who likes good bread, send them your invitation: with their first order they get a free croissant, and you get another with your next order.',
+      'If you know someone in the Baix Llobregat who likes good bread, send them your invitation: with their first order they get a free croissant, and you get another with your next order.',
     shareText:
       'I’ve tried the bread from Molla, a small bakery in Sant Boi: slow fermentation and they bring it to your door. Have a look: ',
     newsH: 'Shall I let you know every week?',

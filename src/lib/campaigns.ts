@@ -4,6 +4,7 @@
 // 'campaign'). With `bakeDate`, whoever already ordered from that bake is
 // skipped. To add one: a new entry with its own id and dates.
 import type { Lang } from './domain';
+import { deliveryArea } from './delivery';
 
 export type Campaign = {
   id: string;
@@ -60,7 +61,7 @@ export const campaigns: Campaign[] = [
           ],
           [
             'Entrega',
-            'A domicili a Sant Boi, Sant Just, Sant Joan Despí, Sant Feliu, Santa Coloma i Sant Vicenç, sense cost d’enviament. O recollida a Sant Boi.',
+            `A domicili a ${deliveryArea.ca}, sense cost d’enviament. O recollida a Sant Boi.`,
           ],
           ['La carta', 'Pa de poolish, banana bread i brioixeria, com sempre.'],
         ],
@@ -87,7 +88,7 @@ export const campaigns: Campaign[] = [
           ],
           [
             'Entrega',
-            'A domicilio en Sant Boi, Sant Just, Sant Joan Despí, Sant Feliu, Santa Coloma y Sant Vicenç, sin coste de envío. O recogida en Sant Boi.',
+            `A domicilio en ${deliveryArea.es}, sin coste de envío. O recogida en Sant Boi.`,
           ],
           [
             'La carta',
@@ -117,7 +118,7 @@ export const campaigns: Campaign[] = [
           ],
           [
             'Delivery',
-            'Delivered in Sant Boi, Sant Just, Sant Joan Despí, Sant Feliu, Santa Coloma and Sant Vicenç, free of charge. Or pickup in Sant Boi.',
+            `Delivered in ${deliveryArea.en}, free of charge. Or pickup in Sant Boi.`,
           ],
           ['The menu', 'Poolish bread, banana bread and pastries, as always.'],
         ],

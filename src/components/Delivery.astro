@@ -3,9 +3,12 @@ import Article from '../layouts/Article.astro';
 import Photo from './Photo.astro';
 import { brand, isDemo, launchReady, money, productById } from '../lib/config';
 import {
+  deliveryArea,
   deliveryTowns,
   deliveryWindow,
+  deliveryZones,
   eveningWindow,
+  townsInZone,
   windowHours,
 } from '../lib/delivery';
 import { dayFormat, madridParts, routes, type Lang } from '../lib/i18n';
@@ -37,34 +40,44 @@ const text = {
   es: {
     crumb: 'Pan a domicilio',
     title: `Pan a domicilio en Sant Boi y el Baix Llobregat · ${brand.name}`,
-    description: `Pan de masa madre y poolish a domicilio en Sant Boi, Sant Just, Sant Joan Despí, Sant Feliu, Santa Coloma y Sant Vicenç. Miércoles y sábado, envío gratis.`,
+    description: `Pan de masa madre y poolish a domicilio en ${deliveryArea.es}: Santa Coloma de Cervelló, Sant Boi, Molins de Rei, Gavà, Cornellà, El Prat y más. Miércoles y sábado, envío gratis.`,
     kicker: `A domicilio · miércoles y sábados de ${hours} · miércoles también ${evening}`,
     h1: 'Pan artesano a domicilio, miércoles y sábado.',
-    lede: `Reservas durante la semana y el miércoles o el sábado, entre las ${from} y las ${to}, te llevo a casa el pan horneado esa misma mañana. Si a mediodía trabajas, el miércoles también reparto por la tarde, entre las ${eveFrom} y las ${eveTo}. En Sant Boi de Llobregat, Sant Just Desvern, Sant Joan Despí, Sant Feliu de Llobregat, Santa Coloma de Cervelló y Sant Vicenç dels Horts.`,
+    lede: `Reservas durante la semana y el miércoles o el sábado, entre las ${from} y las ${to}, te llevo a casa el pan horneado esa misma mañana. Si a mediodía trabajas, el miércoles también reparto por la tarde, entre las ${eveFrom} y las ${eveTo}. En ${deliveryArea.es}, de Santa Coloma de Cervelló a El Prat.`,
     whenH: 'Cuándo',
     when: (day: string) =>
       `Los miércoles y los sábados, de ${hours}; los miércoles, también ${evening}. El próximo reparto es el ${day}.`,
     whenClose: (weekday: string, d: string, time: string) =>
       ` Los pedidos se cierran el ${weekday} ${d} a las ${time} o cuando se completa la hornada.`,
     whenFallback: `Los miércoles y los sábados, de ${hours}; los miércoles, también ${evening}. Los pedidos se cierran a las 20:00 del lunes (para el miércoles) o del jueves (para el sábado), o cuando se completa la hornada.`,
+    whereKicker: 'Zona de reparto',
     whereH: 'Dónde reparto',
-    towns: {
-      'sant-boi':
-        'Aquí horneo. Reparto a domicilio el miércoles y el sábado y, si lo prefieres, también puedes recogerlo en Sant Boi.',
-      'sant-just':
-        'Cada miércoles y cada sábado hago la ruta hasta Sant Just Desvern. El pan llega horneado esa misma mañana, todavía con la corteza crujiente.',
-      'sant-joan':
-        'Sant Joan Despí está al lado de Sant Just: entra en la misma ruta del miércoles y del sábado.',
-      'sant-feliu':
-        'Reparto a domicilio en Sant Feliu de Llobregat dentro de la misma franja, miércoles y sábado.',
-      'santa-coloma':
-        'Reparto a domicilio en Santa Coloma de Cervelló dentro de la misma franja, miércoles y sábado.',
-      'sant-vicenc':
-        'Reparto a domicilio en Sant Vicenç dels Horts dentro de la misma franja, miércoles y sábado.',
-    } as Record<string, string>,
-    otherH: '¿Vives en otro municipio del Baix Llobregat?',
+    whereIntro: `Molla es un obrador de proximidad: el pan viaja poco. Lo horneo por la mañana y lo llevo a casa por el Baix Llobregat. Hago entregas a domicilio en estas ${deliveryTowns.length} poblaciones, todas con las mismas condiciones y sin coste de envío.`,
+    zone: 'Zona',
+    zones: {
+      1: [
+        'Zona de proximidad',
+        'Los pueblos que rodean Santa Coloma de Cervelló, el corazón de la ruta.',
+      ],
+      2: [
+        'Baix Llobregat cercano',
+        'Río arriba y hacia la montaña, de Molins de Rei a Gavà.',
+      ],
+      3: [
+        'Zona de reparto ampliada',
+        'Hasta el final de la ruta, de El Papiol a El Prat.',
+      ],
+    },
+    findLabel: '¿Llego a tu casa? Busca tu población',
+    findPlaceholder: 'Por ejemplo, Gavà',
+    found: (town: string, zone: number | string) =>
+      `Sí, llego a ${town} (zona ${zone}). Te lo llevo el miércoles o el sábado, sin coste de envío.`,
+    notFound: (q: string) =>
+      `Todavía no reparto en «${q}». Puedes recogerlo en Sant Boi de Llobregat.`,
+    same: 'Mismas condiciones en todas las poblaciones: miércoles y sábado, las mismas franjas y sin coste de envío.',
+    otherH: '¿No ves tu población?',
     other:
-      'Desde Cornellà, Molins de Rei o Viladecans, lo recoges en Sant Boi de Llobregat.',
+      'Si vives fuera de la zona de reparto, lo recoges en Sant Boi de Llobregat.',
     otherLink: 'Cómo funciona la recogida',
     howH: 'Cómo funciona',
     how: [
@@ -84,34 +97,44 @@ const text = {
   ca: {
     crumb: 'Pa a domicili',
     title: `Pa a domicili a Sant Boi i el Baix Llobregat · ${brand.name}`,
-    description: `Pa de massa mare i poolish a domicili a Sant Boi, Sant Just, Sant Joan Despí, Sant Feliu, Santa Coloma i Sant Vicenç. Dimecres i dissabte, enviament gratis.`,
+    description: `Pa de massa mare i poolish a domicili a ${deliveryArea.ca}: Santa Coloma de Cervelló, Sant Boi, Molins de Rei, Gavà, Cornellà, el Prat i més. Dimecres i dissabte, enviament gratis.`,
     kicker: `A domicili · dimecres i dissabtes de ${hours} · dimecres també ${evening}`,
     h1: 'Pa artesà a domicili, dimecres i dissabte.',
-    lede: `Reserves durant la setmana i dimecres o dissabte, entre les ${from} i les ${to}, et porto a casa el pa cuit aquell mateix matí. Si al migdia treballes, el dimecres també reparteixo a la tarda, entre les ${eveFrom} i les ${eveTo}. A Sant Boi de Llobregat, Sant Just Desvern, Sant Joan Despí, Sant Feliu de Llobregat, Santa Coloma de Cervelló i Sant Vicenç dels Horts.`,
+    lede: `Reserves durant la setmana i dimecres o dissabte, entre les ${from} i les ${to}, et porto a casa el pa cuit aquell mateix matí. Si al migdia treballes, el dimecres també reparteixo a la tarda, entre les ${eveFrom} i les ${eveTo}. A ${deliveryArea.ca}, de Santa Coloma de Cervelló al Prat.`,
     whenH: 'Quan',
     when: (day: string) =>
       `Els dimecres i els dissabtes, de ${hours}; els dimecres, també ${evening}. El proper repartiment és ${day}.`,
     whenClose: (weekday: string, d: string, time: string) =>
       ` Les comandes es tanquen ${weekday} ${d} a les ${time} o quan s’acaba la fornada.`,
     whenFallback: `Els dimecres i els dissabtes, de ${hours}; els dimecres, també ${evening}. Les comandes es tanquen a les 20:00 de dilluns (per a dimecres) o de dijous (per a dissabte), o quan s’acaba la fornada.`,
+    whereKicker: 'Zona de repartiment',
     whereH: 'On reparteixo',
-    towns: {
-      'sant-boi':
-        'Aquí és on faig el pa. Reparteixo a domicili dimecres i dissabte i, si ho prefereixes, també el pots recollir a Sant Boi.',
-      'sant-just':
-        'Cada dimecres i cada dissabte faig la ruta fins a Sant Just Desvern. El pa arriba cuit aquell mateix matí, encara amb la crosta cruixent.',
-      'sant-joan':
-        'Sant Joan Despí és al costat de Sant Just: entra a la mateixa ruta del dimecres i del dissabte.',
-      'sant-feliu':
-        'Reparteixo a domicili a Sant Feliu de Llobregat dins de la mateixa franja, dimecres i dissabte.',
-      'santa-coloma':
-        'Reparteixo a domicili a Santa Coloma de Cervelló dins de la mateixa franja, dimecres i dissabte.',
-      'sant-vicenc':
-        'Reparteixo a domicili a Sant Vicenç dels Horts dins de la mateixa franja, dimecres i dissabte.',
-    } as Record<string, string>,
-    otherH: 'Vius en un altre municipi del Baix Llobregat?',
+    whereIntro: `Molla és un obrador de proximitat: el pa viatja poc. El faig al matí i el porto a casa pel Baix Llobregat. Faig entregues a domicili en aquestes ${deliveryTowns.length} poblacions, totes amb les mateixes condicions i sense cost d’enviament.`,
+    zone: 'Zona',
+    zones: {
+      1: [
+        'Zona de proximitat',
+        'Els pobles que envolten Santa Coloma de Cervelló, el cor de la ruta.',
+      ],
+      2: [
+        'Baix Llobregat proper',
+        'Riu amunt i cap a la muntanya, de Molins de Rei a Gavà.',
+      ],
+      3: [
+        'Zona de repartiment ampliada',
+        'Fins al final de la ruta, del Papiol al Prat.',
+      ],
+    },
+    findLabel: 'Arribo a casa teva? Busca la teva població',
+    findPlaceholder: 'Per exemple, Gavà',
+    found: (town: string, zone: number | string) =>
+      `Sí, arribo a ${town} (zona ${zone}). Te’l porto dimecres o dissabte, sense cost d’enviament.`,
+    notFound: (q: string) =>
+      `Encara no reparteixo a «${q}». El pots recollir a Sant Boi de Llobregat.`,
+    same: 'Mateixes condicions a totes les poblacions: dimecres i dissabte, les mateixes franges i sense cost d’enviament.',
+    otherH: 'No hi veus la teva població?',
     other:
-      'Des de Cornellà, Molins de Rei o Viladecans, el reculls a Sant Boi de Llobregat.',
+      'Si vius fora de la zona de repartiment, el reculls a Sant Boi de Llobregat.',
     otherLink: 'Com funciona la recollida',
     howH: 'Com funciona',
     how: [
@@ -131,34 +154,44 @@ const text = {
   en: {
     crumb: 'Bread delivery',
     title: `Bread delivery in Sant Boi and the Baix Llobregat · ${brand.name}`,
-    description: `Sourdough and poolish bread delivered in Sant Boi, Sant Just, Sant Joan Despí, Sant Feliu, Santa Coloma and Sant Vicenç. Wednesday and Saturday, free delivery.`,
+    description: `Sourdough and poolish bread delivered in ${deliveryArea.en}: Santa Coloma de Cervelló, Sant Boi, Molins de Rei, Gavà, Cornellà, El Prat and more. Wednesday and Saturday, free delivery.`,
     kicker: `Home delivery · Wednesdays and Saturdays ${from}–${to} · Wednesdays also ${eveFrom}–${eveTo}`,
     h1: 'Artisan bread delivered, Wednesday and Saturday.',
-    lede: `You order during the week and on Wednesday or Saturday, between ${from} and ${to}, I bring you bread baked that same morning. If you work at midday, on Wednesdays I also deliver in the evening, between ${eveFrom} and ${eveTo}. In Sant Boi de Llobregat, Sant Just Desvern, Sant Joan Despí, Sant Feliu de Llobregat, Santa Coloma de Cervelló and Sant Vicenç dels Horts.`,
+    lede: `You order during the week and on Wednesday or Saturday, between ${from} and ${to}, I bring you bread baked that same morning. If you work at midday, on Wednesdays I also deliver in the evening, between ${eveFrom} and ${eveTo}. In ${deliveryArea.en}, from Santa Coloma de Cervelló to El Prat.`,
     whenH: 'When',
     when: (day: string) =>
       `Wednesdays and Saturdays, ${from}–${to}; Wednesdays also ${eveFrom}–${eveTo}. The next delivery is on ${day}.`,
     whenClose: (weekday: string, d: string, time: string) =>
       ` Orders close on ${weekday} ${d} at ${time} or when the bake is full.`,
     whenFallback: `Wednesdays and Saturdays, ${from}–${to}; Wednesdays also ${eveFrom}–${eveTo}. Orders close at 20:00 on Monday (for Wednesday) or Thursday (for Saturday), or when the bake is full.`,
+    whereKicker: 'Delivery area',
     whereH: 'Where I deliver',
-    towns: {
-      'sant-boi':
-        'This is where I make the bread. I deliver on Wednesday and Saturday and, if you prefer, you can also pick it up in Sant Boi.',
-      'sant-just':
-        'Every Wednesday and Saturday I drive the route to Sant Just Desvern. The bread arrives baked that same morning, its crust still crunchy.',
-      'sant-joan':
-        'Sant Joan Despí is right next to Sant Just: it’s on the same Wednesday and Saturday route.',
-      'sant-feliu':
-        'I deliver in Sant Feliu de Llobregat within the same slot, Wednesday and Saturday.',
-      'santa-coloma':
-        'I deliver in Santa Coloma de Cervelló within the same slot, Wednesday and Saturday.',
-      'sant-vicenc':
-        'I deliver in Sant Vicenç dels Horts within the same slot, Wednesday and Saturday.',
-    } as Record<string, string>,
-    otherH: 'Live in another town in the Baix Llobregat?',
+    whereIntro: `Molla is a neighbourhood bakery: the bread doesn’t travel far. I bake it in the morning and bring it to your door across the Baix Llobregat. I deliver to these ${deliveryTowns.length} towns, all on the same terms and free of charge.`,
+    zone: 'Zone',
+    zones: {
+      1: [
+        'Close to home',
+        'The towns around Santa Coloma de Cervelló, the heart of the route.',
+      ],
+      2: [
+        'Nearby Baix Llobregat',
+        'Up the river and towards the hills, from Molins de Rei to Gavà.',
+      ],
+      3: [
+        'Wider delivery area',
+        'To the far end of the route, from El Papiol to El Prat.',
+      ],
+    },
+    findLabel: 'Do I deliver to you? Find your town',
+    findPlaceholder: 'For example, Gavà',
+    found: (town: string, zone: number | string) =>
+      `Yes, I deliver to ${town} (zone ${zone}). I’ll bring it on Wednesday or Saturday, free of charge.`,
+    notFound: (q: string) =>
+      `I don’t deliver to “${q}” yet. You can pick it up in Sant Boi de Llobregat.`,
+    same: 'Same terms in every town: Wednesday and Saturday, the same slots and no delivery fee.',
+    otherH: 'Can’t see your town?',
     other:
-      'From Cornellà, Molins de Rei or Viladecans, you pick it up in Sant Boi de Llobregat.',
+      'If you live outside the delivery area, you pick it up in Sant Boi de Llobregat.',
     otherLink: 'How pickup works',
     howH: 'How it works',
     how: [
@@ -220,6 +253,66 @@ const service = {
   lede={text.lede}
   jsonLd={[service]}
 >
+  <section class="zones" aria-labelledby="zonas">
+    <div class="zones-head">
+      <p class="kicker">{text.whereKicker}</p>
+      <h2 id="zonas">{text.whereH}</h2>
+      <p class="zones-intro">{text.whereIntro}</p>
+      <div class="zones-find" data-zones-find hidden>
+        <label for="zones-q">{text.findLabel}</label>
+        <input
+          id="zones-q"
+          type="search"
+          autocomplete="address-level2"
+          placeholder={text.findPlaceholder}
+          aria-describedby="zones-answer"
+        />
+        <p
+          id="zones-answer"
+          class="zones-answer"
+          aria-live="polite"
+          data-found={text.found('{town}', '{zone}')}
+          data-not-found={text.notFound('{q}')}
+        ></p>
+      </div>
+    </div>
+    <ol class="zones-grid">
+      {deliveryZones.map((zone) => (
+        <li class={`zone zone-${zone}`} data-zone={zone}>
+          <p class="zone-num">
+            <span>
+              {text.zone} {zone}
+            </span>
+            <svg viewBox="0 0 40 40" aria-hidden="true" class="zone-rings">
+              {[6, 12, 18].map((radius, i) => (
+                <circle
+                  cx="20"
+                  cy="20"
+                  r={radius}
+                  class={i < zone ? 'is-on' : undefined}
+                />
+              ))}
+            </svg>
+          </p>
+          <h3>{text.zones[zone][0]}</h3>
+          <p class="zone-note">{text.zones[zone][1]}</p>
+          <ul class="zone-towns">
+            {townsInZone(zone).map((town) => (
+              <li data-town={town.name}>{town.name}</li>
+            ))}
+          </ul>
+        </li>
+      ))}
+    </ol>
+    <div class="zones-foot">
+      <p>{text.same}</p>
+      <p>
+        <strong>{text.otherH}</strong> {text.other}{' '}
+        <a href={routes.pickup[lang]}>{text.otherLink}</a>.
+      </p>
+    </div>
+  </section>
+
   <div class="article-grid">
     <div class="prose">
       <h2>{text.whenH}</h2>
@@ -232,18 +325,6 @@ const service = {
         ) : (
           text.whenFallback
         )}
-      </p>
-
-      <h2>{text.whereH}</h2>
-      {deliveryTowns.map((town) => (
-        <>
-          <h3>{town.name}</h3>
-          <p>{text.towns[town.id]}</p>
-        </>
-      ))}
-      <h3>{text.otherH}</h3>
-      <p>
-        {text.other} <a href={routes.pickup[lang]}>{text.otherLink}</a>.
       </p>
 
       <h2>{text.howH}</h2>
@@ -268,3 +349,52 @@ const service = {
     </figure>
   </div>
 </Article>
+
+<script>
+  // "Do I deliver to you?": type a town, see whether it's on the route.
+  // Accents, case and "de Llobregat" don't matter.
+  const norm = (s: string) =>
+    s
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .replace(/[’'·.-]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+  const box = document.querySelector<HTMLElement>('[data-zones-find]');
+  const input = box?.querySelector('input');
+  const answer = box?.querySelector<HTMLElement>('.zones-answer');
+  const towns = [...document.querySelectorAll<HTMLElement>('[data-town]')];
+  if (box && input && answer) {
+    box.hidden = false;
+    input.addEventListener('input', () => {
+      const q = norm(input.value);
+      const hits = towns.filter(
+        (li) => q.length >= 2 && norm(li.dataset.town!).includes(q),
+      );
+      for (const li of towns)
+        li.classList.toggle('is-match', hits.includes(li));
+      // "Sant" matches a dozen towns: highlight them and wait for more.
+      // "Cervelló" is also inside two longer names: an exact name wins.
+      const first =
+        hits.find((li) => norm(li.dataset.town!) === q) ??
+        (hits.length === 1 ? hits[0] : undefined);
+      const none = !hits.length && q.length >= 3;
+      answer.classList.toggle('is-yes', !!first);
+      answer.classList.toggle('is-no', none);
+      if (first) {
+        const zone = first.closest<HTMLElement>('[data-zone]')!.dataset.zone!;
+        answer.textContent = answer.dataset
+          .found!.replace('{town}', first.dataset.town!)
+          .replace('{zone}', zone);
+      } else if (none) {
+        answer.textContent = answer.dataset.notFound!.replace(
+          '{q}',
+          input.value.trim(),
+        );
+      } else {
+        answer.textContent = '';
+      }
+    });
+  }
+</script>

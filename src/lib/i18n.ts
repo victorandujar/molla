@@ -1,5 +1,10 @@
 import { bake, brand, money, productById, type ExtraBreadId } from './config';
-import { deliveryWindow, eveningWindow, windowHours } from './delivery';
+import {
+  deliveryArea,
+  deliveryWindow,
+  eveningWindow,
+  windowHours,
+} from './delivery';
 import { localeOf, type Lang } from './messages';
 export type { Lang };
 
@@ -92,8 +97,6 @@ export const madridParts = (lang: Lang, iso: string) => {
 };
 const capital = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
-// Towns outside the delivery zone that pick up in Sant Boi.
-const areaTowns = 'Cornellà, Molins de Rei o Viladecans';
 // "12:00–14:00" reads "de 12 a 14 h" in copy.
 const [fromH, toH] = deliveryWindow
   .split('–')
@@ -126,7 +129,7 @@ export const ui = {
     switchAria: 'Llegeix aquesta pàgina en català',
     footer: {
       line: 'Pan artesanal de fermentación lenta, por encargo.',
-      area: `Pan a domicilio los miércoles ${hours.es} o ${evening} y los sábados ${hours.es} en Sant Boi, Sant Just Desvern, Sant Joan Despí, Sant Feliu de Llobregat, Santa Coloma de Cervelló y Sant Vicenç dels Horts · Recogida en Sant Boi de Llobregat`,
+      area: `Pan a domicilio los miércoles ${hours.es} o ${evening} y los sábados ${hours.es} en ${deliveryArea.es} · Recogida en Sant Boi de Llobregat`,
       privacy: 'Privacidad y condiciones',
       write: 'Escríbeme ↗',
       channel: 'Canal de WhatsApp',
@@ -151,7 +154,7 @@ export const ui = {
     hero: {
       h1a: 'Pan artesano, recién hecho,',
       h1b: 'en tu puerta',
-      sub: `Cada miércoles y cada sábado ${hours.es}, y los miércoles también ${evening}, a domicilio en Sant Boi, Sant Just Desvern, Sant Joan Despí, Sant Feliu, Santa Coloma y Sant Vicenç.`,
+      sub: `Cada miércoles y cada sábado ${hours.es}, y los miércoles también ${evening}, a domicilio en ${deliveryArea.es}.`,
       short: `Lo horneo esa misma mañana y te lo llevo a casa o a la oficina, cada miércoles y sábado ${hours.es} (el miércoles, también ${evening}). Pan desde ${loafPrice}, envío gratis y pagas al recibirlo.`,
       kicker: 'Panadería de barrio · Baix Llobregat',
       keywords: [
@@ -175,7 +178,7 @@ export const ui = {
         ['Hornada pequeña', 'Pocas hogazas, hechas de una en una.'],
         [
           'A domicilio',
-          `Miércoles y sábados ${hours.es}; miércoles también ${evening}. En Sant Boi, Sant Just, Sant Joan Despí, Sant Feliu, Santa Coloma y Sant Vicenç.`,
+          `Miércoles y sábados ${hours.es}; miércoles también ${evening}. En ${deliveryArea.es}.`,
         ],
       ],
       nextBake: 'Próxima hornada',
@@ -187,7 +190,7 @@ export const ui = {
       ],
       // Price and terms sit by the button; the proof line adds who and where.
       // Under the hero button: where it goes, where to pick it up, how you pay.
-      terms: `Envío gratis a Sant Boi, Sant Just, Sant Joan Despí, Sant Feliu, Santa Coloma y Sant Vicenç, o lo recoges ${brand.pickupPlace.es} · Pagas al recibirlo`,
+      terms: `Envío gratis a ${deliveryArea.es}, o lo recoges ${brand.pickupPlace.es} · Pagas al recibirlo`,
       proof: ['Hecho a mano en Sant Boi'],
       // Next to the button: who makes it and what people say.
       trust: (score: string, count: number) =>
@@ -597,7 +600,7 @@ export const ui = {
         {
           when: 'Miércoles o sábado',
           title: 'A tu casa',
-          text: `Te lo llevo ${hours.es} (el miércoles, también ${evening}) a Sant Boi, Sant Just, Sant Joan Despí, Sant Feliu, Santa Coloma o Sant Vicenç, o lo recoges en Sant Boi. Pagas al recibirlo.`,
+          text: `Te lo llevo ${hours.es} (el miércoles, también ${evening}) a ${deliveryArea.es}, o lo recoges en Sant Boi. Pagas al recibirlo.`,
         },
       ],
     },
@@ -624,8 +627,7 @@ export const ui = {
       pickup: 'Entrega',
       where: 'Dónde',
       pickupLocation: `A domicilio, ${hours.es} · miércoles también ${evening}`,
-      pickupDetails:
-        'Sant Boi, Sant Just Desvern, Sant Joan Despí, Sant Feliu de Llobregat, Santa Coloma de Cervelló y Sant Vicenç dels Horts. ¿Otro municipio? Lo recoges en Sant Boi.',
+      pickupDetails: `${deliveryArea.es}, de Santa Coloma de Cervelló a El Prat. ¿Otro municipio? Lo recoges en Sant Boi.`,
       pickupInfo: 'Zonas y horario de reparto',
       deliveryH: '2 · ¿Cómo te llega?',
       deliveryHome: (wed: boolean) =>
@@ -634,11 +636,10 @@ export const ui = {
       slotMidday: `Mediodía · ${hours.es}`,
       slotEvening: `Tarde · ${evening}`,
       slotEveningHint: 'Si a mediodía no estás en casa',
-      deliveryHomeHint:
-        'Sant Boi, Sant Just Desvern, Sant Joan Despí, Sant Feliu de Llobregat, Santa Coloma de Cervelló y Sant Vicenç dels Horts',
+      deliveryHomeHint: `${deliveryArea.es}, de Santa Coloma de Cervelló a El Prat`,
       deliveryPickup: 'Lo recojo en Sant Boi',
       deliveryPickupHint:
-        'Resto del Baix Llobregat. Delante del Mercat de la Muntanyeta.',
+        'Fuera de la zona de reparto. Delante del Mercat de la Muntanyeta.',
       town: 'Municipio',
       townPick: 'Elige tu municipio',
       address: 'Dirección de entrega',
@@ -706,15 +707,15 @@ export const ui = {
         ],
         [
           '¿Dónde se recoge?',
-          `Delante del Mercat de la Muntanyeta, en Sant Boi de Llobregat. Es la opción si vives en otro municipio del Baix Llobregat, como ${areaTowns}.`,
+          `Delante del Mercat de la Muntanyeta, en Sant Boi de Llobregat. Es la opción si vives fuera de la zona de reparto.`,
         ],
         [
           '¿Hacéis entrega a domicilio?',
-          `Sí, los miércoles ${hours.es} o ${evening} y los sábados ${hours.es} en Sant Boi de Llobregat, Sant Just Desvern, Sant Joan Despí, Sant Feliu de Llobregat, Santa Coloma de Cervelló y Sant Vicenç dels Horts, sin coste de envío. Al reservar eliges «A domicilio», la franja si es miércoles, y escribes tu dirección. Pagas al recibirlo.`,
+          `Sí, los miércoles ${hours.es} o ${evening} y los sábados ${hours.es} en ${deliveryArea.es}, sin coste de envío. Al reservar eliges «A domicilio», la franja si es miércoles, y escribes tu dirección. Pagas al recibirlo.`,
         ],
         [
           '¿Lleváis pan a Sant Just Desvern?',
-          `Sí. Cada miércoles y cada sábado reparto en Sant Just Desvern ${hours.es} (el miércoles, también ${evening}), igual que en Sant Boi, Sant Joan Despí, Sant Feliu de Llobregat, Santa Coloma de Cervelló y Sant Vicenç dels Horts. Reserva antes del cierre de pedidos: el lunes para el miércoles y el jueves para el sábado, a las 20:00.`,
+          `Sí. Cada miércoles y cada sábado reparto en Sant Just Desvern ${hours.es} (el miércoles, también ${evening}), igual que en el resto de la zona de reparto. Reserva antes del cierre de pedidos: el lunes para el miércoles y el jueves para el sábado, a las 20:00.`,
         ],
         [
           '¿Y si no voy a estar?',
@@ -791,7 +792,7 @@ export const ui = {
     switchAria: 'Lee esta página en castellano',
     footer: {
       line: 'Pa artesà de fermentació lenta, per encàrrec.',
-      area: `Pa a domicili els dimecres ${hours.ca} o ${evening} i els dissabtes ${hours.ca} a Sant Boi, Sant Just Desvern, Sant Joan Despí, Sant Feliu de Llobregat, Santa Coloma de Cervelló i Sant Vicenç dels Horts · Recollida a Sant Boi de Llobregat`,
+      area: `Pa a domicili els dimecres ${hours.ca} o ${evening} i els dissabtes ${hours.ca} a ${deliveryArea.ca} · Recollida a Sant Boi de Llobregat`,
       privacy: 'Privacitat i condicions',
       write: 'Escriu-me ↗',
       channel: 'Canal de WhatsApp',
@@ -816,7 +817,7 @@ export const ui = {
     hero: {
       h1a: 'Pa artesà, acabat de fer,',
       h1b: 'a la porta de casa',
-      sub: `Cada dimecres i cada dissabte ${hours.ca}, i els dimecres també ${evening}, a domicili a Sant Boi, Sant Just Desvern, Sant Joan Despí, Sant Feliu, Santa Coloma i Sant Vicenç.`,
+      sub: `Cada dimecres i cada dissabte ${hours.ca}, i els dimecres també ${evening}, a domicili a ${deliveryArea.ca}.`,
       short: `El faig aquell mateix matí i te’l porto a casa o a la feina, cada dimecres i dissabte ${hours.ca} (el dimecres, també ${evening}). Pa des de ${loafPrice}, enviament gratis i pagues en rebre’l.`,
       kicker: 'Fleca de barri · Baix Llobregat',
       keywords: [
@@ -840,7 +841,7 @@ export const ui = {
         ['Fornada petita', 'Pocs pans, fets d’un en un.'],
         [
           'A domicili',
-          `Dimecres i dissabtes ${hours.ca}; dimecres també ${evening}. A Sant Boi, Sant Just, Sant Joan Despí, Sant Feliu, Santa Coloma i Sant Vicenç.`,
+          `Dimecres i dissabtes ${hours.ca}; dimecres també ${evening}. A ${deliveryArea.ca}.`,
         ],
       ],
       nextBake: 'Propera fornada',
@@ -850,7 +851,7 @@ export const ui = {
         'Fins a 35 h de fermentació',
         'Baix Llobregat',
       ],
-      terms: `Enviament gratis a Sant Boi, Sant Just, Sant Joan Despí, Sant Feliu, Santa Coloma i Sant Vicenç, o el reculls ${brand.pickupPlace.ca} · Pagues en rebre’l`,
+      terms: `Enviament gratis a ${deliveryArea.ca}, o el reculls ${brand.pickupPlace.ca} · Pagues en rebre’l`,
       proof: ['Fet a mà a Sant Boi'],
       trust: (score: string, count: number) =>
         `${score} a Google (${count} ressenyes) · El faig jo, el Víctor, a Sant Boi`,
@@ -1246,7 +1247,7 @@ export const ui = {
         {
           when: 'Dimecres o dissabte',
           title: 'A casa teva',
-          text: `Te’l porto ${hours.ca} (el dimecres, també ${evening}) a Sant Boi, Sant Just, Sant Joan Despí, Sant Feliu, Santa Coloma o Sant Vicenç, o el reculls a Sant Boi. Pagues en rebre’l.`,
+          text: `Te’l porto ${hours.ca} (el dimecres, també ${evening}) a ${deliveryArea.ca}, o el reculls a Sant Boi. Pagues en rebre’l.`,
         },
       ],
     },
@@ -1274,8 +1275,7 @@ export const ui = {
       pickup: 'Entrega',
       where: 'On',
       pickupLocation: `A domicili, ${hours.ca} · dimecres també ${evening}`,
-      pickupDetails:
-        'Sant Boi, Sant Just Desvern, Sant Joan Despí, Sant Feliu de Llobregat, Santa Coloma de Cervelló i Sant Vicenç dels Horts. Un altre municipi? El reculls a Sant Boi.',
+      pickupDetails: `${deliveryArea.ca}, de Santa Coloma de Cervelló al Prat. Un altre municipi? El reculls a Sant Boi.`,
       pickupInfo: 'Zones i horari de repartiment',
       deliveryH: '2 · Com t’arriba?',
       deliveryHome: (wed: boolean) =>
@@ -1284,11 +1284,10 @@ export const ui = {
       slotMidday: `Migdia · ${hours.ca}`,
       slotEvening: `Tarda · ${evening}`,
       slotEveningHint: 'Si al migdia no ets a casa',
-      deliveryHomeHint:
-        'Sant Boi, Sant Just Desvern, Sant Joan Despí, Sant Feliu de Llobregat, Santa Coloma de Cervelló i Sant Vicenç dels Horts',
+      deliveryHomeHint: `${deliveryArea.ca}, de Santa Coloma de Cervelló al Prat`,
       deliveryPickup: 'El recullo a Sant Boi',
       deliveryPickupHint:
-        'Resta del Baix Llobregat. Davant del Mercat de la Muntanyeta.',
+        'Fora de la zona de repartiment. Davant del Mercat de la Muntanyeta.',
       town: 'Municipi',
       townPick: 'Tria el teu municipi',
       address: 'Adreça d’entrega',
@@ -1354,15 +1353,15 @@ export const ui = {
         ],
         [
           'On es recull?',
-          `Davant del Mercat de la Muntanyeta, a Sant Boi de Llobregat. És l’opció si vius en un altre municipi del Baix Llobregat, com ${areaTowns}.`,
+          `Davant del Mercat de la Muntanyeta, a Sant Boi de Llobregat. És l’opció si vius fora de la zona de repartiment.`,
         ],
         [
           'Feu entrega a domicili?',
-          `Sí, els dimecres ${hours.ca} o ${evening} i els dissabtes ${hours.ca} a Sant Boi de Llobregat, Sant Just Desvern, Sant Joan Despí, Sant Feliu de Llobregat, Santa Coloma de Cervelló i Sant Vicenç dels Horts, sense cost d’enviament. En reservar tries «A domicili», la franja si és dimecres, i escrius la teva adreça. Pagues en rebre’l.`,
+          `Sí, els dimecres ${hours.ca} o ${evening} i els dissabtes ${hours.ca} a ${deliveryArea.ca}, sense cost d’enviament. En reservar tries «A domicili», la franja si és dimecres, i escrius la teva adreça. Pagues en rebre’l.`,
         ],
         [
           'Porteu pa a Sant Just Desvern?',
-          `Sí. Cada dimecres i cada dissabte reparteixo a Sant Just Desvern ${hours.ca} (el dimecres, també ${evening}), igual que a Sant Boi, Sant Joan Despí, Sant Feliu de Llobregat, Santa Coloma de Cervelló i Sant Vicenç dels Horts. Reserva abans del tancament de comandes: dilluns per al dimecres i dijous per al dissabte, a les 20:00.`,
+          `Sí. Cada dimecres i cada dissabte reparteixo a Sant Just Desvern ${hours.ca} (el dimecres, també ${evening}), igual que a la resta de la zona de repartiment. Reserva abans del tancament de comandes: dilluns per al dimecres i dijous per al dissabte, a les 20:00.`,
         ],
         [
           'I si no hi seré?',
@@ -1440,7 +1439,7 @@ export const ui = {
     switchAria: 'Read this page in English',
     footer: {
       line: 'Slow-fermented artisan bread, made to order.',
-      area: `Bread delivered on Wednesdays ${hours.en} or ${eveningEn} and Saturdays ${hours.en} in Sant Boi, Sant Just Desvern, Sant Joan Despí, Sant Feliu de Llobregat, Santa Coloma de Cervelló and Sant Vicenç dels Horts · Pickup in Sant Boi de Llobregat`,
+      area: `Bread delivered on Wednesdays ${hours.en} or ${eveningEn} and Saturdays ${hours.en} in ${deliveryArea.en} · Pickup in Sant Boi de Llobregat`,
       privacy: 'Privacy and terms',
       write: 'Write to me ↗',
       channel: 'WhatsApp channel',
@@ -1465,7 +1464,7 @@ export const ui = {
     hero: {
       h1a: 'Artisan bread, freshly baked,',
       h1b: 'at your door',
-      sub: `Every Wednesday and Saturday ${hours.en}, and on Wednesdays also ${eveningEn}, delivered to Sant Boi, Sant Just Desvern, Sant Joan Despí, Sant Feliu, Santa Coloma and Sant Vicenç.`,
+      sub: `Every Wednesday and Saturday ${hours.en}, and on Wednesdays also ${eveningEn}, delivered to ${deliveryArea.en}.`,
       short: `I bake it that same morning and bring it to your home or office, every Wednesday and Saturday ${hours.en} (on Wednesdays, also ${eveningEn}). Bread from ${loafPrice}, free delivery and you pay when it arrives.`,
       kicker: 'Neighbourhood bakery · Baix Llobregat',
       keywords: [
@@ -1489,7 +1488,7 @@ export const ui = {
         ['Small bake', 'Few loaves, made one at a time.'],
         [
           'Home delivery',
-          `Wednesdays and Saturdays ${hours.en}; Wednesdays also ${eveningEn}. In Sant Boi, Sant Just, Sant Joan Despí, Sant Feliu, Santa Coloma and Sant Vicenç.`,
+          `Wednesdays and Saturdays ${hours.en}; Wednesdays also ${eveningEn}. In ${deliveryArea.en}.`,
         ],
       ],
       nextBake: 'Next bake',
@@ -1499,7 +1498,7 @@ export const ui = {
         'Fins a 35 h de fermentació',
         'Baix Llobregat',
       ],
-      terms: `Free delivery to Sant Boi, Sant Just, Sant Joan Despí, Sant Feliu, Santa Coloma and Sant Vicenç, or pick it up ${brand.pickupPlace.en} · Pay on delivery`,
+      terms: `Free delivery to ${deliveryArea.en}, or pick it up ${brand.pickupPlace.en} · Pay on delivery`,
       proof: ['Handmade in Sant Boi'],
       trust: (score: string, count: number) =>
         `${score} on Google (${count} reviews) · Made by me, Víctor, in Sant Boi`,
@@ -1895,7 +1894,7 @@ export const ui = {
         {
           when: 'Wednesday or Saturday',
           title: 'To your door',
-          text: `I deliver it ${hours.en} (on Wednesdays, also ${eveningEn}) to Sant Boi, Sant Just, Sant Joan Despí, Sant Feliu, Santa Coloma or Sant Vicenç, or you pick it up in Sant Boi. You pay when you get it.`,
+          text: `I deliver it ${hours.en} (on Wednesdays, also ${eveningEn}) to ${deliveryArea.en}, or you pick it up in Sant Boi. You pay when you get it.`,
         },
       ],
     },
@@ -1922,8 +1921,7 @@ export const ui = {
       pickup: 'Delivery',
       where: 'Where',
       pickupLocation: `Home delivery, ${hours.en} · Wednesdays also ${eveningEn}`,
-      pickupDetails:
-        'Sant Boi, Sant Just Desvern, Sant Joan Despí, Sant Feliu de Llobregat, Santa Coloma de Cervelló and Sant Vicenç dels Horts. Another town? Pick it up in Sant Boi.',
+      pickupDetails: `${deliveryArea.en}, from Santa Coloma de Cervelló to El Prat. Another town? Pick it up in Sant Boi.`,
       pickupInfo: 'Delivery areas and times',
       deliveryH: '2 · How do you want it?',
       deliveryHome: (wed: boolean) =>
@@ -1934,11 +1932,10 @@ export const ui = {
       slotMidday: `Midday · ${hours.en}`,
       slotEvening: `Evening · ${eveningEn}`,
       slotEveningHint: 'If you’re not home at midday',
-      deliveryHomeHint:
-        'Sant Boi, Sant Just Desvern, Sant Joan Despí, Sant Feliu de Llobregat, Santa Coloma de Cervelló and Sant Vicenç dels Horts',
+      deliveryHomeHint: `${deliveryArea.en}, from Santa Coloma de Cervelló to El Prat`,
       deliveryPickup: 'I’ll pick it up in Sant Boi',
       deliveryPickupHint:
-        'Rest of the Baix Llobregat. In front of the Mercat de la Muntanyeta.',
+        'Outside the delivery area. In front of the Mercat de la Muntanyeta.',
       town: 'Town',
       townPick: 'Choose your town',
       address: 'Delivery address',
@@ -2005,15 +2002,15 @@ export const ui = {
         ],
         [
           'Where do I pick it up?',
-          `In front of the Mercat de la Muntanyeta, in Sant Boi de Llobregat. It’s the option if you live in another town in the Baix Llobregat, such as ${areaTowns.replace(' o ', ' or ')}.`,
+          `In front of the Mercat de la Muntanyeta, in Sant Boi de Llobregat. It’s the option if you live outside the delivery area.`,
         ],
         [
           'Do you deliver to homes?',
-          `Yes, on Wednesdays ${hours.en} or ${eveningEn} and on Saturdays ${hours.en} in Sant Boi de Llobregat, Sant Just Desvern, Sant Joan Despí, Sant Feliu de Llobregat, Santa Coloma de Cervelló and Sant Vicenç dels Horts, free of charge. When ordering, choose «Home delivery», the slot if it’s a Wednesday, and write your address. You pay when you get it.`,
+          `Yes, on Wednesdays ${hours.en} or ${eveningEn} and on Saturdays ${hours.en} in ${deliveryArea.en}, free of charge. When ordering, choose «Home delivery», the slot if it’s a Wednesday, and write your address. You pay when you get it.`,
         ],
         [
           'Do you bring bread to Sant Just Desvern?',
-          `Yes. Every Wednesday and Saturday I deliver in Sant Just Desvern ${hours.en} (on Wednesdays, also ${eveningEn}), just like in Sant Boi, Sant Joan Despí, Sant Feliu de Llobregat, Santa Coloma de Cervelló and Sant Vicenç dels Horts. Order before orders close: Monday for Wednesday and Thursday for Saturday, at 20:00.`,
+          `Yes. Every Wednesday and Saturday I deliver in Sant Just Desvern ${hours.en} (on Wednesdays, also ${eveningEn}), just like in the rest of the delivery area. Order before orders close: Monday for Wednesday and Thursday for Saturday, at 20:00.`,
         ],
         [
           'What if I won’t be home?',
