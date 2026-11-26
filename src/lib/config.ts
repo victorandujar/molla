@@ -328,7 +328,7 @@ export const products = [
     weight: 'Unidad',
     ingredients: 'Masa laminada con mantequilla.',
     allergens: 'Contiene trigo (gluten), leche y huevo.',
-    image: 'pastries',
+    image: 'croissant',
     available: true,
   },
   {
@@ -339,7 +339,7 @@ export const products = [
     weight: 'Unidad',
     ingredients: 'Masa laminada con mantequilla y barritas de chocolate.',
     allergens: 'Contiene trigo (gluten), leche y huevo.',
-    image: 'pastries',
+    image: 'pain-au-chocolat',
     available: true,
   },
   {
