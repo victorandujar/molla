@@ -1,11 +1,17 @@
 ---
 import Base from '../layouts/Base.astro';
 import { brand, launchReady, privacy } from '../lib/config';
+import { deliveryTowns } from '../lib/delivery';
 import { routes, type Lang } from '../lib/i18n';
 interface Props {
   lang: Lang;
 }
 const { lang } = Astro.props;
+// The full delivery area, spelled out: the terms must name every town.
+const townList = (and: string) => {
+  const names = deliveryTowns.map((t) => t.name);
+  return `${names.slice(0, -1).join(', ')} ${and} ${names.at(-1)}`;
+};
 const text = {
   es: {
     title: `Privacidad y condiciones · ${brand.name}`,
@@ -36,8 +42,7 @@ const text = {
     rights:
       'Puedes solicitar acceso, rectificación, supresión, oposición, limitación o portabilidad de tus datos a través del contacto del responsable. También puedes presentar una reclamación ante la Agencia Española de Protección de Datos.',
     pickupH: 'Recogida y pago',
-    pickup:
-      'El precio total se muestra antes de confirmar. El pago se hace al recibir o recoger el pedido. La confirmación indica la cantidad, la fecha, la entrega o el punto de recogida y tu código. Se entrega a domicilio los miércoles y los sábados de 12 a 14 h, sin coste de envío, solo en Sant Boi de Llobregat, Sant Just Desvern, Sant Joan Despí, Sant Feliu de Llobregat, Santa Coloma de Cervelló y Sant Vicenç dels Horts; en el resto, se recoge en Sant Boi de Llobregat. Puedes cancelar tu pedido con un clic desde el enlace del email de confirmación hasta el cierre de pedidos de la hornada (el lunes a las 20:00 para la del miércoles y el jueves a las 20:00 para la del sábado), sin dar explicaciones y sin coste: así tu pedido puede pasar a otra persona. Para cualquier otro cambio, contacta cuanto antes indicando el código. Pasado el cierre ya no se puede cancelar con el enlace porque el pedido está en preparación; escríbeme y buscaremos una solución. Si no puedo preparar tu pedido, te contactaré para comunicarlo. Si no recoges ni recibes el pedido y no avisas, podremos pedirte el pago por adelantado en próximas reservas.',
+    pickup: `El precio total se muestra antes de confirmar. El pago se hace al recibir o recoger el pedido. La confirmación indica la cantidad, la fecha, la entrega o el punto de recogida y tu código. Se entrega a domicilio los miércoles y los sábados de 12 a 14 h, sin coste de envío, solo en ${townList('y')}; en el resto, se recoge en Sant Boi de Llobregat. Puedes cancelar tu pedido con un clic desde el enlace del email de confirmación hasta el cierre de pedidos de la hornada (el lunes a las 20:00 para la del miércoles y el jueves a las 20:00 para la del sábado), sin dar explicaciones y sin coste: así tu pedido puede pasar a otra persona. Para cualquier otro cambio, contacta cuanto antes indicando el código. Pasado el cierre ya no se puede cancelar con el enlace porque el pedido está en preparación; escríbeme y buscaremos una solución. Si no puedo preparar tu pedido, te contactaré para comunicarlo. Si no recoges ni recibes el pedido y no avisas, podremos pedirte el pago por adelantado en próximas reservas.`,
     withdrawal:
       'Al tratarse de un alimento perecedero elaborado para tu pedido, no aplica el derecho de desistimiento (art. 103.d del Texto Refundido de la Ley General para la Defensa de los Consumidores y Usuarios). Esto no afecta a tus derechos si el producto no es conforme.',
     standingH: 'Pan fijo (suscripción semanal)',
@@ -89,8 +94,7 @@ const text = {
     rights:
       'Pots sol·licitar l’accés, la rectificació, la supressió, l’oposició, la limitació o la portabilitat de les teves dades a través del contacte del responsable. També pots presentar una reclamació davant l’Agència Espanyola de Protecció de Dades o l’Autoritat Catalana de Protecció de Dades.',
     pickupH: 'Recollida i pagament',
-    pickup:
-      'El preu total es mostra abans de confirmar. El pagament es fa en rebre o recollir la comanda. La confirmació indica la quantitat, la data, l’entrega o el punt de recollida i el teu codi. Es lliura a domicili els dimecres i els dissabtes de 12 a 14 h, sense cost d’enviament, només a Sant Boi de Llobregat, Sant Just Desvern, Sant Joan Despí, Sant Feliu de Llobregat, Santa Coloma de Cervelló i Sant Vicenç dels Horts; a la resta, es recull a Sant Boi de Llobregat. Pots cancel·lar la comanda amb un clic des de l’enllaç del correu de confirmació fins al tancament de comandes de la fornada (dilluns a les 20:00 per a la de dimecres i dijous a les 20:00 per a la de dissabte), sense donar explicacions i sense cost: així la teva comanda pot passar a una altra persona. Per a qualsevol altre canvi, contacta com més aviat millor indicant el codi. Passat el tancament ja no es pot cancel·lar amb l’enllaç perquè la comanda és en preparació; escriu-me i buscarem una solució. Si no puc preparar la teva comanda, et contactaré per comunicar-t’ho. Si no reculls ni reps la comanda i no avises, et podrem demanar el pagament per avançat en properes reserves.',
+    pickup: `El preu total es mostra abans de confirmar. El pagament es fa en rebre o recollir la comanda. La confirmació indica la quantitat, la data, l’entrega o el punt de recollida i el teu codi. Es lliura a domicili els dimecres i els dissabtes de 12 a 14 h, sense cost d’enviament, només a ${townList('i')}; a la resta, es recull a Sant Boi de Llobregat. Pots cancel·lar la comanda amb un clic des de l’enllaç del correu de confirmació fins al tancament de comandes de la fornada (dilluns a les 20:00 per a la de dimecres i dijous a les 20:00 per a la de dissabte), sense donar explicacions i sense cost: així la teva comanda pot passar a una altra persona. Per a qualsevol altre canvi, contacta com més aviat millor indicant el codi. Passat el tancament ja no es pot cancel·lar amb l’enllaç perquè la comanda és en preparació; escriu-me i buscarem una solució. Si no puc preparar la teva comanda, et contactaré per comunicar-t’ho. Si no reculls ni reps la comanda i no avises, et podrem demanar el pagament per avançat en properes reserves.`,
     withdrawal:
       'Com que es tracta d’un aliment perible elaborat per a la teva comanda, no s’aplica el dret de desistiment (art. 103.d del Text Refós de la Llei General per a la Defensa dels Consumidors i Usuaris). Això no afecta els teus drets si el producte no és conforme.',
     standingH: 'Pa fix (subscripció setmanal)',
@@ -141,8 +145,7 @@ const text = {
     rights:
       'You can request access, rectification, erasure, objection, restriction or portability of your data through the controller’s contact. You can also lodge a complaint with the Spanish Data Protection Agency (AEPD).',
     pickupH: 'Pickup and payment',
-    pickup:
-      'The total price is shown before you confirm. Payment is made when you receive or pick up the order. The confirmation states the quantity, the date, the delivery or pickup point and your code. Home delivery is on Wednesdays and Saturdays from 12:00 to 14:00, free of charge, only in Sant Boi de Llobregat, Sant Just Desvern, Sant Joan Despí, Sant Feliu de Llobregat, Santa Coloma de Cervelló and Sant Vicenç dels Horts; elsewhere, it is picked up in Sant Boi de Llobregat. You can cancel your order with one click from the link in the confirmation email until the bake’s orders close (Monday at 20:00 for the Wednesday bake and Thursday at 20:00 for the Saturday bake), with no explanation and at no cost: that way your order can go to someone else. For any other change, get in touch as soon as possible quoting your code. After closing it can no longer be cancelled with the link because the order is being prepared; write to me and we’ll find a solution. If I can’t prepare your order, I’ll contact you to let you know. If you neither pick up nor receive the order and don’t let me know, we may ask you to pay in advance for future orders.',
+    pickup: `The total price is shown before you confirm. Payment is made when you receive or pick up the order. The confirmation states the quantity, the date, the delivery or pickup point and your code. Home delivery is on Wednesdays and Saturdays from 12:00 to 14:00, free of charge, only in ${townList('and')}; elsewhere, it is picked up in Sant Boi de Llobregat. You can cancel your order with one click from the link in the confirmation email until the bake’s orders close (Monday at 20:00 for the Wednesday bake and Thursday at 20:00 for the Saturday bake), with no explanation and at no cost: that way your order can go to someone else. For any other change, get in touch as soon as possible quoting your code. After closing it can no longer be cancelled with the link because the order is being prepared; write to me and we’ll find a solution. If I can’t prepare your order, I’ll contact you to let you know. If you neither pick up nor receive the order and don’t let me know, we may ask you to pay in advance for future orders.`,
     withdrawal:
       'As this is a perishable food made for your order, the right of withdrawal does not apply (art. 103.d of the Spanish consolidated General Law for the Defence of Consumers and Users). This does not affect your rights if the product is not as described.',
     standingH: 'Weekly bread (weekly subscription)',

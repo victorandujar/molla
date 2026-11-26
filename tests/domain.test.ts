@@ -402,7 +402,7 @@ test('home delivery needs a town in the zone and an address; pickup needs neithe
   assert.equal(noAddress.error?.issues[0]?.message, 'address');
   const outside = reservationSchema.safeParse({
     ...home,
-    town: 'cornella',
+    town: 'castelldefels',
     address: 'Carrer Major 1',
   });
   assert.equal(outside.error?.issues[0]?.message, 'town');
@@ -459,7 +459,7 @@ test('pa fix needs terms, a quantity and, for home delivery, a town and address'
     { frequency: 'daily' },
     { website: 'x' },
     { delivery: 'home', town: 'sant-just' },
-    { delivery: 'home', address: 'Carrer Major 1', town: 'cornella' },
+    { delivery: 'home', address: 'Carrer Major 1', town: 'castelldefels' },
   ])
     assert.equal(
       subscriptionSchema.safeParse({ ...pafix, ...bad }).success,

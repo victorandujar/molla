@@ -1,10 +1,14 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
+  deliveryTowns,
   deliveryWindow,
+  deliveryZones,
   eveningWindow,
   isWednesday,
   slotWindow,
+  townById,
+  townsInZone,
   windowHours,
 } from '../src/lib/delivery';
 import { reservationSchema } from '../src/lib/domain';
@@ -47,4 +51,24 @@ test('an order defaults to midday and accepts the evening slot', () => {
     reservationSchema.safeParse({ ...base, slot: 'night' }).success,
     false,
   );
+});
+
+test('delivery zones: 22 towns in three zones, ids unique, old ids kept', () => {
+  const ids = deliveryTowns.map((t) => t.id);
+  assert.equal(new Set(ids).size, ids.length);
+  assert.deepEqual(
+    deliveryZones.map((z) => townsInZone(z).length),
+    [7, 8, 7],
+  );
+  for (const id of [
+    'sant-boi',
+    'sant-just',
+    'sant-joan',
+    'sant-feliu',
+    'santa-coloma',
+    'sant-vicenc',
+  ])
+    assert.ok(townById(id), id);
+  assert.equal(townById('gava')?.zone, 2);
+  assert.equal(townById('castelldefels'), undefined);
 });
