@@ -1,4 +1,5 @@
-// Fotos de la bollería (croissant y pain au chocolat), con la luz de la tarde.
+// Foto de la bollería (croissant y pain au chocolat juntos), con la luz de la tarde.
+// Las fotos de producto de cada pieza: scripts/photos-pastry-product.mjs.
 // Uso: node scripts/photos-pastry.mjs <carpeta con los originales>
 import sharp from 'sharp';
 import { mkdir } from 'node:fs/promises';
@@ -6,8 +7,6 @@ const dir = process.argv[2] || 'assets/originals-3';
 const photos = {
   // Los dos, desde arriba, sobre la tabla.
   pastries: '4.jpg',
-  // El croissant de lado, a contraluz, con sus capas.
-  croissant: '1.jpg',
 };
 await mkdir('public/images', { recursive: true });
 for (const [name, file] of Object.entries(photos))

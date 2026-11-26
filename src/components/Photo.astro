@@ -43,7 +43,9 @@ const ratios: Record<string, number> = {
   cut: 0.8,
   tiles: 0.75,
   pastries: 1506 / 2000,
-  croissant: 1506 / 2000,
+  // Each pastry cut out on the menu's beige, like the breads.
+  croissant: 1,
+  'pain-au-chocolat': 1,
   'combo-desayuno': 1.25,
   'combo-capricho': 1.25,
   'combo-compartir': 1.25,
@@ -55,6 +57,8 @@ const widths = [
   'slice',
   'pan-de-leche',
   'nueces-naranja',
+  'croissant',
+  'pain-au-chocolat',
 ].includes(name)
   ? [400, 720, 1100]
   : name === 'crumb2'
