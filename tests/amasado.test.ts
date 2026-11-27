@@ -20,12 +20,12 @@ test('asunto: día de amasado y panes por tipo', () => {
   const s = computeSheet({ clasica: 3, integral: 1, 'masa-madre': 2 });
   assert.equal(
     sheetEmail(s, meta).subject,
-    'molla. · Amasado martes 1 dic · 6 panes (A: 3 · B: 1 · C: 2)',
+    'molla. · Amasado martes 1 dic · 6 panes (3 de cada semana · 1 integral · 2 masa madre)',
   );
   const extra = computeSheet({ clasica: 1, nueces: 2, 'pan-de-leche': 1 });
   assert.equal(
     sheetEmail(extra, meta).subject,
-    'molla. · Amasado martes 1 dic · 4 panes (A: 1 · B: 0 · C: 0 · relleno: 2 · leche: 1)',
+    'molla. · Amasado martes 1 dic · 4 panes (1 de cada semana · 2 con relleno · 1 de leche)',
   );
 });
 
@@ -41,25 +41,26 @@ test('el email lleva los bloques, lo no calculado y los pedidos dudosos', () => 
     ],
   });
   for (const title of [
-    '1 · RESUMEN',
-    '2 · POOLISH DE ESTA NOCHE',
-    '3 · STARTER Y LEVAIN DE ESTA NOCHE',
-    '4 · MASA',
-    '5 · COMPROBACIÓN',
-    '6 · RECORDATORIOS',
-    '7 · PEDIDOS DUDOSOS',
+    'TE HAN PEDIDO',
+    'ESTA NOCHE (LUNES 30 NOV)',
+    'MAÑANA, PAN POR PAN (MARTES 1 DIC)',
+    'COMPRUEBA CON LA BÁSCULA',
+    'RECUERDA',
+    'PEDIDOS DUDOSOS',
   ])
     assert.ok(text.includes(title), title);
-  assert.ok(text.includes('Sin fórmula definida (no calculado)'));
+  assert.ok(text.includes('Sin receta aquí (no se calcula)'));
   assert.ok(text.includes('Banana bread · 1'));
   assert.ok(text.includes('045-ABCD'));
-  assert.ok(text.includes('goma elástica'));
+  assert.ok(text.includes('Marca el nivel con una goma'));
   assert.ok(text.includes('1.286 g'));
   assert.ok(text.includes('74,09 %'));
-  assert.ok(html.includes('Starter para C'));
+  assert.ok(html.includes('Starter · para Masa madre (4)'));
+  assert.ok(text.includes('Poolish · para La de cada semana (2)'));
+  assert.ok(!/\b[ABC] ·/.test(text), 'sin letras A/B/C');
   // Sin panes C ni rellenos no hay bloque de starter.
   const onlyA = sheetEmail(computeSheet({ clasica: 1 }), meta).text;
-  assert.ok(!onlyA.includes('STARTER'));
+  assert.ok(!onlyA.includes('Starter'));
   assert.ok(!onlyA.includes('PEDIDOS DUDOSOS'));
 });
 

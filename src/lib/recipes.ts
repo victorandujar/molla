@@ -51,29 +51,29 @@ export function settingsFromEnv(env: Record<string, string | undefined>) {
 // ---- Ingredientes ----------------------------------------------------------
 
 export const ingredientNames = {
-  ylla: 'Ylla (harina de fuerza eco)',
-  w200: 'W200 (harina blanca eco, floja)',
-  t150: 'T150 (harina integral)',
-  t80: 'T80 (harina semi-integral)',
+  ylla: 'Harina Ylla (fuerza)',
+  w200: 'Harina W200 (blanca floja)',
+  t150: 'Harina integral T150',
+  t80: 'Harina T80',
   agua: 'Agua',
   sal: 'Sal',
   levadura: 'Levadura fresca',
-  semilla: 'Masa madre madura (semilla)',
-  poolish: 'Poolish',
-  starter: 'Starter de masa madre (100 %)',
-  levain: 'Levain (100 %)',
+  semilla: 'Masa madre madura',
+  poolish: 'Poolish (el de anoche)',
+  starter: 'Starter (el de anoche)',
+  levain: 'Levain (el de anoche)',
   leche: 'Leche entera',
   huevo: 'Huevo',
   mantequilla: 'Mantequilla en pomada',
   azucar: 'Azúcar',
   nueces: 'Nueces troceadas',
-  naranja: 'Piel de naranja rallada (solo lo naranja)',
-  aceitunas: 'Aceitunas negras sin hueso, escurridas y secas',
+  naranja: 'Piel de naranja rallada (sin lo blanco)',
+  aceitunas: 'Aceitunas negras sin hueso (bien secas)',
   romero: 'Romero fresco picado',
   pasas: 'Pasas sultanas',
   arandanos: 'Arándanos secos',
   pistachos: 'Pistachos pelados crudos',
-  chocolate: 'Chocolate negro 70 % en trozos de ~1 cm',
+  chocolate: 'Chocolate 70 % en trozos de ~1 cm',
 } as const;
 export type Ingredient = keyof typeof ingredientNames;
 // Lo que se prepara la noche anterior y se usa entero en la masa: no se pesa
@@ -119,9 +119,9 @@ export const productRecipe: Record<string, RecipeKey> = {
 };
 
 export const recipeTitles: Record<RecipeKey, string> = {
-  A: 'A · Pan normal con poolish',
-  B: 'B · Pan integral «de Marilo» con poolish',
-  C: 'C · Pan con masa madre',
+  A: 'La de cada semana',
+  B: 'Integral 60 %',
+  C: 'Masa madre',
   nueces: 'Nueces',
   nueces_naranja: 'Nueces y naranja',
   olivas_romero: 'Aceitunas negras y romero',
@@ -220,6 +220,7 @@ export type Dough = {
   notes: string[];
 };
 export type Check = {
+  key: RecipeKey | 'base';
   title: string;
   n: number;
   flour: number;
@@ -238,6 +239,7 @@ export type Check = {
   ok: boolean;
 };
 export type Preferment = {
+  id: 'poolish' | 'poolish-leche' | 'starter' | 'levain';
   title: string;
   n: number;
   lines: { label: string; ingredient: Ingredient; total: number }[];
@@ -276,7 +278,7 @@ export const grams = (x: number, ingredient?: Ingredient) =>
 export const yeastText = (x: number) =>
   scale01(x) === x
     ? `${fmt(x, 2)} g`
-    : `${fmt(x, 2)} g (báscula de 0,1 g: ${fmt(scale01(x))} g)`;
+    : `${fmt(x, 2)} g (≈ ${fmt(scale01(x))} g)`;
 const pct = (x: number) => `${fmt(x, 2)} %`;
 
 const scaleLines = (lines: Line[], n: number, how: Rounding): Amount[] =>
@@ -327,8 +329,19 @@ export function computeSheet(
     );
     const mass = flour + water;
     const units = Math.max(1, Math.ceil(mass / 600));
+    const slower = round(
+      (POOLISH_PER_LOAF.flour * nPoolish * 0.4) / 100,
+      'yeast',
+    );
+    const breads = [
+      nA ? `${recipeTitles.A} (${nA})` : '',
+      nB ? `${recipeTitles.B} (${nB})` : '',
+    ]
+      .filter(Boolean)
+      .join(' e ');
     tonight.push({
-      title: `Poolish de A y B (${nPoolish} ${nPoolish === 1 ? 'pan' : 'panes'}: A ${nA} + B ${nB})`,
+      id: 'poolish',
+      title: `Poolish · para ${breads}`,
       n: nPoolish,
       lines: [
         { label: ingredientNames.ylla, ingredient: 'ylla', total: flour },
@@ -340,11 +353,8 @@ export function computeSheet(
         },
       ],
       notes: [
-        `Cálculo: Ylla 100 g × ${nPoolish} = ${grams(flour)}; agua 100 g × ${nPoolish} = ${grams(water)}; levadura ${fmt(settings.poolishYeastPct, 3)} % de ${grams(flour)} = ${fmt(yeast, 2)} g.`,
-        `Salen ${grams(mass)} de poolish: 200 g por pan (A ${nA} × 200 = ${grams(nA * 200)}; B ${nB} × 200 = ${grams(nB * 200)}).`,
-        `Disuelve la levadura en parte del agua. Levadura al ${fmt(settings.poolishYeastPct, 3)} %: para ~11,5–12 h fuera de la nevera a ~18 °C (si va a reposar ~10,5 h, usa el 0,4 %).`,
-        `Un solo recipiente amplio: unos ${fmt(units * 1.5)}–${fmt(units * 2)} L (1,5–2 L por cada ~600 g de poolish; sube y puede rebosar). Marca el nivel inicial con una goma elástica.`,
-        'Hazlo esta noche, hacia las 21:00–22:00.',
+        `Todo en un solo bote de ${fmt(units * 1.5)}–${fmt(units * 2)} L, porque sube mucho. Marca el nivel con una goma.`,
+        `Disuelve la levadura en parte del agua. Hacia las 21:00–22:00; reposa ~11,5–12 h fuera de la nevera (~18 °C).${settings.poolishYeastPct === 0.375 ? ` Si solo va a reposar ~10,5 h, pon ${yeastText(slower)} de levadura.` : ''}`,
       ],
     });
   }
@@ -355,7 +365,8 @@ export function computeSheet(
     const water = round(LECHE_POOLISH.water * nLeche, 'whole');
     const yeast = round(LECHE_POOLISH.yeast * nLeche, 'yeast');
     tonight.push({
-      title: `Poolish del pan de leche (${nLeche} ${nLeche === 1 ? 'pan' : 'panes'})`,
+      id: 'poolish-leche',
+      title: `Poolish · para el ${recipeTitles.leche} (${nLeche})`,
       n: nLeche,
       lines: [
         { label: ingredientNames.ylla, ingredient: 'ylla', total: flour },
@@ -367,9 +378,7 @@ export function computeSheet(
         },
       ],
       notes: [
-        `Cálculo: harina de fuerza 100 g × ${nLeche} = ${grams(flour)}; agua 100 g × ${nLeche} = ${grams(water)}; levadura 0,375 g × ${nLeche} = ${fmt(yeast, 2)} g.`,
-        `Rinde ~${grams(LECHE_POOLISH.yield * nLeche)} (194 g por pan) y se usa entero en la masa.`,
-        '~12 h a ~18 °C: prepáralo hacia las 22:00.',
+        'En otro bote. Hacia las 22:00; reposa ~12 h a ~18 °C. Mañana lo usas entero.',
       ],
     });
   }
@@ -381,7 +390,8 @@ export function computeSheet(
     const flour = round((need * 3) / 7, 'half');
     const water = round((need * 3) / 7, 'half');
     tonight.push({
-      title: `Starter para C (${nC} ${nC === 1 ? 'pan' : 'panes'} × ${fmt(s)} g = ${grams(round(need, 'half'))})`,
+      id: 'starter',
+      title: `Starter · para ${recipeTitles.C} (${nC})`,
       n: nC,
       lines: [
         { label: ingredientNames.semilla, ingredient: 'semilla', total: base },
@@ -389,8 +399,7 @@ export function computeSheet(
         { label: ingredientNames.agua, ingredient: 'agua', total: water },
       ],
       notes: [
-        `Refresco 1 : 3 : 3 (base : T80 : agua) hasta ${grams(round(need, 'half'))}: base = ${fmt(need)} ÷ 7 = ${grams(base)}; T80 y agua = ${fmt(need)} × 3 ÷ 7 = ${grams(flour)} cada una.`,
-        `En la masa van ${fmt(s)} g por pan (${fmt(s / 2)} g de T80 + ${fmt(s / 2)} g de agua).`,
+        `Refresco 1 : 3 : 3. Salen ${grams(round(need, 'half'))}: mañana usas ${fmt(s)} g por pan.`,
       ],
     });
   }
@@ -401,7 +410,8 @@ export function computeSheet(
     const flour = round(50 * nFilled, 'whole');
     const water = round(50 * nFilled, 'whole');
     tonight.push({
-      title: `Levain para los panes con relleno (${nFilled} ${nFilled === 1 ? 'pan' : 'panes'})`,
+      id: 'levain',
+      title: `Levain · para los panes con relleno (${nFilled})`,
       n: nFilled,
       lines: [
         { label: ingredientNames.semilla, ingredient: 'semilla', total: seed },
@@ -409,9 +419,8 @@ export function computeSheet(
         { label: ingredientNames.agua, ingredient: 'agua', total: water },
       ],
       notes: [
-        `Hacen falta 100 g × ${nFilled} = ${grams(100 * nFilled)}; se prepara un 10 % más: ${grams(110 * nFilled)}.`,
-        `Refresco 1 : 5 : 5: semilla 10 g × ${nFilled} = ${grams(seed)}; T80 50 g × ${nFilled} = ${grams(flour)}; agua 50 g × ${nFilled} = ${grams(water)}.`,
-        'A ~19 °C, 10–12 h: aliméntalo hacia las 22:00. Úsalo cuando haya doblado y tenga cúpula. Tu reserva de 600 g va aparte.',
+        `Refresco 1 : 5 : 5. Salen ${grams(110 * nFilled)}: mañana usas 100 g por pan (lleva un 10 % de margen).`,
+        'Hacia las 22:00, a ~19 °C (10–12 h). Está listo cuando ha doblado y tiene cúpula. Tu reserva de 600 g va aparte.',
       ],
     });
   }
@@ -430,12 +439,7 @@ export function computeSheet(
       title: recipeTitles[key],
       n: count,
       lines,
-      notes:
-        key === 'C'
-          ? [
-              `Ylla = 374 − ${fmt(s)} ÷ 2 = ${fmt(374 - s / 2)} g por pan; agua = 426 − ${fmt(s)} ÷ 2 = ${fmt(426 - s / 2)} g por pan.`,
-            ]
-          : [],
+      notes: [],
     });
     // Comprobación con los gramos redondeados (los que pesas).
     const pre =
@@ -464,21 +468,22 @@ export function computeSheet(
     const mass = flourTotal + waterTotal + salt + yeast;
     const hydration = (waterTotal / flourTotal) * 100;
     checks.push({
+      key,
       title: recipeTitles[key],
       n: count,
       flour: flourTotal,
       water: waterTotal,
-      flourCalc: `${fmt(pre.flour)} (${key === 'C' ? 'T80 del starter' : 'Ylla del poolish'}) + ${fmt(ylla)} Ylla + ${fmt(w200)} W200 + ${fmt(t150)} T150`,
-      waterCalc: `${fmt(pre.water)} (${pre.name}) + ${fmt(water)} (masa)`,
+      flourCalc: `${fmt(pre.flour)} del ${pre.name} + ${fmt(ylla)} Ylla + ${fmt(w200)} W200 + ${fmt(t150)} integral`,
+      waterCalc: `${fmt(pre.water)} del ${pre.name} + ${fmt(water)} de la masa`,
       hydration,
       hydrationRange: [74.0, 74.2],
       integralPct: (t150 / flourTotal) * 100,
       integralLabel:
         key === 'C'
-          ? `T150 ${fmt(t150)} ÷ ${fmt(flourTotal)} (además, T80 del starter: ${pct((pre.flour / flourTotal) * 100)})`
-          : `T150 ${fmt(t150)} ÷ ${fmt(flourTotal)}`,
+          ? `además, ${pct((pre.flour / flourTotal) * 100)} de T80 del starter`
+          : '',
       mass,
-      massCalc: `${fmt(flourTotal)} harina + ${fmt(waterTotal)} agua + ${fmt(salt)} sal${yeast ? ` + ${fmt(yeast, 2)} levadura` : ''}`,
+      massCalc: `${fmt(flourTotal)} + ${fmt(waterTotal)} + ${fmt(salt)} sal${yeast ? ` + ${fmt(yeast, 2)} levadura` : ''}`,
       perLoaf: mass / count,
       expectedFlour: 575 * count,
       ok: false,
@@ -490,12 +495,11 @@ export function computeSheet(
     const lines = scaleLines(doughBase, nFilled, 'whole');
     doughs.push({
       key: 'base',
-      title: `Masa base de los panes con relleno (${nFilled} ${nFilled === 1 ? 'pan' : 'panes'})`,
+      title: 'Panes con relleno · la masa (la misma para todos)',
       n: nFilled,
       lines,
       notes: [
-        `Masa base: 880 g por pan × ${nFilled} = ${grams(880 * nFilled)}. Después se divide: 880 g de masa base para cada pan.`,
-        'Relleno en la tercera serie de pliegues (para la próxima, prueba en la segunda: reparte mejor). Nada de amasado largo: reposos y pliegues.',
+        `Salen ${grams(880 * nFilled)}: divídela en ${nFilled} ${nFilled === 1 ? 'pieza' : 'piezas'} de 880 g y añade a cada una su relleno en la 3.ª serie de pliegues (o prueba en la 2.ª: reparte mejor).`,
       ],
     });
     for (const key of fillingKeys) {
@@ -505,12 +509,10 @@ export function computeSheet(
       const fillingPerLoaf = fillings[key].reduce((a, l) => a + l.perLoaf, 0);
       doughs.push({
         key,
-        title: `Relleno · ${recipeTitles[key]} (${count} ${count === 1 ? 'pan' : 'panes'})`,
+        title: recipeTitles[key],
         n: count,
         lines: fl,
-        notes: [
-          `Masa cruda por pan: 880 + ${fmt(fillingPerLoaf)} = ${grams(880 + fillingPerLoaf)}.`,
-        ],
+        notes: [`${grams(880 + fillingPerLoaf)} de masa por pan.`],
       });
     }
     const flourTotal =
@@ -521,18 +523,19 @@ export function computeSheet(
     const salt = amountOf(lines, 'sal');
     const mass = flourTotal + waterTotal + salt;
     checks.push({
-      title: 'Masa base de los panes con relleno (sin contar el relleno)',
+      key: 'base',
+      title: 'Panes con relleno (la masa, sin relleno)',
       n: nFilled,
       flour: flourTotal,
       water: waterTotal,
-      flourCalc: `${fmt(amountOf(lines, 'levain') / 2)} (T80 del levain) + ${fmt(amountOf(lines, 'ylla'))} fuerza + ${fmt(amountOf(lines, 't150'))} integral`,
-      waterCalc: `${fmt(amountOf(lines, 'levain') / 2)} (levain) + ${fmt(amountOf(lines, 'agua'))} (masa)`,
+      flourCalc: `${fmt(amountOf(lines, 'levain') / 2)} del levain + ${fmt(amountOf(lines, 'ylla'))} Ylla + ${fmt(amountOf(lines, 't150'))} integral`,
+      waterCalc: `${fmt(amountOf(lines, 'levain') / 2)} del levain + ${fmt(amountOf(lines, 'agua'))} de la masa`,
       hydration: (waterTotal / flourTotal) * 100,
       hydrationRange: [73.95, 74.05],
       integralPct: (amountOf(lines, 't150') / flourTotal) * 100,
-      integralLabel: `integral ${fmt(amountOf(lines, 't150'))} ÷ ${fmt(flourTotal)}`,
+      integralLabel: '',
       mass,
-      massCalc: `${fmt(flourTotal)} harina + ${fmt(waterTotal)} agua + ${fmt(salt)} sal`,
+      massCalc: `${fmt(flourTotal)} + ${fmt(waterTotal)} + ${fmt(salt)} sal`,
       perLoaf: mass / nFilled,
       expectedFlour: 500 * nFilled,
       ok: false,
@@ -545,13 +548,13 @@ export function computeSheet(
     const mass = lines.reduce((a, l) => a + l.total, 0);
     doughs.push({
       key: 'leche',
-      title: `${recipeTitles.leche} (${nLeche} ${nLeche === 1 ? 'pan' : 'panes'})`,
+      title: recipeTitles.leche,
       n: nLeche,
       lines,
       notes: [
-        `Masa cruda: ${grams(903)} por pan × ${nLeche} = ${grams(mass)}. Cada pan, en 3 bolas de ~301 g, en molde grande (≥ 1,5 L) engrasado.`,
-        `Mantequilla en 3 trozos de ~23 g por pan. Para pintar, por pan: el huevo sobrante batido con 1 cucharada de leche; 10 g de mantequilla fundida al salir del horno (${grams(10 * nLeche)} en total).`,
-        'Horario: mezcla ~10:30; pliegues 3 series cada 30 min; formado ~30 min después (no más de 45); nevera de ~13:00 a 22:00–23:00; fuera hasta las 7:00 a 17–18 °C; horno 170 °C con ventilador, 35–40 min (interior 92–94 °C).',
+        'La mantequilla, en 3 trozos de ~23 g por pan. Cada pan, en 3 bolas de ~301 g en molde grande engrasado.',
+        `Para pintar: el huevo sobrante batido con 1 cucharada de leche; al salir del horno, ${grams(10 * nLeche)} de mantequilla fundida.`,
+        'Mezcla ~10:30 · 3 series de pliegues cada 30 min · formado ~30 min después · nevera de ~13:00 a 22:00–23:00 · fuera hasta las 7:00 (17–18 °C) · horno a 170 °C con ventilador, 35–40 min.',
       ],
     });
     // Agua efectiva: leche × 0,87, huevo × 0,75, mantequilla × 0,16.
@@ -562,18 +565,19 @@ export function computeSheet(
     const mant = amountOf(lines, 'mantequilla') * 0.16;
     const waterTotal = poolish / 2 + leche + huevo + mant;
     checks.push({
+      key: 'leche',
       title: recipeTitles.leche,
       n: nLeche,
       flour: flourTotal,
       water: waterTotal,
-      flourCalc: `${fmt(poolish / 2)} (del poolish) + ${fmt(amountOf(lines, 'ylla'))} fuerza`,
-      waterCalc: `agua efectiva: ${fmt(poolish / 2)} (poolish) + ${fmt(leche)} (leche × 0,87) + ${fmt(huevo)} (huevo × 0,75) + ${fmt(mant)} (mantequilla × 0,16)`,
+      flourCalc: `${fmt(poolish / 2)} del poolish + ${fmt(amountOf(lines, 'ylla'))} Ylla`,
+      waterCalc: `agua efectiva: ${fmt(poolish / 2)} del poolish + ${fmt(leche)} de la leche (× 0,87) + ${fmt(huevo)} del huevo (× 0,75) + ${fmt(mant)} de la mantequilla (× 0,16)`,
       hydration: (waterTotal / flourTotal) * 100,
       hydrationRange: [63.5, 64.5],
       integralPct: 0,
       integralLabel: 'sin integral',
       mass,
-      massCalc: lines.map((l) => fmt(l.total, 2)).join(' + '),
+      massCalc: 'todos los ingredientes',
       perLoaf: mass / nLeche,
       expectedFlour: 460 * nLeche,
       ok: false,
@@ -585,26 +589,26 @@ export function computeSheet(
     c.ok = checkOk(c);
     if (!c.ok)
       warnings.unshift(
-        `NO CUADRA · ${c.title}: harina ${fmt(c.flour)} g (debería ser ${fmt(c.expectedFlour)} g), hidratación ${pct(c.hydration)} (debería estar entre ${fmt(lo)} y ${fmt(hi)} %). No peses con estas cifras sin revisarlas.`,
+        `NO CUADRA · ${c.title}: harina ${fmt(c.flour)} g (debería ser ${fmt(c.expectedFlour)} g) e hidratación ${pct(c.hydration)} (debería estar entre ${fmt(lo)} y ${fmt(hi)} %). No peses con estas cifras sin revisarlas.`,
       );
   }
 
   // Avisos del recetario que afectan a esta hornada.
   if (nFilled)
     warnings.push(
-      'Gramos de relleno: son los de referencia del recetario v2. Bajaste un poco el relleno en las últimas hornadas y no se apuntó cuánto: corrígelo si hace falta (§9.1).',
+      'Los gramos de relleno son los del recetario. Si los bajaste en las últimas hornadas, dime cuánto y lo cambio.',
     );
   if (nFilled || nLeche)
     warnings.push(
-      'En el recetario v2, «harina de fuerza» se ha tomado como Ylla e «integral» como T150 (§9.2). Si no es así, dímelo.',
+      'En los panes con relleno y el de leche, la «harina de fuerza» del recetario es la Ylla y la «integral», la T150. Si no es así, dímelo.',
     );
   if (nLeche > 2)
     warnings.push(
-      `Pan de leche × ${nLeche}: la receta está validada solo con 1 pan; más de 2 no está probado (§9.5). La levadura vale con la habitación a 17–18 °C.`,
+      `Pan de leche × ${nLeche}: la receta solo está probada con 1 pan; con más de 2 no está probada. La levadura vale con la habitación a 17–18 °C.`,
     );
   if (nC && nFilled)
     warnings.push(
-      'El starter de C (1:3:3, sin margen) y el levain de los panes con relleno (1:5:5, +10 %) vienen de recetarios distintos y se dan por separado. Si los haces en un solo bote, confírmame cómo quieres unificarlos.',
+      'El starter de la Masa madre (1 : 3 : 3) y el levain de los panes con relleno (1 : 5 : 5) son recetas distintas y van por separado. Si los haces en un solo bote, dime cómo quieres juntarlos.',
     );
 
   // Lo que se pesa: esta noche y mañana, sumado por ingrediente.
