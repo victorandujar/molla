@@ -429,6 +429,11 @@ import {
             <dd>{live.length - pending.length}</dd>
           </div>
         </dl>
+        <p>
+          <a class="text-link" href={`/gestio/amasado?bake=${data.bake.id}`}>
+            Hoja de amasado de esta hornada →
+          </a>
+        </p>
         {notice && (
           <p class="admin-notice" role="status">
             {notice}

@@ -66,6 +66,21 @@ Vercel Cron llama cada día a `/api/cron/cycle` a las 19:05 UTC (20:05 en invier
 
 El resultado (`reminders`, `reminderFailures`, `retried`) aparece en los logs de la ejecución en Vercel (Settings → Cron Jobs). En `/gestio` cada pedido indica si el recordatorio salió.
 
+## Hoja de amasado (email la noche del cierre)
+
+La noche en que cierra cada hornada (lunes y jueves a las 20:00; martes en las semanas de Navidad) llega a `AMASADO_EMAIL` (o, si no está, a `CONTACT_EMAIL`) un email con lo que hay que amasar al día siguiente: panes por tipo, poolish, starter y levain de esa noche, masa de cada tipo (por pan y total), comprobación de harina, agua e hidratación, recordatorios y pedidos dudosos. Sale hacia las 20:30, siempre después del cierre y solo con los pedidos no cancelados de esa hornada. La misma hoja se ve en `/gestio` → «Hoja de amasado de esta hornada», con un botón para enviártela en ese momento.
+
+- **Recetas**: `src/lib/recipes.ts`. A = `clasica` (poolish), B = `integral` (integral de Marilo), C = `masa-madre`; panes con relleno (`nueces`, `nueces-naranja`, `kalamata`, `pasas-pistachos`, `chocolate`) y `pan-de-leche` según el recetario v2. Banana bread, bollería y cualquier producto sin receta salen como «Sin fórmula definida (no calculado)». Los tests (`tests/recipes.test.ts`) fallan si la hidratación sale de 74,0–74,2 % o si la harina no es 575 g × panes.
+- **Pedidos dudosos**: un pedido sin productos o apuntado después del cierre no se suma; aparece aparte.
+- **Horario**: Vercel Cron llama a `/api/cron/amasado/…` a las 18:30 y 19:30 UTC; la que cae a las 20:30 de Madrid (invierno o verano) envía y la otra no repite. Cada envío queda en `production_sheets` (migración `015_production_sheets.sql`). Para otra hora entre las 20:00 y las 21:00, cambia los minutos de esas dos entradas en `vercel.json` (nunca sale antes de las 20:00 ni del cierre).
+- **Variables** (Vercel, Production; opcionales):
+  - `AMASADO_EMAIL`: destinatario.
+  - `AMASADO_DIAS`: días en que puede salir, p. ej. `lunes,jueves`. Vacío: cualquier noche en que cierre una hornada (sigue solo los cambios de Navidad).
+  - `AMASADO_STARTER_G`: starter por pan C (105 por defecto; 80–160).
+  - `AMASADO_LEVADURA_PCT`: levadura del poolish de A y B (0,375 por defecto; 0,4 si reposa ~10,5 h).
+  - `AMASADO_COPIA_MANANA=true`: copia a las 7:00 del día de amasado, solo si algún pedido ha cambiado desde la noche, con lo que ha cambiado (crons de las 5:00 y 6:00 UTC).
+- **Vista previa en la terminal** (no envía nada): `npm run amasado -- --panes "clasica=3 integral=1 masa-madre=4"` o, con los pedidos reales, `npm run amasado:prod -- hornada-045`. Con `--html=hoja.html` guarda el email.
+
 ## Embudo automático
 
 Los mismos crons envían, sin intervención, el aviso «hornada abierta» (lunes al abrir la del sábado) y el «último aviso» (jueves por la tarde) a la lista confirmada, el email «¿qué tal el pan?» con la reseña de Google al día siguiente del primer pedido, la oferta del Pan fijo tras el segundo y, el domingo, un resumen semanal a `CONTACT_EMAIL`. Al reservar hay una casilla opcional para entrar en la lista. Cada envío se registra en `email_sends` (migración `008_funnel.sql`) y no se repite. Variables: `FUNNEL_EMAILS`, `NEWSLETTER_DAYS`, `FUNNEL_MAX_PER_RUN`. Detalle, activación y captación de tráfico en `embudo-automatico.md`.

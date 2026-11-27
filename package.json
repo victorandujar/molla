@@ -19,6 +19,8 @@
     "orders:prod": "node --env-file=.env.production --import tsx scripts/orders.ts",
     "bake": "node --env-file-if-exists=.env --import tsx scripts/bake.ts",
     "bake:prod": "node --env-file=.env.production --import tsx scripts/bake.ts",
+    "amasado": "node --env-file-if-exists=.env --import tsx scripts/amasado.ts",
+    "amasado:prod": "node --env-file=.env.production --import tsx scripts/amasado.ts",
     "db:seed": "node --env-file-if-exists=.env --import tsx scripts/seed.ts",
     "db:seed:prod": "node --env-file=.env.production --import tsx scripts/seed.ts",
     "audit:local": "node scripts/audit.mjs",
