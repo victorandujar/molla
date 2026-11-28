@@ -173,23 +173,25 @@ const doughBase: Line[] = [
   { ingredient: 'agua', perLoaf: 320 },
   { ingredient: 'sal', perLoaf: 10 },
 ];
-// Recetario v2 §3: relleno por pan. Lo que la masa admite: no aumentarlo.
+// Relleno por pan (28 nov 2026): aceitunas de 100 a 50 g por pan (70 g ya
+// era demasiado) y el resto a la mitad en la misma proporción. El romero y
+// la piel de naranja, que solo dan aroma, siguen igual.
 export const fillings: Record<FillingKey, Line[]> = {
-  nueces: [{ ingredient: 'nueces', perLoaf: 75 }],
+  nueces: [{ ingredient: 'nueces', perLoaf: 37.5 }],
   nueces_naranja: [
-    { ingredient: 'nueces', perLoaf: 75 },
+    { ingredient: 'nueces', perLoaf: 37.5 },
     { ingredient: 'naranja', perLoaf: 4 },
   ],
   olivas_romero: [
-    { ingredient: 'aceitunas', perLoaf: 100 },
+    { ingredient: 'aceitunas', perLoaf: 50 },
     { ingredient: 'romero', perLoaf: 3 },
   ],
   pasas_arandanos_pistachos: [
-    { ingredient: 'pasas', perLoaf: 25 },
-    { ingredient: 'arandanos', perLoaf: 25 },
-    { ingredient: 'pistachos', perLoaf: 40 },
+    { ingredient: 'pasas', perLoaf: 12.5 },
+    { ingredient: 'arandanos', perLoaf: 12.5 },
+    { ingredient: 'pistachos', perLoaf: 20 },
   ],
-  chocolate: [{ ingredient: 'chocolate', perLoaf: 65 }],
+  chocolate: [{ ingredient: 'chocolate', perLoaf: 32.5 }],
 };
 // Recetario v2 §4: pan de leche. El poolish (100 + 100 + 0,375 g) rinde 194 g.
 const doughLeche: Line[] = [
@@ -505,7 +507,7 @@ export function computeSheet(
     for (const key of fillingKeys) {
       const count = n[key] || 0;
       if (!count) continue;
-      const fl = scaleLines(fillings[key], count, 'whole');
+      const fl = scaleLines(fillings[key], count, 'half');
       const fillingPerLoaf = fillings[key].reduce((a, l) => a + l.perLoaf, 0);
       doughs.push({
         key,
@@ -594,10 +596,6 @@ export function computeSheet(
   }
 
   // Avisos del recetario que afectan a esta hornada.
-  if (nFilled)
-    warnings.push(
-      'Los gramos de relleno son los del recetario. Si los bajaste en las últimas hornadas, dime cuánto y lo cambio.',
-    );
   if (nFilled || nLeche)
     warnings.push(
       'En los panes con relleno y el de leche, la «harina de fuerza» del recetario es la Ylla y la «integral», la T150. Si no es así, dímelo.',
