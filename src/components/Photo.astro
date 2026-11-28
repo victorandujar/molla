@@ -67,8 +67,8 @@ const widths = [
 // Bump when a photo is replaced under the same name, so browsers that
 // cached the old file (max-age 1 day) fetch the new one.
 const versions: Record<string, number> = {
-  croissant: 2,
-  'pain-au-chocolat': 2,
+  croissant: 5,
+  'pain-au-chocolat': 5,
 };
 const v = versions[name] ? `?v=${versions[name]}` : '';
 const srcset = (format: string) =>
