@@ -64,15 +64,22 @@ const widths = [
   : name === 'crumb2'
     ? [400, 720, 1100, 1440]
     : [400, 720, 1100, 1600];
+// Bump when a photo is replaced under the same name, so browsers that
+// cached the old file (max-age 1 day) fetch the new one.
+const versions: Record<string, number> = {
+  croissant: 2,
+  'pain-au-chocolat': 2,
+};
+const v = versions[name] ? `?v=${versions[name]}` : '';
 const srcset = (format: string) =>
-  widths.map((w) => `/images/${name}-${w}.${format} ${w}w`).join(', ');
+  widths.map((w) => `/images/${name}-${w}.${format}${v} ${w}w`).join(', ');
 ---
 
 <picture>
   <source type="image/avif" srcset={srcset('avif')} sizes={sizes} />
   <img
     class={className}
-    src={`/images/${name}-720.webp`}
+    src={`/images/${name}-720.webp${v}`}
     srcset={srcset('webp')}
     sizes={sizes}
     alt={alt}

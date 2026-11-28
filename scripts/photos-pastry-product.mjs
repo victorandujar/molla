@@ -1,6 +1,7 @@
-// Fotos de producto de la bollería: el croissant y el pain au chocolat,
-// recortados de la foto de los dos sobre la tabla (26 nov 2026) y puestos
-// sobre el beige mineral de las fotos de los panes, con su sombra suave.
+// Fotos de producto de la bollería: el croissant (de frente, desde arriba) y
+// el pain au chocolat (de lado, con la espiral y el chocolate), recortados de
+// las fotos de la hornada del 28 nov 2026, con un retoque suave de luz y color,
+// y puestos sobre el beige mineral de las fotos de los panes, con su sombra.
 // Los compuestos están en assets/pastry/; aquí solo se publican en los
 // anchos y formatos de las demás fotos.
 // Uso: node scripts/photos-pastry-product.mjs
