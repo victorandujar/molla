@@ -188,17 +188,17 @@ test('ejemplo resuelto del recetario v2', () => {
     sal: 18,
     levadura: 4,
   });
-  // Rellenos: 3 panes con nueces (2 + 1 de naranja) = 225 g.
+  // Rellenos (ajustados el 28 nov): 3 panes con nueces × 37,5 g = 112,5 g.
   const nuts = dough(s, 'nueces').nueces! + dough(s, 'nueces_naranja').nueces!;
-  assert.equal(nuts, 225);
+  assert.equal(nuts, 112.5);
   assert.equal(dough(s, 'nueces_naranja').naranja, 4);
-  assert.deepEqual(dough(s, 'olivas_romero'), { aceitunas: 100, romero: 3 });
+  assert.deepEqual(dough(s, 'olivas_romero'), { aceitunas: 50, romero: 3 });
   assert.deepEqual(dough(s, 'pasas_arandanos_pistachos'), {
-    pasas: 25,
-    arandanos: 25,
-    pistachos: 40,
+    pasas: 12.5,
+    arandanos: 12.5,
+    pistachos: 20,
   });
-  assert.deepEqual(dough(s, 'chocolate'), { chocolate: 65 });
+  assert.deepEqual(dough(s, 'chocolate'), { chocolate: 32.5 });
   // Mise en place del recetario (esta noche + mañana).
   const both = (i: Ingredient) =>
     total(s.totalsTonight, i) + total(s.totalsTomorrow, i);
@@ -247,6 +247,13 @@ test('panes con relleno y pan de leche cuadran para cualquier N', () => {
     assert.equal(check(s, 'leche').flour, 460 * n);
     assert.ok(s.ok);
   }
+});
+
+test('rellenos por pan y escala lineal', () => {
+  const s = computeSheet({ kalamata: 4, nueces: 2, chocolate: 3 });
+  assert.deepEqual(dough(s, 'olivas_romero'), { aceitunas: 200, romero: 12 });
+  assert.deepEqual(dough(s, 'nueces'), { nueces: 75 });
+  assert.deepEqual(dough(s, 'chocolate'), { chocolate: 97.5 });
 });
 
 test('escala lineal: 20 panes son 20 veces 1 pan', () => {
